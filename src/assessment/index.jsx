@@ -324,11 +324,14 @@ export default function AssessmentLoader({
   const [isLoading, setIsLoading] = useState(true); // formsLoading,  setFormsLoading
   const [sessionId, setSessionId] = useState(null);
   const [activeTab, setActiveTab] = useState(TABS[0]);
-  const [assessmentId, setAssessmentId] = useState(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isConfirmModal, setIsConfirmModal] = useState(false);
   const [isReferralModal, setIsReferralModal] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
-  const [assessmentsValues, setAssessmentsValues] = useState({});
+  const [assessmentsValues, setAssessmentsValues] = useState(() => {
+    return { subjective: {}, objective: {}, assessment: {}, plan: {} }
+  });
+  
   
   // Mapping template to the schema registry
   const loadTemplates = async () => {
@@ -341,7 +344,20 @@ export default function AssessmentLoader({
     data.forEach(template => {
       const key = template.assessment_type?.toLowerCase();
       if(TABS.includes(key)){
-        map[key] = { ...template.body, actions: actions.ACTIONS_BUTTON}
+        map[key] = { 
+          ...template.body, 
+          id:template.id, 
+          name:template.name, 
+          actions: actions.ACTIONS_BUTTON
+        }
+      } else {
+        map[key] = {
+          [template.name.toLowerCase().replaceAll(" ", "_")] : {
+            ...template.body, 
+            id:template.id, 
+            name:template.name, 
+          }
+        }
       }
     })
     setTemplates(map)
@@ -350,8 +366,10 @@ export default function AssessmentLoader({
 
   // Load template on department
   useEffect(() => {
-    loadTemplates()
-  }, [department])
+    if (!sessionId) {
+      loadTemplates()
+    }
+  }, [department, sessionId])
 
   // Start session handler
   const handleStartSession = useCallback(async() => {
@@ -375,7 +393,20 @@ export default function AssessmentLoader({
         false
       )
       setSessionId(response.data.id)
-      setIsSessionActive(false)
+      response?.data?.assessment_ids.forEach(
+        template => {
+          const map = {}
+          const tab = template.type.toLowerCase()
+          const formType = template.form_type.toUpperCase()
+          if (formType === "INITIAL") {
+            templates[tab].id = template.id
+          }
+          // [[template.name.toLowerCase().replaceAll(" ", "_")]] : {
+          //   id: template.id,
+          //   name: template.name
+          // }
+        }
+      )
       setToast({ message: 'Assessment session started', variant: 'success' });
     } catch (e) {
         const detail = e?.response?.data
@@ -385,40 +416,19 @@ export default function AssessmentLoader({
         setToast({ message: msg, variant: 'error' })
         setIsSessionActive(false)
     }
-  }, [patient])
-  // ── Start assessment session ──────────────────────────────────────────────
-  // const handleStart = useCallback(async () => {
-      
-  //     setAssessmentId(data.id);
-
-  //     // Map FormData ids — only INITIAL form_type gives one record per SOAP tab
-  //     const idMap = {};
-  //     const qMap  = {};   // QUESTIONAIRE sub-assessments keyed by registry key
-  //     (data.assessment_ids || []).forEach(fd => {
-  //       const ft = (fd.form_type || '').toUpperCase();
-  //       if (ft === 'INITIAL') {
-  //         const key = (fd.type || '').toLowerCase();
-  //         if (key) idMap[key] = fd.id;
-  //       } else if (ft === 'QUESTIONNAIRE' || ft === 'QUESTIONAIRE') {
-  //         // Match by name to registry key
-  //         const regKey = Object.keys(REGISTRY_KEY_TO_NAME).find(
-  //           k => REGISTRY_KEY_TO_NAME[k] === fd.name
-  //         );
-  //         if (regKey) qMap[regKey] = fd.id;
-  //       }
-  //     });
-  //     setFormDataIds(idMap);
-  //     setQuestionaireIds(qMap);
-  //   }, [patient]);
-
+  }, [patient, templates])
 
   // End session handler
   const handleEndSession = useCallback(async() => {
     if (sessionId) {
       try {
         await session.end(sessionId)
+        setIsSubmitted(true)
+        setIsConfirmModal(false)
+        setIsSessionActive(false)
         setToast({ message: "Assessment submitted and session ended", variant: "success" })
       } catch(e) {
+        setIsSubmitted(false)
         setToast({ message: "Submission failed. Please try again.", variant: "error" })
         return;
       }
@@ -428,7 +438,9 @@ export default function AssessmentLoader({
   // Action handler
   const handleAction = useCallback(async (type) => {
     if (type === "next") {
-      const templateDataId = templates[activeTab]
+      console.log("values", assessmentsValues)
+      console.log("tab wise values", assessmentsValues[activeTab])
+      const templateDataId = templates[activeTab].id
       if (isSessionActive && templateDataId) {
         try {
           await forms.save(templateDataId, assessmentsValues[activeTab])
@@ -436,15 +448,35 @@ export default function AssessmentLoader({
         } catch (e) {
           setToast({ message: 'Failed to save', variant: 'error' })
         }
-        setActiveTab(activeTab)
+        const pos = TABS.indexOf(activeTab)
+        if(pos < TABS.length - 1) setActiveTab(TABS[pos+1])
       }
-
     } else if (type === "clear") {
+      setIsSubmitted(false)
       setAssessmentsValues(
         { subjective: {}, objective: {}, assessment: {}, plan: {}}
       )
     }
-  }, [activeTab, assessmentId, sessionId])
+    return
+  }, [activeTab, sessionId])
+
+  // OnChange handler
+  const onChange = useCallback(
+    (name, value) => {
+      setAssessmentsValues(
+        v => {
+          const next = {
+            ...v,
+            [activeTab]: {
+              ...v[activeTab],
+              [name]: value
+            }
+          }
+          return next
+        }
+      )
+    }, [activeTab, sessionId]
+  )
 
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
@@ -504,20 +536,20 @@ export default function AssessmentLoader({
             style={{
               opacity: isSessionActive ? 0.7 : 1,
               transition: "background .15s, opacity .15s",
-              color: assessmentId ? "#0369a1" : "#fff",
+              color: sessionId ? "#0369a1" : "#fff",
               cursor: isSessionActive ? "not-allowed" : "pointer",
               display: "inline-flex", alignItems: "center", gap: 5,
-              background: assessmentId ? "#e0f2fe" : "#0284c7",
-              border: assessmentId ? "1.5px solid #bae6fd" : "none",
+              background: sessionId ? "#e0f2fe" : "#0284c7",
+              border: sessionId ? "1.5px solid #bae6fd" : "none",
               borderRadius: 6, padding: "6px 16px", fontSize: 12, fontWeight: 700,
             }}
-            disabled={isSessionActive || !!assessmentId}
-            onClick={!assessmentId && !isSessionActive ? handleStartSession: undefined} 
-            onMouseEnter={e => { if (!assessmentId) e.currentTarget.style.background = "#0369a1"; }}
-            onMouseLeave={e => { if (!assessmentId) e.currentTarget.style.background = "#0284c7"; }}
-            title={assessmentId ? `Session active: ${assessmentId}` : "Start a new assessment session"}
+            disabled={isSessionActive || !!sessionId}
+            onClick={!sessionId && !isSessionActive ? handleStartSession: undefined} 
+            onMouseEnter={e => { if (!sessionId) e.currentTarget.style.background = "#0369a1"; }}
+            onMouseLeave={e => { if (!sessionId) e.currentTarget.style.background = "#0284c7"; }}
+            title={sessionId ? `Session active: ${sessionId}` : "Start a new assessment session"}
           >
-            { isSessionActive ? "Starting…": assessmentId ? "✓ Started" : "Start" }
+            { isSessionActive ? "Starting…": sessionId ? "✓ Started" : "Start" }
           </button>
           {/* Referral Button UI */}
           <button
@@ -593,9 +625,9 @@ export default function AssessmentLoader({
                 </div>
               ) : (
                 <CommonFormBuilder
-                  // ---- readOnly={readOnly}
-                  // ---- onChange={onChange}
-                  // ---- submitted={submitted}
+                  readOnly={false}
+                  onChange={onChange}
+                  submitted={isSubmitted}
                   onAction={handleAction}
                   schema={templates[activeTab]}
                   values={assessmentsValues[activeTab] || {}}
