@@ -4,6 +4,9 @@ import api from "../../shared/api/apiClient";
 import { API_URL } from "../../platform/config/api.config";
 import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
+import ProgressIntervention from "./ProgressIntervention";
+import GroupIntervention from "./GroupIntervention";
+import CheckoutAssessment from "./Checkout";
 import WheelchairAssessment from "./WheelchairAssessment";
 import ThreeDAssessment from "./ThreeDAssessment";
 
@@ -12,6 +15,7 @@ const ASSESSMENT_CARDS = [
   { id: "followup", title: "Follow-up Visit",        desc: "Review progress and adjust treatment plan",        icon: "🔄", accent: "#059669", tag: "Returning",     tagBg: "#d1fae5", tagColor: "#065f46" },
   { id: "progress", title: "Progress Intervention",  desc: "Document interventions and track outcomes",        icon: "📈", accent: "#7C3AED", tag: "Ongoing Care",  tagBg: "#ede9fe", tagColor: "#5b21b6" },
   { id: "group",    title: "Group Intervention",     desc: "Record group session and multi-patient notes",     icon: "👥", accent: "#DC2626", tag: "Group Session", tagBg: "#fee2e2", tagColor: "#991b1b" },
+  { id: "checkout", title: "Check Out", desc: "Finalize visit, confirm completion and discharge workflow", icon: "✅", accent: "#EA580C", tag: "Visit Closure", tagBg: "#ffedd5", tagColor: "#9a3412" }
 ];
 
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
@@ -141,6 +145,36 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
         />
       );
     }
+    // Progress Intervention
+    if (assessmentMode === "progress") {
+      return (
+        <ProgressIntervention
+          patient={selectedPatient}
+          onBack={() => setAssessmentMode(null)}
+          onSubmit={() => setAssessmentMode(null)}
+        />
+      );
+    }
+    // Group Intervention
+    if (assessmentMode === "group") {
+      return (
+        <GroupIntervention
+          patient={selectedPatient}
+          onBack={() => setAssessmentMode(null)}
+          onSubmit={() => setAssessmentMode(null)}
+        />
+      );
+    }    
+    // Checkout Intervention
+    if (assessmentMode === "checkout") {
+      return (
+        <CheckoutAssessment
+          patient={selectedPatient}
+          onBack={() => setAssessmentMode(null)}
+          onSubmit={() => setAssessmentMode(null)}
+        />
+      );
+    }       
     // Initial / Progress / Group → main assessment form with mode passed
     return (
       <OrthoticsAssessment
