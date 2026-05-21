@@ -2275,10 +2275,7 @@ actions: [
       { type: "save", label: "Save" }
     ],  sections: [{
     fields: [
-           {
-          type: "subheading",
-          label: "Therapeutic Exercises"
-        },
+
          { type: "subheading", label: "Short-Term Goals (2–4 weeks)" },
         {
             type: "dynamic-goals",
@@ -2289,6 +2286,7 @@ actions: [
             type: "dynamic-goals",
             name: "long_term_goals"
           },  
+          {type:'subheading',label:'Therapeutic Exercises'},
         {
           name: "therapeutic_exercises",
          

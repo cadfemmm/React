@@ -4425,30 +4425,19 @@ actions: [
   showIf: { field: "neuro_robotics_neuromodulation_interventions", includes: "lifescape_medical_bci" },
   fields: [
     { name: "lifescape_medical_bci_intensity", label: "Intensity (mA)", type: "input", placeholder: "Enter intensity in mA" },
-    { name: "lifescape_medical_bci_repetitions", label: "Repetitions (reps)", type: "input", placeholder: "Enter repetitions" }
-  ]
-},
-
-{
+    { name: "lifescape_medical_bci_repetitions", label: "Repetitions (reps)", type: "input", placeholder: "Enter repetitions" },
+    {
   name: "lifescape_medical_bci_duration",
   label: "Duration (minutes)",
   type: "input",
-  placeholder: "Enter duration in minutes",
-  showIf: {
-    field: "neuro_robotics_neuromodulation_interventions",
-    includes: "lifescape_medical_bci"
-  }
-},
-
-{
+  placeholder: "Enter duration in minutes"},
+  {
   name: "lifescape_medical_bci_remarks",
   label: "Remarks",
   type: "input",
-  placeholder: "Enter remarks",
-  showIf: {
-    field: "neuro_robotics_neuromodulation_interventions",
-    includes: "lifescape_medical_bci"
-  }
+  placeholder: "Enter remarks"}
+
+  ]
 },
 // =====================================================
 // RECOVERIX BRAIN COMPUTER INTERFACE (BCI)
@@ -4533,7 +4522,84 @@ actions: [
     includes: "recoverix_bci"
   }
 },
+{type:'subheading',label:'Pain Management'},
+{
+  name: "pain_management",
 
+  type: "checkbox-group",
+  options: [
+    {
+      label: "Cold Therapy",
+      value: "cold_therapy"
+    },
+    {
+      label: "Heat Therapy",
+      value: "heat_therapy"
+    },
+    {
+      label: "Laser Therapy",
+      value: "laser_therapy"
+    },
+    {
+      label: "Other",
+      value: "other"
+    }
+  ]
+},
+
+/* Cold Therapy Remarks */
+{
+  name: "cold_therapy_remarks",
+  label: "Cold Therapy Remarks",
+  type: "input",
+  showIf: {
+    field: "pain_management",
+    includes: "cold_therapy"
+  }
+},
+
+/* Heat Therapy Remarks */
+{
+  name: "heat_therapy_remarks",
+  label: "Heat Therapy Remarks",
+  type: "input",
+  showIf: {
+    field: "pain_management",
+    includes: "heat_therapy"
+  }
+},
+
+/* Laser Therapy Remarks */
+{
+  name: "laser_therapy_remarks",
+  label: "Laser Therapy Remarks",
+  type: "input",
+  showIf: {
+    field: "pain_management",
+    includes: "laser_therapy"
+  }
+},
+
+/* Other Pain Management */
+{
+  name: "other_pain_management",
+  label: "Other Pain Management",
+  type: "input",
+  showIf: {
+    field: "pain_management",
+    includes: "other"
+  }
+},
+
+{
+  name: "other_pain_management_remarks",
+  label: "Other Remarks",
+  type: "input",
+  showIf: {
+    field: "pain_management",
+    includes: "other"
+  }
+}
 
 
       ]
