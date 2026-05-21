@@ -68,6 +68,7 @@ const handleLogin = async() => {
   localStorage.setItem("user", JSON.stringify(user));
   localStorage.setItem("username", user.username.trim());
   localStorage.setItem("userRole", user.user_type);
+  localStorage.setItem("user_id", user.id)
   history.push(redirectPath);
 };
 
