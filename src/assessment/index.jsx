@@ -29,9 +29,8 @@ import schemas from "../schema/optometry"
 import actions from "../schema/actions.js";
 
 // API calls
+import forms from "./forms.js";
 import session from "./session.js"
-import fetchForms from "./fetchForms.js";
-
 
 
 // ── Lazy-loaded assessment components ──────────────────────────────────────
@@ -332,23 +331,25 @@ export default function AssessmentLoader({
   const [assessmentsValues, setAssessmentsValues] = useState({});
   
   // Mapping template to the schema registry
-  useEffect(() => {
-    const loadTemplates = async () => {
-      setIsLoading(true)
-      const map = {}
-      const data = await fetchForms(department)
-      if(!data || data.length === 0) {
-        setError(true)
-      }
-      data.forEach(template => {
-        const key = template.assessment_type?.toLowerCase();
-        if(TABS.includes(key)){
-          map[key] = { ...template.body, actions: actions.ACTIONS_BUTTON}
-        }
-      })
-      setTemplates(map)
-      setIsLoading(false)
+  const loadTemplates = async () => {
+    setIsLoading(true)
+    const map = {}
+    const data = await forms.fetch(department)
+    if(!data || data.length === 0) {
+      setError(true)
     }
+    data.forEach(template => {
+      const key = template.assessment_type?.toLowerCase();
+      if(TABS.includes(key)){
+        map[key] = { ...template.body, actions: actions.ACTIONS_BUTTON}
+      }
+    })
+    setTemplates(map)
+    setIsLoading(false)
+  }
+
+  // Load template on department
+  useEffect(() => {
     loadTemplates()
   }, [department])
 
@@ -373,7 +374,6 @@ export default function AssessmentLoader({
         0,
         false
       )
-      console.log(response.data)
       setSessionId(response.data.id)
       setIsSessionActive(false)
       setToast({ message: 'Assessment session started', variant: 'success' });
@@ -425,7 +425,27 @@ export default function AssessmentLoader({
     }
   }, [sessionId])
   
-  console.log('templates ---', templates)
+  // Action handler
+  const handleAction = useCallback(async (type) => {
+    if (type === "next") {
+      const templateDataId = templates[activeTab]
+      if (isSessionActive && templateDataId) {
+        try {
+          await forms.save(templateDataId, assessmentsValues[activeTab])
+          setToast({ message: 'Saved', variant: 'success' })
+        } catch (e) {
+          setToast({ message: 'Failed to save', variant: 'error' })
+        }
+        setActiveTab(activeTab)
+      }
+
+    } else if (type === "clear") {
+      setAssessmentsValues(
+        { subjective: {}, objective: {}, assessment: {}, plan: {}}
+      )
+    }
+  }, [activeTab, assessmentId, sessionId])
+
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
     <PatientContext.Provider value={{ patient}} >
@@ -560,7 +580,7 @@ export default function AssessmentLoader({
                       icon="⚠️"
                       title="Failed to load form"
                       message="Could not fetch the assessment form. Please check your connection and try again."
-                      // ---- action={{ label: "Retry", onClick: retryForms }}
+                      action={{ label: "Retry", onClick: loadTemplates }}
                 />
                 </div>
               ) : !templates[activeTab] ? (
@@ -576,7 +596,7 @@ export default function AssessmentLoader({
                   // ---- readOnly={readOnly}
                   // ---- onChange={onChange}
                   // ---- submitted={submitted}
-                  // ---- onAction={handleAction}
+                  onAction={handleAction}
                   schema={templates[activeTab]}
                   values={assessmentsValues[activeTab] || {}}
                   assessmentRegistry={OPTOMETRY_ASSESSMENT_REGISTRY}
@@ -587,7 +607,7 @@ export default function AssessmentLoader({
                       onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
                       onMouseEnter={e => e.currentTarget.style.background = 
                         activeTab === "plan"? "#1d4ed8" : "#1a6fc4"}
-                      onClick={() => activeTab === "plan" ? setIsConfirmModal(true) : undefined } // ----handleAction("next")
+                      onClick={() => {handleAction('next'); if(activeTab === "plan") {setIsConfirmModal(true)}} } 
                     >
                       {
                         activeTab === "plan" ? "Submit Assessment" :
@@ -604,152 +624,7 @@ export default function AssessmentLoader({
       </div>
     </PatientContext.Provider>
   )
-
-
-
 }
-/* ===================== MAIN COMPONENT ===================== */
-
-/** Initial optometry SOAP assessment only (follow-up uses OptometryFollowUpAssessment.jsx). */
-// export default function OptometryAssessment({
-//   patient,
-//   onSubmit,
-//   onBack,
-//   savedValues          = null,
-//   readOnly             = false,
-//   initialSessionId     = null,   // pre-seeded when opened via direct link
-//   initialAssessmentIds = [],     // pre-seeded assessment_ids array
-// }) {
-//   const [values,        setValues]        = useState(readOnly && savedValues ? savedValues : {});
-//   const [submitted,     setSubmitted]     = useState(readOnly);
-//   const [activeTab,     setActiveTab]     = useState("subjective");
-//   const [forms,         setForms]         = useState([]);  // kept for future API integration
-//   const [formsLoading,  setFormsLoading]  = useState(false);
-//   const [formsError,    setFormsError]    = useState(false);
-//   const [showConfirm,   setShowConfirm]   = useState(false);
-//   const [isDirty,       setIsDirty]       = useState(false);
-//   const [toast,         setToast]         = useState(null);
-//   const [assessmentId,  setAssessmentId]  = useState(initialSessionId);
-//   const [formDataIds,   setFormDataIds]   = useState(() => {
-//     const idMap = {};
-//     (initialAssessmentIds || []).forEach(fd => {
-//       if ((fd.form_type || '').toUpperCase() === 'INITIAL') {
-//         const key = (fd.type || '').toLowerCase();
-//         if (key) idMap[key] = fd.id;
-//       }
-//     });
-//     return idMap;
-//   });
-//   const [questionaireIds, setQuestionaireIds] = useState(() => {
-//     const qMap = {};
-//     (initialAssessmentIds || []).forEach(fd => {
-//       if ((fd.form_type || '').toUpperCase() === 'QUESTIONNAIRE' || (fd.form_type || '').toUpperCase() === 'QUESTIONAIRE') {
-//         const regKey = Object.keys(REGISTRY_KEY_TO_NAME).find(
-//           k => REGISTRY_KEY_TO_NAME[k] === fd.name
-//         );
-//         if (regKey) qMap[regKey] = fd.id;
-//       }
-//     });
-//     return qMap;
-//   });
-//   const [starting,      setStarting]      = useState(false);
-//   const [tabLoading,    setTabLoading]    = useState(false);
-//   const autoSaveTimer = useRef(null);
-
-
-//   useEffect(() => {
-//     if (!patient || readOnly) return;
-//     setValues(v => ({
-//       ...v,
-//       pmh_from_registration:           patient.medical_history   || "No data available",
-//       family_history_from_registration: patient.diagnosis_history || "No data available",
-//       allergies_from_registration:      patient.allergies         || "No data available",
-//     }));
-//   }, [patient, readOnly]);
-
-
-//   useEffect(() => {
-//     if (!isDirty || readOnly) return;
-//     const fn = (e) => { e.preventDefault(); e.returnValue = ""; };
-//     window.addEventListener("beforeunload", fn);
-//     return () => window.removeEventListener("beforeunload", fn);
-//   }, [isDirty, readOnly]);
-
-//   const onChange = useCallback((name, value) => {
-//     if (readOnly) return;
-//     setIsDirty(true);
-//     setValues(v => {
-//       const next = { ...v, [name]: value };
-
-//       // Debounced auto-save to API (1.5 s after last keystroke)
-//       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-//       autoSaveTimer.current = setTimeout(() => {
-//         const formDataId = formDataIds[activeTab];
-//         if (formDataId && assessmentId) {
-//           api.patch(API_URL.ASSESSMENT + `data/${formDataId}/`, { data: next })
-//             .catch(() => {/* silent — user can still hit Save manually */});
-//         }
-//         // Always persist draft locally too
-//         if (storageKey) {
-//           localStorage.setItem(storageKey, JSON.stringify({ values: next, updatedAt: new Date() }));
-//         }
-//       }, 1500);
-
-//       return next;
-//     });
-//   }, [readOnly, activeTab, formDataIds, assessmentId, storageKey]);
-
-//   const handleAction = useCallback((type) => {
-//     if (type === "back") { onBack?.(); return; }
-//     if (readOnly) return;
-//     if (type === "next") {
-//       const idx = actions.ASSESSMENT_TABS.indexOf(activeTab);
-//       if (idx < actions.ASSESSMENT_TABS.length - 1) setActiveTab(actions.ASSESSMENT_TABS[idx + 1]);
-//       return;
-//     }
-//     if (type === "clear") { setValues({}); setSubmitted(false); localStorage.removeItem(storageKey); }
-//     if (type === "save") {
-//       // Persist draft locally
-//       localStorage.setItem(storageKey, JSON.stringify({ values, updatedAt: new Date() }));
-
-//       // Push to API immediately on explicit Save click
-//       if (assessmentId) {
-//         const formDataId = formDataIds[activeTab];
-//         if (formDataId) {
-//           api.patch(API_URL.ASSESSMENT + `data/${formDataId}/`, { data: values })
-//             .then(() => setToast({ message: 'Saved successfully', variant: 'success' }))
-//             .catch(() => setToast({ message: 'Save failed. Draft kept locally.', variant: 'error' }));
-//         } else {
-//           setToast({ message: 'Draft saved locally', variant: 'success' });
-//         }
-//       } else {
-//         setToast({ message: 'Draft saved locally (start a session to sync)', variant: 'success' });
-//       }
-//     }
-//   }, [readOnly, activeTab, storageKey, values, onBack, assessmentId, formDataIds]);
-
-
-//   const handleReferralSubmit = useCallback(async ({ departments, notes, urgency }) => {
-//     try {
-//       await api.post(API_URL.PATIENT + "referral/", {
-//         patient_id: patient?.id, departments, notes, urgency, referred_by: "Optometry",
-//       });
-//       setToast({ message: `Referral sent to ${departments.length} department${departments.length > 1 ? "s" : ""}`, variant: "success" });
-//     } catch {
-//       setToast({ message: "Failed to send referral. Please try again.", variant: "error" });
-//     }
-//   }, [patient]);
-
-//   // const retryForms = useCallback(() => {
-//   //   setFormsError(false);
-//   //   setFormsLoading(true);
-//   //   api.get(API_URL.FORM + "department/optometry/")
-//   //     .then(res => setForms(res.data.results))
-//   //     .catch(() => setFormsError(true))
-//   //     .finally(() => setFormsLoading(false));
-//   // }, []);
-
-//   const activeTabIdx = actions.ASSESSMENT_TABS.indexOf(activeTab);
 
 
 /* ===================== STYLES ===================== */
