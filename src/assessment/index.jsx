@@ -423,23 +423,22 @@ export default function AssessmentLoader({
     if (sessionId) {
       try {
         await session.end(sessionId)
+        setSessionId(null)
         setIsSubmitted(true)
-        setIsConfirmModal(false)
         setIsSessionActive(false)
         setToast({ message: "Assessment submitted and session ended", variant: "success" })
       } catch(e) {
         setIsSubmitted(false)
         setToast({ message: "Submission failed. Please try again.", variant: "error" })
-        return;
       }
+      setIsConfirmModal(false)
+      return
     }
   }, [sessionId])
   
   // Action handler
   const handleAction = useCallback(async (type) => {
     if (type === "next") {
-      console.log("values", assessmentsValues)
-      console.log("tab wise values", assessmentsValues[activeTab])
       const templateDataId = templates[activeTab].id
       if (isSessionActive && templateDataId) {
         try {
