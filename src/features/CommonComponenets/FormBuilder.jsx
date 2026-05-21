@@ -2906,29 +2906,45 @@ if (typeof col === "object" && col.type === "radio") {
                 flexWrap: "wrap"
               }}
             >
-              {(field.options || []).map(opt => (
-                <label key={opt.value} className="form-check-label form-check">
+              {(field.options || []).map((opt, idx) => {
+                const optVal = typeof opt === "object" && opt !== null ? opt.value : opt;
+                const optLabel = typeof opt === "object" && opt !== null ? opt.label : opt;
+                const optTooltip = typeof opt === "object" && opt !== null ? opt.tooltip : undefined;
+                const labelText = t(optLabel, languageConfig?.enabled ? languageConfig.lang : "en");
+                const renderedLabel = optTooltip ? (
+                  <InfoTooltip
+                    info={{ title: labelText, content: [optTooltip] }}
+                    showIcon={false}
+                  >
+                    {labelText}
+                  </InfoTooltip>
+                ) : (
+                  labelText
+                );
+                return (
+                <label key={`${field.name}-${idx}`} className="form-check-label form-check">
                   <input
                     type="checkbox"
-                    checked={(value || []).includes(opt.value)}
+                    checked={(value || []).includes(optVal)}
                     disabled={readOnly}
                     onChange={() => {
                       if (readOnly) return;
                       const exclusiveValues = (field.options || []).filter(o => o.exclusive).map(o => o.value);
                       let next;
-                      if ((value || []).includes(opt.value)) {
-                        next = (value || []).filter(v => v !== opt.value);
+                      if ((value || []).includes(optVal)) {
+                        next = (value || []).filter(v => v !== optVal);
                       } else if (opt.exclusive) {
-                        next = [opt.value];
+                        next = [optVal];
                       } else {
-                        next = [...(value || []).filter(v => !exclusiveValues.includes(v)), opt.value];
+                        next = [...(value || []).filter(v => !exclusiveValues.includes(v)), optVal];
                       }
                       onChange(field.name, next);
                     }}
                   />
-                  {t(opt.label, languageConfig?.enabled ? languageConfig.lang : "en")}
+                  {renderedLabel}
                 </label>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
@@ -2942,29 +2958,45 @@ if (typeof col === "object" && col.type === "radio") {
           ) : null}
 
           <div className="fb-inline-group">
-            {(field.options || []).map((opt) => (
-              <label key={opt.value} className="form-check-label form-check">
+            {(field.options || []).map((opt, idx) => {
+              const optVal = typeof opt === "object" && opt !== null ? opt.value : opt;
+              const optLabel = typeof opt === "object" && opt !== null ? opt.label : opt;
+              const optTooltip = typeof opt === "object" && opt !== null ? opt.tooltip : undefined;
+              const labelText = t(optLabel, languageConfig?.enabled ? languageConfig.lang : "en");
+              const renderedLabel = optTooltip ? (
+                <InfoTooltip
+                  info={{ title: labelText, content: [optTooltip] }}
+                  showIcon={false}
+                >
+                  {labelText}
+                </InfoTooltip>
+              ) : (
+                labelText
+              );
+              return (
+              <label key={`${field.name}-${idx}`} className="form-check-label form-check">
                 <input
                   type="checkbox"
-                  checked={(value || []).includes(opt.value)}
+                  checked={(value || []).includes(optVal)}
                   disabled={readOnly}
                   onChange={() => {
                     if (readOnly) return;
                     const exclusiveValues = (field.options || []).filter(o => o.exclusive).map(o => o.value);
                     let next;
-                    if ((value || []).includes(opt.value)) {
-                      next = (value || []).filter((v) => v !== opt.value);
+                    if ((value || []).includes(optVal)) {
+                      next = (value || []).filter((v) => v !== optVal);
                     } else if (opt.exclusive) {
-                      next = [opt.value];
+                      next = [optVal];
                     } else {
-                      next = [...(value || []).filter(v => !exclusiveValues.includes(v)), opt.value];
+                      next = [...(value || []).filter(v => !exclusiveValues.includes(v)), optVal];
                     }
                     onChange(field.name, next);
                   }}
                 />
-                {t(opt.label, languageConfig?.enabled ? languageConfig.lang : "en")}
+                {renderedLabel}
               </label>
-            ))}
+              );
+            })}
           </div>
         </div>
       );
