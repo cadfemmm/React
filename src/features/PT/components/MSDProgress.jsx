@@ -388,15 +388,34 @@ actions: [
     { name: "lightforce_power",       label: "Power (Watts)",        type: "input", placeholder: "Enter power in Watts"      },
   ]
 },
+// {
+//   name: "lightforce_mode",
+//   label: "Mode",
+//   type: "radio-group",
+//   options: [
+//     { label: "Continuous", value: "continuous" },
+//     { label: "Pulsed",     value: "pulsed"     },
+//   ],
+//   showIf: { field: "pain_management", includes: "lightforce_laser" },
+// },
 {
-  name: "lightforce_mode",
+  name: "laser_mode",
   label: "Mode",
-  type: "radio-group",
+  type: "radio",
+  showIf: {
+    field: "pain_management",
+    includes: "lightforce_laser"
+  },
   options: [
-    { label: "Continuous", value: "continuous" },
-    { label: "Pulsed",     value: "pulsed"     },
-  ],
-  showIf: { field: "pain_management", includes: "lightforce_laser" },
+    {
+      label: "Continuous",
+      value: "continuous"
+    },
+    {
+      label: "Pulsed",
+      value: "pulsed"
+    }
+  ]
 },
 {
   type: "row",
