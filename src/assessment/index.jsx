@@ -29,7 +29,9 @@ import schemas from "../schema/optometry"
 import actions from "../schema/actions.js";
 
 // API calls
+import session from "./session.js"
 import fetchForms from "./fetchForms.js";
+
 
 
 // ── Lazy-loaded assessment components ──────────────────────────────────────
@@ -321,6 +323,7 @@ export default function AssessmentLoader({
   const [error, setError] = useState(false);  //formsError, setFormsError
   const [templates, setTemplates] = useState([]);   //[forms, setForms]
   const [isLoading, setIsLoading] = useState(true); // formsLoading,  setFormsLoading
+  const [sessionId, setSessionId] = useState(null);
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [assessmentId, setAssessmentId] = useState(null);
   const [isConfirmModal, setIsConfirmModal] = useState(false);
@@ -349,6 +352,80 @@ export default function AssessmentLoader({
     loadTemplates()
   }, [department])
 
+  // Start session handler
+  const handleStartSession = useCallback(async() => {
+    if (!patient) return;
+    // Extract login doctor id
+    const doctorId = localStorage.getItem('user_id')
+    if (!doctorId) {
+      setToast(
+        { message: 'Could not identify logged on doctor. Please re-login.', variant: 'error'}
+      )
+      return;
+    }
+    setIsSessionActive(true)
+    try {
+      const response = await session.start(
+        doctorId,
+        patient.id,
+        department,
+        'INITIAL',
+        0,
+        false
+      )
+      console.log(response.data)
+      setSessionId(response.data.id)
+      setIsSessionActive(false)
+      setToast({ message: 'Assessment session started', variant: 'success' });
+    } catch (e) {
+        const detail = e?.response?.data
+        const msg = typeof detail === "object"
+        ? Object.values(detail).flat().join(' ')
+        : 'Failed to start assessment. Please try again'
+        setToast({ message: msg, variant: 'error' })
+        setIsSessionActive(false)
+    }
+  }, [patient])
+  // ── Start assessment session ──────────────────────────────────────────────
+  // const handleStart = useCallback(async () => {
+      
+  //     setAssessmentId(data.id);
+
+  //     // Map FormData ids — only INITIAL form_type gives one record per SOAP tab
+  //     const idMap = {};
+  //     const qMap  = {};   // QUESTIONAIRE sub-assessments keyed by registry key
+  //     (data.assessment_ids || []).forEach(fd => {
+  //       const ft = (fd.form_type || '').toUpperCase();
+  //       if (ft === 'INITIAL') {
+  //         const key = (fd.type || '').toLowerCase();
+  //         if (key) idMap[key] = fd.id;
+  //       } else if (ft === 'QUESTIONNAIRE' || ft === 'QUESTIONAIRE') {
+  //         // Match by name to registry key
+  //         const regKey = Object.keys(REGISTRY_KEY_TO_NAME).find(
+  //           k => REGISTRY_KEY_TO_NAME[k] === fd.name
+  //         );
+  //         if (regKey) qMap[regKey] = fd.id;
+  //       }
+  //     });
+  //     setFormDataIds(idMap);
+  //     setQuestionaireIds(qMap);
+  //   }, [patient]);
+
+
+  // End session handler
+  const handleEndSession = useCallback(async() => {
+    if (sessionId) {
+      try {
+        await session.end(sessionId)
+        setToast({ message: "Assessment submitted and session ended", variant: "success" })
+      } catch(e) {
+        setToast({ message: "Submission failed. Please try again.", variant: "error" })
+        return;
+      }
+    }
+  }, [sessionId])
+  
+  console.log('templates ---', templates)
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
     <PatientContext.Provider value={{ patient}} >
@@ -357,7 +434,7 @@ export default function AssessmentLoader({
         isReferralModal && (
           <ReferralModal
             patient={patient}
-            // onSubmit={handleReferralSubmit}
+            // ---- onSubmit={handleReferralSubmit}
             onClose={() => setIsReferralModal(false)}
           />
         )
@@ -379,13 +456,13 @@ export default function AssessmentLoader({
             variant="submit"
             title="Submit Assessment?"
             confirmLabel="Submit Assessment"
-            // onConfirm={handleConfirmedSubmit}
+            onConfirm={handleEndSession}
             onCancel={() => setIsConfirmModal(false)}
             message="You are about to finalise and submit this assessment."
             meta= {
               patient?[
                 { label: "Patient", value: patient.email || patient.name || "—" },
-                { label: "Visit Type", value: templates?[0]?.assessment_type.upperCase() : "—" },
+                { label: "Visit Type", value: "INITIAL"},
                 { label: "Date", value: localDateTimeString(new Date()) }
               ] : []
             }
@@ -415,7 +492,7 @@ export default function AssessmentLoader({
               borderRadius: 6, padding: "6px 16px", fontSize: 12, fontWeight: 700,
             }}
             disabled={isSessionActive || !!assessmentId}
-            onClick={!assessmentId && !isSessionActive ? 'handleStart': undefined} //handleStart
+            onClick={!assessmentId && !isSessionActive ? handleStartSession: undefined} 
             onMouseEnter={e => { if (!assessmentId) e.currentTarget.style.background = "#0369a1"; }}
             onMouseLeave={e => { if (!assessmentId) e.currentTarget.style.background = "#0284c7"; }}
             title={assessmentId ? `Session active: ${assessmentId}` : "Start a new assessment session"}
@@ -447,7 +524,7 @@ export default function AssessmentLoader({
               TABS.map((tab, idx) => {
                 const isActive  = activeTab === tab;
                 const isDone    = idx < TABS.indexOf(activeTab);
-                const hasData   = '' //= !!formDataIds[tab]; 
+                const hasData   = '' // ----= !!formDataIds[tab]; 
                 // Tab Button
                 return (
                   <button
@@ -483,7 +560,7 @@ export default function AssessmentLoader({
                       icon="⚠️"
                       title="Failed to load form"
                       message="Could not fetch the assessment form. Please check your connection and try again."
-                      // action={{ label: "Retry", onClick: retryForms }}
+                      // ---- action={{ label: "Retry", onClick: retryForms }}
                 />
                 </div>
               ) : !templates[activeTab] ? (
@@ -496,10 +573,10 @@ export default function AssessmentLoader({
                 </div>
               ) : (
                 <CommonFormBuilder
-                  // readOnly={readOnly}
-                  // onChange={onChange}
-                  // submitted={submitted}
-                  // onAction={handleAction}
+                  // ---- readOnly={readOnly}
+                  // ---- onChange={onChange}
+                  // ---- submitted={submitted}
+                  // ---- onAction={handleAction}
                   schema={templates[activeTab]}
                   values={assessmentsValues[activeTab] || {}}
                   assessmentRegistry={OPTOMETRY_ASSESSMENT_REGISTRY}
@@ -510,7 +587,7 @@ export default function AssessmentLoader({
                       onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
                       onMouseEnter={e => e.currentTarget.style.background = 
                         activeTab === "plan"? "#1d4ed8" : "#1a6fc4"}
-                      onClick={() => activeTab === "plan" ? setIsConfirmModal(true) : undefined } //handleAction("next")
+                      onClick={() => activeTab === "plan" ? setIsConfirmModal(true) : undefined } // ----handleAction("next")
                     >
                       {
                         activeTab === "plan" ? "Submit Assessment" :
@@ -590,29 +667,6 @@ export default function AssessmentLoader({
 //     }));
 //   }, [patient, readOnly]);
 
-//   // ── Fetch FormData for the active tab whenever the session is active ──────
-//   useEffect(() => {
-//     const formDataId = formDataIds[activeTab];
-//     if (!formDataId || !assessmentId) return;
-
-//     setTabLoading(true);
-//     api.get(API_URL.ASSESSMENT + `data/${formDataId}/`)
-//       .then(res => {
-//         const existing = res.data?.data;
-//         if (existing && typeof existing === 'object' && Object.keys(existing).length > 0) {
-//           setValues(v => ({ ...v, ...existing }));
-//         }
-//       })
-//       .catch(() => {/* silently ignore — form stays editable */})
-//       .finally(() => setTabLoading(false));
-//   }, [activeTab, formDataIds, assessmentId]);
-
-//   const schemaMap = {
-//     plan: schemas.PLAN,
-//     objective: schemas.OBJECTIVE,
-//     subjective: schemas.SUBJECTIVE,
-//     assessment: schemas.ASSESSMENT,
-//   };
 
 //   useEffect(() => {
 //     if (!isDirty || readOnly) return;
@@ -645,67 +699,6 @@ export default function AssessmentLoader({
 //     });
 //   }, [readOnly, activeTab, formDataIds, assessmentId, storageKey]);
 
-//   // ── Start assessment session ──────────────────────────────────────────────
-//   const handleStart = useCallback(async () => {
-//     if (!patient) return;
-
-//     // Get the logged-in doctor's id from localStorage
-//     let doctorId = null;
-//     try {
-//       const me = JSON.parse(localStorage.getItem("user") || "{}");
-//       doctorId = me.id || null;
-//     } catch {}
-
-//     if (!doctorId) {
-//       setToast({ message: 'Could not identify logged-in doctor. Please re-login.', variant: 'error' });
-//       return;
-//     }
-
-//     setStarting(true);
-//     try {
-//       const res = await api.post(
-//         API_URL.ASSESSMENT + 'optometry/start',
-//         {
-//           doctor:       doctorId,
-//           patient:      patient.id,
-//           visit_type:   'INITIAL',
-//           is_completed: false,
-//           total_score:  0,
-//         }
-//       );
-//       const data = res.data;
-//       setAssessmentId(data.id);
-
-//       // Map FormData ids — only INITIAL form_type gives one record per SOAP tab
-//       const idMap = {};
-//       const qMap  = {};   // QUESTIONAIRE sub-assessments keyed by registry key
-//       (data.assessment_ids || []).forEach(fd => {
-//         const ft = (fd.form_type || '').toUpperCase();
-//         if (ft === 'INITIAL') {
-//           const key = (fd.type || '').toLowerCase();
-//           if (key) idMap[key] = fd.id;
-//         } else if (ft === 'QUESTIONNAIRE' || ft === 'QUESTIONAIRE') {
-//           // Match by name to registry key
-//           const regKey = Object.keys(REGISTRY_KEY_TO_NAME).find(
-//             k => REGISTRY_KEY_TO_NAME[k] === fd.name
-//           );
-//           if (regKey) qMap[regKey] = fd.id;
-//         }
-//       });
-//       setFormDataIds(idMap);
-//       setQuestionaireIds(qMap);
-//       setToast({ message: 'Assessment session started', variant: 'success' });
-//     } catch (err) {
-//       const detail = err?.response?.data;
-//       const msg = typeof detail === 'object'
-//         ? Object.values(detail).flat().join(' ')
-//         : 'Failed to start assessment. Please try again.';
-//       setToast({ message: msg, variant: 'error' });
-//     } finally {
-//       setStarting(false);
-//     }
-//   }, [patient]);
-
 //   const handleAction = useCallback((type) => {
 //     if (type === "back") { onBack?.(); return; }
 //     if (readOnly) return;
@@ -735,38 +728,6 @@ export default function AssessmentLoader({
 //     }
 //   }, [readOnly, activeTab, storageKey, values, onBack, assessmentId, formDataIds]);
 
-//   const handleConfirmedSubmit = useCallback(async () => {
-//     setShowConfirm(false);
-//     if (readOnly) return;
-
-//     // End the session if one is active
-//     if (assessmentId) {
-//       try {
-//         await api.patch(API_URL.ASSESSMENT + `session/${assessmentId}/end/`);
-//         setToast({ message: "Assessment submitted and session ended", variant: "success" });
-//       } catch {
-//         setToast({ message: "Submission failed. Please try again.", variant: "error" });
-//         return;
-//       }
-//     } else {
-//       setToast({ message: "Assessment submitted (no active session)", variant: "success" });
-//     }
-
-//     setSubmitted(true);
-//     setIsDirty(false);
-//     onSubmit?.(values);
-//   }, [readOnly, values, onSubmit, assessmentId]);
-
-//   // const schemaMap = useMemo(() => {
-//   //   const map = {};
-//   //   forms.forEach(form => {
-//   //     const key = form.assessment_type?.toLowerCase();
-//   //     if (key && TAB_ORDER.includes(key)) {
-//   //       map[key] = { ...form.body, actions: ACTIONS_WITH_NEXT };
-//   //     }
-//   //   });
-//   //   return map;
-//   // }, [forms]);
 
 //   const handleReferralSubmit = useCallback(async ({ departments, notes, urgency }) => {
 //     try {
