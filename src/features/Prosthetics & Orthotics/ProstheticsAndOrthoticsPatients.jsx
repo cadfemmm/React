@@ -6,6 +6,8 @@ import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
 import WheelchairAssessment from "./WheelchairAssessment";
 import ThreeDAssessment from "./ThreeDAssessment";
+import ThreeDProgress from './ThreeDProgress';
+import WheelchairGroup from './WheelchairGroup'
 
 const ASSESSMENT_CARDS = [
   { id: "initial",  title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "New Patient",   tagBg: "#dbeafe", tagColor: "#1d4ed8" },
@@ -125,12 +127,60 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
 
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentMode) {
+    // if (selectedCard === "Wheelchair") {
+    //   return <WheelchairAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
+    // }
+    // if (selectedCard === "3D") {
+    //   return <ThreeDAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
+    // }
     if (selectedCard === "Wheelchair") {
-      return <WheelchairAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
-    }
-    if (selectedCard === "3D") {
-      return <ThreeDAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
-    }
+
+  // initial, followup, progress → WheelchairAssessment
+  if (["initial", "followup", "progress"].includes(assessmentMode)) {
+    return (
+      <WheelchairAssessment
+        patient={selectedPatient}
+        mode={assessmentMode}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+
+  // group → WheelchairGroup
+  if (assessmentMode === "group") {
+    return (
+      <WheelchairGroup
+        patient={selectedPatient}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+}
+
+if (selectedCard === "3D") {
+
+  // initial, followup, group → ThreeDAssessment
+  if (["initial", "followup", "group"].includes(assessmentMode)) {
+    return (
+      <ThreeDAssessment
+        patient={selectedPatient}
+        mode={assessmentMode}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+
+  // progress → ThreeDProgressAssessment
+  if (assessmentMode === "progress") {
+    return (
+      <ThreeDProgress
+        patient={selectedPatient}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+}
+
     // Follow-up → dedicated follow-up form
     if (assessmentMode === "followup") {
       return (
@@ -152,7 +202,9 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
   }
 
   /* ── Step 2: Assessment type selection (My Appointments only) ── */
-  if (selectedPatient && selectedCard === "My Appointments") {
+  // if (selectedPatient && selectedCard === "My Appointments") {
+  if (selectedPatient && selectedCard) {
+
     const initials = (selectedPatient.name || selectedPatient.email || "P")
       .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
     const avatarBg = AVATAR_COLORS[initials.charCodeAt(0) % AVATAR_COLORS.length];
