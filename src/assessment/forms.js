@@ -2,7 +2,7 @@ import api from "../shared/api/apiClient";
 import { API_URL } from "../platform/config/api.config";
 
 
-const fetchForms = async (department) => {
+const fetch = async (department) => {
     try {
         const response = await api.get(
             API_URL.fetchTemplate(department)
@@ -13,4 +13,17 @@ const fetchForms = async (department) => {
     }
 }
 
-export default fetchForms;
+const save = async (
+    templateDataId,
+    assessmentData
+) => {
+    return await api.patch(
+        API_URL.ASSESSMENT + `data/${templateDataId}/`,
+        { data: assessmentData }
+    )
+}
+
+export default {
+    save,
+    fetch
+};
