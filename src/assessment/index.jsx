@@ -331,12 +331,13 @@ export default function AssessmentLoader({
   const [assessmentsValues, setAssessmentsValues] = useState(() => {
     return { subjective: {}, objective: {}, assessment: {}, plan: {} }
   });
-  
-  
+  const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({})
+
   // Mapping template to the schema registry
   const loadTemplates = async () => {
     setIsLoading(true)
     const map = {}
+    const subAssessment = {}
     const data = await forms.fetch(department)
     if(!data || data.length === 0) {
       setError(true)
@@ -350,18 +351,14 @@ export default function AssessmentLoader({
           name:template.name, 
           actions: actions.ACTIONS_BUTTON
         }
-      } else {
-        map[key] = {
-          [template.name.toLowerCase().replaceAll(" ", "_")] : {
-            ...template.body, 
-            id:template.id, 
-            name:template.name, 
-          }
-        }
+      } 
+      if(template?.sub_assessment) {
+        subAssessment[key] = template.sub_assessment
       }
     })
     setTemplates(map)
     setIsLoading(false)
+    setSubAssessmentTemplate(subAssessment)
   }
 
   // Load template on department
@@ -371,57 +368,17 @@ export default function AssessmentLoader({
     }
   }, [department, sessionId])
 
-  const [formDataIds, setFormDataIds] = useState({});
-  const [questionaireIds, setQuestionaireIds] = useState({});
-  const [assessmentEnded, setAssessmentEnded] = useState(false);
-
-  useEffect(() => {
-
-  const formDataId = formDataIds?.[activeTab];
-
-  if (!formDataId || !sessionId) return;
-
-  api
-    .get(API_URL.ASSESSMENT + `data/${formDataId}/`)
-    .then(res => {
-
-      const existing = res.data?.data;
-
-      if (
-        existing &&
-        typeof existing === "object" &&
-        Object.keys(existing).length > 0
-      ) {
-
-        setAssessmentsValues(v => ({
-          ...v,
-          [activeTab]: {
-            ...v[activeTab],
-            ...existing
-          }
-        }));
-      }
-    })
-    .catch(() => {});
-
-}, [activeTab, formDataIds, sessionId]);
   // Start session handler
-  const handleStartSession = useCallback(async () => {
+  const handleStartSession = useCallback(async() => {
     if (!patient) return;
-
     // Extract login doctor id
-    const doctorId = localStorage.getItem('user_id');
-
+    const doctorId = localStorage.getItem('user_id')
     if (!doctorId) {
-      setToast({
-        message: 'Could not identify logged on doctor. Please re-login.',
-        variant: 'error'
-      });
+      setToast(
+        { message: 'Could not identify logged on doctor. Please re-login.', variant: 'error'}
+      )
       return;
     }
-
-    setIsSessionActive(true);
-
     try {
       const response = await session.start(
         doctorId,
@@ -430,181 +387,99 @@ export default function AssessmentLoader({
         'INITIAL',
         0,
         false
-      );
-
-      // Create mappings
-      const formMap = {};
-      const questionnaireMap = {};
-
-      response?.data?.assessment_ids?.forEach(template => {
-        const formType = template.form_type?.toUpperCase();
-        const tab = template.type?.toLowerCase();
-
-        // Main SOAP forms
-        if (formType === "INITIAL" && tab) {
-          formMap[tab] = template.id;
-        }
-
-        // Questionnaire forms
-        if (
-          formType === "QUESTIONNAIRE" ||
-          formType === "QUESTIONAIRE"
-        ) {
-          const regKey = Object.keys(REGISTRY_KEY_TO_NAME).find(
-            key => REGISTRY_KEY_TO_NAME[key] === template.name
-          );
-
-          if (regKey) {
-            questionnaireMap[regKey] = template.id;
+      )
+      setSessionId(response.data.id)
+      response?.data?.assessment_ids.forEach(
+        template => {
+          const map = {}
+          const tab = template.type.toLowerCase()
+          const screeningType = template.screening_type.toUpperCase()
+          if(template.is_parent === "True") {
+            templates[tab].id = template.id
+          } else {
+            subAssessmentTemplate[tab] = {
+               [template.name] : {
+                  id: template.id,
+                  name: template.name,
+                  type: template.type
+               }
+            }
           }
         }
-      });
-
-      // Save mappings
-      setFormDataIds(formMap);
-      setQuestionaireIds(questionnaireMap);
-
-      // Save session
-      setSessionId(response.data.id);
-
-      // Session successfully started
-      setIsSessionActive(false);
-
-      // Reset ended state if restarting
+      )
+      setIsSessionActive(true)  
       setIsSubmitted(false);
-
-      setToast({
-        message: 'Assessment session started',
-        variant: 'success'
-      });
-
+      setToast({ message: 'Assessment session started', variant: 'success' });
     } catch (e) {
-      const detail = e?.response?.data;
-
-      const msg = typeof detail === "object"
+        const detail = e?.response?.data
+        const msg = typeof detail === "object"
         ? Object.values(detail).flat().join(' ')
-        : 'Failed to start assessment. Please try again';
-
-      setToast({
-        message: msg,
-        variant: 'error'
-      });
-
-      setIsSessionActive(false);
+        : 'Failed to start assessment. Please try again'
+        setToast({ message: msg, variant: 'error' })
+        setIsSessionActive(false)
     }
-  }, [patient, department]);
-
+  }, [patient, templates])
 
   // End session handler
-  const handleEndSession = useCallback(async () => {
-    if (!sessionId) return;
-
-    try {
-      await session.end(sessionId);
-
-      // Mark session ended
-      setAssessmentEnded(true);
-
-      // Remove active session
-      setSessionId(null);
-
-      setIsSubmitted(true);
-      setIsSessionActive(false);
-
-      setToast({
-        message: "Assessment submitted and session ended",
-        variant: "success"
-      });
-
-    } catch (e) {
-      setIsSubmitted(false);
-
-      setToast({
-        message: "Submission failed. Please try again.",
-        variant: "error"
-      });
+  const handleEndSession = useCallback(async() => {
+    if (sessionId) {
+      try {
+        await session.end(sessionId)
+        setSessionId(null)
+        setIsSubmitted(true)
+        setIsSessionActive(false)
+        setToast({ message: "Assessment submitted and session ended", variant: "success" })
+      } catch(e) {
+        setIsSubmitted(false)
+        setToast({ message: "Submission failed. Please try again.", variant: "error" })
+      }
+      setIsConfirmModal(false)
+      return
     }
-
-    setIsConfirmModal(false);
-
-  }, [sessionId]);
+  }, [sessionId])
   
   // Action handler
   const handleAction = useCallback(async (type) => {
-
     if (type === "next") {
-
-      const templateDataId = formDataIds?.[activeTab];
-
-      if (sessionId && templateDataId) {
-
+      const templateDataId = templates[activeTab].id
+      if (isSessionActive && templateDataId) {
         try {
-
-          await forms.save(
-            templateDataId,
-            assessmentsValues[activeTab]
-          );
-
-          setToast({
-            message: 'Saved',
-            variant: 'success'
-          });
-
+          await forms.save(templateDataId, assessmentsValues[activeTab])
+          setToast({ message: 'Saved', variant: 'success' })
         } catch (e) {
-
-          setToast({
-            message: 'Failed to save',
-            variant: 'error'
-          });
-
-          return;
+          setToast({ message: 'Failed to save', variant: 'error' })
         }
+        const pos = TABS.indexOf(activeTab)
+        if(pos < TABS.length - 1) setActiveTab(TABS[pos+1])
       }
-
-      const pos = TABS.indexOf(activeTab);
-
-      if (pos < TABS.length - 1) {
-        setActiveTab(TABS[pos + 1]);
-      }
-
     } else if (type === "clear") {
+      setIsSubmitted(false)
+      setAssessmentsValues(
+        { subjective: {}, objective: {}, assessment: {}, plan: {}}
+      )
+    } else if (type === "save") {
 
-      setIsSubmitted(false);
-
-      setAssessmentsValues({
-        subjective: {},
-        objective: {},
-        assessment: {},
-        plan: {}
-      });
     }
+    return
+  }, [activeTab, sessionId])
 
-    return;
-
-  }, [
-    activeTab,
-    sessionId,
-    formDataIds,
-    assessmentsValues
-  ]);
-
-    // OnChange handler
-    const onChange = useCallback(
-      (name, value) => {
-        setAssessmentsValues(
-          v => {
-            const next = {
-              ...v,
-              [activeTab]: {
-                ...v[activeTab],
-                [name]: value
-              }
+  // OnChange handler
+  const onChange = useCallback(
+    (name, value) => {
+      setAssessmentsValues(
+        v => {
+          const next = {
+            ...v,
+            [activeTab]: {
+              ...v[activeTab],
+              [name]: value
             }
-            return next
           }
-        )
-      }, [activeTab, sessionId]
-    )
+          return next
+        }
+      )
+    }, [activeTab, sessionId]
+  )
 
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
@@ -659,131 +534,47 @@ export default function AssessmentLoader({
       <div style={S.page}>
         {/* Referral and Start Assessment Button UI */}
         <div style={S.actionBar}>
-          {/* Session Start / Ended Button */}
+          {/* Session Start / Ended Button UI */}
           <button
             style={{
               opacity: isSessionActive ? 0.7 : 1,
               transition: "background .15s, opacity .15s",
-
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-
-              borderRadius: 6,
-              padding: "6px 16px",
-              fontSize: 12,
-              fontWeight: 700,
-
-              cursor:
-                isSessionActive || isSubmitted || sessionId
-                  ? "not-allowed"
-                  : "pointer",
-
-              background:
-                isSubmitted
-                  ? "#e5e7eb"
-                  : sessionId
-                  ? "#e0f2fe"
-                  : "#0284c7",
-
-              color:
-                isSubmitted
-                  ? "#6b7280"
-                  : sessionId
-                  ? "#0369a1"
-                  : "#fff",
-
-              border:
-                sessionId && !isSubmitted
-                  ? "1.5px solid #bae6fd"
-                  : "none",
+              color: isSubmitted ? "#6b7280" : sessionId ? "#0369a1" : "#fff",
+              cursor: isSessionActive || isSubmitted || sessionId ? "not-allowed" : "pointer",
+              display: "inline-flex", alignItems: "center", gap: 5,
+              background: isSubmitted ? "#e5e7eb" : sessionId ? "#e0f2fe" : "#0284c7",
+              border:sessionId && !isSubmitted ? "1.5px solid #bae6fd" : "none",
+              borderRadius: 6, padding: "6px 16px", fontSize: 12, fontWeight: 700,
             }}
             disabled={isSessionActive || !!sessionId || isSubmitted}
-            onClick={
-              !sessionId && !isSessionActive && !isSubmitted
-                ? handleStartSession
-                : undefined
-            }
-            onMouseEnter={e => {
-              if (!sessionId && !isSubmitted) {
-                e.currentTarget.style.background = "#0369a1";
-              }
-            }}
-            onMouseLeave={e => {
-              if (!sessionId && !isSubmitted) {
-                e.currentTarget.style.background = "#0284c7";
-              }
-            }}
-            title={
-              isSubmitted
+            onClick={!sessionId && !isSessionActive ? handleStartSession: undefined} 
+            onMouseEnter={e => { if (!sessionId && !isSubmitted) e.currentTarget.style.background = "#0369a1"; }}
+            onMouseLeave={e => { if (!sessionId && !isSubmitted) e.currentTarget.style.background = "#0284c7"; }}
+            title={ isSubmitted
                 ? "Session ended"
                 : sessionId
                 ? `Session active: ${sessionId}`
                 : "Start a new assessment session"
             }
           >
-            {
-              isSessionActive
-                ? "Starting…"
-                : isSubmitted
-                ? "✓ Ended"
-                : sessionId
-                ? "✓ Started"
-                : "Start"
-            }
+            { isSessionActive ? "Starting…": sessionId ? "✓ Started" : "Start" }
           </button>
-
-          {/* Referral Button */}
+          {/* Referral Button UI */}
           <button
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-
-              borderRadius: 6,
-              padding: "6px 14px",
-              fontSize: 12,
-              fontWeight: 600,
-
-              background:
-                sessionId || isSubmitted
-                  ? "#0284c7"
-                  : "#d1d5db",
-
               border: "none",
-
-              color:
-                sessionId || isSubmitted
-                  ? "#fff"
-                  : "#6b7280",
-
-              cursor:
-                sessionId || isSubmitted
-                  ? "pointer"
-                  : "not-allowed",
-
-              opacity:
-                sessionId || isSubmitted
-                  ? 1
-                  : 0.7,
-
+              display: "inline-flex", alignItems: "center",
+              borderRadius: 6, padding: "6px 14px", fontSize: 12,
+              background: sessionId || isSubmitted ? "#0284c7" : "#d1d5db",
+              fontWeight: 600, 
+              color:sessionId || isSubmitted? "#fff": "#6b7280",
+              cursor:sessionId || isSubmitted ? "pointer" : "not-allowed",
               transition: "background .15s",
             }}
             disabled={!(sessionId || isSubmitted)}
-            onClick={
-              sessionId || isSubmitted
-                ? () => setIsReferralModal(true)
-                : undefined
-            }
-            onMouseEnter={e => {
-              if (sessionId || isSubmitted) {
-                e.currentTarget.style.background = "#0369a1";
-              }
-            }}
-            onMouseLeave={e => {
-              if (sessionId || isSubmitted) {
-                e.currentTarget.style.background = "#0284c7";
-              }
-            }}
+            onClick={ sessionId || isSubmitted ? () => setIsReferralModal(true): undefined}     
+            onMouseLeave={e =>  {if (sessionId || isSubmitted){ e.currentTarget.style.background = "#0284c7"}}  }
+            onMouseEnter={e =>  {if (sessionId || isSubmitted){e.currentTarget.style.background = "#0369a1"}} } 
           >
             Referral
           </button>
@@ -992,6 +783,3 @@ const S = {
     boxShadow: "0 1px 4px rgba(37,99,235,0.2)",
   },
 };
-
-/* ── Patient header card styles ─────────────────────────────────────────── */
-// end of file
