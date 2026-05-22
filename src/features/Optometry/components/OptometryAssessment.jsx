@@ -358,6 +358,7 @@ export default function OptometryAssessment({
   });
   const [starting,      setStarting]      = useState(false);
   const [tabLoading,    setTabLoading]    = useState(false);
+  const [assessmentEnded, setAssessmentEnded] = useState(false);
 
   const isFollowup = false;
 
@@ -1484,29 +1485,53 @@ export default function OptometryAssessment({
     }
   }, [readOnly, activeTab, storageKey, values, onBack, assessmentId, formDataIds]);
 
-  const handleConfirmedSubmit = useCallback(async () => {
-    setShowConfirm(false);
-    if (readOnly) return;
+const handleConfirmedSubmit = useCallback(async () => {
+  setShowConfirm(false);
 
-    // End the session if one is active
-    if (assessmentId) {
-      try {
-        await api.patch(API_URL.ASSESSMENT + `session/${assessmentId}/end/`);
-        setToast({ message: "Assessment submitted and session ended", variant: "success" });
-      } catch {
-        setToast({ message: "Submission failed. Please try again.", variant: "error" });
-        return;
-      }
-    } else {
-      setToast({ message: "Assessment submitted (no active session)", variant: "success" });
+  if (readOnly) return;
+
+  // End the session if one is active
+  if (assessmentId) {
+    try {
+      await api.patch(
+        API_URL.ASSESSMENT + `session/${assessmentId}/end/`
+      );
+
+      // mark session as ended
+      setAssessmentEnded(true);
+
+      // remove active session
+      setAssessmentId(null);
+
+      setToast({
+        message: "Assessment submitted and session ended",
+        variant: "success",
+      });
+    } catch {
+      setToast({
+        message: "Submission failed. Please try again.",
+        variant: "error",
+      });
+      return;
     }
+  } else {
+    setToast({
+      message: "Assessment submitted (no active session)",
+      variant: "success",
+    });
+  }
 
-    setSubmitted(true);
-    setIsDirty(false);
-    // Merge all tab values for submission
-    const allValues = Object.values(values).reduce((acc, tab) => ({ ...acc, ...tab }), {});
-    onSubmit?.(allValues);
-  }, [readOnly, values, onSubmit, assessmentId]);
+  setSubmitted(true);
+  setIsDirty(false);
+
+  // Merge all tab values for submission
+  const allValues = Object.values(values).reduce(
+    (acc, tab) => ({ ...acc, ...tab }),
+    {}
+  );
+
+  onSubmit?.(allValues);
+}, [readOnly, values, onSubmit, assessmentId]);
 
   // const schemaMap = useMemo(() => {
   //   const map = {};
@@ -1574,35 +1599,127 @@ export default function OptometryAssessment({
       <div style={S.page}>
         {/* ── Start / Referral action bar (above patient card) ── */}
         <div style={S.actionBar}>
+          {/* Start / Ended button */}
           <button
             style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              borderRadius: 6, padding: "6px 16px", fontSize: 12, fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              borderRadius: 6,
+              padding: "6px 16px",
+              fontSize: 12,
+              fontWeight: 700,
               transition: "background .15s, opacity .15s",
+
               opacity: starting ? 0.7 : 1,
-              cursor: starting ? "not-allowed" : "pointer",
-              background: assessmentId ? "#e0f2fe" : "#0284c7",
-              color: assessmentId ? "#0369a1" : "#fff",
-              border: assessmentId ? "1.5px solid #bae6fd" : "none",
+              cursor:
+                starting || assessmentEnded || assessmentId
+                  ? "not-allowed"
+                  : "pointer",
+
+              background:
+                assessmentEnded
+                  ? "#e5e7eb"
+                  : assessmentId
+                  ? "#e0f2fe"
+                  : "#0284c7",
+
+              color:
+                assessmentEnded
+                  ? "#6b7280"
+                  : assessmentId
+                  ? "#0369a1"
+                  : "#fff",
+
+              border:
+                assessmentId && !assessmentEnded
+                  ? "1.5px solid #bae6fd"
+                  : "none",
             }}
-            onMouseEnter={e => { if (!assessmentId) e.currentTarget.style.background = "#0369a1"; }}
-            onMouseLeave={e => { if (!assessmentId) e.currentTarget.style.background = "#0284c7"; }}
-            onClick={!assessmentId && !starting ? handleStart : undefined}
-            disabled={starting || !!assessmentId}
-            title={assessmentId ? `Session active: ${assessmentId}` : "Start a new assessment session"}
+            onMouseEnter={e => {
+              if (!assessmentId && !assessmentEnded) {
+                e.currentTarget.style.background = "#0369a1";
+              }
+            }}
+            onMouseLeave={e => {
+              if (!assessmentId && !assessmentEnded) {
+                e.currentTarget.style.background = "#0284c7";
+              }
+            }}
+            onClick={
+              !assessmentId && !starting && !assessmentEnded
+                ? handleStart
+                : undefined
+            }
+            disabled={starting || !!assessmentId || assessmentEnded}
+            title={
+              assessmentEnded
+                ? "Session ended"
+                : assessmentId
+                ? `Session active: ${assessmentId}`
+                : "Start a new assessment session"
+            }
           >
-            {starting ? "Starting…" : assessmentId ? "✓ Started" : "Start"}
+            {starting
+              ? "Starting…"
+              : assessmentEnded
+              ? "✓ Ended"
+              : assessmentId
+              ? "✓ Started"
+              : "Start"}
           </button>
+
+          {/* Referral button */}
           <button
             style={{
-              display: "inline-flex", alignItems: "center",
-              background: "#0284c7", border: "none", color: "#fff",
-              borderRadius: 6, padding: "6px 14px", fontSize: 12,
-              fontWeight: 600, cursor: "pointer", transition: "background .15s",
+              display: "inline-flex",
+              alignItems: "center",
+
+              background:
+                assessmentId || assessmentEnded
+                  ? "#0284c7"
+                  : "#d1d5db",
+
+              border: "none",
+
+              color:
+                assessmentId || assessmentEnded
+                  ? "#fff"
+                  : "#6b7280",
+
+              borderRadius: 6,
+              padding: "6px 14px",
+              fontSize: 12,
+              fontWeight: 600,
+
+              cursor:
+                assessmentId || assessmentEnded
+                  ? "pointer"
+                  : "not-allowed",
+
+              opacity:
+                assessmentId || assessmentEnded
+                  ? 1
+                  : 0.7,
+
+              transition: "background .15s",
             }}
-            onMouseEnter={e => e.currentTarget.style.background = "#0369a1"}
-            onMouseLeave={e => e.currentTarget.style.background = "#0284c7"}
-            onClick={() => setShowReferral(true)}
+            onMouseEnter={e => {
+              if (assessmentId || assessmentEnded) {
+                e.currentTarget.style.background = "#0369a1";
+              }
+            }}
+            onMouseLeave={e => {
+              if (assessmentId || assessmentEnded) {
+                e.currentTarget.style.background = "#0284c7";
+              }
+            }}
+            onClick={
+              assessmentId || assessmentEnded
+                ? () => setShowReferral(true)
+                : undefined
+            }
+            disabled={!(assessmentId || assessmentEnded)}
           >
             Referral
           </button>
