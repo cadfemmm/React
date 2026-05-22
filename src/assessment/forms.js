@@ -13,6 +13,18 @@ const fetch = async (department) => {
     }
 }
 
+const fetchData = async (assessmentId) => {
+    return await api.get(
+        API_URL.ASSESSMENT + `data/${assessmentId}`
+    )
+}
+
+const fetchById = async (formId) => {
+    return await api.get(
+        API_URL.ASSESSMENT + `form/${formId}`
+    )
+}
+
 const save = async (
     templateDataId,
     assessmentData
@@ -25,5 +37,7 @@ const save = async (
 
 export default {
     save,
-    fetch
+    fetch,
+    fetchData,
+    fetchById
 };
