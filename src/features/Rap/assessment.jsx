@@ -137,7 +137,7 @@ function AssessmentRow({ sessionData, idx, onView }) {
 
 export default function Assessment({ patient, session, onBack }) {
   const [search, setSearch] = useState("");
-  const [sessionData, setSessionData] = useState(
+  const [sessionData] = useState(
     session && typeof session === "object" ? session.assessment_ids : {},
   );
 
