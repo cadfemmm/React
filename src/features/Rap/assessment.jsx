@@ -137,8 +137,6 @@ function AssessmentRow({ sessionData, idx, onView }) {
 
 export default function Assessment({ patient, session, onBack }) {
   const [search, setSearch] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [sessionData, setSessionData] = useState(
     session && typeof session === "object" ? session.assessment_ids : {},
   );
@@ -332,15 +330,7 @@ export default function Assessment({ patient, session, onBack }) {
         </div>
 
         {/* Body */}
-        {loading ? (
-          Array.from({ length: 5 }, (_, i) => <ShimmerRow key={i} />)
-        ) : error ? (
-          <EmptyState
-            icon="⚠️"
-            title="Unable to load assessment"
-            message={error}
-          />
-        ) : filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <EmptyState
             icon="📋"
             title={
@@ -363,7 +353,7 @@ export default function Assessment({ patient, session, onBack }) {
         )}
       </div>
 
-      {!loading && !error && filtered.length > 0 && (
+      {filtered.length > 0 && (
         <div
           style={{
             marginTop: 12,
