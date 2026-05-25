@@ -23,6 +23,9 @@ const API_URL = {
 
     // Patients apis
     PATIENT: BASE_API + 'patient/',
+    PATIENT_ALL: BASE_API + 'patient/all',
+    DYNAMIC_FORM_RESPONSE: (patientId) =>
+        `https://api.dev.rehab-software.com/api/v1/dynamic-form/form-response/with-data/?patient_id=${encodeURIComponent(patientId)}`,
 }
 
 export {

@@ -254,7 +254,6 @@ export default function PsychologyAssessment({ patient, onSubmit, onBack,mode })
       />
     );
   }
-
   // Age 20 and above → Adult Progress
   return (
     <PsychologyAssessment

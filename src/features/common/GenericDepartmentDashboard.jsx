@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import api from "../../shared/api/apiClient";
+import { API_URL } from "../../platform/config/api.config";
 import DepartmentDashboard from "./DepartmentDashboard";
 import DepartmentPatients from "./DepartmentPatients";
 import {
@@ -50,6 +52,28 @@ export default function GenericDepartmentDashboard({
 
   const [showPatients, setShowPatients] = useState(hasDeepLink);
   const [poSelectedCard, setPoSelectedCard] = useState(null); // tracks which P&O card was clicked
+  const [approveDenyPatients, setApproveDenyPatients] = useState([]);
+  const [approveDenyLoading, setApproveDenyLoading] = useState(false);
+  const [showApproveDeny, setShowApproveDeny] = useState(false);
+
+  const handleApproveDenyClick = () => {
+    // Navigate immediately — data loads inside the patients page
+    setShowApproveDeny(true);
+
+    api.get(API_URL.PATIENT_ALL)
+      .then((res) => {
+        const list = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+          ? res.data.results
+          : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+        setApproveDenyPatients(list);
+      })
+      .catch((err) => console.error("Failed to fetch approve/deny patients:", err))
+      .finally(() => setApproveDenyLoading(false));
+  };
   const dept = departmentName.replace(" Department", "");
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
@@ -60,6 +84,33 @@ export default function GenericDepartmentDashboard({
       <ProstheticsAndOrthoticsPatients
         selectedCard={poSelectedCard || "My Appointments"}
         onBack={() => { setShowPatients(false); setPoSelectedCard(null); }}
+      />
+    );
+  }
+
+  /* ── Approve / Deny Patients page (Doctor dept only) ── */
+  if (showApproveDeny) {
+    const handleApproveDenyAction = (patient) => {
+      const patientId = patient.id || patient.patient_id || patient.mrn;
+      api.get(API_URL.DYNAMIC_FORM_RESPONSE(patientId))
+        .then((res) => {
+          console.log("Approve/Deny form data:", res.data);
+          // TODO: open approve/deny modal or navigate to form view with res.data
+        })
+        .catch((err) => console.error("Failed to fetch form response:", err));
+    };
+
+    return (
+      <DepartmentPatients
+        department={dept}
+        onBack={() => { setShowApproveDeny(false); setApproveDenyPatients([]); setApproveDenyLoading(true); }}
+        AssessmentComponent={AssessmentComponent}
+        showAllPatients
+        patientsFromApp={approveDenyPatients}
+        loading={approveDenyLoading}
+        title="Approve / Deny Patients"
+        actionLabel="View"
+        onRowAction={handleApproveDenyAction}
       />
     );
   }
@@ -114,6 +165,18 @@ export default function GenericDepartmentDashboard({
         { label: "Referrals Today",     value: "6",  sub: "3 in · 3 out",          icon: <FaShareSquare size={16} />,         accent: "#06b6d4" },
         { label: "Pending Billing",     value: "RM 2,100", sub: "9 invoices",      icon: <FaFileInvoiceDollar size={16} />,   accent: "#f97316" },
         { label: "Follow-ups Overdue",  value: "4",  sub: "Requires attention",    icon: <FaExclamationTriangle size={16} />, accent: "#dc2626" },
+          ...(dept === "Doctor"
+            ? [{
+                label: "Approve / Deny Patients",
+                value: approveDenyLoading ? "5" : approveDenyPatients.length > 0 ? String(approveDenyPatients.length) : "5",
+                sub: "2 ICU · 3 Observation",
+                icon: <FaUserMd size={16} />,
+                accent: "#dc2626",
+                trend: "up",
+                trendVal: "+1",
+                onClick: handleApproveDenyClick,
+              }]
+            : []),
       ]}
       donutCards={[{
         title: "Patient Distribution",
