@@ -28,7 +28,8 @@ const SCHEMA = {
         // =========================
         // RESPIRATORY
         // =========================
-       {
+        { type: "subheading", label: "Respiratory" },
+        {
           ...yn("respiratory_section", "Respiratory Symptoms"),
           options: [
             { label: "Issue", value: "Yes" },
@@ -140,12 +141,19 @@ const SCHEMA = {
             }
           }
         },
+        {
+          type: "input",
+          name: "respiratory_symptoms_specify",
+          label: "Specify",
+          showIf: showIfYes("respiratory_section"),
+        },
 
         // =========================
         // CARDIOVASCULAR (NOW SAME STYLE ✅)
         // =========================
+        { type: "subheading", label: "Cardiovascular" },
         {
-            ...yn("cardio_section", "Cardiovascular Symptoms"),
+          ...yn("cardio_section", "Cardiovascular Symptoms"),
             options: [
               { label: "Issue", value: "Yes" },
               { label: "No Issue", value: "No" }
@@ -183,9 +191,27 @@ const SCHEMA = {
             label: "Last change date",
             showIf: { field: "pmh_tracheostomy", equals: "Yes" }
           },
-          { type: "input", name: "pmh_prior_mi", label: "Prior Myocardial Infarction" },
-          { type: "input", name: "pmh_heart_failure", label: "Heart Failure" },
-          { type: "input", name: "pmh_arrhythmias", label: "Arrhythmias" },
+          yn("pmh_prior_mi", "Prior Myocardial Infarction"),
+          {
+            type: "input",
+            name: "pmh_prior_mi_specify",
+            label: "Prior Myocardial Infarction (Specify)",
+            showIf: { field: "pmh_prior_mi", equals: "Yes" },
+          },
+          yn("pmh_heart_failure", "Heart Failure"),
+          {
+            type: "input",
+            name: "pmh_heart_failure_specify",
+            label: "Heart Failure (Specify)",
+            showIf: { field: "pmh_heart_failure", equals: "Yes" },
+          },
+          yn("pmh_arrhythmias", "Arrhythmias"),
+          {
+            type: "input",
+            name: "pmh_arrhythmias_specify",
+            label: "Arrhythmias (Specify)",
+            showIf: { field: "pmh_arrhythmias", equals: "Yes" },
+          },
           yn("pmh_hypertension", "Hypertension"),
           yn("pmh_dyslipidaemia", "Dyslipidaemia"),
           yn("pmh_diabetes_mellitus", "Diabetes Mellitus"),
@@ -373,8 +399,8 @@ const SCHEMA = {
             name: "capillary_refill_time",
             label: "Capillary Refill Time",
             options: [
-              { label: "<3 sec", value: "lt_3_sec" },
-              { label: ">3 sec", value: "gt_3_sec" }
+              { label: "<2 sec", value: "lt_2_sec" },
+              { label: ">2 sec", value: "gt_2_sec" }
             ]
           },
           {
