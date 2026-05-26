@@ -3,6 +3,7 @@ import api from "../../shared/api/apiClient";
 import { API_URL } from "../../platform/config/api.config";
 import DepartmentDashboard from "./DepartmentDashboard";
 import DepartmentPatients from "./DepartmentPatients";
+import ApproveDenyAssessments from "../Doctors/components/ApproveDenyAssessments";
 import {
   FaUserInjured, FaCalendarCheck, FaCalendarTimes, FaClock,
   FaStethoscope, FaShareSquare, FaFileInvoiceDollar, FaExclamationTriangle,
@@ -55,6 +56,7 @@ export default function GenericDepartmentDashboard({
   const [approveDenyPatients, setApproveDenyPatients] = useState([]);
   const [approveDenyLoading, setApproveDenyLoading] = useState(false);
   const [showApproveDeny, setShowApproveDeny] = useState(false);
+  const [approveDenyPatient, setApproveDenyPatient] = useState(null); // selected patient for assessment view
 
   const handleApproveDenyClick = () => {
     // Navigate immediately — data loads inside the patients page
@@ -88,18 +90,18 @@ export default function GenericDepartmentDashboard({
     );
   }
 
+  /* ── Approve / Deny: assessment detail page for a specific patient ── */
+  if (showApproveDeny && approveDenyPatient) {
+    return (
+      <ApproveDenyAssessments
+        patient={approveDenyPatient}
+        onBack={() => setApproveDenyPatient(null)}
+      />
+    );
+  }
+
   /* ── Approve / Deny Patients page (Doctor dept only) ── */
   if (showApproveDeny) {
-    const handleApproveDenyAction = (patient) => {
-      const patientId = patient.id || patient.patient_id || patient.mrn;
-      api.get(API_URL.DYNAMIC_FORM_RESPONSE(patientId))
-        .then((res) => {
-          console.log("Approve/Deny form data:", res.data);
-          // TODO: open approve/deny modal or navigate to form view with res.data
-        })
-        .catch((err) => console.error("Failed to fetch form response:", err));
-    };
-
     return (
       <DepartmentPatients
         department={dept}
@@ -110,7 +112,7 @@ export default function GenericDepartmentDashboard({
         loading={approveDenyLoading}
         title="Approve / Deny Patients"
         actionLabel="View"
-        onRowAction={handleApproveDenyAction}
+        onRowAction={(patient) => setApproveDenyPatient(patient)}
       />
     );
   }
