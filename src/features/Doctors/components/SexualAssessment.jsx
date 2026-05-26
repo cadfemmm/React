@@ -231,7 +231,7 @@ export default function SexualAssessment({ onChange: onParentChange, patient }) 
       {
         title: null,
         fields: [
-          { type: "subheading", label: "SCI related sexual history" },
+         
           yn("sexual_issue", "Sexual issue"),
           ...[
             {
@@ -397,7 +397,12 @@ export default function SexualAssessment({ onChange: onParentChange, patient }) 
                 { label: "Others", value: "others" }
               ]
             },
-            { type: "input", name: "female_adverse_event_other_specify", label: "Others (Specify)", showIf: { field: "female_adverse_event_type", equals: "others" } },
+          { type: "input", name: "female_adverse_event_other_specify", label: "Others (Specify)", showIf: { field: "female_adverse_event_type", equals: "others" } },
+          {
+            type: "input",
+            name: "female_specific_specify",
+            label: "Specify"
+          },
           /* ========== GOALS ========== */
           {
             type: "subheading",

@@ -522,8 +522,12 @@ export default function CommonFormBuilder({
                                       {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion"].includes(field.type)
                                         && field.type !== "checkbox-group"
                                         && (
-                                          <label className="form-label">
+                                          <label
+                                            className="form-label"
+                                            style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}
+                                          >
                                             {t(field.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
+                                            {field.info && <InfoTooltip info={field.info} />}
                                           </label>
                                         )}
 
@@ -587,7 +591,20 @@ function InfoTooltip({ info, children, showIcon = true }) {
 
   if (!info) return null;
 
-  const content = typeof info === "string" ? [info] : info.content;
+  const isImageGallery = typeof info === "object" && info?.type === "images";
+  const images = isImageGallery
+    ? (info.images || []).map((img) =>
+        typeof img === "string" ? { src: img, alt: "" } : img
+      )
+    : [];
+  const content =
+    typeof info === "string"
+      ? [info]
+      : Array.isArray(info.content)
+        ? info.content
+        : info.content
+          ? [info.content]
+          : [];
 
   return (
     <span
@@ -602,7 +619,13 @@ function InfoTooltip({ info, children, showIcon = true }) {
       )}
 
       {open && (
-        <div style={styles.tooltipCard}>
+        <div
+          style={
+            isImageGallery
+              ? { ...styles.tooltipCard, width: 340, maxWidth: "min(90vw, 420px)" }
+              : styles.tooltipCard
+          }
+        >
           <div style={styles.tooltipArrow}></div>
 
           {info.title && (
@@ -611,11 +634,30 @@ function InfoTooltip({ info, children, showIcon = true }) {
             </div>
           )}
 
-          <ul style={styles.tooltipList}>
-            {content.map((line, i) => (
-              <li key={i}>{line}</li>
-            ))}
-          </ul>
+          {isImageGallery ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {images.map((img, i) => (
+                <img
+                  key={i}
+                  src={img.src}
+                  alt={img.alt || `Reference ${i + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    display: "block",
+                    borderRadius: 6,
+                    border: "1px solid #e5e7eb",
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <ul style={styles.tooltipList}>
+              {content.map((line, i) => (
+                <li key={i}>{line}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </span>
@@ -753,6 +795,39 @@ function SubheadingWithImage({ field, languageConfig }) {
           alt={field.info.alt}
           onClose={() => setShowImageModal(false)}
         />
+      )}
+    </>
+  );
+}
+
+function CustomImageField({ field, languageConfig }) {
+  const [showImageModal, setShowImageModal] = React.useState(false);
+  const alt = t(field.label, languageConfig?.enabled ? languageConfig.lang : "en") || "Protocol image";
+  const enlargeOnClick = field.enlargeOnClick !== false;
+
+  return (
+    <>
+      <div>
+        <img
+          src={field.src}
+          alt={alt}
+          onClick={() => enlargeOnClick && setShowImageModal(true)}
+          style={{
+            width: "100%",
+            maxWidth: 600,
+            height: "auto",
+            maxHeight: field.maxHeight || 300,
+            objectFit: "contain",
+            border: "1px solid #e5e7eb",
+            borderRadius: 6,
+            marginTop: 8,
+            cursor: enlargeOnClick ? "pointer" : "default",
+          }}
+          title={enlargeOnClick ? "Click to view full size" : undefined}
+        />
+      </div>
+      {showImageModal && (
+        <ImageModal src={field.src} alt={alt} onClose={() => setShowImageModal(false)} />
       )}
     </>
   );
@@ -1504,7 +1579,8 @@ function renderField(
     }
 
     case "dynamic-section": {
-      const rows = values[field.name] ?? [{}];
+      const rawRows = values[field.name];
+      const rows = Array.isArray(rawRows) && rawRows.length > 0 ? rawRows : [{}];
 
       const updateField = (idx, childName, val) => {
         const next = [...rows];
@@ -1521,7 +1597,7 @@ function renderField(
 
       const removeBlock = (idx) => {
         const next = rows.filter((_, i) => i !== idx);
-        onChange(field.name, next);
+        onChange(field.name, next.length > 0 ? next : [{}]);
       };
 
       return (
@@ -1944,10 +2020,6 @@ case "grid-table-advanced": {
               {field.columns.map(col => (
                 <th key={col.value} style={styles.th}>
                   {t(col.label, languageConfig?.enabled ? languageConfig.lang : "en")}
-                  {!col?.required && (
-                    <div style={{ fontSize: 11, fontWeight: 600 }}>({col.value})</div>
-                  )}
-
                 </th>
               ))}
             </tr>
@@ -2348,25 +2420,7 @@ case "grid-table-advanced": {
       );
     }
     case "custom-image":
-      return (
-        <div>
-          {/* <div style={styles.label}>{field.label}</div> */}
-          <img
-            src={field.src}
-            alt={t(field.label, languageConfig?.enabled ? languageConfig.lang : "en")}
-            style={{
-              width: "100%",
-              maxWidth: 600,
-              height: "auto",
-              maxHeight: field.maxHeight || 300,
-              objectFit: "contain",
-              border: "1px solid #e5e7eb",
-              borderRadius: 6,
-              marginTop: 8
-            }}
-          />
-        </div>
-      );
+      return <CustomImageField field={field} languageConfig={languageConfig} />;
 
     case "audiogram-graph": {
       return(
