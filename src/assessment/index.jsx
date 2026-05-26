@@ -331,12 +331,15 @@ export default function AssessmentLoader({
   const [assessmentsValues, setAssessmentsValues] = useState(() => {
     return { subjective: {}, objective: {}, assessment: {}, plan: {} }
   });
-  
-  
+  const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({
+    subjective: [], objective: [], assessment: [], plan: []
+  })
+
   // Mapping template to the schema registry
   const loadTemplates = async () => {
     setIsLoading(true)
     const map = {}
+    const subAssessment = {}
     const data = await forms.fetch(department)
     if(!data || data.length === 0) {
       setError(true)
@@ -350,18 +353,14 @@ export default function AssessmentLoader({
           name:template.name, 
           actions: actions.ACTIONS_BUTTON
         }
-      } else {
-        map[key] = {
-          [template.name.toLowerCase().replaceAll(" ", "_")] : {
-            ...template.body, 
-            id:template.id, 
-            name:template.name, 
-          }
-        }
+      } 
+      if(template?.sub_assessment) {
+        subAssessment[key] = template.sub_assessment
       }
     })
     setTemplates(map)
     setIsLoading(false)
+    setSubAssessmentTemplate(subAssessment)
   }
 
   // Load template on department
@@ -382,7 +381,6 @@ export default function AssessmentLoader({
       )
       return;
     }
-    setIsSessionActive(true)
     try {
       const response = await session.start(
         doctorId,
@@ -397,16 +395,22 @@ export default function AssessmentLoader({
         template => {
           const map = {}
           const tab = template.type.toLowerCase()
-          const formType = template.form_type.toUpperCase()
-          if (formType === "INITIAL") {
+          const screeningType = template.screening_type.toUpperCase()
+          if(template.is_parent === "True") {
             templates[tab].id = template.id
+          } else {
+            subAssessmentTemplate[tab] = {
+               [template.name] : {
+                  id: template.id,
+                  name: template.name,
+                  type: template.type
+               }
+            }
           }
-          // [[template.name.toLowerCase().replaceAll(" ", "_")]] : {
-          //   id: template.id,
-          //   name: template.name
-          // }
         }
       )
+      setIsSessionActive(true)  
+      setIsSubmitted(false);
       setToast({ message: 'Assessment session started', variant: 'success' });
     } catch (e) {
         const detail = e?.response?.data
@@ -455,13 +459,44 @@ export default function AssessmentLoader({
       setAssessmentsValues(
         { subjective: {}, objective: {}, assessment: {}, plan: {}}
       )
+    } else if (type === "save") {
+
     }
     return
   }, [activeTab, sessionId])
 
   // OnChange handler
   const onChange = useCallback(
-    (name, value) => {
+    async (name, value) => {
+      if(name === 'active_assessment_id') {
+        console.log(name, 'and', value)
+        try {
+          console.log('active tab onChange', activeTab)
+          const tm = await forms.fetchById(value)
+          setSubAssessmentTemplate(
+            prev => ({
+              ...prev,
+              [activeTab]: (prev[activeTab]).map(
+                template => {
+                  if (template.id === tm?.data?.id) {
+                    return {
+                      ...template,
+                      ...tm.data.body,
+                      id: tm.data.id,
+                      name: tm.data.name,
+                      score: tm.data.score
+                    }
+                  }
+                  return template
+                }
+              )
+            })
+          )
+        } catch (e) {
+          console.log(e)
+          setToast({ message: 'Sub Assessment form loading failed', variant: 'error'})
+        }        
+      }
       setAssessmentsValues(
         v => {
           const next = {
@@ -477,6 +512,7 @@ export default function AssessmentLoader({
     }, [activeTab, sessionId]
   )
 
+  console.log('after update sub assessment template', subAssessmentTemplate)
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
     <PatientContext.Provider value={{ patient}} >
@@ -530,37 +566,47 @@ export default function AssessmentLoader({
       <div style={S.page}>
         {/* Referral and Start Assessment Button UI */}
         <div style={S.actionBar}>
-          {/* Session Start Button UI */}
+          {/* Session Start / Ended Button UI */}
           <button
             style={{
               opacity: isSessionActive ? 0.7 : 1,
               transition: "background .15s, opacity .15s",
-              color: sessionId ? "#0369a1" : "#fff",
-              cursor: isSessionActive ? "not-allowed" : "pointer",
+              color: isSubmitted ? "#6b7280" : sessionId ? "#0369a1" : "#fff",
+              cursor: isSessionActive || isSubmitted || sessionId ? "not-allowed" : "pointer",
               display: "inline-flex", alignItems: "center", gap: 5,
-              background: sessionId ? "#e0f2fe" : "#0284c7",
-              border: sessionId ? "1.5px solid #bae6fd" : "none",
+              background: isSubmitted ? "#e5e7eb" : sessionId ? "#e0f2fe" : "#0284c7",
+              border:sessionId && !isSubmitted ? "1.5px solid #bae6fd" : "none",
               borderRadius: 6, padding: "6px 16px", fontSize: 12, fontWeight: 700,
             }}
-            disabled={isSessionActive || !!sessionId}
+            disabled={isSessionActive || !!sessionId || isSubmitted}
             onClick={!sessionId && !isSessionActive ? handleStartSession: undefined} 
-            onMouseEnter={e => { if (!sessionId) e.currentTarget.style.background = "#0369a1"; }}
-            onMouseLeave={e => { if (!sessionId) e.currentTarget.style.background = "#0284c7"; }}
-            title={sessionId ? `Session active: ${sessionId}` : "Start a new assessment session"}
+            onMouseEnter={e => { if (!sessionId && !isSubmitted) e.currentTarget.style.background = "#0369a1"; }}
+            onMouseLeave={e => { if (!sessionId && !isSubmitted) e.currentTarget.style.background = "#0284c7"; }}
+            title={ isSubmitted
+                ? "Session ended"
+                : sessionId
+                ? `Session active: ${sessionId}`
+                : "Start a new assessment session"
+            }
           >
             { isSessionActive ? "Starting…": sessionId ? "✓ Started" : "Start" }
           </button>
           {/* Referral Button UI */}
           <button
             style={{
+              border: "none",
               display: "inline-flex", alignItems: "center",
               borderRadius: 6, padding: "6px 14px", fontSize: 12,
-              background: "#0284c7", border: "none", color: "#fff",
-              fontWeight: 600, cursor: "pointer", transition: "background .15s",
+              background: sessionId || isSubmitted ? "#0284c7" : "#d1d5db",
+              fontWeight: 600, 
+              color:sessionId || isSubmitted? "#fff": "#6b7280",
+              cursor:sessionId || isSubmitted ? "pointer" : "not-allowed",
+              transition: "background .15s",
             }}
-            onClick={() => setIsReferralModal(true)}     
-            onMouseLeave={e => e.currentTarget.style.background = "#0284c7"}  
-            onMouseEnter={e => e.currentTarget.style.background = "#0369a1"}  
+            disabled={!(sessionId || isSubmitted)}
+            onClick={ sessionId || isSubmitted ? () => setIsReferralModal(true): undefined}     
+            onMouseLeave={e =>  {if (sessionId || isSubmitted){ e.currentTarget.style.background = "#0284c7"}}  }
+            onMouseEnter={e =>  {if (sessionId || isSubmitted){e.currentTarget.style.background = "#0369a1"}} } 
           >
             Referral
           </button>
@@ -630,7 +676,7 @@ export default function AssessmentLoader({
                   onAction={handleAction}
                   schema={templates[activeTab]}
                   values={assessmentsValues[activeTab] || {}}
-                  assessmentRegistry={OPTOMETRY_ASSESSMENT_REGISTRY}
+                  assessmentRegistry={subAssessmentTemplate[activeTab]}
                 >
                   <div style={S.actionRow}>
                     <button
@@ -769,6 +815,3 @@ const S = {
     boxShadow: "0 1px 4px rgba(37,99,235,0.2)",
   },
 };
-
-/* ── Patient header card styles ─────────────────────────────────────────── */
-// end of file

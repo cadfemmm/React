@@ -1043,70 +1043,32 @@ function AssessmentLauncher({
   assessmentRegistry,
   languageConfig
 }) {
-  const activeKey = `${field.name}_active`;
-  const defaultValue = field.options?.[0]?.value || null;
-  const storedActive = values[activeKey] || (field.autoOpen ? defaultValue : null);
-
-  // Filter options by region if filterByRegionField is set
-  const selectedRegions = field.filterByRegionField
-    ? (values[field.filterByRegionField] || [])
-    : null;
-
-  let visibleOptions = (field.options || []).filter(opt => {
-    // per-option condition: { field, equals }
-    if (opt.visibleIf) {
-      const depVal = values[opt.visibleIf.field];
-      if ("equals" in opt.visibleIf) return depVal === opt.visibleIf.equals;
-    }
-    if (!selectedRegions) return true;               // no filter — show all
-    if (!opt.regions || opt.regions.length === 0) return true; // regions:[] = all
-    return opt.regions.some(r => selectedRegions.includes(r));
-  });
-
-  const filterIncludedField = field.filterByIncludedValues;
-  const includedVals = filterIncludedField ? values[filterIncludedField] : null;
-  if (Array.isArray(includedVals) && includedVals.length > 0) {
-    visibleOptions = visibleOptions.filter(opt => includedVals.includes(opt.value));
-  }
-
-  const active =
-    storedActive != null && visibleOptions.some(o => o.value === storedActive)
-      ? storedActive
-      : null;
-
-  let component = active ? assessmentRegistry?.[active] : null;
-  const ActiveComponent = component?.default || component;
-
+  const activeKey = `active_assessment_id`;
+  const active = values[activeKey]
   // Remarks key per active assessment button
-  const remarksKey = active ? `${field.name}_${active}_remarks` : null;
+  const remarksKey = active ? `${active}_remarks` : null;
 
   return (
     <div>
       {!field.autoOpen && (
         <div className="fb-inline-group">
-          {visibleOptions.map(opt => (
+          {assessmentRegistry.map(opt => (
             <button
-              key={opt.value}
+              key={opt.id}
               type="button"
-              className={`fb-btn-outline ${active === opt.value ? "!border-primary-600 !bg-primary-600 !text-white" : ""}`}
+              className={`fb-btn-outline ${active === opt.id ? "!border-primary-600 !bg-primary-600 !text-white" : ""}`}
               onClick={() =>
                 onChange(
                   activeKey,
-                  values[activeKey] === opt.value ? null : opt.value
+                  values[activeKey] === opt.id ? opt.id : opt.id
                 )
               }
             >
-              {t(opt.label, languageConfig?.enabled ? languageConfig.lang : "en")}
+              {t(opt.name, languageConfig?.enabled ? languageConfig.lang : "en")}
             </button>
           ))}
         </div>
       )}
-
-      {ActiveComponent ? (
-        <div style={{ marginTop: 20, width: '100%' }}>
-          <ActiveComponent values={values} onChange={onChange} layout="nested" />
-        </div>
-      ) : null}
 
       {/* Remarks textarea — shown per active assessment */}
       {active && remarksKey && !field.hideRemarks &&(
@@ -1116,7 +1078,7 @@ function AssessmentLauncher({
           </label>
           <textarea
             rows={3}
-            placeholder={`Remarks for ${visibleOptions.find(o => o.value === active)?.label || active}...`}
+            placeholder={`Remarks for ${assessmentRegistry.find(o => o.id === active)?.name || 'Sub Assessment'}...`}
             value={values[remarksKey] || ""}
             onChange={e => onChange(remarksKey, e.target.value)}
             style={{
