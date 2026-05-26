@@ -23,6 +23,10 @@ const API_URL = {
 
     // Referrral apis
     REFERRAL: BASE_API + 'referrals/',
+    
+    // Department
+    DEPTARMENT: BASE_API + 'department/',
+
     // Patients apis
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
