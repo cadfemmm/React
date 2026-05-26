@@ -1384,7 +1384,7 @@ export default function SkinAssessment({ onChange }) {
             {
               name: "intervention_infection_control",
               label: "Infection Control",
-              type: "radio",
+              type: "checkbox-group",
               options: [
                 { label: "Wound debridement", value: "wound_debridement" },
                 { label: "Antimicrobial dressing", value: "antimicrobial_dressing" },
@@ -1394,7 +1394,7 @@ export default function SkinAssessment({ onChange }) {
             {
               name: "intervention_pressure_relief",
               label: "Pressure Relief",
-              type: "radio",
+              type: "checkbox-group",
               options: [
                 { label: "2-hourly repositioning", value: "two_hourly_repositioning" },
                 { label: "Offloading device", value: "offloading_device" },
@@ -1403,7 +1403,7 @@ export default function SkinAssessment({ onChange }) {
             {
               name: "intervention_rehabilitation",
               label: "Rehabilitation",
-              type: "radio",
+              type: "checkbox-group",
               options: [
                 { label: "Bed mobility training", value: "bed_mobility_training" },
                 { label: "Transfer training", value: "transfer_training" },

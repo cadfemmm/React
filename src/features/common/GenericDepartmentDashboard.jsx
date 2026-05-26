@@ -62,7 +62,8 @@ export default function GenericDepartmentDashboard({
     // Navigate immediately — data loads inside the patients page
     setShowApproveDeny(true);
 
-    api.get(API_URL.PATIENT_ALL)
+    setApproveDenyLoading(true);
+    api.get(API_URL.REHAB_PATIENTS)
       .then((res) => {
         const list = Array.isArray(res.data)
           ? res.data
@@ -108,6 +109,7 @@ export default function GenericDepartmentDashboard({
         onBack={() => { setShowApproveDeny(false); setApproveDenyPatients([]); setApproveDenyLoading(true); }}
         AssessmentComponent={AssessmentComponent}
         showAllPatients
+        patientsFromAppOnly
         patientsFromApp={approveDenyPatients}
         loading={approveDenyLoading}
         title="Approve / Deny Patients"

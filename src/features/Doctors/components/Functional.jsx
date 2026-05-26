@@ -33,10 +33,17 @@ export default function FunctionalAssessment({ patient, onSubmit, onBack }) {
 
   /* ---------------- CHANGE ---------------- */
 const onChange = (name, value) => {
-  setValues(v => ({
-    ...v,
-    [name]: isNaN(value) ? value : Number(value)
-  }));
+  setValues((v) => {
+    let nextValue = value;
+    if (Array.isArray(value) || (value !== null && typeof value === "object")) {
+      nextValue = value;
+    } else if (typeof value === "number") {
+      nextValue = value;
+    } else if (typeof value === "string" && value !== "" && !Number.isNaN(Number(value))) {
+      nextValue = Number(value);
+    }
+    return { ...v, [name]: nextValue };
+  });
 };
 
 
@@ -118,8 +125,7 @@ const onChange = (name, value) => {
   ];
 
   const ADL_SCHEMA = {
-    title: "Functional Assessment",
-    subtitle: "ADL",
+    title: "Activities of Daily Living",
     actions: ACTIONS,
     fields: [
       { name: "adl_washing", label: "Washing oneself", type: "radio-matrix", options: DEPENDENCE_OPTIONS },
@@ -140,6 +146,42 @@ const onChange = (name, value) => {
         name: "adl_other_selfcare_specify",
         label: "Remarks",
         type: "textarea",
+      },
+      {
+        type: "radio",
+        name: "adl_recent_fall_history",
+        label: "Any recent history of fall",
+        options: [
+          { label: "Yes", value: "Yes" },
+          { label: "No", value: "No" },
+        ],
+      },
+      {
+        type: "dynamic-section",
+        name: "adl_fall_history_specify_entries",
+        showIf: { field: "adl_recent_fall_history", equals: "Yes" },
+        fields: [
+          {
+            type: "input",
+            name: "specify",
+            label: "Specify",
+          },
+        ],
+      },
+      {
+        type: "radio",
+        name: "adl_fall_complication",
+        label: "Complication of the fall",
+        options: [
+          { label: "Yes", value: "Yes" },
+          { label: "No", value: "No" },
+        ],
+      },
+      {
+        type: "textarea",
+        name: "adl_fall_complication_details",
+        label: "Complication of the fall",
+        showIf: { field: "adl_fall_complication", equals: "Yes" },
       },
     ]
   };
@@ -283,9 +325,101 @@ const onChange = (name, value) => {
     ]
   };
 
+const MOBILITY_SUPPORT_MODE_OPTIONS = [
+  { label: "Walking Aids", value: "walking_aids" },
+  { label: "Wheelchair", value: "wheelchair" },
+  { label: "Others", value: "others" },
+  { label: "Unaided", value: "unaided" },
+];
+
+const MOBILITY_WALKING_AID_TYPE_OPTIONS = [
+  "Walking stick/cane",
+  "Elbow crutches (single/bilateral)",
+  "Axillary crutches (single/bilateral)",
+  "Platform crutches (single/bilateral)",
+  "Quadripod",
+  "Walking frame",
+  "Wheeled walker",
+  "Rollator/reverse rollator",
+];
+
+const MOBILITY_ASSISTANCE_LEVEL_OPTIONS = [
+  "Independent",
+  "Minimal assistance",
+  "Moderate assistance",
+  "Maximum assistance",
+  "Total Dependent",
+];
+
+function buildMobilityDistanceFields(prefix, distanceLabel) {
+  const modes = `mobility_${prefix}_support_modes`;
+  const aidType = `mobility_${prefix}_aid_type`;
+  const wheelchairType = `mobility_${prefix}_wheelchair_type`;
+  const others = `mobility_${prefix}_others`;
+  const walkingLevel = `mobility_${prefix}_walking_aid_level`;
+  const wheelchairLevel = `mobility_${prefix}_wheelchair_level`;
+
+  return [
+    {
+      name: modes,
+      label: distanceLabel,
+      type: "radio",
+      options: MOBILITY_SUPPORT_MODE_OPTIONS,
+      showIf: { field: "mobility_present", equals: "Ambulant" },
+    },
+    {
+      name: aidType,
+      label: "",
+      type: "radio",
+      options: MOBILITY_WALKING_AID_TYPE_OPTIONS,
+      showIf: { field: modes, equals: "walking_aids" },
+    },
+    {
+      name: wheelchairType,
+      label: "",
+      type: "radio",
+      options: ["Manual wheelchair", "Electric wheelchair"],
+      showIf: { field: modes, equals: "wheelchair" },
+    },
+    {
+      name: others,
+      label: "Others (Specify)",
+      type: "input",
+      showIf: { field: modes, equals: "others" },
+    },
+    {
+      name: walkingLevel,
+      label: "",
+      type: "radio",
+      options: MOBILITY_ASSISTANCE_LEVEL_OPTIONS,
+      showIf: {
+        field: modes,
+        equals: "walking_aids",
+        and: {
+          field: aidType,
+          oneOf: MOBILITY_WALKING_AID_TYPE_OPTIONS,
+        },
+      },
+    },
+    {
+      name: wheelchairLevel,
+      label: "",
+      type: "radio",
+      options: MOBILITY_ASSISTANCE_LEVEL_OPTIONS,
+      showIf: {
+        field: modes,
+        equals: "wheelchair",
+        and: {
+          field: wheelchairType,
+          oneOf: ["Manual wheelchair", "Electric wheelchair"],
+        },
+      },
+    },
+  ];
+}
+
 const MOBILITY_SCHEMA = {
-  title: "Functional Assessment",
-  subtitle: "Mobility – Walking and moving",
+  title: "Mobility",
   actions: ACTIONS,
 
   fields: [
@@ -296,33 +430,22 @@ const MOBILITY_SCHEMA = {
       options: ["Ambulant", "Non-Ambulant"],
     },
 
+    ...buildMobilityDistanceFields("short", "Short Distance"),
+    ...buildMobilityDistanceFields("long", "Long Distance"),
+
     {
       name: "mobility_support_modes",
       label: "",
       type: "radio",
-      options: [
-        { label: "Walking Aids", value: "walking_aids" },
-        { label: "Wheelchair", value: "wheelchair" },
-        { label: "Others", value: "others" },
-        { label: "Unaided", value: "unaided" },
-      ],
-      showIf: { field: "mobility_present", oneOf: ["Ambulant", "Non-Ambulant"] },
+      options: MOBILITY_SUPPORT_MODE_OPTIONS,
+      showIf: { field: "mobility_present", equals: "Non-Ambulant" },
     },
 
     {
       name: "mobility_aid_type",
       label: "",
       type: "radio",
-      options: [
-        "Walking stick/cane",
-        "Elbow crutches (single/bilateral)",
-        "Axillary crutches (single/bilateral)",
-        "Platform crutches (single/bilateral)",
-        "Quadripod",
-        "Walking frame",
-        "Wheeled walker",
-        "Rollator/reverse rollator",
-      ],
+      options: MOBILITY_WALKING_AID_TYPE_OPTIONS,
       showIf: { field: "mobility_support_modes", equals: "walking_aids" },
     },
 
@@ -341,55 +464,34 @@ const MOBILITY_SCHEMA = {
       showIf: { field: "mobility_support_modes", equals: "others" },
     },
 
-{
-  name: "mobility_walking_aid_level",
-  label: "",
-  type: "radio",
-  options: [
-    "Independent",
-    "Minimal assistance",
-    "Moderate assistance",
-    "Maximum assistance",
-    "Total Dependent",
-  ],
-  showIf: {
-    field: "mobility_support_modes",
-    equals: "walking_aids",
-    and: {
-      field: "mobility_aid_type",
-      oneOf: [
-        "Walking stick/cane",
-        "Elbow crutches (single/bilateral)",
-        "Axillary crutches (single/bilateral)",
-        "Platform crutches (single/bilateral)",
-        "Quadripod",
-        "Walking frame",
-        "Wheeled walker",
-        "Rollator/reverse rollator",
-      ],
+    {
+      name: "mobility_walking_aid_level",
+      label: "",
+      type: "radio",
+      options: MOBILITY_ASSISTANCE_LEVEL_OPTIONS,
+      showIf: {
+        field: "mobility_support_modes",
+        equals: "walking_aids",
+        and: {
+          field: "mobility_aid_type",
+          oneOf: MOBILITY_WALKING_AID_TYPE_OPTIONS,
+        },
+      },
     },
-  },
-},
-{
-  name: "mobility_wheelchair_level",
-  label: "",
-  type: "radio",
-  options: [
-    "Independent",
-    "Minimal assistance",
-    "Moderate assistance",
-    "Maximum assistance",
-    "Total Dependent",
-  ],
-  showIf: {
-    field: "mobility_support_modes",
-    equals: "wheelchair",
-    and: {
-      field: "mobility_wheelchair_type",
-      oneOf: ["Manual wheelchair", "Electric wheelchair"],
+    {
+      name: "mobility_wheelchair_level",
+      label: "",
+      type: "radio",
+      options: MOBILITY_ASSISTANCE_LEVEL_OPTIONS,
+      showIf: {
+        field: "mobility_support_modes",
+        equals: "wheelchair",
+        and: {
+          field: "mobility_wheelchair_type",
+          oneOf: ["Manual wheelchair", "Electric wheelchair"],
+        },
+      },
     },
-  },
-},
 
 
     // ================= ORTHOSIS / PROSTHESIS =================
