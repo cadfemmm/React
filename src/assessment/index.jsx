@@ -21,10 +21,6 @@ import { ShimmerForm } from "../shared/ui/Shimmer";
 import ConfirmModal from "../shared/ui/ConfirmModal";
 import ReferralModal from "../shared/ui/ReferralModal";
 
-// API
-import api from "../shared/api/apiClient";
-import { API_URL } from "../platform/config/api.config";
-
 // Schema Load
 import actions from "../schema/actions.js";
 
