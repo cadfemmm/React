@@ -57,7 +57,6 @@ import NursingDepartmentPage from "../features/Nursing/pages/NursingPatientspage
 import OtDepartmentPage from "../features/OT/pages/Patientspage";
 import WandRDepartmentPage from "../features/VocationalRehab/pages/Patientspage";
 import AudiologyPatients from "../features/Audiology/AudiologyPatients";
-import MedicalAssistantPatientspage from "../features/MedicalAssistant/pages/MedicalAssistantPatientspage";
 import GenericDepartmentDashboard from "../features/common/GenericDepartmentDashboard";
 import RAP from "../features/Rap/";
 
@@ -84,7 +83,6 @@ export default function App() {
     "Prosthetics & Orthotics": "prosthetics",
     "Work & Vocational Rehab": "vocational",
     "Doctor":                  "doctor",
-    "Medical Assistant":       "medical-assistant",
     "RAPFINAL":                "rap-case",
     "RAP":                     "rap",
   };
@@ -147,7 +145,7 @@ export default function App() {
     "prosthetics":          "Prosthetics & Orthotics",
     "vocational":           "Work & Vocational Rehab",
     "doctor":               "Doctor",
-    "medical-assistant":    "Medical Assistant",
+    "medical-assistant":    "Nursing",
     "rap-case":             "RAPFINAL",
     "rap":                  "RAP",
   };
@@ -659,10 +657,7 @@ export function MainContent({
       return <GenericDepartmentDashboard departmentName="Doctor Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Nursing":
-      return <GenericDepartmentDashboard departmentName="Nursing Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
-
-    case "Medical Assistant":
-      return <GenericDepartmentDashboard departmentName="Medical Assistant Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
+      return <GenericDepartmentDashboard departmentName="Nursing & MA Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "RAP":
       return <RAP title="RAP" />

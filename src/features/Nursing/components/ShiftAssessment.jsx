@@ -14,6 +14,7 @@ import NursingSwallowScreener from "./NursingSwallowScreener";
 import BladderDiaryChart from "./BladderDiaryChart";
 import WoundTreatmentFlowsheetForm from "./WoundTreatmentFlowsheetForm";
 import WoundAssessment from "../pages/WoundAssessment";
+import { CarerLogBookLauncher } from "./CarerLogBook";
 
 
 function Sec({ title, expanded, onToggle, children }) {
@@ -2254,7 +2255,7 @@ export default function ShiftAssessment({ patient, onSubmit, onBack }) {
             <F label="Carer Comprehension Level"><Radios name="carer_comprehension" opts={["Understood well","Partial understanding","Needs follow-up","Interpreter required"]} v={v} set={set} /></F>
             <F label="Carer Concerns Raised"><Txt name="carer_concerns" v={v} set={set} /></F>
           </div>
-          <button style={st.btnPrimary}>Open Carer Log Book</button>
+          <CarerLogBookLauncher patient={patient} />
         </Sec>
 
         {/* ── ISBAR ── */}

@@ -1,18 +1,27 @@
 // src/features/Diet/pages/DietDepartmentPage.jsx
 import React, { useState } from "react";
-import {DoctorsInitialAssessmentForm} from "../components/DoctorsInitialAssessment";
+import { DoctorsInitialAssessmentForm } from "../components/DoctorsInitialAssessment";
 import PatientDetails from "../components/PatientDetails";
 import DoctorsDashboard from "../components/DoctorsDashboard";
-import {ExaminationDAssessmentForm} from "../components/ExistingPatientPage";
 import ProcedureAssessment from "../components/ProcedureAssessment";
+import MedicationAssessment from "../components/MedicationAssessment";
+import {
+  ClinicalNotesAssessment,
+  HomeVisitReportAssessment,
+  WorkSiteAssessmentForm,
+  WardAroundAssessment,
+} from "../components/DoctorSupplementaryAssessments";
 
 /* ── Assessment cards (standard 4 + Procedure for Doctors only) ── */
 const DOCTOR_ASSESSMENT_CARDS = [
-  { id: "initial",   title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "New Patient",    tagBg: "#dbeafe", tagColor: "#1d4ed8" },
-  { id: "followup",  title: "Follow-up Visit",        desc: "Review progress and adjust treatment plan",        icon: "🔄", accent: "#059669", tag: "Returning",      tagBg: "#d1fae5", tagColor: "#065f46" },
-  { id: "progress",  title: "Progress Intervention",  desc: "Document interventions and track outcomes",        icon: "📈", accent: "#7C3AED", tag: "Ongoing Care",   tagBg: "#ede9fe", tagColor: "#5b21b6" },
-  { id: "group",     title: "Group Intervention",     desc: "Record group session and multi-patient notes",     icon: "👥", accent: "#DC2626", tag: "Group Session",  tagBg: "#fee2e2", tagColor: "#991b1b" },
-  { id: "procedure", title: "Procedure Assessment",   desc: "BTI, FEES, rTMS, tDCS, NESA, EST and more",       icon: "🩺", accent: "#0891B2", tag: "Procedure",      tagBg: "#cffafe", tagColor: "#0e7490" },
+  { id: "initial",         title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "New Patient",    tagBg: "#dbeafe", tagColor: "#1d4ed8" },
+  { id: "ward_round",      title: "Ward-Around",           desc: "Document ward round findings and patient progress", icon: "🚶", accent: "#7C3AED", tag: "Ward Round",     tagBg: "#ede9fe", tagColor: "#5b21b6" },
+  { id: "followup",        title: "Re-assessment",         desc: "Reassess progress and update the treatment plan",  icon: "🔄", accent: "#059669", tag: "Returning",      tagBg: "#d1fae5", tagColor: "#065f46" },
+  { id: "procedure",       title: "Procedures",            desc: "BTI, FEES, rTMS, tDCS, NESA, EST and more",        icon: "🩺", accent: "#0891B2", tag: "Procedures",     tagBg: "#cffafe", tagColor: "#0e7490" },
+  { id: "clinical_notes",  title: "Clinical Notes",        desc: "Document clinical observations and notes",         icon: "📝", accent: "#6366F1", tag: "Notes",          tagBg: "#e0e7ff", tagColor: "#4338ca" },
+  { id: "medication",      title: "Medication",            desc: "Record and manage patient medications",            icon: "💊", accent: "#DB2777", tag: "Medication",     tagBg: "#fce7f3", tagColor: "#9d174d" },
+  { id: "home_visit",      title: "Home Visit Report",     desc: "Document home visit findings and recommendations", icon: "🏠", accent: "#D97706", tag: "Home Visit",     tagBg: "#ffedd5", tagColor: "#9a3412" },
+  { id: "work_site",       title: "Work Site Assessment",  desc: "Assess workplace environment and needs",           icon: "🏗️", accent: "#0D9488", tag: "Work Site",      tagBg: "#ccfbf1", tagColor: "#0f766e" },
 ];
 
 function DoctorAssessmentCard({ card, onClick }) {
@@ -97,13 +106,9 @@ function handleOpenExistingPatient(p) {
 }
 if (existingPatient && openExistingForm) {
   return (
-    <ExaminationDAssessmentForm
+    <DoctorsInitialAssessmentForm
       patient={existingPatient}
-      department={department}
-      onBack={() => {
-        setExistingPatient(null);
-        setOpenExistingForm(false);
-      }}
+      onUpdatePatient={updatePatientInMainList}
     />
   );
 }
@@ -134,15 +139,71 @@ if (existingPatient && openExistingForm) {
     );
   }
 
-  // STEP 1: initial/followup/progress/group form
-  if (selectedPatient && assessmentView && assessmentView !== "procedure") {
+  if (selectedPatient && assessmentView === "ward_round") {
+    return (
+      <WardAroundAssessment
+        patient={selectedPatient}
+        onBack={() => setAssessmentView(null)}
+        onSubmit={() => setAssessmentView(null)}
+      />
+    );
+  }
+
+  if (selectedPatient && assessmentView === "followup") {
     return (
       <DoctorsInitialAssessmentForm
         patient={selectedPatient}
         onUpdatePatient={updatePatientInMainList}
-        department={department}
-        onSubmit={() => setShowDetails(true)}
+      />
+    );
+  }
+
+  if (selectedPatient && assessmentView === "medication") {
+    return (
+      <MedicationAssessment
+        patient={selectedPatient}
         onBack={() => setAssessmentView(null)}
+        onSubmit={() => setAssessmentView(null)}
+      />
+    );
+  }
+
+  if (selectedPatient && assessmentView === "clinical_notes") {
+    return (
+      <ClinicalNotesAssessment
+        patient={selectedPatient}
+        onBack={() => setAssessmentView(null)}
+        onSubmit={() => setAssessmentView(null)}
+      />
+    );
+  }
+
+  if (selectedPatient && assessmentView === "home_visit") {
+    return (
+      <HomeVisitReportAssessment
+        patient={selectedPatient}
+        onBack={() => setAssessmentView(null)}
+        onSubmit={() => setAssessmentView(null)}
+      />
+    );
+  }
+
+  if (selectedPatient && assessmentView === "work_site") {
+    return (
+      <WorkSiteAssessmentForm
+        patient={selectedPatient}
+        onBack={() => setAssessmentView(null)}
+        onSubmit={() => setAssessmentView(null)}
+      />
+    );
+  }
+
+  // Initial assessment
+  if (selectedPatient && assessmentView === "initial") {
+    return (
+      <DoctorsInitialAssessmentForm
+        patient={selectedPatient}
+        onUpdatePatient={updatePatientInMainList}
       />
     );
   }
@@ -170,7 +231,7 @@ if (existingPatient && openExistingForm) {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 28px" }}>
           <div style={{ fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 6 }}>Select Assessment Type</div>
           <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 32 }}>Choose the appropriate assessment for this patient visit</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 18, width: "100%", maxWidth: 860 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, width: "100%", maxWidth: 1100 }}>
             {DOCTOR_ASSESSMENT_CARDS.map(card => (
               <DoctorAssessmentCard key={card.id} card={card} onClick={() => setAssessmentView(card.id)} />
             ))}

@@ -7,7 +7,6 @@ import {
   Brain,
   Briefcase,
   Building2,
-  ClipboardList,
   FileBarChart,
   Ear,
   Eye,
@@ -26,9 +25,7 @@ import {
 } from "lucide-react";
 
 const DEPARTMENTS = [
-
   "Nursing",
-  "Medical Assistant",
   "Doctor",
   "Physiotherapy",
   "Integrated Rehab",
@@ -42,10 +39,12 @@ const DEPARTMENTS = [
   "Psychology",
 ];
 
+const DEPT_LABELS = {
+  Nursing: "Nursing & MA",
+};
+
 const DEPT_ICONS = {
- 
   Nursing: HeartPulse,
-  "Medical Assistant": ClipboardList,
   Doctor: Stethoscope,
   Physiotherapy: Activity,
   "Integrated Rehab": Layers2,
@@ -160,6 +159,7 @@ function DepartmentNav({ departments, tab, onSelect, collapsed, className }) {
       <ul className="flex flex-col gap-0.5 px-2 py-2">
         {departments.map((dept, index) => {
           const Icon = DEPT_ICONS[dept] || LayoutGrid;
+          const label = DEPT_LABELS[dept] || dept;
           const active = tab === dept;
           return (
             <motion.li
@@ -174,7 +174,7 @@ function DepartmentNav({ departments, tab, onSelect, collapsed, className }) {
               }}
             >
 <div
-  title={collapsed ? dept : undefined}
+  title={collapsed ? label : undefined}
   onClick={() => onSelect(dept)}
   className={[
     "group flex cursor-pointer w-full items-center gap-[12px] px-[12px] py-[12px] rounded-[12px] text-left text-[16px] font-medium transition-all duration-200 mb-[6px]",
@@ -188,7 +188,7 @@ function DepartmentNav({ departments, tab, onSelect, collapsed, className }) {
                   aria-hidden
                 />
                 {!collapsed && (
-                  <span className="min-w-0 flex-1 truncate leading-snug">{dept}</span>
+                  <span className="min-w-0 flex-1 truncate leading-snug">{label}</span>
                 )}
               </div>
             </motion.li>

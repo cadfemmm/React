@@ -77,7 +77,8 @@ export default function GenericDepartmentDashboard({
       .catch((err) => console.error("Failed to fetch approve/deny patients:", err))
       .finally(() => setApproveDenyLoading(false));
   };
-  const dept = departmentName.replace(" Department", "");
+  const deptRaw = departmentName.replace(" Department", "").trim();
+  const dept = deptRaw === "Nursing & MA" ? "Nursing" : deptRaw;
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
 
@@ -141,6 +142,7 @@ export default function GenericDepartmentDashboard({
         department={dept}
         onBack={() => setShowPatients(false)}
         AssessmentComponent={AssessmentComponent}
+        updatePatientInMainList={updatePatientInMainList}
       />
     );
   }

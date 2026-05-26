@@ -2,19 +2,15 @@ import React, { useState } from "react";
 import MedicalAssistantPatientDetails from "../components/PatientDetails";
 
 export default function MedicalAssistantPatientspage({ patients = [], department, initialView = "dashboard", onBack }) {
-  const [view, setView] = useState(initialView); // dashboard | patients | details
+  const [view, setView] = useState(initialView);
   const [selectedPatient, setSelectedPatient] = useState(null);
 
-  /* ================= SAFETY GUARD ================= */
   if (!department) {
     return <div style={{ padding: 20 }}>Department not assigned</div>;
   }
 
-  const departmentPatients = patients.filter(
-    p => p.departments?.includes(department)
-  );
+  const departmentPatients = patients.filter((p) => p.departments?.includes(department));
 
-  /* ================= PATIENT DETAILS (TABS) ================= */
   if (view === "details" && selectedPatient) {
     return (
       <MedicalAssistantPatientDetails
@@ -27,7 +23,6 @@ export default function MedicalAssistantPatientspage({ patients = [], department
     );
   }
 
-  /* ================= PATIENT LIST ================= */
   if (view === "patients") {
     return (
       <div style={page}>
@@ -36,7 +31,7 @@ export default function MedicalAssistantPatientspage({ patients = [], department
         {departmentPatients.length === 0 ? (
           <div style={muted}>No patients assigned</div>
         ) : (
-          departmentPatients.map(p => (
+          departmentPatients.map((p) => (
             <div
               key={p.id}
               style={patientRow}
@@ -54,7 +49,6 @@ export default function MedicalAssistantPatientspage({ patients = [], department
     );
   }
 
-  /* ================= DASHBOARD ================= */
   return (
     <div style={page}>
       <div style={header}>
@@ -65,8 +59,12 @@ export default function MedicalAssistantPatientspage({ patients = [], department
 
         <div style={searchWrap}>
           <div style={caseInfo}>
-            <div><b>My Active Cases:</b> {departmentPatients.length}</div>
-            <div><b>Scheduled Today:</b> 5</div>
+            <div>
+              <b>My Active Cases:</b> {departmentPatients.length}
+            </div>
+            <div>
+              <b>Scheduled Today:</b> 5
+            </div>
           </div>
         </div>
       </div>
@@ -117,7 +115,9 @@ export default function MedicalAssistantPatientspage({ patients = [], department
 function Header({ title, onBack }) {
   return (
     <div style={headerRow}>
-      <button onClick={onBack} style={backBtn}>← Back</button>
+      <button onClick={onBack} style={backBtn}>
+        ← Back
+      </button>
       <h3>{title}</h3>
     </div>
   );
@@ -150,20 +150,18 @@ function Appointment({ time, name, tag }) {
   );
 }
 
-/* ================= STYLES ================= */
-
 const page = {
   padding: 24,
   fontFamily: "Inter, system-ui",
   background: "#f8fafc",
-  minHeight: "100vh"
+  minHeight: "100vh",
 };
 
 const header = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  marginBottom: 24
+  marginBottom: 24,
 };
 
 const title = { margin: 0, fontSize: 22 };
@@ -175,7 +173,7 @@ const caseInfo = { fontSize: 13 };
 const grid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-  gap: 20
+  gap: 20,
 };
 
 const card = {
@@ -183,7 +181,7 @@ const card = {
   border: "1px solid #e5e7eb",
   borderRadius: 12,
   padding: 18,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.04)"
+  boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
 };
 
 const cardTitle = { fontWeight: 700, marginBottom: 12 };
@@ -194,7 +192,7 @@ const listItem = {
   alignItems: "center",
   padding: "8px 0",
   fontSize: 14,
-  borderBottom: "1px solid #f1f5f9"
+  borderBottom: "1px solid #f1f5f9",
 };
 
 const tagMA = {
@@ -203,13 +201,13 @@ const tagMA = {
   borderRadius: 999,
   fontSize: 12,
   padding: "2px 8px",
-  textAlign: "center"
+  textAlign: "center",
 };
 
 const moduleGrid = {
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
-  gap: 10
+  gap: 10,
 };
 
 const moduleCard = {
@@ -219,7 +217,7 @@ const moduleCard = {
   textAlign: "center",
   fontWeight: 600,
   fontSize: 13,
-  cursor: "pointer"
+  cursor: "pointer",
 };
 
 const patientRow = {
@@ -232,17 +230,15 @@ const patientRow = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 12
+  gap: 12,
 };
 
 const muted = { fontSize: 12, color: "#9ca3af" };
 
-const headerRow = { display: "flex", gap: 12, alignItems: "center" };
+const headerRow = { display: "flex", gap: 12, alignItems: "center", marginBottom: 20 };
 const backBtn = { background: "none", border: "none", cursor: "pointer", color: "#2563eb" };
 
 const queueBox = { background: "#f9fafb", padding: 12, borderRadius: 8 };
 const queueCount = { fontWeight: 600 };
 const queueList = { paddingLeft: 18, fontSize: 14 };
 const taskList = { paddingLeft: 18, fontSize: 14 };
-
-

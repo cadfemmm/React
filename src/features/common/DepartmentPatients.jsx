@@ -4,6 +4,14 @@ import EmptyState from "../../shared/ui/EmptyState";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import { API_URL } from "../../platform/config/api.config";
 import ProcedureAssessment from "../Doctors/components/ProcedureAssessment";
+import MedicationAssessment from "../Doctors/components/MedicationAssessment";
+import { DoctorsInitialAssessmentForm } from "../Doctors/components/DoctorsInitialAssessment";
+import {
+  ClinicalNotesAssessment,
+  HomeVisitReportAssessment,
+  WorkSiteAssessmentForm,
+  WardAroundAssessment,
+} from "../Doctors/components/DoctorSupplementaryAssessments";
 import ShiftAssessment from "../Nursing/components/ShiftAssessment";
 import NursingReAssessment from "../Nursing/components/Reassessment";
 import RehabilitationDischargeChecklist from "../Nursing/components/Discharge";
@@ -11,6 +19,7 @@ import GroupIntervention from "../Nursing/components/GroupIntervention";
 import Intervention from "../Nursing/components/Intervention";
 import Procedures from "../Nursing/components/Procedures";
 import RAPPatientAssessmentsList from "../../components/RAPPatientAssessmentsList";
+import MedicalAssistantPatientDetails from "../MedicalAssistant/components/PatientDetails";
 
 /* ── Assessment type cards ─────────────────────────────── */
 
@@ -30,6 +39,17 @@ const ASSESSMENT_CARDS = [
   { id: "procedure", title: "Procedure Assessment",   desc: "BTI, FEES, rTMS, tDCS, NESA, EST and more",       icon: "🩺", accent: "#0891B2", tag: "Procedure",      tagBg: "#cffafe", tagColor: "#0e7490", depts: ["Doctor"] },
 ];
 
+const DOCTOR_CARDS = [
+  { id: "initial",         title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "New Patient",    tagBg: "#dbeafe", tagColor: "#1d4ed8" },
+  { id: "ward_round",      title: "Ward-Around",           desc: "Document ward round findings and patient progress", icon: "🚶", accent: "#7C3AED", tag: "Ward Round",     tagBg: "#ede9fe", tagColor: "#5b21b6" },
+  { id: "followup",        title: "Re-assessment",         desc: "Reassess progress and update the treatment plan",  icon: "🔄", accent: "#059669", tag: "Returning",      tagBg: "#d1fae5", tagColor: "#065f46" },
+  { id: "procedure",       title: "Procedures",            desc: "BTI, FEES, rTMS, tDCS, NESA, EST and more",        icon: "🩺", accent: "#0891B2", tag: "Procedures",     tagBg: "#cffafe", tagColor: "#0e7490" },
+  { id: "clinical_notes",  title: "Clinical Notes",        desc: "Document clinical observations and notes",         icon: "📝", accent: "#6366F1", tag: "Notes",          tagBg: "#e0e7ff", tagColor: "#4338ca" },
+  { id: "medication",      title: "Medication",            desc: "Record and manage patient medications",            icon: "💊", accent: "#DB2777", tag: "Medication",     tagBg: "#fce7f3", tagColor: "#9d174d" },
+  { id: "home_visit",      title: "Home Visit Report",     desc: "Document home visit findings and recommendations", icon: "🏠", accent: "#D97706", tag: "Home Visit",     tagBg: "#ffedd5", tagColor: "#9a3412" },
+  { id: "work_site",       title: "Work Site Assessment",  desc: "Assess workplace environment and needs",           icon: "🏗️", accent: "#0D9488", tag: "Work Site",      tagBg: "#ccfbf1", tagColor: "#0f766e" },
+];
+
 // Nursing-specific cards (replace the default set entirely)
 const NURSING_CARDS = [
   { id: "initial",   title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "1",              tagBg: "#dbeafe", tagColor: "#1d4ed8" },
@@ -39,11 +59,14 @@ const NURSING_CARDS = [
   { id: "shift",     title: "Shift Assessment",       desc: "Shift handover and patient status update",         icon: "🕐", accent: "#F59E0B", tag: "5",              tagBg: "#fef3c7", tagColor: "#92400e" },
   { id: "group",     title: "Group Intervention",     desc: "Record group session and multi-patient notes",     icon: "👥", accent: "#DC2626", tag: "6",              tagBg: "#fee2e2", tagColor: "#991b1b" },
   { id: "discharge", title: "Discharge",              desc: "Complete discharge summary and planning",          icon: "🏠", accent: "#6B7280", tag: "7",              tagBg: "#f3f4f6", tagColor: "#374151" },
+  { id: "urgent",    title: "Urgent Care",           desc: "Clinical entry, fleet, lab, X-ray and day care",   icon: "🚨", accent: "#DC2626", tag: "Urgent",         tagBg: "#fee2e2", tagColor: "#991b1b" },
+  { id: "neuro",     title: "Neuro & Cardio",        desc: "EEG, PSG, NCS/EMG, evoke potential, EST and Holter", icon: "🧠", accent: "#6366F1", tag: "Neuro / Cardio", tagBg: "#e0e7ff", tagColor: "#4338ca" },
 ];
 
 // Returns the correct card set for a given department
 function getCardsForDept(department) {
   if (department === "Nursing") return NURSING_CARDS;
+  if (department === "Doctor") return DOCTOR_CARDS;
   const cards = ASSESSMENT_CARDS.filter(c => !c.depts || c.depts.includes(department));
   if (!DEPTS_FOLLOWUP_AS_REASSESSMENT.has(department)) return cards;
   return cards.map(c =>
@@ -59,9 +82,19 @@ function getCardsForDept(department) {
 
 function assessmentViewTitle(assessmentView, department) {
   if (assessmentView === "initial") return "Initial Assessment";
+  if (assessmentView === "ward_round") return "Ward-Around";
   if (assessmentView === "followup") {
-    return DEPTS_FOLLOWUP_AS_REASSESSMENT.has(department) ? "Re-assessment" : "Follow-up Visit";
+    return department === "Doctor" || DEPTS_FOLLOWUP_AS_REASSESSMENT.has(department)
+      ? "Re-assessment"
+      : "Follow-up Visit";
   }
+  if (assessmentView === "procedure") return department === "Doctor" ? "Procedures" : "Procedure Assessment";
+  if (assessmentView === "clinical_notes") return "Clinical Notes";
+  if (assessmentView === "medication") return "Medication";
+  if (assessmentView === "home_visit") return "Home Visit Report";
+  if (assessmentView === "work_site") return "Work Site Assessment";
+  if (assessmentView === "urgent") return "Urgent Care";
+  if (assessmentView === "neuro") return "Neuro & Cardio";
   return "Intervention";
 }
 
@@ -197,9 +230,16 @@ function normalizePatientList(data) {
 }
 
 /** Same departments as sidebar — used to load full registry for Admin/Staff */
+function patientBelongsToDepartment(p, department) {
+  if (!Array.isArray(p.departments)) return true;
+  if (department === "Nursing") {
+    return p.departments.includes("Nursing") || p.departments.includes("Medical Assistant");
+  }
+  return p.departments.includes(department);
+}
+
 const ALL_CLINICAL_DEPARTMENTS = [
   "Nursing",
-  "Medical Assistant",
   "Doctor",
   "Physiotherapy",
   "Integrated Rehab",
@@ -254,6 +294,7 @@ export default function DepartmentPatients({
   patientsFromApp,
   actionLabel,    // optional: overrides "Begin assessment" button text
   onRowAction,    // optional: overrides button click — receives the patient object
+  updatePatientInMainList,
 }) {
   const userRole = localStorage.getItem("userRole") || "";
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -269,16 +310,15 @@ export default function DepartmentPatients({
   const deptPatients = useMemo(() => {
     if (showAllPatients) return patients;
     return patients.filter(
-      (p) =>
-        !department ||
-        (Array.isArray(p.departments) ? p.departments.includes(department) : true)
+      (p) => !department || patientBelongsToDepartment(p, department)
     );
   }, [patients, department, showAllPatients]);
 
-  const pageTitle = title || (showAllPatients ? "RAP" : `${department} Patients`);
+  const departmentLabel = department === "Nursing" ? "Nursing & MA" : department;
+  const pageTitle = title || (showAllPatients ? "RAP" : `${departmentLabel} Patients`);
   const pageSubtitle = showAllPatients
     ? "All patients across every department"
-    : `Patient queue for ${department}`;
+    : `Patient queue for ${departmentLabel}`;
 
   React.useEffect(() => {
     if (!showAllPatients) return;
@@ -346,12 +386,92 @@ export default function DepartmentPatients({
     );
   }
 
+  const assessmentBackBar = (title) => (
+    <div style={{ padding: "12px 20px", borderBottom: "1px solid #e5e7eb", background: "#fff" }}>
+      <button
+        type="button"
+        onClick={handleBackToCards}
+        style={{
+          padding: "7px 16px",
+          borderRadius: 8,
+          border: "1px solid #d1d5db",
+          background: "#fff",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        ← Back to {title || "assessments"}
+      </button>
+    </div>
+  );
+
   /* ── Assessment view ── */
   if (!listOnly && selectedPatient && assessmentView) {
-    // Procedure Assessment — only for Doctor department
+    // Procedures — Doctor department
     if (assessmentView === "procedure") {
       return (
         <ProcedureAssessment
+          patient={selectedPatient}
+          onBack={handleBackToCards}
+          onSubmit={handleBackToCards}
+        />
+      );
+    }
+    if (department === "Doctor" && assessmentView === "ward_round") {
+      return (
+        <WardAroundAssessment
+          patient={selectedPatient}
+          onBack={handleBackToCards}
+          onSubmit={handleBackToCards}
+        />
+      );
+    }
+    if (department === "Doctor" && assessmentView === "followup") {
+      return (
+        <div>
+          {assessmentBackBar("assessments")}
+          <DoctorsInitialAssessmentForm
+            patient={selectedPatient}
+            onUpdatePatient={updatePatientInMainList}
+          />
+        </div>
+      );
+    }
+    if (department === "Doctor" && assessmentView === "medication") {
+      return (
+        <div>
+          {assessmentBackBar("Medication")}
+          <MedicationAssessment
+            patient={selectedPatient}
+            onBack={handleBackToCards}
+            onSubmit={handleBackToCards}
+          />
+        </div>
+      );
+    }
+    if (department === "Doctor" && assessmentView === "clinical_notes") {
+      return (
+        <ClinicalNotesAssessment
+          patient={selectedPatient}
+          onBack={handleBackToCards}
+          onSubmit={handleBackToCards}
+          onUpdatePatient={updatePatientInMainList}
+        />
+      );
+    }
+    if (department === "Doctor" && assessmentView === "home_visit") {
+      return (
+        <HomeVisitReportAssessment
+          patient={selectedPatient}
+          onBack={handleBackToCards}
+          onSubmit={handleBackToCards}
+        />
+      );
+    }
+    if (department === "Doctor" && assessmentView === "work_site") {
+      return (
+        <WorkSiteAssessmentForm
           patient={selectedPatient}
           onBack={handleBackToCards}
           onSubmit={handleBackToCards}
@@ -417,7 +537,16 @@ export default function DepartmentPatients({
           onSubmit={handleBackToCards}
         />
       );
-    }                
+    }
+    if (department === "Nursing" && (assessmentView === "urgent" || assessmentView === "neuro")) {
+      return (
+        <MedicalAssistantPatientDetails
+          patient={selectedPatient}
+          mode={assessmentView}
+          onBack={handleBackToCards}
+        />
+      );
+    }
     if (AssessmentComponent) {
       return (
         <AssessmentComponent
@@ -459,9 +588,19 @@ export default function DepartmentPatients({
         </div>
         {/* Cards */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 28px" }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 6 }}>Select Assessment Type</div>
-          <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 32 }}>Choose the appropriate assessment for this patient visit</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 18, width: "100%", maxWidth: 860 }}>
+          
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                department === "Doctor" || department === "Nursing"
+                  ? "repeat(3, 1fr)"
+                  : "repeat(2, 1fr)",
+              gap: 18,
+              width: "100%",
+              maxWidth: department === "Doctor" || department === "Nursing" ? 1100 : 860,
+            }}
+          >
             {getCardsForDept(department).map(card => (
               <AssessmentCard key={card.id} card={card} onClick={() => setAssessmentView(card.id)} />
             ))}
