@@ -1052,24 +1052,56 @@ function AssessmentLauncher({
     <div>
       {!field.autoOpen && (
         <div className="fb-inline-group">
-          {assessmentRegistry.map(opt => (
+          {(assessmentRegistry || [])
+            .filter(Boolean)
+            .map(opt => (
             <button
               key={opt.id}
               type="button"
               className={`fb-btn-outline ${active === opt.id ? "!border-primary-600 !bg-primary-600 !text-white" : ""}`}
               onClick={() =>
-                onChange(
-                  activeKey,
-                  values[activeKey] === opt.id ? opt.id : opt.id
-                )
-              }
+              onChange(
+                activeKey,
+                values[activeKey] === opt.id ? null : opt.id
+              )
+            }
             >
               {t(opt.name, languageConfig?.enabled ? languageConfig.lang : "en")}
             </button>
           ))}
         </div>
       )}
+      {/* Render Active Sub Assessment Form */}
+{active && (() => {
 
+const selectedAssessment = (assessmentRegistry || []).find(
+  o => o && o.id === active
+);
+
+  // not loaded yet
+  if (
+    !selectedAssessment ||
+    !selectedAssessment.sections
+  ) {
+    return null;
+  }
+
+  return (
+    <div style={{ marginTop: 20 }}>
+
+      <CommonFormBuilder
+        schema={selectedAssessment}
+        values={values}
+        onChange={onChange}
+        onAction={() => {}}
+        assessmentRegistry={assessmentRegistry}
+        layout="nested"
+      />
+
+    </div>
+  );
+
+})()}
       {/* Remarks textarea — shown per active assessment */}
       {active && remarksKey && !field.hideRemarks &&(
         <div style={{ marginTop: 12 }}>
@@ -1094,6 +1126,7 @@ function AssessmentLauncher({
           />
         </div>
       )}
+
     </div>
   );
 }

@@ -331,37 +331,91 @@ export default function AssessmentLoader({
   const [assessmentsValues, setAssessmentsValues] = useState(() => {
     return { subjective: {}, objective: {}, assessment: {}, plan: {} }
   });
-  const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({
-    subjective: [], objective: [], assessment: [], plan: []
-  })
+const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({
+  subjective: {},
+  objective: {},
+  assessment: {},
+  plan: {}
+})
 
   // Mapping template to the schema registry
-  const loadTemplates = async () => {
-    setIsLoading(true)
-    const map = {}
-    const subAssessment = {}
-    const data = await forms.fetch(department)
-    if(!data || data.length === 0) {
-      setError(true)
+const loadTemplates = async () => {
+
+  setIsLoading(true);
+  setError(false);
+
+  try {
+
+    const map = {};
+    const subAssessment = {};
+
+    const data = await forms.fetch(department);
+
+    if (!data || data.length === 0) {
+      setError(true);
+      return;
     }
+
     data.forEach(template => {
+
       const key = template.assessment_type?.toLowerCase();
-      if(TABS.includes(key)){
-        map[key] = { 
-          ...template.body, 
-          id:template.id, 
-          name:template.name, 
+
+      // MAIN ASSESSMENT
+      if (TABS.includes(key)) {
+
+        map[key] = {
+          ...template.body,
+          id: template.id,
+          name: template.name,
           actions: actions.ACTIONS_BUTTON
-        }
-      } 
-      if(template?.sub_assessment) {
-        subAssessment[key] = template.sub_assessment
+        };
+
       }
-    })
-    setTemplates(map)
-    setIsLoading(false)
-    setSubAssessmentTemplate(subAssessment)
+
+      // SUB ASSESSMENTS
+      if (template?.sub_assessment?.length) {
+
+        subAssessment[key] = template.sub_assessment.reduce(
+          (acc, sub) => {
+
+            acc[sub.name] = {
+              ...sub,
+
+              id: sub.id,
+              name: sub.name,
+              type: sub.type,
+              score: sub.score ?? null,
+              body: sub.body ?? {},
+
+              // session will override later
+              session_id: null
+            };
+
+            return acc;
+
+          },
+          {}
+        );
+
+      }
+
+    });
+
+    setTemplates(map);
+    setSubAssessmentTemplate(subAssessment);
+
+  } catch (e) {
+
+    console.log("loadTemplates error", e);
+    setError(true);
+
+  } finally {
+
+    setIsLoading(false);
+
   }
+
+};
 
   // Load template on department
   useEffect(() => {
@@ -391,24 +445,70 @@ export default function AssessmentLoader({
         false
       )
       setSessionId(response.data.id)
-      response?.data?.assessment_ids.forEach(
-        template => {
-          const map = {}
-          const tab = template.type.toLowerCase()
-          const screeningType = template.screening_type.toUpperCase()
-          if(template.is_parent === "True") {
-            templates[tab].id = template.id
-          } else {
-            subAssessmentTemplate[tab] = {
-               [template.name] : {
-                  id: template.id,
-                  name: template.name,
-                  type: template.type
-               }
+      response?.data?.assessment_ids.forEach(template => {
+
+  const tab = template.type.toLowerCase();
+
+  // MAIN ASSESSMENT
+  if (template.is_parent === "True") {
+
+    setTemplates(prev => ({
+      ...prev,
+
+      [tab]: {
+        ...prev[tab],
+        id: template.id
+      }
+    }));
+
+  }
+
+  // SUB ASSESSMENT
+  else {
+
+    setSubAssessmentTemplate(prev => ({
+
+      ...prev,
+
+      [tab]: Object.fromEntries(
+
+        Object.entries(prev[tab] || {}).map(
+          ([key, subTemplate]) => {
+
+            if (
+              subTemplate.name === template.name ||
+              key === template.name
+            ) {
+
+              return [
+                key,
+                  {
+                    ...subTemplate,
+
+                    // KEEP ORIGINAL FORM ID
+                    id: subTemplate.id,
+
+                    // STORE SESSION INSTANCE SEPARATELY
+                    session_id: template.id,
+
+                    type: template.type
+                  }
+                ];
+
             }
+
+            return [key, subTemplate];
+
           }
-        }
+        )
+
       )
+
+    }));
+
+  }
+
+});
       setIsSessionActive(true)  
       setIsSubmitted(false);
       setToast({ message: 'Assessment session started', variant: 'success' });
@@ -441,77 +541,226 @@ export default function AssessmentLoader({
   }, [sessionId])
   
   // Action handler
-  const handleAction = useCallback(async (type) => {
-    if (type === "next") {
-      const templateDataId = templates[activeTab].id
-      if (isSessionActive && templateDataId) {
-        try {
-          await forms.save(templateDataId, assessmentsValues[activeTab])
-          setToast({ message: 'Saved', variant: 'success' })
-        } catch (e) {
-          setToast({ message: 'Failed to save', variant: 'error' })
-        }
-        const pos = TABS.indexOf(activeTab)
-        if(pos < TABS.length - 1) setActiveTab(TABS[pos+1])
+const handleAction = useCallback(async (type) => {
+
+  // =========================
+  // NEXT
+  // =========================
+  if (type === "next") {
+
+    const templateDataId = templates?.[activeTab]?.id;
+
+    // SAVE CURRENT TAB
+    if (isSessionActive && templateDataId) {
+
+      try {
+
+        await forms.save(
+          templateDataId,
+          assessmentsValues[activeTab]
+        );
+
+        setToast({
+          message: 'Saved',
+          variant: 'success'
+        });
+
+      } catch (e) {
+
+        console.log(e);
+
+        setToast({
+          message: 'Failed to save',
+          variant: 'error'
+        });
+
+        return;
       }
-    } else if (type === "clear") {
-      setIsSubmitted(false)
-      setAssessmentsValues(
-        { subjective: {}, objective: {}, assessment: {}, plan: {}}
-      )
-    } else if (type === "save") {
 
     }
-    return
-  }, [activeTab, sessionId])
+
+    // MOVE TO NEXT TAB
+    const pos = TABS.indexOf(activeTab);
+
+    if (pos < TABS.length - 1) {
+
+      setActiveTab(TABS[pos + 1]);
+
+    }
+
+    return;
+  }
+
+  // =========================
+  // CLEAR
+  // =========================
+  if (type === "clear") {
+
+    setIsSubmitted(false);
+
+    setAssessmentsValues({
+      subjective: {},
+      objective: {},
+      assessment: {},
+      plan: {}
+    });
+
+    return;
+  }
+
+  // =========================
+  // SAVE ONLY
+  // =========================
+  if (type === "save") {
+
+    const templateDataId = templates?.[activeTab]?.id;
+
+    if (!templateDataId) return;
+
+    try {
+
+      await forms.save(
+        templateDataId,
+        assessmentsValues[activeTab]
+      );
+
+      setToast({
+        message: 'Saved',
+        variant: 'success'
+      });
+
+    } catch (e) {
+
+      console.log(e);
+
+      setToast({
+        message: 'Failed to save',
+        variant: 'error'
+      });
+
+    }
+
+  }
+
+}, [
+  activeTab,
+  sessionId,
+  templates,
+  assessmentsValues,
+  isSessionActive
+]);
 
   // OnChange handler
-  const onChange = useCallback(
-    async (name, value) => {
-      if(name === 'active_assessment_id') {
-        console.log(name, 'and', value)
-        try {
-          console.log('active tab onChange', activeTab)
-          const tm = await forms.fetchById(value)
-          setSubAssessmentTemplate(
-            prev => ({
-              ...prev,
-              [activeTab]: (prev[activeTab]).map(
-                template => {
-                  if (template.id === tm?.data?.id) {
-                    return {
+const onChange = useCallback(
+  async (name, value) => {
+
+    // =========================
+    // SUB ASSESSMENT HANDLING
+    // =========================
+    if (name === 'active_assessment_id') {
+
+      // CLOSE ACTIVE SUB ASSESSMENT
+      if (!value) {
+
+        setAssessmentsValues(v => ({
+
+          ...v,
+
+          [activeTab]: {
+            ...v[activeTab],
+            [name]: null
+          }
+
+        }));
+
+        return;
+      }
+
+      try {
+
+        const tm = await forms.fetchById(value);
+
+        console.log("Loaded Sub Assessment", tm.data);
+
+        setSubAssessmentTemplate(prev => {
+
+          const currentTab = prev[activeTab] || {};
+
+          const updated = Object.fromEntries(
+
+            Object.entries(currentTab).map(
+              ([key, template]) => {
+
+                // MATCH SELECTED ASSESSMENT
+                if (
+                  template.id === value ||
+                  template.name === tm?.data?.name ||
+                  key === tm?.data?.name
+                ) {
+
+                  return [
+                    key,
+                    {
                       ...template,
-                      ...tm.data.body,
+
+                      // LOAD FORM SCHEMA
+                      sections: tm?.data?.body?.sections || [],
+
                       id: tm.data.id,
                       name: tm.data.name,
-                      score: tm.data.score
-                    }
-                  }
-                  return template
-                }
-              )
-            })
-          )
-        } catch (e) {
-          console.log(e)
-          setToast({ message: 'Sub Assessment form loading failed', variant: 'error'})
-        }        
-      }
-      setAssessmentsValues(
-        v => {
-          const next = {
-            ...v,
-            [activeTab]: {
-              ...v[activeTab],
-              [name]: value
-            }
-          }
-          return next
-        }
-      )
-    }, [activeTab, sessionId]
-  )
+                      type: tm.data.type,
+                      score: tm.data.score,
 
+                      loaded: true
+                    }
+                  ];
+
+                }
+
+                return [key, template];
+
+              }
+            )
+
+          );
+
+          return {
+            ...prev,
+            [activeTab]: updated
+          };
+
+        });
+
+      } catch (e) {
+
+        console.log(e);
+
+        setToast({
+          message: 'Sub Assessment form loading failed',
+          variant: 'error'
+        });
+
+      }
+
+    }
+
+    // =========================
+    // MAIN ASSESSMENT VALUES
+    // =========================
+    setAssessmentsValues(v => ({
+
+      ...v,
+
+      [activeTab]: {
+        ...v[activeTab],
+        [name]: value
+      }
+
+    }));
+
+  },
+  [activeTab, sessionId]
+);
   console.log('after update sub assessment template', subAssessmentTemplate)
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
@@ -543,7 +792,15 @@ export default function AssessmentLoader({
             variant="submit"
             title="Submit Assessment?"
             confirmLabel="Submit Assessment"
-            onConfirm={handleEndSession}
+            onConfirm={async () => {
+
+              // save final plan data first
+              await handleAction('next');
+
+              // then end session
+              await handleEndSession();
+
+            }}
             onCancel={() => setIsConfirmModal(false)}
             message="You are about to finalise and submit this assessment."
             meta= {
@@ -589,7 +846,13 @@ export default function AssessmentLoader({
                 : "Start a new assessment session"
             }
           >
-            { isSessionActive ? "Starting…": sessionId ? "✓ Started" : "Start" }
+            {
+            sessionId
+              ? "✓ Started"
+              : isSessionActive
+                ? "Starting..."
+                : "Start"
+          }
           </button>
           {/* Referral Button UI */}
           <button
@@ -676,19 +939,50 @@ export default function AssessmentLoader({
                   onAction={handleAction}
                   schema={templates[activeTab]}
                   values={assessmentsValues[activeTab] || {}}
-                  assessmentRegistry={subAssessmentTemplate[activeTab]}
+                  assessmentRegistry={
+  Object.values(subAssessmentTemplate[activeTab] || {})
+}
                 >
                   <div style={S.actionRow}>
                     <button
-                      style={activeTab === "plan"? S.submitBtn : S.nextBtn}
+                      style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
                       onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
-                      onMouseEnter={e => e.currentTarget.style.background = 
-                        activeTab === "plan"? "#1d4ed8" : "#1a6fc4"}
-                      onClick={() => {handleAction('next'); if(activeTab === "plan") {setIsConfirmModal(true)}} } 
+                      onMouseEnter={e =>
+                        e.currentTarget.style.background =
+                          activeTab === "plan" ? "#1d4ed8" : "#1a6fc4"
+                      }
+                      onClick={() => {
+
+                        // FINAL STEP
+                        if (activeTab === "plan") {
+
+                          setIsConfirmModal(true);
+
+                          return;
+                        }
+
+                        // NORMAL NEXT
+                        handleAction('next');
+
+                      }}
                     >
                       {
-                        activeTab === "plan" ? "Submit Assessment" :
-                        "Next :" + activeTab.charAt(0).toUpperCase() + activeTab.slice(1) + "→"
+                        activeTab === "plan"
+                          ? "Submit Assessment"
+                          : (() => {
+
+                              const currentIndex = TABS.indexOf(activeTab);
+
+                              const nextTab =
+                                currentIndex < TABS.length - 1
+                                  ? TABS[currentIndex + 1]
+                                  : null;
+
+                              return nextTab
+                                ? `Next :${nextTab.charAt(0).toUpperCase() + nextTab.slice(1)} →`
+                                : "Submit";
+
+                            })()
                       }
                     </button>
                   </div>
