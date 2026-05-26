@@ -331,7 +331,9 @@ export default function AssessmentLoader({
   const [assessmentsValues, setAssessmentsValues] = useState(() => {
     return { subjective: {}, objective: {}, assessment: {}, plan: {} }
   });
-  const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({})
+  const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({
+    subjective: [], objective: [], assessment: [], plan: []
+  })
 
   // Mapping template to the schema registry
   const loadTemplates = async () => {
@@ -465,7 +467,36 @@ export default function AssessmentLoader({
 
   // OnChange handler
   const onChange = useCallback(
-    (name, value) => {
+    async (name, value) => {
+      if(name === 'active_assessment_id') {
+        console.log(name, 'and', value)
+        try {
+          console.log('active tab onChange', activeTab)
+          const tm = await forms.fetchById(value)
+          setSubAssessmentTemplate(
+            prev => ({
+              ...prev,
+              [activeTab]: (prev[activeTab]).map(
+                template => {
+                  if (template.id === tm?.data?.id) {
+                    return {
+                      ...template,
+                      ...tm.data.body,
+                      id: tm.data.id,
+                      name: tm.data.name,
+                      score: tm.data.score
+                    }
+                  }
+                  return template
+                }
+              )
+            })
+          )
+        } catch (e) {
+          console.log(e)
+          setToast({ message: 'Sub Assessment form loading failed', variant: 'error'})
+        }        
+      }
       setAssessmentsValues(
         v => {
           const next = {
@@ -481,6 +512,7 @@ export default function AssessmentLoader({
     }, [activeTab, sessionId]
   )
 
+  console.log('after update sub assessment template', subAssessmentTemplate)
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
     <PatientContext.Provider value={{ patient}} >
@@ -644,7 +676,7 @@ export default function AssessmentLoader({
                   onAction={handleAction}
                   schema={templates[activeTab]}
                   values={assessmentsValues[activeTab] || {}}
-                  assessmentRegistry={OPTOMETRY_ASSESSMENT_REGISTRY}
+                  assessmentRegistry={subAssessmentTemplate[activeTab]}
                 >
                   <div style={S.actionRow}>
                     <button
