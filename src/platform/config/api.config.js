@@ -21,6 +21,8 @@ const API_URL = {
     assessmentFormData: (formDataId) =>
         BASE_API + `assessment/data/${encodeURIComponent(formDataId)}/`,
 
+    // Referrral apis
+    REFERRAL: BASE_API + 'referrals/',
     // Patients apis
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
