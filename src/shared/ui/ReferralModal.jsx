@@ -1,6 +1,14 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 
+// UI
+import Toast from "./Toast";
+
+// API calls
+import referral from "../../assessment/referrals"
+import dept from "../../assessment/department"
+
+
 /* ── keyframe injected once ─────────────────────────────────────────────── */
 if (typeof document !== "undefined" && !document.getElementById("__ref_kf__")) {
   const styleTag = document.createElement("style");
@@ -45,9 +53,21 @@ const DEPARTMENTS = [
  *   onClose    – called to dismiss
  */
 const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }) {
+  const [toast, setToast] = useState(null);
   const [selected, setSelected] = useState([]);
   const [notes,    setNotes]    = useState("");
+  const [department, setDepartment] = useState([])
   const [urgency,  setUrgency]  = useState("routine");
+  
+  // Call once for department
+  useEffect(async() => {
+    try {
+      const response = await dept.getAll()
+      setDepartment(response.data)
+    } catch(e) {
+      setToast({message: "Department not loaded", variant: "error"})
+    }
+  }, [])
 
   const toggle = useCallback((id) => {
     setSelected(prev =>
@@ -55,11 +75,45 @@ const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }
     );
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    if (selected.length === 0) return;
-    onSubmit?.({ departments: selected, notes, urgency });
-    onClose?.();
-  }, [selected, notes, urgency, onSubmit, onClose]);
+   // Referral handler
+  const handleSubmit = useCallback(async() => {
+    // Extract login doctor id
+    const doctorId = localStorage.getItem("user_id");
+    if (!doctorId) {
+      setToast({
+        message: "Could not identify logged on doctor. Please re-login.",
+        variant: "error",
+      });
+      return;
+    }
+    if (!selected) {
+      setToast({
+        message: "Please select atleast one department",
+        variant: "error"
+      })
+      return selected
+    }
+
+    try{
+      const data = []
+      selected.forEach((dept) => {
+        data.push({
+          "reason": notes,
+          "type": "INTERNAL",
+          "doctor_id": doctorId,
+          "patient_id": patient.id,
+          "referral_status": "PENDING",
+          "urgency_type": urgency.toUpperCase(), 
+          "referred_to_department": "8b761f4c-b029-4647-8306-a35e805d4854", 
+          "referred_from_department": "0782ed55-7e5a-4048-bac3-f9d52afcb886"
+        })
+      })
+      const response = await referral.create(data)
+    } catch(e) {
+      setToast({message: "Referral failed. Please try again", variant: "error"})
+    }
+  }, [selected, onSubmit, onClose])
+
 
   return (
     <div style={overlay} onClick={onClose} role="dialog" aria-modal="true">
@@ -89,7 +143,6 @@ const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }
           <div style={urgencyRow}>
             {[
               { value: "routine",  label: "Routine",  color: "#059669", bg: "#ECFDF5", border: "#6EE7B7" },
-              { value: "urgent",   label: "Urgent",   color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
               { value: "emergency",label: "Emergency",color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
             ].map(u => (
               <button
