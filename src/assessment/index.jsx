@@ -1,7 +1,8 @@
 import {
-  lazy, Suspense,
-  useEffect, useState, useCallback, useMemo, useRef,
-  createContext, useContext, memo
+  useEffect,
+  useState,
+  useCallback,
+  createContext,
 } from "react";
 
 // Common Form Builder
@@ -20,307 +21,39 @@ import { ShimmerForm } from "../shared/ui/Shimmer";
 import ConfirmModal from "../shared/ui/ConfirmModal";
 import ReferralModal from "../shared/ui/ReferralModal";
 
-// API 
+// API
 import api from "../shared/api/apiClient";
 import { API_URL } from "../platform/config/api.config";
 
 // Schema Load
-import schemas from "../schema/optometry"
 import actions from "../schema/actions.js";
 
 // API calls
 import forms from "./forms.js";
-import session from "./session.js"
-
-
-// ── Lazy-loaded assessment components ──────────────────────────────────────
-const BinocularVisionAssessment   = lazy(() => import("../features/Optometry/BinocularVisionAssessment"));
-const RefractionAssessment        = lazy(() => import("../features/Optometry/RefractionAssessment"));
-const VisionAssessment            = lazy(() => import("../features/Optometry/VisionAssessment"));
-const OcularHealthAssessment      = lazy(() => import("../features/Optometry/OcularHealthAssessment"));
-const SpecialDiagnosticAssessment = lazy(() => import("../features/Optometry/SpecialDiagnostic"));
-const LVQoLForm                   = lazy(() => import("../features/Optometry/LowVisionQualityAssessment"));
-const BrainVisionInjury           = lazy(() => import("../features/Optometry/BrainVisionInjury"));
-const VisualFunctionForm          = lazy(() => import("../features/Optometry/VisionFunctionalAssessment"));
-const BVDAssessment               = lazy(() => import("../features/Optometry/BvdqAssessment"));
-const LowVisionAssessment         = lazy(() => import("../features/Optometry/LowVisionAssessment"));
-
-const AssessmentFallback = <ShimmerForm rows={6} />;
+import session from "./session.js";
 
 // ── Context ────────────────────────────────────────────────────────────────
 // Carries patient + the questionaire FormData ID map + save helper
 const PatientContext = createContext(null);
 
-// Registry key → exact name as returned in assessment_ids from the backend
-const REGISTRY_KEY_TO_NAME = {
-  BINOCULAR_VISION:      "Binocular Vision",
-  REFRACTION:            "Refraction Assessment",
-  VISION_DRIVING:        "Vision for Driving",
-  OCULAR_HEALTH:         "Ocular Health / Structure",
-  SPECIAL_DIAGNOSTIC:    "Special Diagnostic",
-  LOW_VISION_ASSESSMENT: "Low Vision Assessment",
-  VISUAL_FUNCTION:       "Visual Function Questionnaire",
-  LVQOL:                 "Low Vision Quality of Life Questionnaire (LVQoL)",
-  BRAIN_VISION:          "Brain Injury Vision Symptoms Survey (BIVSS)",
-  BVDQ:                  "Binocular Vision Dysfunction Questionnaire (BVDQ)",
-  BV_QUESTIONNAIRE: "Binocular Vision Questionnaire",
-};
-
-const BV_QUESTIONNAIRE_SCHEMA = {
-  title: "Binocular Vision Questionnaire",
-
-  sections: [
-    {
-      fields: [
-        {
-          type: "subheading",
-          label: "Binocular Vision"
-        },
-
-        {
-          type: "radio",
-          name: "bv_onset",
-          label: "Onset",
-          options: [
-            { label: "Sudden", value: "sudden" },
-            { label: "Gradual", value: "gradual" }
-          ]
-        },
-
-        {
-          type: "radio",
-          name: "bv_frequency",
-          label: "Frequency",
-          options: [
-            { label: "Constant", value: "constant" },
-            { label: "Intermittent", value: "intermittent" },
-            { label: "Alternating", value: "alternating" }
-          ]
-        },
-
-        {
-          type: "radio",
-          name: "bv_was_he_been",
-          label: "Neurological disease",
-          options: [
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" }
-          ]
-        },
-
-        {
-          type: "input",
-          name: "bv_was_he_been_specify",
-          label: "Neurological – specify",
-          showIf: {
-            field: "bv_was_he_been",
-            equals: "yes"
-          }
-        },
-
-        {
-          type: "row",
-          fields: [
-            {
-              type: "input",
-              name: "bv_type_of_birth",
-              label: "Type of Birth"
-            },
-            {
-              type: "input",
-              name: "bv_birth_term",
-              label: "Birth Term"
-            }
-          ]
-        },
-
-        {
-          type: "input",
-          name: "bv_previous_treatment",
-          label: "Previous Treatment"
-        },
-
-        {
-          type: "input",
-          name: "bv_subjective_Remarks",
-          label: "Remarks"
-        },
-
-        {
-          type: "multi-select-dropdown",
-          name: "bv_ocular_signs",
-          label: "Ocular Signs",
-          options: [
-            { label: "Squint / turn of eyes", value: "Squint" },
-            { label: "Defective eye movement", value: "Defective eye movement" },
-            { label: "Nystagmus (wobbling eyes)", value: "Nystagmus" },
-            { label: "Visual inattention / neglect", value: "Visual inattention" },
-            { label: "Closing one eye", value: "Closing one eye" },
-            { label: "Suspected visual problem", value: "Suspected visual problem" },
-            { label: "Ptosis (lid drop)", value: "Ptosis" },
-            { label: "Abnormal pupils", value: "Abnormal pupils" },
-            { label: "Head turn", value: "Head turn" },
-            { label: "Family concern", value: "Family concern" },
-            { label: "Misjudging distance", value: "Misjudging distance" },
-            { label: "Other (Specify)", value: "Other" }
-          ]
-        },
-
-        {
-          type: "input",
-          name: "bv_ocular_signs_other",
-          label: "Other – Specify",
-          showIf: {
-            field: "bv_ocular_signs",
-            includes: "Other"
-          }
-        }
-      ]
-    }
-  ]
-};
-const BVQuestionnaire = memo(function BVQuestionnaire({
-  values,
-  onChange,
-  onBack,
-  layout = "root"
-}) {
-  const [submitted, setSubmitted] = useState(false);
-
-  const onAction = useCallback((type) => {
-    if (type === "submit") setSubmitted(true);
-    if (type === "back") onBack?.();
-  }, [onBack]);
-
-  return (
-    <CommonFormBuilder
-      schema={BV_QUESTIONNAIRE_SCHEMA}
-      values={values}
-      onChange={onChange}
-      submitted={submitted}
-      onAction={onAction}
-      layout={layout}
-    />
-  );
-});
-// ── Adapter factory ────────────────────────────────────────────────────────
-// Each adapter: reads its FormData ID from context, loads existing data,
-// auto-saves on every field change (1 s debounce).
-function makeAdapter(Component, activeKey, registryKey) {
-  const Adapter = memo(function Adapter({ onChange: outerOnChange, layout }) {
-    const ctx = useContext(PatientContext);
-    const patient          = ctx?.patient   ?? ctx;   // backward-compat
-    const questionaireIds  = ctx?.questionaireIds ?? {};
-    const formDataId       = questionaireIds[registryKey] ?? null;
-
-    const [values,  setValues]  = useState({});
-    const [loading, setLoading] = useState(false);
-    const saveTimer = useRef(null);
-
-    // Load existing data when the sub-assessment opens
-    useEffect(() => {
-      if (!formDataId) return;
-      setLoading(true);
-      api.get(API_URL.ASSESSMENT + `data/${formDataId}/`)
-        .then(res => {
-          const existing = res.data?.data;
-          if (existing && typeof existing === 'object' && Object.keys(existing).length > 0) {
-            setValues(existing);
-          }
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    }, [formDataId]);
-
-    const handleChange = useCallback((name, value) => {
-      setValues(v => {
-        const next = { ...v, [name]: value };
-        // Debounced PATCH
-        if (saveTimer.current) clearTimeout(saveTimer.current);
-        saveTimer.current = setTimeout(() => {
-          if (formDataId) {
-            api.patch(API_URL.ASSESSMENT + `data/${formDataId}/`, { data: next })
-              .catch(() => {});
-          }
-        }, 1000);
-        return next;
-      });
-    }, [formDataId]);
-
-    const handleBack = useCallback(() => {
-      outerOnChange(activeKey, null);
-    }, [outerOnChange]);
-
-    if (loading) return <ShimmerForm rows={5} />;
-
-    return (
-      <Suspense fallback={AssessmentFallback}>
-        <Component
-          patient={patient}
-          values={values}
-          onChange={handleChange}
-          onBack={handleBack}
-          layout={layout}
-        />
-      </Suspense>
-    );
-  });
-  return Adapter;
-}
-
-const BinocularVisionAdapter    = makeAdapter(BinocularVisionAssessment,  "optometry_assessments_active", "BINOCULAR_VISION");
-const RefractionAdapter         = makeAdapter(RefractionAssessment,        "optometry_assessments_active", "REFRACTION");
-const VisionAdapter             = makeAdapter(VisionAssessment,            "optometry_assessments_active", "VISION_DRIVING");
-const OcularHealthAdapter       = makeAdapter(OcularHealthAssessment,      "optometry_assessments_active", "OCULAR_HEALTH");
-const SpecialDiagnosticAdapter  = makeAdapter(SpecialDiagnosticAssessment, "optometry_assessments_active", "SPECIAL_DIAGNOSTIC");
-const LVQoLAdapter              = makeAdapter(LVQoLForm,                   "optometry_assessments_active", "LVQOL");
-const BrainVisionAdapter        = makeAdapter(BrainVisionInjury,           "optometry_assessments_active", "BRAIN_VISION");
-const VisualFunctionAdapter     = makeAdapter(VisualFunctionForm,          "optometry_assessments_active", "VISUAL_FUNCTION");
-const BVDQAdapter               = makeAdapter(BVDAssessment,               "optometry_assessments_active", "BVDQ");
-const LowVisionAdapter          = makeAdapter(LowVisionAssessment,         "low_vision_assessment_active", "LOW_VISION_ASSESSMENT");
-const BVQuestionnaireAdapter =
-  makeAdapter(
-    BVQuestionnaire,
-    "optometry_assessments_active",
-    "BV_QUESTIONNAIRE"
-  );
-
-export const OPTOMETRY_ASSESSMENT_REGISTRY = {
-  BINOCULAR_VISION:      BinocularVisionAdapter,
-  REFRACTION:            RefractionAdapter,
-  VISION_DRIVING:        VisionAdapter,
-  OCULAR_HEALTH:         OcularHealthAdapter,
-  SPECIAL_DIAGNOSTIC:    SpecialDiagnosticAdapter,
-  LVQOL:                 LVQoLAdapter,
-  BRAIN_VISION:          BrainVisionAdapter,
-  VISUAL_FUNCTION:       VisualFunctionAdapter,
-  BVDQ:                  BVDQAdapter,
-  LOW_VISION_ASSESSMENT: LowVisionAdapter,
-  BV_QUESTIONNAIRE: BVQuestionnaireAdapter,
-};
-
-/** 
+/**
  * This component is responsible for fetching the assessment forms
  * for the given department and rendering the appropriate tab
- * content based on the active tab. It also manages the state of the 
+ * content based on the active tab. It also manages the state of the
  * assessment values, loading state, any errors, retry logic, toast notifications,
  * starting the assessment session, end session, submission of the assessment
  * and also for the referral management, equipments booking, and mapping codes to the session.
  * @param {Object} patient - The patient object containing patient details
  * @param {String} department - The department for which the assessment forms are to be fetched
-*/
+ */
 
-export default function AssessmentLoader({
-  patient, 
-  department
-}) 
-{
+export default function AssessmentLoader({ patient, department }) {
   // Extract Tab
-  const TABS = actions.ASSESSMENT_TABS
+  const TABS = actions.ASSESSMENT_TABS;
   // Set up state to track which assessment is active and its values
   const [toast, setToast] = useState(null);
-  const [error, setError] = useState(false);  //formsError, setFormsError
-  const [templates, setTemplates] = useState([]);   //[forms, setForms]
+  const [error, setError] = useState(false); //formsError, setFormsError
+  const [templates, setTemplates] = useState([]); //[forms, setForms]
   const [isLoading, setIsLoading] = useState(true); // formsLoading,  setFormsLoading
   const [sessionId, setSessionId] = useState(null);
   const [activeTab, setActiveTab] = useState(TABS[0]);
@@ -329,56 +62,82 @@ export default function AssessmentLoader({
   const [isReferralModal, setIsReferralModal] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [assessmentsValues, setAssessmentsValues] = useState(() => {
-    return { subjective: {}, objective: {}, assessment: {}, plan: {} }
+    return { subjective: {}, objective: {}, assessment: {}, plan: {} };
   });
   const [subAssessmentTemplate, setSubAssessmentTemplate] = useState({
-    subjective: [], objective: [], assessment: [], plan: []
-  })
+    subjective: {},
+    objective: {},
+    assessment: {},
+    plan: {},
+  });
 
   // Mapping template to the schema registry
   const loadTemplates = async () => {
-    setIsLoading(true)
-    const map = {}
-    const subAssessment = {}
-    const data = await forms.fetch(department)
-    if(!data || data.length === 0) {
-      setError(true)
-    }
-    data.forEach(template => {
-      const key = template.assessment_type?.toLowerCase();
-      if(TABS.includes(key)){
-        map[key] = { 
-          ...template.body, 
-          id:template.id, 
-          name:template.name, 
-          actions: actions.ACTIONS_BUTTON
-        }
-      } 
-      if(template?.sub_assessment) {
-        subAssessment[key] = template.sub_assessment
+    setIsLoading(true);
+    setError(false);
+
+    try {
+      const map = {};
+      const subAssessment = {};
+      const data = await forms.fetch(department);
+      if (!data || data.length === 0) {
+        setError(true);
+        return;
       }
-    })
-    setTemplates(map)
-    setIsLoading(false)
-    setSubAssessmentTemplate(subAssessment)
-  }
+      data.forEach((template) => {
+        const key = template.assessment_type?.toLowerCase();
+        // MAIN ASSESSMENT
+        if (TABS.includes(key)) {
+          map[key] = {
+            ...template.body,
+            id: template.id,
+            name: template.name,
+            actions: actions.ACTIONS_BUTTON,
+          };
+        }
+        // SUB ASSESSMENTS
+        if (template?.sub_assessment?.length) {
+          subAssessment[key] = template.sub_assessment.reduce((acc, sub) => {
+            acc[sub.name] = {
+              ...sub,
+              id: sub.id,
+              name: sub.name,
+              type: sub.type,
+              score: sub.score ?? null,
+              body: sub.body ?? {},
+              // session will override later
+              session_id: null,
+            };
+            return acc;
+          }, {});
+        }
+      });
+      setTemplates(map);
+      setSubAssessmentTemplate(subAssessment);
+    } catch (e) {
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Load template on department
   useEffect(() => {
     if (!sessionId) {
-      loadTemplates()
+      loadTemplates();
     }
-  }, [department, sessionId])
+  }, [department, sessionId]);
 
   // Start session handler
-  const handleStartSession = useCallback(async() => {
+  const handleStartSession = useCallback(async () => {
     if (!patient) return;
     // Extract login doctor id
-    const doctorId = localStorage.getItem('user_id')
+    const doctorId = localStorage.getItem("user_id");
     if (!doctorId) {
-      setToast(
-        { message: 'Could not identify logged on doctor. Please re-login.', variant: 'error'}
-      )
+      setToast({
+        message: "Could not identify logged on doctor. Please re-login.",
+        variant: "error",
+      });
       return;
     }
     try {
@@ -386,183 +145,286 @@ export default function AssessmentLoader({
         doctorId,
         patient.id,
         department,
-        'INITIAL',
+        "INITIAL",
         0,
-        false
-      )
-      setSessionId(response.data.id)
-      response?.data?.assessment_ids.forEach(
-        template => {
-          const map = {}
-          const tab = template.type.toLowerCase()
-          const screeningType = template.screening_type.toUpperCase()
-          if(template.is_parent === "True") {
-            templates[tab].id = template.id
-          } else {
-            subAssessmentTemplate[tab] = {
-               [template.name] : {
-                  id: template.id,
-                  name: template.name,
-                  type: template.type
-               }
-            }
-          }
+        false,
+      );
+      setSessionId(response.data.id);
+      response?.data?.assessment_ids.forEach((template) => {
+        const tab = template.type.toLowerCase();
+
+        // MAIN ASSESSMENT
+        if (template.is_parent === "True") {
+          setTemplates((prev) => ({
+            ...prev,
+
+            [tab]: {
+              ...prev[tab],
+              id: template.id,
+            },
+          }));
         }
-      )
-      setIsSessionActive(true)  
+        // SUB ASSESSMENT
+        else {
+          setSubAssessmentTemplate((prev) => ({
+            ...prev,
+            [tab]: Object.fromEntries(
+              Object.entries(prev[tab] || {}).map(([key, subTemplate]) => {
+                if (
+                  subTemplate.name === template.name ||
+                  key === template.name
+                ) {
+                  return [
+                    key,
+                    {
+                      ...subTemplate,
+                      // KEEP ORIGINAL FORM ID
+                      id: subTemplate.id,
+                      // STORE SESSION INSTANCE SEPARATELY
+                      session_id: template.id,
+                      type: template.type,
+                    },
+                  ];
+                }
+                return [key, subTemplate];
+              }),
+            ),
+          }));
+        }
+      });
+      setIsSessionActive(true);
       setIsSubmitted(false);
-      setToast({ message: 'Assessment session started', variant: 'success' });
+      setToast({ message: "Assessment session started", variant: "success" });
     } catch (e) {
-        const detail = e?.response?.data
-        const msg = typeof detail === "object"
-        ? Object.values(detail).flat().join(' ')
-        : 'Failed to start assessment. Please try again'
-        setToast({ message: msg, variant: 'error' })
-        setIsSessionActive(false)
+      const detail = e?.response?.data;
+      const msg =
+        typeof detail === "object"
+          ? Object.values(detail).flat().join(" ")
+          : "Failed to start assessment. Please try again";
+      setToast({ message: msg, variant: "error" });
+      setIsSessionActive(false);
     }
-  }, [patient, templates])
+  }, [patient, templates]);
 
   // End session handler
-  const handleEndSession = useCallback(async() => {
+  const handleEndSession = useCallback(async () => {
     if (sessionId) {
       try {
-        await session.end(sessionId)
-        setSessionId(null)
-        setIsSubmitted(true)
-        setIsSessionActive(false)
-        setToast({ message: "Assessment submitted and session ended", variant: "success" })
-      } catch(e) {
-        setIsSubmitted(false)
-        setToast({ message: "Submission failed. Please try again.", variant: "error" })
+        await session.end(sessionId);
+        setSessionId(null);
+        setIsSubmitted(true);
+        setIsSessionActive(false);
+        setToast({
+          message: "Assessment submitted and session ended",
+          variant: "success",
+        });
+      } catch (e) {
+        setIsSubmitted(false);
+        setToast({
+          message: "Submission failed. Please try again.",
+          variant: "error",
+        });
       }
-      setIsConfirmModal(false)
-      return
+      setIsConfirmModal(false);
+      return;
     }
-  }, [sessionId])
-  
-  // Action handler
-  const handleAction = useCallback(async (type) => {
-    if (type === "next") {
-      const templateDataId = templates[activeTab].id
-      if (isSessionActive && templateDataId) {
-        try {
-          await forms.save(templateDataId, assessmentsValues[activeTab])
-          setToast({ message: 'Saved', variant: 'success' })
-        } catch (e) {
-          setToast({ message: 'Failed to save', variant: 'error' })
-        }
-        const pos = TABS.indexOf(activeTab)
-        if(pos < TABS.length - 1) setActiveTab(TABS[pos+1])
-      }
-    } else if (type === "clear") {
-      setIsSubmitted(false)
-      setAssessmentsValues(
-        { subjective: {}, objective: {}, assessment: {}, plan: {}}
-      )
-    } else if (type === "save") {
+  }, [sessionId]);
 
-    }
-    return
-  }, [activeTab, sessionId])
+  // Action handler
+  const handleAction = useCallback(
+    async (type) => {
+      // =========================
+      // NEXT
+      // =========================
+      if (type === "next") {
+        const templateDataId = templates?.[activeTab]?.id;
+        // SAVE CURRENT TAB
+        if (isSessionActive && templateDataId) {
+          try {
+            await forms.save(templateDataId, assessmentsValues[activeTab]);
+            setToast({
+              message: "Saved",
+              variant: "success",
+            });
+          } catch (e) {
+            setToast({
+              message: "Failed to save",
+              variant: "error",
+            });
+            return;
+          }
+        }
+        // MOVE TO NEXT TAB
+        const pos = TABS.indexOf(activeTab);
+        if (pos < TABS.length - 1) {
+          setActiveTab(TABS[pos + 1]);
+        }
+        return;
+      }
+
+      // =========================
+      // CLEAR
+      // =========================
+      if (type === "clear") {
+        setIsSubmitted(false);
+        setAssessmentsValues({
+          subjective: {},
+          objective: {},
+          assessment: {},
+          plan: {},
+        });
+        return;
+      }
+
+      // =========================
+      // SAVE ONLY
+      // =========================
+      if (type === "save") {
+        const templateDataId = templates?.[activeTab]?.id;
+        if (!templateDataId) return;
+        try {
+          await forms.save(templateDataId, assessmentsValues[activeTab]);
+          setToast({
+            message: "Saved",
+            variant: "success",
+          });
+        } catch (e) {
+          setToast({
+            message: "Failed to save",
+            variant: "error",
+          });
+        }
+      }
+    },
+    [activeTab, sessionId, templates, assessmentsValues, isSessionActive],
+  );
 
   // OnChange handler
   const onChange = useCallback(
     async (name, value) => {
-      if(name === 'active_assessment_id') {
-        console.log(name, 'and', value)
-        try {
-          console.log('active tab onChange', activeTab)
-          const tm = await forms.fetchById(value)
-          setSubAssessmentTemplate(
-            prev => ({
-              ...prev,
-              [activeTab]: (prev[activeTab]).map(
-                template => {
-                  if (template.id === tm?.data?.id) {
-                    return {
-                      ...template,
-                      ...tm.data.body,
-                      id: tm.data.id,
-                      name: tm.data.name,
-                      score: tm.data.score
-                    }
-                  }
-                  return template
-                }
-              )
-            })
-          )
-        } catch (e) {
-          console.log(e)
-          setToast({ message: 'Sub Assessment form loading failed', variant: 'error'})
-        }        
-      }
-      setAssessmentsValues(
-        v => {
-          const next = {
+      // =========================
+      // SUB ASSESSMENT HANDLING
+      // =========================
+      if (name === "active_assessment_id") {
+        // CLOSE ACTIVE SUB ASSESSMENT
+        if (!value) {
+          setAssessmentsValues((v) => ({
             ...v,
             [activeTab]: {
               ...v[activeTab],
-              [name]: value
-            }
-          }
-          return next
+              [name]: null,
+            },
+          }));
+          return;
         }
-      )
-    }, [activeTab, sessionId]
-  )
 
-  console.log('after update sub assessment template', subAssessmentTemplate)
+        try {
+          const tm = await forms.fetchById(value);
+          setSubAssessmentTemplate((prev) => {
+            const currentTab = prev[activeTab] || {};
+            const updated = Object.fromEntries(
+              Object.entries(currentTab).map(([key, template]) => {
+                // MATCH SELECTED ASSESSMENT
+                if (
+                  template.id === value ||
+                  template.name === tm?.data?.name ||
+                  key === tm?.data?.name
+                ) {
+                  return [
+                    key,
+                    {
+                      ...template,
+                      // LOAD FORM SCHEMA
+                      sections: tm?.data?.body?.sections || [],
+                      id: tm.data.id,
+                      name: tm.data.name,
+                      type: tm.data.type,
+                      score: tm.data.score,
+                      loaded: true,
+                    },
+                  ];
+                }
+                return [key, template];
+              }),
+            );
+            return {
+              ...prev,
+              [activeTab]: updated,
+            };
+          });
+        } catch (e) {
+          setToast({
+            message: "Sub Assessment form loading failed",
+            variant: "error",
+          });
+        }
+      }
+      // =========================
+      // MAIN ASSESSMENT VALUES
+      // =========================
+      setAssessmentsValues((v) => ({
+        ...v,
+        [activeTab]: {
+          ...v[activeTab],
+          [name]: value,
+        },
+      }));
+    },
+    [activeTab, sessionId],
+  );
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
-    <PatientContext.Provider value={{ patient}} >
+    <PatientContext.Provider value={{ patient }}>
       {/* Referral Modal */}
-      {
-        isReferralModal && (
-          <ReferralModal
-            patient={patient}
-            // ---- onSubmit={handleReferralSubmit}
-            onClose={() => setIsReferralModal(false)}
-          />
-        )
-      }
+      {isReferralModal && (
+        <ReferralModal
+          patient={patient}
+          // ---- onSubmit={handleReferralSubmit}
+          onClose={() => setIsReferralModal(false)}
+        />
+      )}
       {/* Toast Notifications */}
-      {
-        toast && (
-          <Toast
-            message={toast.message}
-            variant={toast.variant}
-            onClose={() => setToast(null)}
-          />
-        )
-      }
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onClose={() => setToast(null)}
+        />
+      )}
       {/* Confirmation Modal  */}
-      {
-        isConfirmModal && (
-          <ConfirmModal
-            variant="submit"
-            title="Submit Assessment?"
-            confirmLabel="Submit Assessment"
-            onConfirm={handleEndSession}
-            onCancel={() => setIsConfirmModal(false)}
-            message="You are about to finalise and submit this assessment."
-            meta= {
-              patient?[
-                { label: "Patient", value: patient.email || patient.name || "—" },
-                { label: "Visit Type", value: "INITIAL"},
-                { label: "Date", value: localDateTimeString(new Date()) }
-              ] : []
-            }
-            checklist={
-              [
-                "All SOAP sections have been reviewed",
-                "Assessment data is accurate and complete",
-                "Submission cannot be edited after confirmation",
-              ]
-            }
-          />
-        )
-      }
+      {isConfirmModal && (
+        <ConfirmModal
+          variant="submit"
+          title="Submit Assessment?"
+          confirmLabel="Submit Assessment"
+          onConfirm={async () => {
+            // save final plan data first
+            await handleAction("next");
+
+            // then end session
+            await handleEndSession();
+          }}
+          onCancel={() => setIsConfirmModal(false)}
+          message="You are about to finalise and submit this assessment."
+          meta={
+            patient
+              ? [
+                  {
+                    label: "Patient",
+                    value: patient.email || patient.name || "—",
+                  },
+                  { label: "Visit Type", value: "INITIAL" },
+                  { label: "Date", value: localDateTimeString(new Date()) },
+                ]
+              : []
+          }
+          checklist={[
+            "All SOAP sections have been reviewed",
+            "Assessment data is accurate and complete",
+            "Submission cannot be edited after confirmation",
+          ]}
+        />
+      )}
       <div style={S.page}>
         {/* Referral and Start Assessment Button UI */}
         <div style={S.actionBar}>
@@ -572,137 +434,208 @@ export default function AssessmentLoader({
               opacity: isSessionActive ? 0.7 : 1,
               transition: "background .15s, opacity .15s",
               color: isSubmitted ? "#6b7280" : sessionId ? "#0369a1" : "#fff",
-              cursor: isSessionActive || isSubmitted || sessionId ? "not-allowed" : "pointer",
-              display: "inline-flex", alignItems: "center", gap: 5,
-              background: isSubmitted ? "#e5e7eb" : sessionId ? "#e0f2fe" : "#0284c7",
-              border:sessionId && !isSubmitted ? "1.5px solid #bae6fd" : "none",
-              borderRadius: 6, padding: "6px 16px", fontSize: 12, fontWeight: 700,
+              cursor:
+                isSessionActive || isSubmitted || sessionId
+                  ? "not-allowed"
+                  : "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              background: isSubmitted
+                ? "#e5e7eb"
+                : sessionId
+                  ? "#e0f2fe"
+                  : "#0284c7",
+              border:
+                sessionId && !isSubmitted ? "1.5px solid #bae6fd" : "none",
+              borderRadius: 6,
+              padding: "6px 16px",
+              fontSize: 12,
+              fontWeight: 700,
             }}
             disabled={isSessionActive || !!sessionId || isSubmitted}
-            onClick={!sessionId && !isSessionActive ? handleStartSession: undefined} 
-            onMouseEnter={e => { if (!sessionId && !isSubmitted) e.currentTarget.style.background = "#0369a1"; }}
-            onMouseLeave={e => { if (!sessionId && !isSubmitted) e.currentTarget.style.background = "#0284c7"; }}
-            title={ isSubmitted
+            onClick={
+              !sessionId && !isSessionActive ? handleStartSession : undefined
+            }
+            onMouseEnter={(e) => {
+              if (!sessionId && !isSubmitted)
+                e.currentTarget.style.background = "#0369a1";
+            }}
+            onMouseLeave={(e) => {
+              if (!sessionId && !isSubmitted)
+                e.currentTarget.style.background = "#0284c7";
+            }}
+            title={
+              isSubmitted
                 ? "Session ended"
                 : sessionId
-                ? `Session active: ${sessionId}`
-                : "Start a new assessment session"
+                  ? `Session active: ${sessionId}`
+                  : "Start a new assessment session"
             }
           >
-            { isSessionActive ? "Starting…": sessionId ? "✓ Started" : "Start" }
+            {sessionId
+              ? "✓ Started"
+              : isSessionActive
+                ? "Starting..."
+                : "Start"}
           </button>
           {/* Referral Button UI */}
           <button
             style={{
               border: "none",
-              display: "inline-flex", alignItems: "center",
-              borderRadius: 6, padding: "6px 14px", fontSize: 12,
+              display: "inline-flex",
+              alignItems: "center",
+              borderRadius: 6,
+              padding: "6px 14px",
+              fontSize: 12,
               background: sessionId || isSubmitted ? "#0284c7" : "#d1d5db",
-              fontWeight: 600, 
-              color:sessionId || isSubmitted? "#fff": "#6b7280",
-              cursor:sessionId || isSubmitted ? "pointer" : "not-allowed",
+              fontWeight: 600,
+              color: sessionId || isSubmitted ? "#fff" : "#6b7280",
+              cursor: sessionId || isSubmitted ? "pointer" : "not-allowed",
               transition: "background .15s",
             }}
             disabled={!(sessionId || isSubmitted)}
-            onClick={ sessionId || isSubmitted ? () => setIsReferralModal(true): undefined}     
-            onMouseLeave={e =>  {if (sessionId || isSubmitted){ e.currentTarget.style.background = "#0284c7"}}  }
-            onMouseEnter={e =>  {if (sessionId || isSubmitted){e.currentTarget.style.background = "#0369a1"}} } 
+            onClick={
+              sessionId || isSubmitted
+                ? () => setIsReferralModal(true)
+                : undefined
+            }
+            onMouseLeave={(e) => {
+              if (sessionId || isSubmitted) {
+                e.currentTarget.style.background = "#0284c7";
+              }
+            }}
+            onMouseEnter={(e) => {
+              if (sessionId || isSubmitted) {
+                e.currentTarget.style.background = "#0369a1";
+              }
+            }}
           >
             Referral
           </button>
         </div>
         {/* Patient Details in top of the page */}
-        <div style={S.patientCardWrap}><PatientCard patient={patient}/></div>
+        <div style={S.patientCardWrap}>
+          <PatientCard patient={patient} />
+        </div>
         {/* Assessment Tabs */}
         <div style={S.soapShell}>
           {/* Tab Buttons UI */}
           <div style={S.tabBar}>
-            {
-              TABS.map((tab, idx) => {
-                const isActive  = activeTab === tab;
-                const isDone    = idx < TABS.indexOf(activeTab);
-                const hasData   = '' // ----= !!formDataIds[tab]; 
-                // Tab Button
-                return (
-                  <button
-                    key={tab}
-                    onClick={ ()=> setActiveTab(tab)}
-                    style={{ ...S.tab, ...(isActive ? S.tabActive : isDone ? S.tabDone : {}) }}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    {
-                      hasData && (
-                        <span
-                          title="Template data linked"
-                          style={{
-                            display: "inline-block", flexShrink: 0,
-                            background: isActive ? "#2563eb" : "#10b981",
-                            marginLeft: 6, width: 7, height: 7, borderRadius: "50%",
-                          }}
-                        />
-                      )
-                    }
-                  </button>
-                )
-              })
-            }
+            {TABS.map((tab, idx) => {
+              const isActive = activeTab === tab;
+              const isDone = idx < TABS.indexOf(activeTab);
+              const hasData = ""; // ----= !!formDataIds[tab];
+              // Tab Button
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    ...S.tab,
+                    ...(isActive ? S.tabActive : isDone ? S.tabDone : {}),
+                  }}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {hasData && (
+                    <span
+                      title="Template data linked"
+                      style={{
+                        display: "inline-block",
+                        flexShrink: 0,
+                        background: isActive ? "#2563eb" : "#10b981",
+                        marginLeft: 6,
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
           {/* Tab Content UI */}
           <div style={S.tabContent}>
-            {
-              isLoading ? (<div style={S.contentPad}><ShimmerForm rows={6} /></div>) :
-              error ? (
-                <div style={S.contentPad}>
-                   <EmptyState
-                      icon="⚠️"
-                      title="Failed to load form"
-                      message="Could not fetch the assessment form. Please check your connection and try again."
-                      action={{ label: "Retry", onClick: loadTemplates }}
+            {isLoading ? (
+              <div style={S.contentPad}>
+                <ShimmerForm rows={6} />
+              </div>
+            ) : error ? (
+              <div style={S.contentPad}>
+                <EmptyState
+                  icon="⚠️"
+                  title="Failed to load form"
+                  message="Could not fetch the assessment form. Please check your connection and try again."
+                  action={{ label: "Retry", onClick: loadTemplates }}
                 />
-                </div>
-              ) : !templates[activeTab] ? (
-                <div style={S.contentPad}>
-                  <EmptyState
-                    icon="📋"
-                    title="No form available"
-                    message={`The ${activeTab} section hasn't been configured yet.`}
-                  />
-                </div>
-              ) : (
-                <CommonFormBuilder
-                  readOnly={false}
-                  onChange={onChange}
-                  submitted={isSubmitted}
-                  onAction={handleAction}
-                  schema={templates[activeTab]}
-                  values={assessmentsValues[activeTab] || {}}
-                  assessmentRegistry={subAssessmentTemplate[activeTab]}
-                >
-                  <div style={S.actionRow}>
-                    <button
-                      style={activeTab === "plan"? S.submitBtn : S.nextBtn}
-                      onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
-                      onMouseEnter={e => e.currentTarget.style.background = 
-                        activeTab === "plan"? "#1d4ed8" : "#1a6fc4"}
-                      onClick={() => {handleAction('next'); if(activeTab === "plan") {setIsConfirmModal(true)}} } 
-                    >
-                      {
-                        activeTab === "plan" ? "Submit Assessment" :
-                        "Next :" + activeTab.charAt(0).toUpperCase() + activeTab.slice(1) + "→"
+              </div>
+            ) : !templates[activeTab] ? (
+              <div style={S.contentPad}>
+                <EmptyState
+                  icon="📋"
+                  title="No form available"
+                  message={`The ${activeTab} section hasn't been configured yet.`}
+                />
+              </div>
+            ) : (
+              <CommonFormBuilder
+                readOnly={false}
+                onChange={onChange}
+                submitted={isSubmitted}
+                onAction={handleAction}
+                schema={templates[activeTab]}
+                values={assessmentsValues[activeTab] || {}}
+                assessmentRegistry={Object.values(
+                  subAssessmentTemplate[activeTab] || {},
+                )}
+              >
+                <div style={S.actionRow}>
+                  <button
+                    style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "#2563eb")
+                    }
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background =
+                        activeTab === "plan" ? "#1d4ed8" : "#1a6fc4")
+                    }
+                    onClick={() => {
+                      // FINAL STEP
+                      if (activeTab === "plan") {
+                        setIsConfirmModal(true);
+
+                        return;
                       }
-                    </button>
-                  </div>
-                </CommonFormBuilder>
-              )
-            }
+
+                      // NORMAL NEXT
+                      handleAction("next");
+                    }}
+                  >
+                    {activeTab === "plan"
+                      ? "Submit Assessment"
+                      : (() => {
+                          const currentIndex = TABS.indexOf(activeTab);
+
+                          const nextTab =
+                            currentIndex < TABS.length - 1
+                              ? TABS[currentIndex + 1]
+                              : null;
+
+                          return nextTab
+                            ? `Next :${nextTab.charAt(0).toUpperCase() + nextTab.slice(1)} →`
+                            : "Submit";
+                        })()}
+                  </button>
+                </div>
+              </CommonFormBuilder>
+            )}
           </div>
-          
         </div>
       </div>
     </PatientContext.Provider>
-  )
+  );
 }
-
 
 /* ===================== STYLES ===================== */
 const S = {
