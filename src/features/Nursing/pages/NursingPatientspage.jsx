@@ -10,9 +10,13 @@ export default function NursingDepartmentPage({ patients = [], department, initi
     return <div style={{ padding: 20 }}>Department not assigned</div>;
   }
 
-  const departmentPatients = patients.filter(
-    p => p.departments?.includes(department)
-  );
+  const departmentPatients = patients.filter((p) => {
+    if (!Array.isArray(p.departments)) return true;
+    if (department === "Nursing") {
+      return p.departments.includes("Nursing") || p.departments.includes("Medical Assistant");
+    }
+    return p.departments.includes(department);
+  });
 
   /* ================= PATIENT DETAILS ================= */
   if (view === "details" && selectedPatient) {

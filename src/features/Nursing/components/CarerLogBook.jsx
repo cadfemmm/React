@@ -308,8 +308,37 @@ function ProgressBar({ values, sections }) {
   );
 }
 
+const LAUNCHER_BTN = {
+  marginTop: 12,
+  padding: "10px 18px",
+  borderRadius: 6,
+  border: "none",
+  background: "#1d4ed8",
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: 13,
+  cursor: "pointer",
+};
+
+/** Toggle inline Carer Log Book (for nursing assessment / shift sections). */
+export function CarerLogBookLauncher({ patient }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button type="button" style={LAUNCHER_BTN} onClick={() => setOpen((o) => !o)}>
+        {open ? "Hide Carer Log Book" : "Open Carer Log Book"}
+      </button>
+      {open && (
+        <div style={{ marginTop: 16, border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden" }}>
+          <CarerLogBook patient={patient} embedded />
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main component ──────────────────────────────────────── */
-export default function CarerLogBook({ patient, onBack }) {
+export default function CarerLogBook({ patient, onBack, embedded = false }) {
   const [values, setValues] = useState({});
   const [meta, setMeta]     = useState({ topic: "", name: patient?.name || "", carer: "", duration: "" });
   const [tab, setTab]       = useState("nursing");
@@ -329,7 +358,7 @@ export default function CarerLogBook({ patient, onBack }) {
   };
 
   return (
-    <div style={S.page}>
+    <div style={embedded ? S.embedded : S.page}>
 
       {/* ── Header ── */}
       {/* <div style={S.topBar}>
@@ -401,6 +430,11 @@ const S = {
   page: {
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
     background: C.pageBg, minHeight: "100vh", padding: "0 0 48px",
+  },
+  embedded: {
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    background: C.white,
+    padding: "12px 0 16px",
   },
   topBar: {
     background: C.white, borderBottom: `3px solid ${C.primary}`,

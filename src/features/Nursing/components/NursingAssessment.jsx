@@ -33,10 +33,15 @@ import BladderAssessment from "../../Doctors/components/BladderAssessment";
 import BowelAssessmentForm from "../../Doctors/components/BowelAssessment";
 import PainAssessmentForm from "../../Doctors/components/PainAssessmentForm";
 import BristolChartAssessment  from "../../Doctors/components/BowelAssessment";
-import WoundAssessment from "../pages/WoundAssessment";
+import { CarerLogBookLauncher } from "./CarerLogBook";
 
 // Create context to pass patient to assessment components
 const PatientContext = createContext(null);
+
+function CarerLogBookLauncherField() {
+  const patient = useContext(PatientContext);
+  return <CarerLogBookLauncher patient={patient} />;
+}
 
 // Adapter components that bridge values/onChange to patient/onSubmit/onBack
 function BarthelIndexAdapter({ values, onChange }) {
@@ -117,30 +122,6 @@ function BradenScaleAdapter({ values, onChange }) {
     onChange(activeKey, null);
   };
   return <BradenScaleForm patient={patient} onSubmit={handleSubmit} onBack={handleBack} />;
-}
-
-function WoundAssessmentAdapter({ values, onChange }) {
-  const patient = useContext(PatientContext);
-
-  const handleSubmit = (payload) => {
-    if (payload?.values) {
-      Object.keys(payload.values).forEach((key) => {
-        onChange(`wound_assessment_${key}`, payload.values[key]);
-      });
-    }
-  };
-
-  const handleBack = () => {
-    onChange("nursing_assessments_active", null);
-  };
-
-  return (
-    <WoundAssessment
-      patient={patient}
-      onSubmit={handleSubmit}
-      onBack={handleBack}
-    />
-  );
 }
 
 function WoundTreatmentFlowsheetAdapter({ values, onChange }) {
@@ -397,7 +378,6 @@ export const NURSING_ASSESSMENT_REGISTRY = {
   spasm_assessment: SpasmSpasticity,
   pain_assessment: PainAssessmentForm,
   bristol_chart: BristolChartAssessment,
-  wound_assessment: WoundAssessmentAdapter,
   bladder_issue: (props) => (
   <BladderAssessment {...props} department="nursing" />
   ),
@@ -429,14 +409,30 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
   }, [storageKey]);
 
 
- useEffect(() => {
-        if (!patient) return;
-        setPatientHistory({
-          past_medical_history: patient.medical_history || "",
-          past_family_history: patient.family_medical_history || "",
-          alerts_and_allergies: patient.alerts_and_allergies_history || ""
-        });
-      }, [patient]);
+  useEffect(() => {
+    if (!patient?.id) return;
+    setPatientHistory({
+      past_medical_history: patient.medical_history || "",
+      past_family_history: patient.family_medical_history || "",
+      alerts_and_allergies: patient.alerts_and_allergies_history || "",
+    });
+  }, [patient?.id]);
+
+  useEffect(() => {
+    if (!patient?.id) return;
+    const updated = {
+      ...patient,
+      medical_history: patientHistory.past_medical_history,
+      family_medical_history: patientHistory.past_family_history,
+      alerts_and_allergies_history: patientHistory.alerts_and_allergies,
+    };
+    localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+  }, [
+    patient?.id,
+    patientHistory.past_medical_history,
+    patientHistory.past_family_history,
+    patientHistory.alerts_and_allergies,
+  ]);
 
   useEffect(() => {
     if (!storageKey) return;
@@ -536,103 +532,6 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
     onSubmit?.(values);
     alert("Nursing assessment submitted");
   };
-function PatientInformationBlock({ patient, patientHistory, setPatientHistory }) {
-  if (!patient) return null;
-
-  const safe = (v) => v ?? "-";
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString() : "-";
-
-  return (
-    <div style={{ marginBottom: 24 }}>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: 12,
-        fontSize: 14
-      }}>
-        <div><b>Name:</b> {safe(patient.name)}</div>
-        <div><b>IC:</b> {safe(patient.id)}</div>
-        <div><b>DOB:</b> {formatDate(patient.dob)}</div>
-
-        <div><b>Age / Gender:</b> {safe(patient.age)} / {safe(patient.sex)}</div>
-        <div><b>ICD:</b> {safe(patient.icd)}</div>
-        <div><b>Date of Assessment:</b> {new Date().toLocaleDateString()}</div>
-
-        <div><b>Date of Onset:</b> {formatDate(patient.date_of_onset)}</div>
-        <div><b>Duration of Diagnosis:</b> -</div>
-        <div><b>Primary Diagnosis:</b> {safe(patient.diagnosis_history)}</div>
-
-        <div><b>Secondary Diagnosis:</b> {safe(patient.medical_history)}</div>
-        <div><b>Dominant Side:</b> {safe(patient.dominant_side)}</div>
-        <div><b>Language Preference:</b> {safe(patient.language_preference)}</div>
-
-        <div><b>Education Level:</b> {safe(patient.education_background)}</div>
-        <div><b>Occupation:</b> {safe(patient.occupation)}</div>
-        <div><b>Work Status:</b> {safe(patient.employment_status)}</div>
-
-        <div><b>Driving Status:</b> {safe(patient.driving_status)}</div>
-        <div><b>PP/OB:</b> {safe(patient.pp_ob)}</div>
-        <div><b>Weight:</b> {patient.weight ? `${patient.weight} kg` : "-"}</div>
-        <div><b>Accommodation:</b> {safe(patient.accommodation)}</div>
-        <div><b>Attending Case Manager:</b> {safe(patient.attending_case_manager)}</div>
-        <div><b>Doctor Incharge for Initial Assessment:</b> {safe(patient.doctor_incharge_initial_assessment)}</div>
-        <div><b>Attending Therapist:</b> {safe(patient.attending_therapist)}</div>
-        {/* ===== HISTORY ===== */}
-        <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
-        
-           <h3>Patient History</h3>
-        
-                  <div>
-                    <b>Past Medical History</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.past_medical_history}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          past_medical_history: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-
-          
-          <div>
-                    <b>Family History</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.past_family_history}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          past_family_history: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-
-        
-           <div>
-                    <b>Allergies</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.alerts_and_allergies}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          alerts_and_allergies: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-
-          <button style={alertBtn}> 🚨 Alerts</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
   /* ===================== SCHEMAS ===================== */
 
   const YES_NO_OPTIONS = [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }];
@@ -2504,23 +2403,6 @@ function PatientInformationBlock({ patient, patientHistory, setPatientHistory })
             showIf: { field: "pi_ulcer_wound_present", equals: "yes" }
           },
           {
-            name: "pi_wound_assessment",
-            label: "Wound Assessment (WATFS)",
-            type: "assessment-launcher",
-            autoOpen: false,
-            hideRemarks: true,
-            showIf: {
-              field: "pi_ulcer_wound_present",
-              equals: "yes"
-            },
-            options: [
-              {
-                label: "Wound Assessment (WATFS)",
-                value: "wound_assessment"
-              }
-            ]
-          },
-          {
             name: "pi_drainage",
             label: "Drainage",
             type: "radio",
@@ -3817,43 +3699,24 @@ function NursingPlanPanel({ values, onChange }) {
     main_caregiver: patient?.main_caregiver || "-"
   };
 
-    const handleDoctorsReport = () => {
-      alert("Report will be generating soon");
-    };
-
   /* ===================== RENDER ===================== */
 
   return (
     <PatientContext.Provider value={patient}>
       <div style={mainContent}>
-        <CommonFormBuilder
-          schema={{ title: "Patient Information", sections: [] }}
-          values={{}}
-          onChange={() => {}}
-        >
-          <PatientInformationBlock
-            patient={patient}
-            patientHistory={patientHistory}
-            setPatientHistory={setPatientHistory}
-          />
-        
-          <button style={doctorsReportBtn}>
-            Doctors Reports
-          </button>
-        </CommonFormBuilder>
+        <PatientCard
+          patient={patient}
+          patientHistory={patientHistory}
+          setPatientHistory={setPatientHistory}
+          showDoctorsReport={true}
+          department="Nursing"
+        />
 
-        {/* ===== PATIENT INFORMATION CARD ===== */}
         <CommonFormBuilder
           schema={NURSING_PATIENT_INFO_SCHEMA}
           values={nursingPatientInfoValues}
           onChange={onChange}
-        >
-          <div style={{ ...section, marginTop: 16 }}>
-            <button style={doctorsReportBtn} onClick={handleDoctorsReport}>
-              Doctors Reports
-            </button>
-          </div>
-        </CommonFormBuilder>
+        />
 
         {/* ===== TABS ===== */}
         <div style={tabBar}>
@@ -3891,7 +3754,7 @@ function NursingPlanPanel({ values, onChange }) {
 
 /* ===================== STYLES ===================== */
 
-const mainContent = { margin: "0 auto", width: "100%" };
+const mainContent = { margin: "0 auto", width: "100%", padding: 15, boxSizing: "border-box" };
 
 const tabBar = {
   display: "flex",
@@ -3930,48 +3793,3 @@ const submitBtn = {
   fontWeight: 700
 };
 
-const section = {
-  marginBottom: 24
-};
-
-const patientGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 12,
-  fontSize: 14
-};
-
-const doctorsReportBtn = {
-  padding: "10px 20px",
-  background: "#2563EB",
-  color: "#fff",
-  border: "none",
-  borderRadius: 6,
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer",
-  marginTop: 8
-};
-
-
-const textarea = {
-          width: "100%",
-          minHeight: 90,
-          marginTop: 6,
-          marginBottom: 12,
-          padding: "10px 12px",
-          borderRadius: 6,
-          border: "1px solid #d1d5db",
-          fontSize: 14,
-          resize: "vertical"
-};
-const alertBtn = {
-  marginTop: 10,
-          padding: "10px 20px",
-          borderRadius: 6,
-          border: "1.5px solid #007bff",
-          background: "#007bff",
-          color: "#fff",
-          fontWeight: 600,
-          cursor: "pointer"
-};

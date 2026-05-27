@@ -14,7 +14,6 @@ import SexualAssessment from "./SexualAssessment";
 import FunctionalAssessment from "./Functional";
 import SkinAssessment from "./SkinAssessment";
 import ProcedureAssessment from "./ProcedureAssessment";
-import MedicationAssessment from "./MedicationAssessment";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PatientCard from "../../../shared/cards/PatientCard";
 
@@ -336,7 +335,6 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
     "Functional",
     "Social History",
     "Work History",
-    "Medication"
   ];
 
   const today = new Date();
@@ -615,9 +613,6 @@ const handleSubmitReferral = () => {
         ) :
         tabs[activeTab] === "Procedure" ? (
           <ProcedureAssessment patient={patient}/>
-        ) : 
-        tabs[activeTab] === "Medication" ? (
-          <MedicationAssessment patient={patient}/>
         ) :
          (
           <div style={{ padding: "20px 0" }}>
