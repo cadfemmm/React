@@ -201,8 +201,16 @@ export default function AssessmentLoader({ patient, department }) {
   // End session handler
   const handleEndSession = useCallback(async () => {
     if (sessionId) {
+      const billingResponse = await forms.fetchSessionCharge(department);
+      const billingItem = billingResponse?.data?.data?.[0];
       try {
-        await session.end(sessionId);
+        await session.end(
+          sessionId, 
+          { 
+            price:billingItem?.cost, 
+            charge_id:billingItem?.id
+          }
+        );
         setSessionId(null);
         setIsSubmitted(true);
         setIsSessionActive(false);
@@ -282,27 +290,22 @@ export default function AssessmentLoader({ patient, department }) {
 
         // MOVE TO NEXT TAB
         const pos = TABS.indexOf(activeTab);
-
         if (pos < TABS.length - 1) {
           setActiveTab(TABS[pos + 1]);
         }
-
         return;
       }
-
       // =========================
       // CLEAR
       // =========================
       if (type === "clear") {
         setIsSubmitted(false);
-
         setAssessmentsValues({
           subjective: {},
           objective: {},
           assessment: {},
           plan: {},
         });
-
         return;
       }
 
@@ -311,22 +314,18 @@ export default function AssessmentLoader({ patient, department }) {
       // =========================
       if (type === "save") {
         const templateDataId = templates?.[activeTab]?.id;
-
         if (!templateDataId) return;
-
         try {
           // ALL SUB ASSESSMENT FIELD NAMES
           const subAssessmentFieldNames = Object.values(
             subAssessmentTemplate?.[activeTab] || {},
           ).flatMap((sub) => {
             const names = [];
-
             (sub.sections || []).forEach((section) => {
               (section.fields || []).forEach((field) => {
                 if (field.name) {
                   names.push(field.name);
                 }
-
                 if (field.cols?.length) {
                   field.cols.forEach((col) => {
                     if (col.name) {
@@ -336,7 +335,6 @@ export default function AssessmentLoader({ patient, department }) {
                 }
               });
             });
-
             return names;
           });
 
@@ -346,9 +344,7 @@ export default function AssessmentLoader({ patient, department }) {
               ([key]) => !subAssessmentFieldNames.includes(key),
             ),
           );
-
           await forms.save(templateDataId, parentAssessmentData);
-
           setToast({
             message: "Saved",
             variant: "success",
@@ -406,23 +402,17 @@ export default function AssessmentLoader({ patient, department }) {
                     key,
                     {
                       ...template,
-
                       // IMPORTANT
                       ...tm.data.body,
-
                       // KEEP ACTIONS
                       actions: actions.ACTIONS_BUTTON,
-
                       // KEEP SESSION INSTANCE ID
                       session_id: template.session_id,
-
                       // KEEP ORIGINAL FORM TEMPLATE ID
                       id: template.id,
-
                       name: tm.data.name,
                       type: tm.data.type,
                       score: tm.data.score,
-
                       loaded: true,
                     },
                   ];
@@ -481,33 +471,10 @@ export default function AssessmentLoader({ patient, department }) {
           title="Submit Assessment?"
           confirmLabel="Submit Assessment"
           onConfirm={async () => {
-            try {
-              // SAVE FINAL PLAN DATA
-              await handleAction("next");
-
-              // FETCH SESSION BILLING
-              const billingResponse =
-                await forms.fetchSessionCharge(department);
-
-              const billingItem = billingResponse?.data?.data?.[0];
-
-              const charge_id = billingItem?.id;
-
-              const cost = billingItem?.cost;
-
-              // OPTIONAL:
-              // save/store/send these values later
-
-              // END SESSION
-              await handleEndSession();
-
-              setIsConfirmModal(false);
-            } catch (e) {
-              setToast({
-                message: "Failed to submit assessment",
-                variant: "error",
-              });
-            }
+            // save final plan data first
+            await handleAction("next");
+            // then end session
+            await handleEndSession();
           }}
           onCancel={() => setIsConfirmModal(false)}
           message="You are about to finalise and submit this assessment."
