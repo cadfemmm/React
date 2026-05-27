@@ -66,6 +66,125 @@ const YES_NO = [
   { label: "No", value: "no" },
 ];
 
+const OTHER_SKIN_CONDITIONS_SHOW_IF = {
+  or: [
+    { field: "skin_lesion_or_rash_present", equals: "yes" },
+    { field: "skin_integrity", oneOf: ["rash", "erythema"] },
+    {
+      field: "skin_surface",
+      oneOf: ["scaling", "crusting", "blistering", "non_scaling", "migratory_rash"],
+    },
+  ],
+};
+
+const SINGLE_WOUND_SHOW_IF = {
+  field: "wound_number",
+  equals: "single",
+  and: {
+    or: [
+      { field: "open_wound_present_initial", equals: "yes" },
+      { field: "skin_moisture", equals: "excess_moisture" },
+    ],
+  },
+};
+
+function buildTimeFrameworkFields(namePrefix = "", showIf) {
+  const n = (key) => (namePrefix ? `${namePrefix}_${key}` : key);
+  const field = (f) => (showIf ? { ...f, showIf } : f);
+  return [
+    field({ type: "subheading", label: "Tissue type:" }),
+    field({
+      name: n("time_tissue_type"),
+      label: "Tissue type",
+      type: "radio",
+      options: [
+        { label: "Granulation", value: "granulation" },
+        { label: "Epithelialising", value: "epithelialising" },
+        { label: "Slough", value: "slough" },
+        { label: "Eschar / necrotic", value: "eschar_necrotic" },
+        { label: "Mixed", value: "mixed" },
+      ],
+    }),
+    field({ type: "subheading", label: "Infection / Inflammation:" }),
+    field({
+      name: n("time_infection"),
+      label: "Infection / Inflammation",
+      type: "radio",
+      options: [
+        { label: "Clean", value: "clean" },
+        { label: "Contaminated", value: "contaminated" },
+        { label: "Critically colonised", value: "critically_colonised" },
+        { label: "Locally infected", value: "locally_infected" },
+        { label: "Spreading infection", value: "spreading_infection" },
+      ],
+    }),
+    field({
+      name: n("time_infection_signs"),
+      label: "Signs",
+      type: "checkbox-group",
+      options: [
+        { label: "Increased exudate", value: "increased_exudate" },
+        { label: "Malodour", value: "malodour" },
+        { label: "Erythema", value: "erythema" },
+        { label: "Warmth", value: "warmth" },
+        { label: "Pain", value: "pain" },
+        { label: "Oedema", value: "oedema" },
+      ],
+    }),
+    field({ type: "subheading", label: "Moisture / Exudate:" }),
+    field({
+      name: n("time_moisture_amount"),
+      label: "Amount",
+      type: "radio",
+      options: [
+        { label: "None", value: "none" },
+        { label: "Light", value: "light" },
+        { label: "Moderate", value: "moderate" },
+        { label: "Heavy", value: "heavy" },
+      ],
+    }),
+    field({
+      name: n("time_moisture_type"),
+      label: "Type",
+      type: "radio",
+      options: [
+        { label: "Serous", value: "serous" },
+        { label: "Haemoserous", value: "haemoserous" },
+        { label: "Haemorrhagic", value: "haemorrhagic" },
+        { label: "Purulent", value: "purulent" },
+        { label: "Mixed", value: "mixed" },
+      ],
+    }),
+    field({ type: "subheading", label: "Edge / Periwound:" }),
+    field({
+      name: n("time_edge"),
+      label: "Edge",
+      type: "radio",
+      options: [
+        { label: "Well-defined", value: "well_defined" },
+        { label: "Irregular", value: "irregular" },
+        { label: "Rolled/epibole", value: "rolled_epibole" },
+        { label: "Undermined", value: "undermined" },
+        { label: "Attached", value: "attached" },
+        { label: "Non-attached", value: "non_attached" },
+      ],
+    }),
+    field({
+      name: n("time_periwound"),
+      label: "Periwound",
+      type: "radio",
+      options: [
+        { label: "Intact", value: "intact" },
+        { label: "Macerated", value: "macerated" },
+        { label: "Erythema", value: "erythema" },
+        { label: "Oedema", value: "oedema" },
+        { label: "Callous", value: "callous" },
+        { label: "Eczema", value: "eczema" },
+      ],
+    }),
+  ];
+}
+
 const LESION_REFERENCE_IMAGES = {
   macule: maculeRef,
   papule: papuleRef,
@@ -136,6 +255,7 @@ export default function SkinAssessment({ onChange }) {
               name: "skin_integrity",
               label: "Skin Integrity",
               type: "radio",
+              labelAbove: true,
               options: [
                 { label: "Intact", value: "intact" },
                 { label: "Dry", value: "dry" },
@@ -143,7 +263,17 @@ export default function SkinAssessment({ onChange }) {
                 { label: "Macerated", value: "macerated" },
                 { label: "Rash", value: "rash" },
                 { label: "Erythema", value: "erythema" },
+                { label: "Non-blanchable erythema", value: "non_blanchable_erythema" },
+                { label: "Erythema migrans", value: "erythema_migrans" },
+                { label: "Skin tears", value: "skin_tears" },
+                { label: "Other", value: "other" },
               ],
+            },
+            {
+              name: "skin_integrity_other_specify",
+              label: "Specify",
+              type: "input",
+              showIf: { field: "skin_integrity", equals: "other" },
             },
             {
               name: "skin_colour",
@@ -157,7 +287,18 @@ export default function SkinAssessment({ onChange }) {
                 { label: "Jaundice", value: "jaundice" },
                 { label: "Hyperpigmentation", value: "hyperpigmentation" },
                 { label: "Hypopigmentation", value: "hypopigmentation" },
+                { label: "Erythema", value: "erythema" },
+                { label: "Petechiae", value: "petechiae" },
+                { label: "Purpura", value: "purpura" },
+                { label: "Ecchymosis", value: "ecchymosis" },
+                { label: "Other", value: "other" },
               ],
+            },
+            {
+              name: "skin_colour_other_specify",
+              label: "Specify",
+              type: "input",
+              showIf: { field: "skin_colour", equals: "other" },
             },
             {
               name: "skin_temperature",
@@ -165,6 +306,7 @@ export default function SkinAssessment({ onChange }) {
               type: "radio",
               options: [
                 { label: "Warm", value: "warm" },
+                { label: "Hot", value: "hot" },
                 { label: "Cool", value: "cool" },
               ],
             },
@@ -181,13 +323,9 @@ export default function SkinAssessment({ onChange }) {
               name: "edema",
               label: "Edema",
               type: "radio",
-              labelAbove: true,
               options: [
-                { label: "None", value: "none" },
-                { label: "1+ (Mild)", value: "1_mild" },
-                { label: "2+ (Moderate)", value: "2_moderate" },
-                { label: "3+ (Severe)", value: "3_severe" },
-                { label: "4+ (Very Severe)", value: "4_very_severe" },
+                { label: "Pitting", value: "pitting" },
+                { label: "Non-pitting", value: "non_pitting" },
               ],
             },
             {
@@ -211,6 +349,7 @@ export default function SkinAssessment({ onChange }) {
               options: [
                 { label: "Reduced Sensation", value: "reduced_sensation" },
                 { label: "Numbness", value: "numbness" },
+                { label: "10g Monofilament fail", value: "monofilament_10g_fail" },
                 { label: "None", value: "none" },
               ],
             },
@@ -221,6 +360,21 @@ export default function SkinAssessment({ onChange }) {
               type: "radio",
               options: [
                 { label: "Excess Moisture", value: "excess_moisture" },
+                {
+                  label: "IAD",
+                  value: "iad",
+                  tooltip: "Incontinence-Associated Dermatitis",
+                },
+                {
+                  label: "ITD",
+                  value: "itd",
+                  tooltip: "Intertriginous Dermatitis",
+                },
+                {
+                  label: "Periwound MASD",
+                  value: "periwound_masd",
+                  tooltip: "Periwound Moisture-Associated Skin Damage",
+                },
                 { label: "None", value: "none" },
               ],
             },
@@ -448,6 +602,8 @@ export default function SkinAssessment({ onChange }) {
                 { label: "Burning", value: "burning" },
                 { label: "Tenderness", value: "tenderness" },
                 { label: "Fever", value: "fever" },
+                { label: "Exudate / discharge", value: "exudate_discharge" },
+                { label: "Sleep disturbance", value: "sleep_disturbance" },
               ],
             },
 
@@ -566,95 +722,87 @@ export default function SkinAssessment({ onChange }) {
             {
               type: "subheading",
               label: "Other Skin Conditions",
+              showIf: OTHER_SKIN_CONDITIONS_SHOW_IF,
+            },
+            {
+              name: "other_skin_conditions_autoimmune",
+              label: "Autoimmune / Chronic",
+              type: "checkbox-group",
+              showIf: OTHER_SKIN_CONDITIONS_SHOW_IF,
+              options: [
+                { label: "Psoriasis", value: "psoriasis" },
+                { label: "Lupus (SLE)", value: "lupus_sle" },
+                { label: "Bullous pemphigoid", value: "bullous_pemphigoid" },
+                { label: "Pemphigus", value: "pemphigus" },
+                { label: "Other", value: "other" },
+              ],
+            },
+            {
+              name: "other_skin_conditions_autoimmune_other_specify",
+              label: "Specify",
+              type: "input",
               showIf: {
-                or: [
-                  { field: "skin_lesion_or_rash_present", equals: "yes" },
-                  { field: "skin_integrity", oneOf: ["rash", "erythema"] },
-                  {
-                    field: "skin_surface",
-                    oneOf: ["scaling", "crusting", "blistering", "non_scaling", "migratory_rash"],
-                  },
-                ],
+                field: "other_skin_conditions_autoimmune",
+                includes: "other",
               },
             },
             {
-              type: "row",
-              showIf: {
-                or: [
-                  { field: "skin_lesion_or_rash_present", equals: "yes" },
-                  { field: "skin_integrity", oneOf: ["rash", "erythema"] },
-                  {
-                    field: "skin_surface",
-                    oneOf: ["scaling", "crusting", "blistering", "non_scaling", "migratory_rash"],
-                  },
-                ],
-              },
-              fields: [
+              name: "other_skin_conditions_neoplastic",
+              label: "Neoplastic",
+              type: "checkbox-group",
+              showIf: OTHER_SKIN_CONDITIONS_SHOW_IF,
+              options: [
+                { label: "Melanoma", value: "melanoma" },
+                { label: "Basal cell carcinoma", value: "basal_cell_carcinoma" },
                 {
-                  name: "other_skin_conditions_autoimmune",
-                  label: "Autoimmune / Chronic",
-                  type: "checkbox-group",
-                  options: [{ label: "Psoriasis", value: "psoriasis" }],
-                },
-                {
-                  name: "other_skin_conditions_neoplastic",
-                  label: "Neoplastic",
-                  type: "checkbox-group",
-                  options: [
-                    { label: "Melanoma", value: "melanoma" },
-                    { label: "Basal cell carcinoma", value: "basal_cell_carcinoma" },
-                  ],
+                  label: "Squamous cell carcinoma (NICE NG12)",
+                  value: "squamous_cell_carcinoma_nice_ng12",
                 },
               ],
             },
             {
-              type: "row",
-              showIf: {
-                or: [
-                  { field: "skin_lesion_or_rash_present", equals: "yes" },
-                  { field: "skin_integrity", oneOf: ["rash", "erythema"] },
-                  {
-                    field: "skin_surface",
-                    oneOf: ["scaling", "crusting", "blistering", "non_scaling", "migratory_rash"],
-                  },
-                ],
-              },
-              fields: [
-                {
-                  name: "other_skin_conditions_structural",
-                  label: "Structural",
-                  type: "checkbox-group",
-                  options: [
-                    { label: "Epidermal cyst", value: "epidermal_cyst" },
-                    { label: "Follicular accentuation", value: "follicular_accentuation" },
-                  ],
-                },
-                {
-                  name: "other_skin_conditions_tick_borne",
-                  label: "Tick-borne",
-                  type: "checkbox-group",
-                  options: [{ label: "Lyme disease (Erythema migrans)", value: "lyme_disease" }],
-                },
+              name: "other_skin_conditions_structural",
+              label: "Structural",
+              type: "checkbox-group",
+              showIf: OTHER_SKIN_CONDITIONS_SHOW_IF,
+              options: [
+                { label: "Epidermal cyst", value: "epidermal_cyst" },
+                { label: "Follicular accentuation", value: "follicular_accentuation" },
               ],
             },
             {
-              type: "row",
-              showIf: {
-                or: [
-                  { field: "skin_lesion_or_rash_present", equals: "yes" },
-                  { field: "skin_integrity", oneOf: ["rash", "erythema"] },
-                  {
-                    field: "skin_surface",
-                    oneOf: ["scaling", "crusting", "blistering", "non_scaling", "migratory_rash"],
-                  },
-                ],
-              },
-              fields: [
+              name: "other_skin_conditions_tick_borne",
+              label: "Tick-borne",
+              type: "checkbox-group",
+              showIf: OTHER_SKIN_CONDITIONS_SHOW_IF,
+              options: [{ label: "Lyme disease (Erythema migrans)", value: "lyme_disease" }],
+            },
+            {
+              name: "other_skin_conditions_drug_reaction",
+              label: "Drug Reaction",
+              type: "checkbox-group",
+              showIf: OTHER_SKIN_CONDITIONS_SHOW_IF,
+              options: [
+                { label: "Fixed drug eruption", value: "fixed_drug_eruption" },
                 {
-                  name: "other_skin_conditions_drug_reaction",
-                  label: "Drug Reaction",
-                  type: "checkbox-group",
-                  options: [{ label: "Drug eruption", value: "drug_eruption" }],
+                  label: "SJS",
+                  value: "sjs",
+                  tooltip: "Stevens-Johnson Syndrome",
+                },
+                {
+                  label: "TEN",
+                  value: "ten",
+                  tooltip: "Toxic Epidermal Necrolysis",
+                },
+                {
+                  label: "DRESS syndrome",
+                  value: "dress_syndrome",
+                  tooltip: "Drug Reaction with Eosinophilia & Systemic Symptoms",
+                },
+                {
+                  label: "AGEP",
+                  value: "agep",
+                  tooltip: "Acute Generalised Exanthematous Pustulosis",
                 },
               ],
             },
@@ -934,27 +1082,6 @@ export default function SkinAssessment({ onChange }) {
               },
             },
             {
-              name: "single_tissue_type",
-              label: "Tissue Type",
-              type: "radio",
-              options: [
-                { label: "Granulation", value: "granulation" },
-                { label: "Slough", value: "slough" },
-                { label: "Necrotic tissue", value: "necrotic" },
-                { label: "Epithelial tissue", value: "epithelial" },
-              ],
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
-            },
-            {
               type: "subheading",
               label: "Percentage (%)",
               showIf: {
@@ -1000,121 +1127,10 @@ export default function SkinAssessment({ onChange }) {
             },
             {
               type: "subheading",
-              label: "Exudate Assessment",
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
+              label: "Characterisation — TIME Framework",
+              showIf: SINGLE_WOUND_SHOW_IF,
             },
-            {
-              name: "single_exudate_amount",
-              label: "Amount",
-              type: "radio",
-              options: [
-                { label: "None", value: "none" },
-                { label: "Mild", value: "mild" },
-                { label: "Moderate", value: "moderate" },
-                { label: "Heavy", value: "heavy" },
-              ],
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
-            },
-            {
-              name: "single_exudate_type",
-              label: "Type",
-              type: "radio",
-              options: [
-                { label: "Serous", value: "serous" },
-                { label: "Serosanguineous", value: "serosanguineous" },
-                { label: "Purulent", value: "purulent" },
-              ],
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
-            },
-            {
-              name: "single_exudate_odor",
-              label: "Odor",
-              type: "radio",
-              options: [
-                { label: "None", value: "none" },
-                { label: "Mild", value: "mild" },
-                { label: "Foul", value: "foul" },
-              ],
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
-            },
-            {
-              name: "single_wound_edge",
-              label: "Wound Edge",
-              type: "radio",
-              options: [
-                { label: "Advancing", value: "advancing" },
-                { label: "Rolled (Epibole)", value: "rolled" },
-                { label: "Undermined", value: "undermined" },
-              ],
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
-            },
-            {
-              name: "single_peri_wound_skin",
-              label: "Peri-wound skin",
-              type: "radio",
-              options: [
-                { label: "Normal", value: "normal" },
-                { label: "Macerated", value: "macerated" },
-                { label: "Erythematous", value: "erythematous" },
-                { label: "Indurated", value: "indurated" },
-                { label: "Calloused", value: "calloused" },
-              ],
-              showIf: {
-                field: "wound_number",
-                equals: "single",
-                and: {
-                  or: [
-                    { field: "open_wound_present_initial", equals: "yes" },
-                    { field: "skin_moisture", equals: "excess_moisture" },
-                  ],
-                },
-              },
-            },
+            ...buildTimeFrameworkFields("single", SINGLE_WOUND_SHOW_IF),
             {
               name: "single_wound_pain_score",
               label: "Wound Pain (0–10)",
@@ -1304,17 +1320,6 @@ export default function SkinAssessment({ onChange }) {
                   showIf: { field: "wound_type", includes: "pressure_injury" },
                 },
                 { type: "subheading", label: "Wound Bed Assessment" },
-                {
-                  name: "tissue_type",
-                  label: "Tissue Type",
-                  type: "radio",
-                  options: [
-                    { label: "Granulation", value: "granulation" },
-                    { label: "Slough", value: "slough" },
-                    { label: "Necrotic tissue", value: "necrotic" },
-                    { label: "Epithelial tissue", value: "epithelial" },
-                  ],
-                },
                 { type: "subheading", label: "Percentage (%)" },
                 {
                   type: "row",
@@ -1337,61 +1342,8 @@ export default function SkinAssessment({ onChange }) {
                   ],
                 },
 
-                { type: "subheading", label: "Exudate Assessment" },
-                {
-                  name: "exudate_amount",
-                  label: "Amount",
-                  type: "radio",
-                  options: [
-                    { label: "None", value: "none" },
-                    { label: "Mild", value: "mild" },
-                    { label: "Moderate", value: "moderate" },
-                    { label: "Heavy", value: "heavy" },
-                  ],
-                },
-                {
-                  name: "exudate_type",
-                  label: "Type",
-                  type: "radio",
-                  options: [
-                    { label: "Serous", value: "serous" },
-                    { label: "Serosanguineous", value: "serosanguineous" },
-                    { label: "Purulent", value: "purulent" },
-                  ],
-                },
-                {
-                  name: "exudate_odor",
-                  label: "Odor",
-                  type: "radio",
-                  options: [
-                    { label: "None", value: "none" },
-                    { label: "Mild", value: "mild" },
-                    { label: "Foul", value: "foul" },
-                  ],
-                },
-
-                {
-                  name: "wound_edge",
-                  label: "Wound Edge",
-                  type: "radio",
-                  options: [
-                    { label: "Advancing", value: "advancing" },
-                    { label: "Rolled (Epibole)", value: "rolled" },
-                    { label: "Undermined", value: "undermined" },
-                  ],
-                },
-                {
-                  name: "peri_wound_skin",
-                  label: "Peri-wound skin",
-                  type: "radio",
-                  options: [
-                    { label: "Normal", value: "normal" },
-                    { label: "Macerated", value: "macerated" },
-                    { label: "Erythematous", value: "erythematous" },
-                    { label: "Indurated", value: "indurated" },
-                    { label: "Calloused", value: "calloused" },
-                  ],
-                },
+                { type: "subheading", label: "Characterisation — TIME Framework" },
+                ...buildTimeFrameworkFields(),
 
                 {
                   name: "wound_pain_score",
@@ -1432,7 +1384,7 @@ export default function SkinAssessment({ onChange }) {
             {
               name: "intervention_infection_control",
               label: "Infection Control",
-              type: "radio",
+              type: "checkbox-group",
               options: [
                 { label: "Wound debridement", value: "wound_debridement" },
                 { label: "Antimicrobial dressing", value: "antimicrobial_dressing" },
@@ -1442,7 +1394,7 @@ export default function SkinAssessment({ onChange }) {
             {
               name: "intervention_pressure_relief",
               label: "Pressure Relief",
-              type: "radio",
+              type: "checkbox-group",
               options: [
                 { label: "2-hourly repositioning", value: "two_hourly_repositioning" },
                 { label: "Offloading device", value: "offloading_device" },
@@ -1451,7 +1403,7 @@ export default function SkinAssessment({ onChange }) {
             {
               name: "intervention_rehabilitation",
               label: "Rehabilitation",
-              type: "radio",
+              type: "checkbox-group",
               options: [
                 { label: "Bed mobility training", value: "bed_mobility_training" },
                 { label: "Transfer training", value: "transfer_training" },
@@ -1541,18 +1493,29 @@ export default function SkinAssessment({ onChange }) {
     if (name === "wound_blocks") {
       const blocks = value || [];
       const hasInfectedBlock = blocks.some(
-        (b) => b?.exudate_type === "purulent" && b?.exudate_odor === "foul"
+        (b) =>
+          b?.time_moisture_type === "purulent" &&
+          Array.isArray(b?.time_infection_signs) &&
+          b.time_infection_signs.includes("malodour")
       );
       if (hasInfectedBlock) {
-        window.alert("Possible wound infection: Purulent exudate with foul odor. Please consider urgent review.");
+        window.alert("Possible wound infection: Purulent exudate with malodour. Please consider urgent review.");
       }
     }
 
-    if (name === "single_exudate_type" || name === "single_exudate_odor") {
-      const typeVal = name === "single_exudate_type" ? value : values.single_exudate_type;
-      const odorVal = name === "single_exudate_odor" ? value : values.single_exudate_odor;
-      if (typeVal === "purulent" && odorVal === "foul") {
-        window.alert("Possible wound infection: Purulent exudate with foul odor. Please consider urgent review.");
+    if (name === "single_time_moisture_type" || name === "single_time_infection_signs") {
+      const typeVal =
+        name === "single_time_moisture_type" ? value : values.single_time_moisture_type;
+      const signs =
+        name === "single_time_infection_signs"
+          ? value
+          : values.single_time_infection_signs || [];
+      if (
+        typeVal === "purulent" &&
+        Array.isArray(signs) &&
+        signs.includes("malodour")
+      ) {
+        window.alert("Possible wound infection: Purulent exudate with malodour. Please consider urgent review.");
       }
     }
   };

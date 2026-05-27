@@ -12,7 +12,7 @@ export default function SwallowingAndSpeechAssessment() {
     title: "Swallowing and Speech Assessment",
     sections: [
       {
-        title: "Swallowing",
+        
         fields: [
           {
             type: "radio",
@@ -395,7 +395,7 @@ export default function SwallowingAndSpeechAssessment() {
       },
 
       {
-        title: "Speech and Language",
+       
         fields: [
           {
             type: "radio",

@@ -39,7 +39,7 @@ const VISUAL_SECTIONS = [
        VISION STATUS
     ===================================================== */
     {
-      title: "Vision Issue",
+      
       fields: [
         {
           type: "radio",

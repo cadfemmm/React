@@ -107,7 +107,7 @@ function AssessmentCard({ card, onClick }) {
 
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
 
-function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, selectable }) {
+function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, selectable, actionLabel, onActionClick }) {
   const [hovered, setHovered] = useState(false);
   const displayName = p.name || p.patient_name || p.email || "—";
   const initial = (displayName[0] || "P").toUpperCase();
@@ -166,11 +166,11 @@ function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, select
         </div>
       ) : (
         <div style={{ textAlign: "right" }}>
-          <button type="button" onClick={(e) => { e.stopPropagation(); onStart?.(); }}
+          <button type="button" onClick={(e) => { e.stopPropagation(); onActionClick ? onActionClick(p) : onStart?.(); }}
             onMouseEnter={e => { e.currentTarget.style.background = "#0058FF"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "#0058FF"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#0058FF"; e.currentTarget.style.borderColor = "#BFDBFE"; }}
             style={{ background: "#fff", border: "1px solid #2563EB", color: "#2563EB", borderRadius: 999, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all .18s" }}>
-            Begin assessment
+            {actionLabel || "Begin assessment"}
           </button>
         </div>
       )}
@@ -252,6 +252,8 @@ export default function DepartmentPatients({
   listOnly = false,
   title,
   patientsFromApp,
+  actionLabel,    // optional: overrides "Begin assessment" button text
+  onRowAction,    // optional: overrides button click — receives the patient object
 }) {
   const userRole = localStorage.getItem("userRole") || "";
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -517,6 +519,8 @@ export default function DepartmentPatients({
                 selectable={rapPatientPicker}
                 onPatientClick={rapPatientPicker ? setSelectedPatient : undefined}
                 onStart={listOnly ? undefined : () => setSelectedPatient(p)}
+                actionLabel={actionLabel}
+                onActionClick={onRowAction}
               />
             ))
           )

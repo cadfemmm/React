@@ -4,14 +4,20 @@ import api from "../../shared/api/apiClient";
 import { API_URL } from "../../platform/config/api.config";
 import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
+import ProgressIntervention from "./ProgressIntervention";
+import GroupIntervention from "./GroupIntervention";
+import CheckoutAssessment from "./Checkout";
 import WheelchairAssessment from "./WheelchairAssessment";
 import ThreeDAssessment from "./ThreeDAssessment";
+import ThreeDProgress from './ThreeDProgress';
+import WheelchairGroup from './WheelchairGroup'
 
 const ASSESSMENT_CARDS = [
   { id: "initial",  title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "New Patient",   tagBg: "#dbeafe", tagColor: "#1d4ed8" },
   { id: "followup", title: "Follow-up Visit",        desc: "Review progress and adjust treatment plan",        icon: "🔄", accent: "#059669", tag: "Returning",     tagBg: "#d1fae5", tagColor: "#065f46" },
   { id: "progress", title: "Progress Intervention",  desc: "Document interventions and track outcomes",        icon: "📈", accent: "#7C3AED", tag: "Ongoing Care",  tagBg: "#ede9fe", tagColor: "#5b21b6" },
   { id: "group",    title: "Group Intervention",     desc: "Record group session and multi-patient notes",     icon: "👥", accent: "#DC2626", tag: "Group Session", tagBg: "#fee2e2", tagColor: "#991b1b" },
+  { id: "checkout", title: "Check Out", desc: "Finalize visit, confirm completion and discharge workflow", icon: "✅", accent: "#EA580C", tag: "Visit Closure", tagBg: "#ffedd5", tagColor: "#9a3412" }
 ];
 
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
@@ -125,12 +131,60 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
 
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentMode) {
+    // if (selectedCard === "Wheelchair") {
+    //   return <WheelchairAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
+    // }
+    // if (selectedCard === "3D") {
+    //   return <ThreeDAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
+    // }
     if (selectedCard === "Wheelchair") {
-      return <WheelchairAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
-    }
-    if (selectedCard === "3D") {
-      return <ThreeDAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
-    }
+
+  // initial, followup, progress → WheelchairAssessment
+  if (["initial", "followup", "progress"].includes(assessmentMode)) {
+    return (
+      <WheelchairAssessment
+        patient={selectedPatient}
+        mode={assessmentMode}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+
+  // group → WheelchairGroup
+  if (assessmentMode === "group") {
+    return (
+      <WheelchairGroup
+        patient={selectedPatient}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+}
+
+if (selectedCard === "3D") {
+
+  // initial, followup, group → ThreeDAssessment
+  if (["initial", "followup", "group"].includes(assessmentMode)) {
+    return (
+      <ThreeDAssessment
+        patient={selectedPatient}
+        mode={assessmentMode}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+
+  // progress → ThreeDProgressAssessment
+  if (assessmentMode === "progress") {
+    return (
+      <ThreeDProgress
+        patient={selectedPatient}
+        onBack={() => setAssessmentMode(null)}
+      />
+    );
+  }
+}
+
     // Follow-up → dedicated follow-up form
     if (assessmentMode === "followup") {
       return (
@@ -141,6 +195,36 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
         />
       );
     }
+    // Progress Intervention
+    if (assessmentMode === "progress") {
+      return (
+        <ProgressIntervention
+          patient={selectedPatient}
+          onBack={() => setAssessmentMode(null)}
+          onSubmit={() => setAssessmentMode(null)}
+        />
+      );
+    }
+    // Group Intervention
+    if (assessmentMode === "group") {
+      return (
+        <GroupIntervention
+          patient={selectedPatient}
+          onBack={() => setAssessmentMode(null)}
+          onSubmit={() => setAssessmentMode(null)}
+        />
+      );
+    }    
+    // Checkout Intervention
+    if (assessmentMode === "checkout") {
+      return (
+        <CheckoutAssessment
+          patient={selectedPatient}
+          onBack={() => setAssessmentMode(null)}
+          onSubmit={() => setAssessmentMode(null)}
+        />
+      );
+    }       
     // Initial / Progress / Group → main assessment form with mode passed
     return (
       <OrthoticsAssessment
@@ -152,7 +236,9 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
   }
 
   /* ── Step 2: Assessment type selection (My Appointments only) ── */
-  if (selectedPatient && selectedCard === "My Appointments") {
+  // if (selectedPatient && selectedCard === "My Appointments") {
+  if (selectedPatient && selectedCard) {
+
     const initials = (selectedPatient.name || selectedPatient.email || "P")
       .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
     const avatarBg = AVATAR_COLORS[initials.charCodeAt(0) % AVATAR_COLORS.length];

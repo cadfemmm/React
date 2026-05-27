@@ -86,7 +86,7 @@ const AMBULATORY_OPTIONS = [
   { label: "Others", value: "others" }
 ];
 
-export default function VocationalRehab({ patient, onUpdatePatient, onSubmit, onBack }) {
+export default function VocationalRehab({ patient, onUpdatePatient, onSubmit, onBack,onValuesChange }) {
   const [values, setValues] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
@@ -146,10 +146,21 @@ export default function VocationalRehab({ patient, onUpdatePatient, onSubmit, on
     onUpdatePatient?.(updated);
   }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
 
-  const onChange = (name, value) => {
-    setValues(v => ({ ...v, [name]: value }));
-  };
+  // const onChange = (name, value) => {
+  //   setValues(v => ({ ...v, [name]: value }));
+  // };
+const onChange = (name, value) => {
+  setValues(v => {
+    const updated = {
+      ...v,
+      [name]: value
+    };
 
+    onValuesChange?.(updated);
+
+    return updated;
+  });
+};
   const handleAction = (type) => {
     if (type === "back") onBack?.();
     if (type === "clear") {
@@ -196,6 +207,11 @@ export default function VocationalRehab({ patient, onUpdatePatient, onSubmit, on
 
 const SUBJECTIVE_SCHEMA = {
   title: "",
+   actions: [
+      { type: "back", label: "Back" },
+      { type: "clear", label: "Clear" },
+      { type: "save", label: "Save" }
+    ],
   sections: [
     {
       fields: [
@@ -420,7 +436,11 @@ const CONSENT_AND_REFERRAL_SCHEMA = {
 
  const OBJECTIVE_SCHEMA = {
   title: "",
-
+ actions: [
+      { type: "back", label: "Back" },
+      { type: "clear", label: "Clear" },
+      { type: "save", label: "Save" }
+    ],
   sections: [
     {
       fields: [
@@ -471,7 +491,12 @@ const CONSENT_AND_REFERRAL_SCHEMA = {
 }
 
 const ASSESSMENT_SCHEMA = {
-  actions: SUBJECTIVE_SCHEMA.actions,
+ actions: [
+      { type: "back", label: "Back" },
+      { type: "clear", label: "Clear" },
+      { type: "save", label: "Save" }
+    ],
+  // actions: SUBJECTIVE_SCHEMA.actions,
   fields: [
     { type: "subheading", label: "Clinical Interpretation" },
     {

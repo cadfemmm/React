@@ -1,17 +1,18 @@
 import React, { useMemo, useState } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import humanBodyImage from "../../../assets/Human Body.jpg";
-import faces0 from "../../../assets/faces-0.png";
-import faces2 from "../../../assets/faces-2.png";
-import faces4 from "../../../assets/faces-4.png";
-import faces6 from "../../../assets/faces-6.png";
-import faces8 from "../../../assets/faces-8.png";
-import faces10 from "../../../assets/faces-10.png";
+import faces0 from "../../../assets/face0.png";
+import faces2 from "../../../assets/face2.png";
+import faces4 from "../../../assets/face4.png";
+import faces6 from "../../../assets/face6.png";
+import faces8 from "../../../assets/face8.png";
+import faces10 from "../../../assets/face10.png";
 import OswestryLowBackPainAssessment from "./OswestryLowBackPainAssessment";
 import BriefPainInventoryAssessment from "./BriefPainInventoryAssessment";
 import KOOSKneeSurvey from "./KOOSKneeSurvey";
 import SPADIShoulderAssessment from "./SPADIShoulderAssessment";
 import BCTQAssessment from "./BCTQAssessment";
+import { SEGMENTED_BODY_DIAGRAM_VIEWS } from "../../../shared/utils/bodyDiagramViews";
 
 
 export default function PainAssessmentForm({ values, onChange }) {
@@ -27,11 +28,7 @@ export default function PainAssessmentForm({ values, onChange }) {
             {
               name: "wound_location_pins", label: "Mark Wound Location on Body Diagram",
               type: "wound-location-marker",
-              views: [
-                { key: "body",  label: "Body (Front/Back)", src: "/body_high.png" },
-                { key: "feet",  label: "Feet",             src: "/feet_high.png" },
-                { key: "handsfeet", label: "Hands",              src: "/palm.png" }
-              ]
+              views: SEGMENTED_BODY_DIAGRAM_VIEWS
             },
             {
               name: "pain_onset",

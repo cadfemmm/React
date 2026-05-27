@@ -166,9 +166,10 @@ const SPASM_SPASTICITY_REGISTRY = {
 };
 
 const SPASM_SPASTICITY_SCHEMA = {
+   title: "Spasm & Spasticity Assessment",
   sections: [
     {
-      title: "Spasticity",
+      
       fields: [
         // Add Yes/No radio button for Spasticity presence
         { 
@@ -464,28 +465,6 @@ const SPASM_SPASTICITY_SCHEMA = {
           ],
           showIf: { field: "spasticity_present", equals: "Yes" },
         },
-        { type: "subheading", label: "Activity & Participation", showIf: { field: "spasticity_present", equals: "Yes" } },
-        {
-          type: "radio",
-          name: "spasticity_activity_walking",
-          label: "Walking",
-          options: ["Independent", "Assist", "Dependent"],
-          showIf: { field: "spasticity_present", equals: "Yes" },
-        },
-        {
-          type: "radio",
-          name: "spasticity_activity_hand_use",
-          label: "Hand use",
-          options: ["Functional", "Impaired"],
-          showIf: { field: "spasticity_present", equals: "Yes" },
-        },
-        {
-          type: "radio",
-          name: "spasticity_activity_position_change",
-          label: "Position change",
-          options: ["Independent", "Dependent"],
-          showIf: { field: "spasticity_present", equals: "Yes" },
-        },
         { type: "subheading", label: "Environmental", showIf: { field: "spasticity_present", equals: "Yes" } },
         {
           type: "radio",
@@ -642,7 +621,7 @@ const SPASM_SPASTICITY_SCHEMA = {
     },
     
     {
-      title: "Spasm",
+     
       fields: [
         { type: "radio", name: "spasm_present", label: "Spasms", options: yesNo },
         { type: "subheading", label: "Symptoms", showIf: { field: "spasm_present", equals: "Yes" } },
@@ -719,7 +698,6 @@ const SPASM_SPASTICITY_SCHEMA = {
         { type: "radio", name: "spasm_hand_splint", label: "Antispastic hand splint", options: yesNo, showIf: { field: "spasm_orthosis_use", equals: "Yes" } },
         { type: "radio", name: "spasm_afo_type", label: "Ankle foot orthosis (AFO)", options: ["Solid AFO", "Hinged AFO", "Others"], showIf: { field: "spasm_orthosis_use", equals: "Yes" } },
         { type: "input", name: "spasm_afo_type_other_specify", label: "AFO - Others (Specify)", showIf: { field: "spasm_afo_type", equals: "Others" } },
-        { type: "input", name: "spasm_orthopaedic_procedure_specify", label: "Orthopaedic procedure (Specify)", showIf: { field: "spasm_orthopaedic_procedure", equals: "Yes" } },
         {
             type: "subheading",
             label: "Goals",
@@ -750,6 +728,7 @@ const SPASM_SPASTICITY_SCHEMA = {
         { type: "radio", name: "spasm_physical_therapy", label: "Physical therapy (stretching, casting, physical modality)", options: yesNo, showIf: { field: "spasm_present", equals: "Yes" } },
         { type: "radio", name: "spasm_orthosis_use", label: "Use of orthosis", options: yesNo, showIf: { field: "spasm_present", equals: "Yes" } },
         { type: "radio", name: "spasm_orthopaedic_procedure", label: "Orthopaedic procedure", options: yesNo, showIf: { field: "spasm_present", equals: "Yes" } },
+        { type: "input", name: "spasm_treatment_specify", label: "Specify", showIf: { field: "spasm_present", equals: "Yes" } },
       ],
     },
   ],

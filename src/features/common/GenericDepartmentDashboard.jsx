@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import api from "../../shared/api/apiClient";
+import { API_URL } from "../../platform/config/api.config";
 import DepartmentDashboard from "./DepartmentDashboard";
 import DepartmentPatients from "./DepartmentPatients";
+import ApproveDenyAssessments from "../Doctors/components/ApproveDenyAssessments";
 import {
   FaUserInjured, FaCalendarCheck, FaCalendarTimes, FaClock,
   FaStethoscope, FaShareSquare, FaFileInvoiceDollar, FaExclamationTriangle,
@@ -50,6 +53,30 @@ export default function GenericDepartmentDashboard({
 
   const [showPatients, setShowPatients] = useState(hasDeepLink);
   const [poSelectedCard, setPoSelectedCard] = useState(null); // tracks which P&O card was clicked
+  const [approveDenyPatients, setApproveDenyPatients] = useState([]);
+  const [approveDenyLoading, setApproveDenyLoading] = useState(false);
+  const [showApproveDeny, setShowApproveDeny] = useState(false);
+  const [approveDenyPatient, setApproveDenyPatient] = useState(null); // selected patient for assessment view
+
+  const handleApproveDenyClick = () => {
+    // Navigate immediately — data loads inside the patients page
+    setShowApproveDeny(true);
+
+    setApproveDenyLoading(true);
+    api.get(API_URL.REHAB_PATIENTS)
+      .then((res) => {
+        const list = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+          ? res.data.results
+          : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+        setApproveDenyPatients(list);
+      })
+      .catch((err) => console.error("Failed to fetch approve/deny patients:", err))
+      .finally(() => setApproveDenyLoading(false));
+  };
   const dept = departmentName.replace(" Department", "");
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
@@ -60,6 +87,34 @@ export default function GenericDepartmentDashboard({
       <ProstheticsAndOrthoticsPatients
         selectedCard={poSelectedCard || "My Appointments"}
         onBack={() => { setShowPatients(false); setPoSelectedCard(null); }}
+      />
+    );
+  }
+
+  /* ── Approve / Deny: assessment detail page for a specific patient ── */
+  if (showApproveDeny && approveDenyPatient) {
+    return (
+      <ApproveDenyAssessments
+        patient={approveDenyPatient}
+        onBack={() => setApproveDenyPatient(null)}
+      />
+    );
+  }
+
+  /* ── Approve / Deny Patients page (Doctor dept only) ── */
+  if (showApproveDeny) {
+    return (
+      <DepartmentPatients
+        department={dept}
+        onBack={() => { setShowApproveDeny(false); setApproveDenyPatients([]); setApproveDenyLoading(true); }}
+        AssessmentComponent={AssessmentComponent}
+        showAllPatients
+        patientsFromAppOnly
+        patientsFromApp={approveDenyPatients}
+        loading={approveDenyLoading}
+        title="Approve / Deny Patients"
+        actionLabel="View"
+        onRowAction={(patient) => setApproveDenyPatient(patient)}
       />
     );
   }
@@ -114,6 +169,18 @@ export default function GenericDepartmentDashboard({
         { label: "Referrals Today",     value: "6",  sub: "3 in · 3 out",          icon: <FaShareSquare size={16} />,         accent: "#06b6d4" },
         { label: "Pending Billing",     value: "RM 2,100", sub: "9 invoices",      icon: <FaFileInvoiceDollar size={16} />,   accent: "#f97316" },
         { label: "Follow-ups Overdue",  value: "4",  sub: "Requires attention",    icon: <FaExclamationTriangle size={16} />, accent: "#dc2626" },
+          ...(dept === "Doctor"
+            ? [{
+                label: "Approve / Deny Patients",
+                value: approveDenyLoading ? "5" : approveDenyPatients.length > 0 ? String(approveDenyPatients.length) : "5",
+                sub: "2 ICU · 3 Observation",
+                icon: <FaUserMd size={16} />,
+                accent: "#dc2626",
+                trend: "up",
+                trendVal: "+1",
+                onClick: handleApproveDenyClick,
+              }]
+            : []),
       ]}
       donutCards={[{
         title: "Patient Distribution",

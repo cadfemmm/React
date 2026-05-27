@@ -258,10 +258,23 @@ actions: [
     {
       label: "Side-Lying Hip Adduction",
       value: "side_lying_hip_adduction"
+    },
+     {
+      label: "Others",
+      value: "others"
     }
+   
   ]
 },
-
+ {
+    name: "mysofascial_chain_exercise_others",
+    label: "Others",
+    type: "input",
+    showIf: {
+      field: "mysofascial_chain_exercise",
+      includes: "others"
+    }
+  },
 // =====================================================
 // SUPINE PELVIC LIFT
 // =====================================================

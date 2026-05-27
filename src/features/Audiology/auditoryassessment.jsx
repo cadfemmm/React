@@ -81,6 +81,54 @@ export function AuditoryAdvancedForm({ onBack, mode }) {
   // =========================
   // HANDLE CHANGE
   // =========================
+  const COSI_SITUATION_OPTIONS = [
+    { label: "Conversation with 1 or 2 in quiet",    value: "conversation_1_2_quiet" },
+    { label: "Conversation with 1 or 2 in noise",    value: "conversation_1_2_noise" },
+    { label: "Conversation with group in quiet",     value: "conversation_group_quiet" },
+    { label: "Conversation with group in noise",     value: "conversation_group_noise" },
+    { label: "Television/Radio @ normal volume",     value: "tv_radio_normal_volume" },
+    { label: "Familiar speaker on phone",            value: "familiar_speaker_phone" },
+    { label: "Unfamiliar speaker on phone",          value: "unfamiliar_speaker_phone" },
+    { label: "Hearing phone ring from another room", value: "phone_ring_other_room" },
+    { label: "Hear front door bell or knock",        value: "door_bell_knock" },
+    { label: "Hear traffic",                         value: "hear_traffic" },
+    { label: "Increased social contact",             value: "increased_social_contact" },
+    { label: "Feel embarrassed or stupid",           value: "feel_embarrassed_stupid" },
+    { label: "Feeling left out",                     value: "feeling_left_out" },
+    { label: "Feeling upset or angry",               value: "feeling_upset_angry" },
+    { label: "Church or meeting",                    value: "church_meeting" },
+    { label: "Other",                                value: "other" }
+  ];
+
+  const cosiSituationLabelByValue = Object.fromEntries(
+    COSI_SITUATION_OPTIONS.map((o) => [o.value, o.label])
+  );
+
+  const COSI_RANK_OPTIONS = ["1", "2", "3", "4", "5"];
+
+  const syncCosiGoalsFromRankedSelections = (v) => {
+    const selected = v.hearing_situations || [];
+    const ranks = v.hearing_situations_rank || {};
+    const sorted = [...selected].sort(
+      (a, b) => Number(ranks[a] || 99) - Number(ranks[b] || 99)
+    );
+    v.cosi_goals = sorted.map((situationValue) => ({
+      goal: cosiSituationLabelByValue[situationValue] || situationValue,
+      priority: ranks[situationValue] || ""
+    }));
+    return v;
+  };
+
+  const handleCosiSituationsChange = (selected, ranks) => {
+    setValues((prev) =>
+      syncCosiGoalsFromRankedSelections({
+        ...prev,
+        hearing_situations: selected,
+        hearing_situations_rank: ranks,
+      })
+    );
+  };
+
   const handleChange = (name, value) => {
     setValues((prev) => {
       const updated = { ...prev, [name]: value };
@@ -90,6 +138,10 @@ export function AuditoryAdvancedForm({ onBack, mode }) {
       }
       if (name === "social_vas") {
         updated.social_severity = getSeverityLabel(value);
+      }
+
+      if (name === "hearing_situations" || name === "hearing_situations_rank") {
+        syncCosiGoalsFromRankedSelections(updated);
       }
 
       if (name.startsWith("hhia_")) {
@@ -190,45 +242,11 @@ export function AuditoryAdvancedForm({ onBack, mode }) {
     }]
   };
 
-  // COSI + Counseling - no toggle
-  const cosiSchema = {
+  // COSI follow-up fields only (Step 1 goals use CosiSituationSelector below)
+  const cosiFollowUpSchema = {
     sections: [{
       title: null,
       fields: [
-        { type: "subheading", label: "Client oriented scale of improvement (COSI)" },
-        {
-          type: "checkbox-group",
-          name: "hearing_situations",
-          label: "Step 1: Pre-Intervention - Identify Listening Goals. Choose 5 goals",
-          options: [
-            { label: "Conversation with 1 or 2 in quiet",    value: "conversation_1_2_quiet" },
-            { label: "Conversation with 1 or 2 in noise",    value: "conversation_1_2_noise" },
-            { label: "Conversation with group in quiet",     value: "conversation_group_quiet" },
-            { label: "Conversation with group in noise",     value: "conversation_group_noise" },
-            { label: "Television/Radio @ normal volume",     value: "tv_radio_normal_volume" },
-            { label: "Familiar speaker on phone",            value: "familiar_speaker_phone" },
-            { label: "Unfamiliar speaker on phone",          value: "unfamiliar_speaker_phone" },
-            { label: "Hearing phone ring from another room", value: "phone_ring_other_room" },
-            { label: "Hear front door bell or knock",        value: "door_bell_knock" },
-            { label: "Hear traffic",                         value: "hear_traffic" },
-            { label: "Increased social contact",             value: "increased_social_contact" },
-            { label: "Feel embarrassed or stupid",           value: "feel_embarrassed_stupid" },
-            { label: "Feeling left out",                     value: "feeling_left_out" },
-            { label: "Feeling upset or angry",               value: "feeling_upset_angry" },
-            { label: "Church or meeting",                    value: "church_meeting" },
-            { label: "Other",                                value: "other" }
-          ]
-        },
-        { type: "info-text", label: "In which specific situations do you most want to hear better?" },
-        {
-          type: "dynamic-section",
-          name: "cosi_goals",
-          fields: [
-            { name: "goal",     label: "Goal",           type: "input" },
-            { name: "priority", label: "Priority (1-5)", type: "radio", options: ["1", "2", "3", "4", "5"] }
-          ]
-        },
-
         { type: "info-text", label: "Step-2: Post-Intervention - Degree of Change", showIf: { field: "mode", equals: "followup" } },
         {
           type: "dynamic-section",
@@ -305,13 +323,217 @@ export function AuditoryAdvancedForm({ onBack, mode }) {
 
       {/* COSI + Counseling - no toggle */}
       {values.enable_cosi === "Yes" && (
-        <CommonFormBuilder
-          schema={cosiSchema}
-          values={allValues}
-          onChange={handleChange}
-          layout="nested"
-        />
+        <>
+          <CosiSituationSelector
+            options={COSI_SITUATION_OPTIONS}
+            selected={values.hearing_situations || []}
+            ranks={values.hearing_situations_rank || {}}
+            maxSelect={5}
+            rankOptions={COSI_RANK_OPTIONS}
+            onChange={handleCosiSituationsChange}
+          />
+          <CommonFormBuilder
+            schema={cosiFollowUpSchema}
+            values={allValues}
+            onChange={handleChange}
+            layout="nested"
+          />
+        </>
       )}
+    </div>
+  );
+}
+
+function CosiSituationSelector({
+  options,
+  selected = [],
+  ranks = {},
+  maxSelect = 5,
+  rankOptions = ["1", "2", "3", "4", "5"],
+  onChange,
+}) {
+  const toggleOption = (optValue) => {
+    const isChecked = selected.includes(optValue);
+    if (isChecked) {
+      const nextSelected = selected.filter((v) => v !== optValue);
+      const nextRanks = { ...ranks };
+      delete nextRanks[optValue];
+      onChange(nextSelected, nextRanks);
+      return;
+    }
+    if (selected.length >= maxSelect) return;
+    const nextSelected = [...selected, optValue];
+    const nextRanks = { ...ranks };
+    const used = new Set(Object.values(nextRanks));
+    const autoRank = rankOptions.find((r) => !used.has(r));
+    if (autoRank) nextRanks[optValue] = autoRank;
+    onChange(nextSelected, nextRanks);
+  };
+
+  const setRank = (optValue, rank) => {
+    const nextRanks = { ...ranks };
+    Object.keys(nextRanks).forEach((key) => {
+      if (nextRanks[key] === rank) delete nextRanks[key];
+    });
+    if (rank) nextRanks[optValue] = rank;
+    else delete nextRanks[optValue];
+    onChange(selected, nextRanks);
+  };
+
+  const labelByValue = Object.fromEntries(options.map((o) => [o.value, o.label]));
+  const sortedSelected = [...selected].sort(
+    (a, b) => Number(ranks[a] || 99) - Number(ranks[b] || 99)
+  );
+
+  return (
+    <div className="fb-card" style={{ marginBottom: 16, padding: "16px 18px" }}>
+      <div
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          color: "#0f172a",
+          marginBottom: 14,
+          paddingBottom: 8,
+          borderBottom: "1px solid #e5e7eb",
+        }}
+      >
+        Client oriented scale of improvement (COSI)
+      </div>
+
+      <label className="form-label" style={{ display: "block", marginBottom: 6 }}>
+        Step 1: Pre-Intervention — Identify listening goals (choose up to {maxSelect})
+      </label>
+      <p style={{ margin: "0 0 12px", fontSize: 13, color: "#64748b" }}>
+        Select the situations that matter most. Then rank each selected goal below (1 = highest
+        priority).
+      </p>
+
+      <div className="fb-inline-group">
+        {options.map((opt) => {
+          const isChecked = selected.includes(opt.value);
+          const atMax = !isChecked && selected.length >= maxSelect;
+          return (
+            <label
+              key={opt.value}
+              className="form-check-label form-check"
+              style={{
+                margin: 0,
+                opacity: atMax ? 0.5 : 1,
+                background: isChecked ? "#f1f5f9" : "transparent",
+                borderRadius: 8,
+                padding: "4px 8px",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isChecked}
+                disabled={atMax}
+                onChange={() => toggleOption(opt.value)}
+              />
+              {opt.label}
+            </label>
+          );
+        })}
+      </div>
+
+      {sortedSelected.length > 0 && (
+        <div
+          style={{
+            marginTop: 16,
+            padding: "14px 16px",
+            borderRadius: 12,
+            background: "#f8faff",
+            border: "1px solid #dbeafe",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1e40af",
+              marginBottom: 10,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Selected goals — priority ranking
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {sortedSelected.map((optValue) => {
+              const rank = ranks[optValue];
+              return (
+                <div
+                  key={optValue}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 10,
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    background: "#fff",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 800,
+                      fontSize: 15,
+                      color: "#2563eb",
+                      minWidth: 36,
+                      textAlign: "center",
+                    }}
+                  >
+                    ({rank || "—"})
+                  </span>
+                  <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                    {labelByValue[optValue]}
+                  </span>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      margin: 0,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "#64748b",
+                    }}
+                  >
+                    Priority
+                    <select
+                      className="form-select form-select-sm"
+                      style={{ width: 72, minHeight: 32 }}
+                      value={rank || ""}
+                      onChange={(e) => setRank(optValue, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {rankOptions.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <p
+        style={{
+          margin: sortedSelected.length > 0 ? "14px 0 0" : "12px 0 0",
+          fontSize: 13,
+          color: "#64748b",
+        }}
+      >
+        In which specific situations do you most want to hear better?
+      </p>
+      <p style={{ margin: "6px 0 0", fontSize: 12, color: "#94a3b8" }}>
+        {selected.length} of {maxSelect} selected
+      </p>
     </div>
   );
 }

@@ -946,6 +946,12 @@ actions: [
       type: "input",
       inputType: "number",
       min: 0
+    },
+    {
+      name: "multigym_remarks",
+      label: "Remarks",
+      type: "input",
+      rows: 3
     }
   ]
 },
@@ -996,21 +1002,21 @@ actions: [
 // MULTIGYM REMARKS - One Row
 // ======================================================
 
-{
-  type: "row",
-  showIf: {
-    field: "functional_exercise_modalities",
-    includes: "multigym"
-  },
-  fields: [
-    {
-      name: "multigym_remarks",
-      label: "Remarks",
-      type: "input",
-      rows: 3
-    }
-  ]
-},
+// {
+//   type: "row",
+//   showIf: {
+//     field: "functional_exercise_modalities",
+//     includes: "multigym"
+//   },
+//   fields: [
+//     {
+//       name: "multigym_remarks",
+//       label: "Remarks",
+//       type: "input",
+//       rows: 3
+//     }
+//   ]
+// },
 {
   type: "subheading",
   label: "Leg Curl",
