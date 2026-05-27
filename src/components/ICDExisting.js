@@ -8,14 +8,6 @@ export default function ICDExisting() {
   const [showPatientDetails, setShowPatientDetails] = useState(false); // Flag to show patient details section
   const [appointments, setAppointments] = useState([]); // State for patient's previous appointments
 
-  // Fetch ICD data for patients
-  useEffect(() => {
-    fetch("/patients_icd_existing")
-      .then((res) => res.json())
-      .then(setRows)
-      .catch((err) => console.error("Error loading ICD list", err));
-  }, []);
-
   // Handle the patient edit action (showing patient details)
   const handleEdit = (id) => {
     setSelectedPatientId(id); // Store the selected patient ID

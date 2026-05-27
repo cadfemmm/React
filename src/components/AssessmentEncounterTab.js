@@ -2,11 +2,7 @@ import React from "react";
 import axios from "axios";
 import { Calendar, FlaskConical, Settings, SquareCheckBig,SquareActivity } from "lucide-react";
 
-const API = "http://127.0.0.1:5000"; // backend base URL
 
-const api = axios.create({
-  baseURL: API,
-});
 function AssessmentEncounterTab({
   patientId,
   value,
@@ -98,64 +94,6 @@ const PREVIOUS_ASSESSMENTS = [
   // keep App state in sync
   React.useEffect(() => onChange?.(form), [form, onChange]);
 
-  // load existing SOAP (+goals if present)
-  React.useEffect(() => {
-    if (!patientId) return;
-    (async () => {
-      try {
-        const r = await fetch(`${API}/encounters/${encodeURIComponent(patientId)}`);
-        if (r.ok) {
-          const d = await r.json();
-          setForm({
-            subjective: d.subjective || "",
-            objective: d.objective || "",
-            assessment: d.assessment || "",
-            plan: d.plan || "",
-            goals: Array.isArray(d.goals) ? d.goals : []
-          });
-        }
-      } catch {}
-    })();
-  }, [patientId]);
-
-  // ← NEW: load previous assessments for this patient (if your API supports it)
-  React.useEffect(() => {
-    if (!patientId) return;
-    (async () => {
-      try {
-        const r = await fetch(`${API}/encounters/${encodeURIComponent(patientId)}/history`);
-        if (r.ok) {
-          const arr = await r.json(); // expect array of past encounters (latest first or last)
-          // Defensive: drop any object that looks identical to current form
-          const past = Array.isArray(arr) ? arr.filter(e =>
-            e.subjective !== form.subjective ||
-            e.objective !== form.objective ||
-            e.assessment !== form.assessment ||
-            e.plan !== form.plan
-          ) : [];
-          setHistory(past.length ? past : SAMPLE_HISTORY);
-        } else {
-          setHistory(SAMPLE_HISTORY);
-        }
-      } catch {
-        setHistory(SAMPLE_HISTORY);
-      }
-    })();
-  }, [patientId]); // don't include `form` here to avoid looping
-
-  // persist SOAP + goals
-  const save = async () => {
-    if (!patientId) return;
-    try {
-      await fetch(`${API}/encounters/${encodeURIComponent(patientId)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-      onSaved?.();
-    } catch {}
-  };
-
   // local helpers to mutate goals (if you later make them editable)
   const addGoal = () =>
     setForm(f => ({
@@ -182,23 +120,6 @@ const PREVIOUS_ASSESSMENTS = [
     setStatus("saving");
     const MIN_DELAY = 2000;
     const start = Date.now();
-
-    try {
-      await fetch(`${API}/encounters/${encodeURIComponent(patientId)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-
-      const elapsed = Date.now() - start;
-      if (elapsed < MIN_DELAY) {
-        await new Promise(r => setTimeout(r, MIN_DELAY - elapsed));
-      }
-      setStatus("saved");
-      onSaved?.();
-    } catch {
-      setStatus("idle");
-    }
   };
 
   // Small helper to render a SOAP card (read-only for history)

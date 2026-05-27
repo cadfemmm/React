@@ -7,14 +7,6 @@ export default function PablotList({ onSelectPatient }) {
   const [patientsData, setPatientsData] = useState([]);
   const [department, setDepartment] = useState("Neurophysics");
 
-  useEffect(() => {
-    const doctor = "Dr. Arvind Rao";
-    axios
-      .get(`${API}/api/patients/departments/${department}/${doctor}`)
-      .then((res) => setPatientsData(res.data))
-      .catch((err) => console.error("Error fetching patients:", err));
-  }, [department]);
-
   const formatDate = (d) => new Date(d).toLocaleString();
 
   const handleEditClick = async (patient) => {

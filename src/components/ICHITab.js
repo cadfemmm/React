@@ -94,21 +94,6 @@ const [durSelByMod, setDurSelByMod]     = useState({});     // { '7': 8, ... }
     })();
   }, [icdCode]);
 
-  // ──────────────────────────────────────
-  // 2) Load modalities once (or per ICD)
-  // ──────────────────────────────────────
-  useEffect(() => {
-    setModsOptions([]); setModsSelected(new Set());
-    (async () => {
-      try {
-        const opts = await getJSON(`${API}/modalities`);
-        setModsOptions(opts || []);
-      } catch (e) {
-        setMsg(m => (m ? m + " | " : "") + `Failed to load modalities: ${e.message || e}`);
-      }
-    })();
-  }, [API]);
-
   // ──────────────────────────────────────────────────────────────
   // 3) Build per-category options (only categories with options)
   // ──────────────────────────────────────────────────────────────
@@ -205,18 +190,6 @@ useEffect(() => {
   durationOpts
 ]);
 
-useEffect(() => {
-  (async () => {
-    try {
-      const r = await getJSON(`${API}/treatment/ranges`);
-      const d = await getJSON(`${API}/treatment/durations`);
-      setRangeOpts(r || []);
-      setDurationOpts(d || []);
-    } catch (e) {
-      setMsg(m => (m? m+" | " : "") + `Failed to load treatment lookups: ${e.message}`);
-    }
-  })();
-}, [API]);
 useEffect(() => {
   const ids = new Set(Array.from(modsSelected)); // modality_id strings
   setRangeSelByMod(prev => {

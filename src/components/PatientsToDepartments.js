@@ -3,13 +3,6 @@ import React, { useEffect, useState } from "react";
 export default function PatientsToDepartments({ setTab }) {
   const [rows, setRows] = useState([]);
 
-  useEffect(() => {
-    fetch("/patients_icd_existing")
-      .then((res) => res.json())
-      .then(setRows)
-      .catch((err) => console.error("Error loading ICD list", err));
-  }, []);
-
   const handleView = (id) => {
     alert(`✅ Patient ID ${id} viewed.`);
     setTab("ICD"); // 🔥 Switch to ICD tab after clicking View
