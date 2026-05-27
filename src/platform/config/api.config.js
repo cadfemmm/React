@@ -1,4 +1,5 @@
 const BASE_API = (process.env.REACT_APP_API_DJANGO || 'https://backend.tps-ind.com') + '/api/'
+const RMS_API = 'https://api.dev.rehab-software.com/api/v1/'
 
 const API_URL = {
     // Users apis
@@ -31,10 +32,16 @@ const API_URL = {
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
+
+    // Billing price
+    BILLING: (
+        dept,
+    ) => RMS_API + `master-charges/?page=1&limit=100&category_name=${dept}&subcategory_name=session&search=${encodeURIComponent('single session')}`,
+
     DYNAMIC_FORM_RESPONSE: (patientId) =>
-        `https://api.dev.rehab-software.com/api/v1/dynamic-form/form-response/with-data/${patientId ? `?patient_id=${encodeURIComponent(patientId)}` : ""}`,
+        `${RMS_API}dynamic-form/form-response/with-data/${patientId ? `?patient_id=${encodeURIComponent(patientId)}` : ""}`,
     DYNAMIC_FORM_RESPONSE_ACTION: (responseId) =>
-        `https://api.dev.rehab-software.com/api/v1/dynamic-form/form-response/${encodeURIComponent(responseId)}/`,
+        `${RMS_API}dynamic-form/form-response/${encodeURIComponent(responseId)}/`,
 }
 
 export {
