@@ -1117,7 +1117,8 @@ function AssessmentLauncher({
   values,
   onChange,
   assessmentRegistry,
-  languageConfig
+  languageConfig,
+  parentSections
 }) {
 
   const activeKey = `active_assessment_id`;
@@ -1198,7 +1199,6 @@ function AssessmentLauncher({
                 // REMOVE INTERNAL ACTION BUTTONS
                 actions: []
               }}
-
               values={values}
               onChange={onChange}
               assessmentRegistry={assessmentRegistry}
@@ -1225,45 +1225,84 @@ function AssessmentLauncher({
                       );
                     }
 
-                    const fieldNames = [];
+const parentFieldNames = [];
 
-                      (selectedAssessment?.sections || []).forEach(section => {
+// MAIN SOAP FIELDS
+(parentSections || []).forEach(section => {
 
-                        (section.fields || []).forEach(field => {
+  (section.fields || []).forEach(field => {
 
-                          // normal field
-                          if (field.name) {
-                            fieldNames.push(field.name);
-                          }
+    // direct field
+    if (field.name) {
+      parentFieldNames.push(field.name);
+    }
 
-                          // grouped columns
-                          if (field.cols?.length) {
+    // cols field
+    if (field.cols?.length) {
 
-                            field.cols.forEach(col => {
+      field.cols.forEach(col => {
 
-                              if (col.name) {
-                                fieldNames.push(col.name);
-                              }
+        if (col.name) {
+          parentFieldNames.push(col.name);
+        }
 
-                            });
+      });
 
-                          }
+    }
 
-                        });
+  });
 
-                      });
+});
 
-                      const subAssessmentData = Object.fromEntries(
+// REMOVE SOAP FIELDS ONLY
+const subPrefixes = [];
 
-                        Object.entries(values || {}).filter(
-                          ([key]) => fieldNames.includes(key)
-                        )
+// DETECT PREFIXES FROM SUBASSESSMENT
+(selectedAssessment.sections || []).forEach(section => {
 
-                      );
-                      await forms.save(
-                        templateDataId,
-                        subAssessmentData
-                      );
+  (section.fields || []).forEach(field => {
+
+    const fieldName =
+      field.name ||
+      field.key;
+
+    if (!fieldName) return;
+
+    // prefix before first _
+    const prefix =
+      fieldName.split("_")[0];
+
+    if (prefix) {
+      subPrefixes.push(prefix + "_");
+    }
+
+  });
+
+});
+
+// UNIQUE PREFIXES
+const uniquePrefixes = [...new Set(subPrefixes)];
+
+const subAssessmentData = Object.fromEntries(
+
+  Object.entries(values || {}).filter(
+    ([key]) =>
+
+      // ONLY CURRENT SUBASSESSMENT PREFIXES
+      uniquePrefixes.some(
+        prefix => key.startsWith(prefix)
+      )
+
+      // remove remarks
+      && !key.endsWith("_remarks")
+  )
+
+);
+
+                    await forms.save(
+                      templateDataId,
+                      subAssessmentData
+                    );
 
                     console.log(
                       "Sub Assessment Saved",
@@ -3054,6 +3093,7 @@ if (typeof col === "object" && col.type === "radio") {
           onChange={onChange}
           assessmentRegistry={assessmentRegistry} // ✅ FIX
           languageConfig={languageConfig}
+          parentSections={field.sections || []}
         />
       );
 

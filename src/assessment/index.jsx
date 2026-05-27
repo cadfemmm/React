@@ -243,44 +243,38 @@ export default function AssessmentLoader({ patient, department }) {
           try {
 
             // ALL SUB ASSESSMENT FIELD NAMES
-            const subAssessmentFieldNames =
-              Object.values(
-                subAssessmentTemplate?.[activeTab] || {}
-              ).flatMap(sub => {
+            const parentFieldNames = [];
 
-                const names = [];
+            // ONLY MAIN SOAP TEMPLATE FIELDS
+            (
+              templates?.[activeTab]?.sections || []
+            ).forEach(section => {
 
-                (sub.sections || []).forEach(section => {
+              (section.fields || []).forEach(field => {
 
-                  (section.fields || []).forEach(field => {
+                // direct field
+                if (field.name) {
+                  parentFieldNames.push(field.name);
+                }
 
-                    // normal field
-                    if (field.name) {
-                      names.push(field.name);
-                    }
+                // cols fields
+                if (field.cols?.length) {
 
-                    // grouped columns
-                    if (field.cols?.length) {
+                  field.cols.forEach(col => {
 
-                      field.cols.forEach(col => {
-
-                        if (col.name) {
-                          names.push(col.name);
-                        }
-
-                      });
-
+                    if (col.name) {
+                      parentFieldNames.push(col.name);
                     }
 
                   });
 
-                });
-
-                return names;
+                }
 
               });
 
-            // REMOVE SUB ASSESSMENT DATA
+            });
+
+            // SAVE ONLY PARENT ASSESSMENT DATA
             const parentAssessmentData =
               Object.fromEntries(
 
@@ -288,7 +282,7 @@ export default function AssessmentLoader({ patient, department }) {
                   assessmentsValues[activeTab] || {}
                 ).filter(
                   ([key]) =>
-                    !subAssessmentFieldNames.includes(key)
+                    parentFieldNames.includes(key)
                 )
 
               );
@@ -744,6 +738,9 @@ export default function AssessmentLoader({ patient, department }) {
                 assessmentRegistry={Object.values(
                   subAssessmentTemplate[activeTab] || {},
                 )}
+                parentSections={
+                  templates?.[activeTab]?.sections || []
+                }
               >
                 <div style={S.actionRow}>
                   <button
