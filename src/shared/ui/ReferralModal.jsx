@@ -1,6 +1,16 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 
+// UI
+import EmptyState from "./EmptyState";
+import { ShimmerForm } from "./Shimmer";
+import Toast from "./Toast";
+
+// API calls
+import referral from "../../assessment/referrals"
+import dept from "../../assessment/department"
+
+
 /* ── keyframe injected once ─────────────────────────────────────────────── */
 if (typeof document !== "undefined" && !document.getElementById("__ref_kf__")) {
   const styleTag = document.createElement("style");
@@ -21,33 +31,50 @@ if (typeof document !== "undefined" && !document.getElementById("__ref_kf__")) {
   document.head.appendChild(styleTag);
 }
 
-const DEPARTMENTS = [
-  { id: "physiotherapy",    label: "Physiotherapy",          icon: "🦵" },
-  { id: "occupational",     label: "Occupational Therapy",   icon: "🖐️" },
-  { id: "speech",           label: "Speech & Language",      icon: "🗣️" },
-  { id: "audiology",        label: "Audiology",              icon: "👂" },
-  { id: "psychology",       label: "Psychology",             icon: "🧠" },
-  { id: "dietetics",        label: "Dietetics",              icon: "🥗" },
-  { id: "prosthetics",      label: "Prosthetics & Orthotics",icon: "🦾" },
-  { id: "nursing",          label: "Nursing",                icon: "💉" },
-  { id: "medical",          label: "Medical Assistant",        icon: "🩺" },
-  // { id: "social",           label: "Social Work",            icon: "🤝" },
-  // { id: "pharmacy",         label: "Pharmacy",               icon: "💊" },
-  // { id: "radiology",        label: "Radiology",              icon: "🔬" },
-];
-
 /**
  * ReferralModal — multi-department referral selector.
- *
- * Props:
- *   patient    – patient object (for display)
- *   onSubmit   – called with { departments: string[], notes: string }
- *   onClose    – called to dismiss
+ * This component is responsible for refering patient to differernt department
+ * get all department from API and load in Referral Pop modal
+ * @param {object} patient - The patient object containing patient details
+ * @param {String} activeDepartment - The active department which refer from different department
+ * @param {func} onClose - onClose callback func which is used for closing referral pop
  */
-const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }) {
+const ReferralModal = memo(function ReferralModal({ patient, activeDepartment, onClose }) {
+  const [toast, setToast] = useState(null);
   const [selected, setSelected] = useState([]);
   const [notes,    setNotes]    = useState("");
+  const [isLoading, setIsLoading] = useState(false)
+  const [department, setDepartment] = useState([])
   const [urgency,  setUrgency]  = useState("routine");
+  const [activeDept, setActiveDept] = useState("")
+  
+  // Call once for department
+  useEffect(async() => {
+    setIsLoading(true)
+    try {
+      const deptMap = []
+      const response = await dept.getAll()
+      response.data.department.filter(
+        (dept) => {
+          if (activeDepartment.toLowerCase() === (dept.name).toLowerCase()) {
+            setActiveDept(dept.id)
+          } else {
+            deptMap.push(
+              {
+                id: dept.id,
+                name: dept.name,
+                url: dept.logo_url
+              }
+            )
+          }
+        }
+      )
+      setDepartment(deptMap)
+    } catch(e) {
+      setToast({message: "Department not loaded", variant: "error"})
+    }
+    setIsLoading(false)
+  }, [])
 
   const toggle = useCallback((id) => {
     setSelected(prev =>
@@ -55,15 +82,56 @@ const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }
     );
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    if (selected.length === 0) return;
-    onSubmit?.({ departments: selected, notes, urgency });
-    onClose?.();
-  }, [selected, notes, urgency, onSubmit, onClose]);
+   // Referral handler
+  const handleSubmit = useCallback(async() => {
+    // Extract login doctor id
+    const doctorId = localStorage.getItem("user_id");
+    if (!doctorId) {
+      setToast({
+        message: "Could not identify logged on doctor. Please re-login.",
+        variant: "error",
+      });
+      return;
+    }
+    if (!selected) {
+      setToast({
+        message: "Please select atleast one department",
+        variant: "error"
+      })
+      return selected
+    }
+    
+    try{
+      const data = []
+      selected.forEach((dept) => {
+        data.push({
+          "reason": notes,
+          "type": "INTERNAL",
+          "doctor_id": doctorId,
+          "patient_id": patient.id,
+          "referral_status": "PENDING",
+          "referred_to_department": dept, 
+          "urgency_type": urgency.toUpperCase(), 
+          "referred_from_department": activeDept
+        })
+      })
+      const response = await referral.create(data)
+    } catch(e) {
+      setToast({message: "Referral failed. Please try again", variant: "error"})
+    }
+  }, [selected, onClose])
 
   return (
     <div style={overlay} onClick={onClose} role="dialog" aria-modal="true">
       <div style={card} onClick={e => e.stopPropagation()}>
+        {/* Toast Notifications */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            variant={toast.variant}
+            onClose={() => setToast(null)}
+          />
+        )}
 
         {/* ── Header ── */}
         <div style={header}>
@@ -89,7 +157,6 @@ const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }
           <div style={urgencyRow}>
             {[
               { value: "routine",  label: "Routine",  color: "#059669", bg: "#ECFDF5", border: "#6EE7B7" },
-              { value: "urgent",   label: "Urgent",   color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
               { value: "emergency",label: "Emergency",color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
             ].map(u => (
               <button
@@ -116,29 +183,44 @@ const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }
             )}
           </div>
           <div style={deptGrid}>
-            {DEPARTMENTS.map(dept => {
-              const isSelected = selected.includes(dept.id);
-              return (
-                <button
-                  key={dept.id}
-                  className={`__ref_dept${isSelected ? " selected" : ""}`}
-                  onClick={() => toggle(dept.id)}
-                  style={{
-                    ...deptBtn,
-                    borderColor: isSelected ? "var(--bs-primary)" : "#E2E8F0",
-                    background:  isSelected ? "#EFF6FF" : "#FAFBFC",
-                  }}
-                >
-                  <span style={deptIcon}>{dept.icon}</span>
-                  <span style={{ ...deptLabel, color: isSelected ? "var(--bs-primary)" : "#334155", fontWeight: isSelected ? 700 : 500 }}>
-                    {dept.label}
-                  </span>
-                  {isSelected && (
-                    <span style={checkMark}>✓</span>
-                  )}
-                </button>
-              );
-            })}
+            {isLoading? (
+                <div>
+                  <ShimmerForm rows={6} />
+                </div>
+              ): !department ? (
+                <div>
+                  <EmptyState
+                    icon="⚠️"
+                    title="Failed to load department"
+                    message="Could not fetch the department. Please check your connection and try again."
+                  />
+                </div>
+              ): (
+                department.map(dept => {
+                const isSelected = selected.includes(dept.id);
+                  return (
+                    <button
+                      key={dept.id}
+                      className={`__ref_dept${isSelected ? " selected" : ""}`}
+                      onClick={() => toggle(dept.id)}
+                      style={{
+                        ...deptBtn,
+                        borderColor: isSelected ? "var(--bs-primary)" : "#E2E8F0",
+                        background:  isSelected ? "#EFF6FF" : "#FAFBFC",
+                      }}
+                    >
+                      {/* <span style={deptIcon}>{dept.icon}</span> */}
+                      <span style={{ ...deptLabel, color: isSelected ? "var(--bs-primary)" : "#334155", fontWeight: isSelected ? 700 : 500 }}>
+                        {dept.name}
+                      </span>
+                      {isSelected && (
+                        <span style={checkMark}>✓</span>
+                      )}
+                    </button>
+                  );
+                })
+              )
+            }
           </div>
 
           {/* ── Notes ── */}
