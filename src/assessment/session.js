@@ -25,9 +25,10 @@ const start = async (
     return response
 }
 
-const end = async (sessionId) => {
+const end = async (sessionId, sessionData) => {
     return await api.patch(
-        API_URL.ASSESSMENT + `session/${sessionId}/end/`
+        API_URL.ASSESSMENT + `session/${sessionId}/end/`,
+        sessionData
     )   
 }
 

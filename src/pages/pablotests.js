@@ -21,31 +21,6 @@ export default function ICDInfinite({ onDeepestICDChange, onPathChange }) {
       .toLowerCase()
       .replace(/\b[a-z]/g, (c) => c.toUpperCase());
 
-  React.useEffect(() => {
-    (async () => {
-      try {
-        setBusy(true);
-        setMsg("");
-        const res = await api.get("/api/icd/roots/");
-        setLevels((prev) => {
-          const next = [...prev];
-          next[0].options = res.data;
-          next[0].disabled = false;
-          for (let i = 1; i < next.length; i++) {
-            next[i] = { ...next[i], options: [], value: "", disabled: true, parentKey: null };
-          }
-          return next;
-        });
-        onDeepestICDChange?.("");
-        onPathChange?.([]);
-      } catch (err) {
-        setMsg(`Failed to load ICD root data: ${err.message}`);
-      } finally {
-        setBusy(false);
-      }
-    })();
-}, [onDeepestICDChange, onPathChange]);
-
   const ensureLevel = (idx) => {
     setLevels((prev) => {
       if (idx < prev.length) return prev;

@@ -2,14 +2,6 @@
 import React from "react";
 import axios from "axios";
 import MultiSelect from "./MultiSelect";
-const API = "http://127.0.0.1:5000"; // backend base URL
-
-const api = axios.create({
-  baseURL: API,
-});
-
-
-
 
 function AssessmentsPanel({ apiBase, selectedIchiCodes, onSummaryChange }) {
   // assessments available for the selected ICHI (deduped by name)
@@ -27,38 +19,6 @@ function AssessmentsPanel({ apiBase, selectedIchiCodes, onSummaryChange }) {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
   };
-
-  // dedupe + load assessments whenever ICHI selection changes
-  React.useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setMsg("");
-        const names = new Set();
-        for (const code of selectedIchiCodes) {
-          const list = await getJSON(`${apiBase}/assessments/by-ichi/${encodeURIComponent(code)}`);
-          list.forEach(n => names.add(n));
-        }
-        if (cancelled) return;
-        const arr = Array.from(names).sort();
-        setAssessments(arr);
-
-        // preload inputs for each assessment (once)
-        const nextInputs = {};
-        for (const name of arr) {
-          const items = await getJSON(`${apiBase}/assessments/inputs/${encodeURIComponent(name)}`);
-          nextInputs[name] = items;
-        }
-        if (cancelled) return;
-        setInputsByAssess(nextInputs);
-      } catch (e) {
-        setMsg(`Failed to load assessments: ${e.message}`);
-        setAssessments([]);
-        setInputsByAssess({});
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [apiBase, selectedIchiCodes.join("|")]);
 
   // helper: range "a-b" -> [a..b]
   const numsFromRange = (rangeStr, min, max) => {
