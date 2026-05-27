@@ -546,27 +546,100 @@ export default function AssessmentLoader({ patient, department }) {
           variant="submit"
           title="Submit Assessment?"
           confirmLabel="Submit Assessment"
-          onConfirm={async () => {
-            // save final plan data first
-            await handleAction("next");
 
-            // then end session
-            await handleEndSession();
+          onConfirm={async () => {
+
+            try {
+
+              // SAVE FINAL PLAN DATA
+              await handleAction("next");
+
+              // FETCH SESSION BILLING
+              const billingResponse =
+                await forms.fetchSessionCharge(
+                  department
+                );
+
+              console.log(
+                "Billing Response",
+                billingResponse.data
+              );
+
+              const billingItem =
+                billingResponse?.data?.data?.[0]
+               console.log(
+                  "Billing Item",
+                  billingItem
+                );
+
+              const charge_id =
+                billingItem?.id;
+
+              const cost =
+                billingItem?.cost
+
+              console.log(
+                "Charge ID:",
+                charge_id
+              );
+
+              console.log(
+                "cost:",
+                cost
+              );
+
+              // OPTIONAL:
+              // save/store/send these values later
+
+              // END SESSION
+              await handleEndSession();
+
+              setIsConfirmModal(false);
+
+            } catch (e) {
+
+              console.log(e);
+
+              setToast({
+                message:
+                  "Failed to submit assessment",
+                variant: "error"
+              });
+
+            }
+
           }}
-          onCancel={() => setIsConfirmModal(false)}
+
+          onCancel={() =>
+            setIsConfirmModal(false)
+          }
+
           message="You are about to finalise and submit this assessment."
+
           meta={
             patient
               ? [
                   {
                     label: "Patient",
-                    value: patient.email || patient.name || "—",
+                    value:
+                      patient.email ||
+                      patient.name ||
+                      "—",
                   },
-                  { label: "Visit Type", value: "INITIAL" },
-                  { label: "Date", value: localDateTimeString(new Date()) },
+                  {
+                    label: "Visit Type",
+                    value: "INITIAL",
+                  },
+                  {
+                    label: "Date",
+                    value: localDateTimeString(
+                      new Date()
+                    ),
+                  },
                 ]
               : []
           }
+
           checklist={[
             "All SOAP sections have been reviewed",
             "Assessment data is accurate and complete",
