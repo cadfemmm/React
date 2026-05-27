@@ -32,7 +32,7 @@ const SLUG_TO_TAB = {
   "prosthetics":         "Prosthetics & Orthotics",
   "vocational":          "Work & Vocational Rehab",
   "doctor":              "Doctor",
-  "medical-assistant":   "Medical Assistant",
+  "medical-assistant":   "Nursing",
 };
 
 export default function DeptEntry() {

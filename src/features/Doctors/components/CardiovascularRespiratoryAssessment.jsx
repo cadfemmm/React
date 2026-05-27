@@ -417,14 +417,14 @@ const SCHEMA = {
             type: "accordion",
             name: "latest_vitals",
             label: "Latest Vitals",
-            defaultOpen: true,
+           
             children: buildVitalsAccordionChildren({ readOnly: true }),
           },
           {
             type: "accordion",
             name: "current_vitals",
             label: "Current Vitals",
-            defaultOpen: true,
+          
             children: buildVitalsAccordionChildren({ prefix: "current", readOnly: false }),
           },
           {

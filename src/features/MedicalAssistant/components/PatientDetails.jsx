@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import XRayInformationForm from "./XRayInformationForm";
 import ResusBayInformationForm from "./ResusBayInformationForm";
 import FleetManagementForm from "./FleetManagementForm";
@@ -41,10 +41,15 @@ const NEURO_OPTIONS = [
 // ];
 
 
-export default function MedicalAssistantPatientDetails({ patient, onBack }) {
-  const [activeTab, setActiveTab] = useState("urgent");
+export default function MedicalAssistantPatientDetails({ patient, onBack, mode }) {
+  const lockedTab = mode === "neuro" ? "neuro" : mode === "urgent" ? "urgent" : null;
+  const [activeTab, setActiveTab] = useState(lockedTab || "urgent");
   const [selectedUrgent, setSelectedUrgent] = useState("resusbay");
   const [selectedNeuro, setSelectedNeuro] = useState("eeg");
+
+  useEffect(() => {
+    if (lockedTab) setActiveTab(lockedTab);
+  }, [lockedTab]);
 
   const renderUrgentContent = (key) => {
     switch (key) {
@@ -129,21 +134,36 @@ export default function MedicalAssistantPatientDetails({ patient, onBack }) {
 
   return (
     <div style={page}>
-      {/* Two tabs: Urgent care | Neuro & Cardio */}
-      <div style={tabRow}>
-        {TABS.map(tab => (
-          <div
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            style={{
-              ...tabItem,
-              ...(activeTab === tab.key ? activeTabStyle : {})
-            }}
-          >
-            {tab.label}
-          </div>
-        ))}
-      </div>
+      {onBack && (
+        <div style={backRow}>
+          <button type="button" onClick={onBack} style={backBtn}>
+            ← Back to assessments
+          </button>
+        </div>
+      )}
+
+      {!lockedTab && (
+        <div style={tabRow}>
+          {TABS.map(tab => (
+            <div
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                ...tabItem,
+                ...(activeTab === tab.key ? activeTabStyle : {}),
+              }}
+            >
+              {tab.label}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {lockedTab && (
+        <div style={sectionHeader}>
+          {TABS.find((t) => t.key === lockedTab)?.label}
+        </div>
+      )}
 
       <div style={contentContainer}>
         {renderContent()}
@@ -155,7 +175,24 @@ export default function MedicalAssistantPatientDetails({ patient, onBack }) {
 const page = {
   fontFamily: "Inter, system-ui",
   background: "#f8fafc",
-  minHeight: "100vh"
+  minHeight: "100vh",
+};
+
+const backRow = {
+  padding: "12px 16px",
+  background: "#fff",
+  borderBottom: "1px solid #e5e7eb",
+};
+
+const backBtn = {
+  background: "none",
+  border: "1px solid #d1d5db",
+  borderRadius: 8,
+  padding: "7px 14px",
+  fontSize: 13,
+  fontWeight: 600,
+  color: "#2563eb",
+  cursor: "pointer",
 };
 
 const tabRow = {
@@ -181,6 +218,15 @@ const activeTabStyle = {
 };
 
 const contentContainer = {};
+
+const sectionHeader = {
+  padding: "14px 16px",
+  fontSize: 16,
+  fontWeight: 700,
+  color: "#0f172a",
+  background: "#fff",
+  borderBottom: "1px solid #e5e7eb",
+};
 
 const urgentContent = {
   display: "flex",
