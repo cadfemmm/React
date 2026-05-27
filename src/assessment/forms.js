@@ -35,13 +35,11 @@ const save = async (
     )
 }
 const fetchSessionCharge = async (department) => {
-
     return await api.get(
         API_URL.BILLING(
             department.toLowerCase()
         )
     );
-
 }
 export default {
     save,
