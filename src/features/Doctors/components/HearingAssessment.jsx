@@ -26,7 +26,7 @@ const HEARING_SECTIONS = [
        EAR ISSUE
     ===================================================== */
     {
-      title: "Ear Issue",
+      
       fields: [
         {
           type: "radio",

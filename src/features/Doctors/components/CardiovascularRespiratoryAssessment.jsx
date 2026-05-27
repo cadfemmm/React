@@ -3,7 +3,7 @@ import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
 
 export default function CardioRespiratoryAssessment() {
-  const [values, setValues] = useState({});
+  const [values, setValues] = useState({ bp_position: "lying" });
   const [submitted, setSubmitted] = useState(false);
 
   const onChange = (name, value) =>
@@ -16,6 +16,46 @@ export default function CardioRespiratoryAssessment() {
 
  
 const showIfYes = (field) => ({ field, equals: "Yes" });
+
+const BP_POSITION_OPTIONS = [
+  { label: "Lying", value: "lying" },
+  { label: "Sitting", value: "sitting" },
+  { label: "Standing", value: "standing" },
+];
+
+function buildVitalsAccordionChildren({ prefix = "", readOnly = false } = {}) {
+  const n = (key) => (prefix ? `${prefix}_${key}` : key);
+  const vitalInput = (key, label) => ({
+    type: "input",
+    name: n(key),
+    label,
+    ...(readOnly ? { readOnly: true, placeholder: "Auto-populated" } : {}),
+  });
+  return [
+    vitalInput("heart_rate", "Heart Rate (bpm)"),
+    {
+      type: "row",
+      fields: [
+        vitalInput("blood_pressure", "Blood Pressure"),
+        {
+          type: "radio",
+          name: n("bp_position"),
+          label: "Position",
+          options: BP_POSITION_OPTIONS,
+          ...(readOnly ? { readOnly: true } : {}),
+        },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
+        vitalInput("respiratory_rate", "Respiratory Rate"),
+        vitalInput("spo2", "SpO2 (%)"),
+        vitalInput("temperature", "Temperature (°C)"),
+      ],
+    },
+  ];
+}
 
 const SCHEMA = {
   title: "Cardiovascular & Respiratory Assessment",
@@ -141,11 +181,25 @@ const SCHEMA = {
             }
           }
         },
+
         {
           type: "input",
           name: "respiratory_symptoms_specify",
           label: "Specify",
-          showIf: showIfYes("respiratory_section"),
+          showIf: {
+            or: [
+              { field: "cough", equals: "Yes" },
+              { field: "sputum", equals: "Yes" },
+              { field: "wheeze", equals: "Yes" },
+              { field: "chest_pain", equals: "Yes" },
+              { field: "dyspnoea", equals: "Yes" },
+              { field: "orthopnoea", equals: "Yes" },
+              { field: "paroxysmal_nocturnal_dyspnoea", equals: "Yes" },
+              { field: "fatigue", equals: "Yes" },
+              { field: "weight_loss", equals: "Yes" },
+              { field: "oxygen_requirement", equals: "Yes" },
+            ],
+          },
         },
 
         // =========================
@@ -167,13 +221,21 @@ const SCHEMA = {
         { ...yn("fluid_restriction", "Fluid Restriction"), showIf: showIfYes("cardio_section") },
 
         {
-          type: "textarea",
-          name: "other_symptoms",
-          label: "Other Symptoms",
-          showIf: showIfYes("cardio_section")
+          type: "input",
+          name: "cardiovascular_symptoms_specify",
+          label: "Specify",
+          showIf: {
+            or: [
+              { field: "palpitations", equals: "Yes" },
+              { field: "syncope_presyncope", equals: "Yes" },
+              { field: "ankle_swelling", equals: "Yes" },
+              { field: "exercise_intolerance", equals: "Yes" },
+              { field: "fluid_restriction", equals: "Yes" },
+            ],
+          },
         },
 
-          { type: "heading", label: "Past Medical History" },
+          { type: "subheading", label: "Past Medical History" },
           yn("pmh_copd", "COPD"),
           yn("pmh_asthma", "Asthma"),
           yn("pmh_osa", "Obstructive Sleep Apnea (OSA)"),
@@ -192,26 +254,8 @@ const SCHEMA = {
             showIf: { field: "pmh_tracheostomy", equals: "Yes" }
           },
           yn("pmh_prior_mi", "Prior Myocardial Infarction"),
-          {
-            type: "input",
-            name: "pmh_prior_mi_specify",
-            label: "Prior Myocardial Infarction (Specify)",
-            showIf: { field: "pmh_prior_mi", equals: "Yes" },
-          },
           yn("pmh_heart_failure", "Heart Failure"),
-          {
-            type: "input",
-            name: "pmh_heart_failure_specify",
-            label: "Heart Failure (Specify)",
-            showIf: { field: "pmh_heart_failure", equals: "Yes" },
-          },
           yn("pmh_arrhythmias", "Arrhythmias"),
-          {
-            type: "input",
-            name: "pmh_arrhythmias_specify",
-            label: "Arrhythmias (Specify)",
-            showIf: { field: "pmh_arrhythmias", equals: "Yes" },
-          },
           yn("pmh_hypertension", "Hypertension"),
           yn("pmh_dyslipidaemia", "Dyslipidaemia"),
           yn("pmh_diabetes_mellitus", "Diabetes Mellitus"),
@@ -369,30 +413,19 @@ const SCHEMA = {
           },
 
           { type: "subheading", label: "Cardiovascular Examination" },
-          { type: "input", name: "heart_rate", label: "Heart Rate (bpm)", readOnly: true, placeholder: "Auto-populated" },
           {
-            type: "row",
-            fields: [
-              { type: "input", name: "blood_pressure", label: "Blood Pressure" },
-              {
-                type: "radio",
-                name: "bp_position",
-                label: "Position",
-                options: [
-                  { label: "Lying", value: "lying" },
-                  { label: "Sitting", value: "sitting" },
-                  { label: "Standing", value: "standing" }
-                ]
-              }
-            ]
+            type: "accordion",
+            name: "latest_vitals",
+            label: "Latest Vitals",
+            defaultOpen: true,
+            children: buildVitalsAccordionChildren({ readOnly: true }),
           },
           {
-            type: "row",
-            fields: [
-              { type: "input", name: "respiratory_rate", label: "Respiratory Rate", readOnly: true, placeholder: "Auto-populated" },
-              { type: "input", name: "spo2", label: "SpO2 (%)", readOnly: true, placeholder: "Auto-populated" },
-              { type: "input", name: "temperature", label: "Temperature (°C)", readOnly: true, placeholder: "Auto-populated" }
-            ]
+            type: "accordion",
+            name: "current_vitals",
+            label: "Current Vitals",
+            defaultOpen: true,
+            children: buildVitalsAccordionChildren({ prefix: "current", readOnly: false }),
           },
           {
             type: "radio",
@@ -599,7 +632,7 @@ const SCHEMA = {
     <>
       <CommonFormBuilder
         schema={SCHEMA}
-        values={values}
+        values={{ ...values, bp_position: "lying" }}
         onChange={onChange}
         submitted={submitted}
         assessmentRegistry={CARDIO_SCORING_ASSESSMENT_REGISTRY}
@@ -672,8 +705,8 @@ function NYHAModal({ onSave, onClose }) {
       {options.map(o => (
         <div
           key={o[0]}
-          style={{ ...nyhaRow, background: selected === o[0]+o[1] ? "#eef6ff" : "#fafafa" }}
-          onClick={() => setSelected(o[0]+o[1])}
+          style={{ ...nyhaRow, background: selected === o[1] ? "#eef6ff" : "#fafafa" }}
+          onClick={() => setSelected(o[1])}
         >
           <strong>{o[0]}</strong> – {o[1]}
         </div>

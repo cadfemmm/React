@@ -10,6 +10,15 @@ import BriefPainInventoryAssessment from "./BriefPainInventoryAssessment";
 import KOOSKneeSurvey from "./KOOSKneeSurvey";
 import SPADIShoulderAssessment from "./SPADIShoulderAssessment";
 import BCTQAssessment from "./BCTQAssessment";
+import { SEGMENTED_BODY_DIAGRAM_VIEWS } from "../../../shared/utils/bodyDiagramViews";
+import amputeeRef1 from "../../../assets/amputeeref1.png";
+import amputeeRef2 from "../../../assets/amputeeref2.png";
+
+const AMP_BONY_PROMINENCE_SHOW_IF = {
+  field: "category",
+  includes: "amputation",
+  and: { field: "amp_bony_prominence", equals: "Yes" },
+};
 
 export default function Physical({ onChange }) {
   const [values, setValues] = useState({
@@ -2457,6 +2466,20 @@ export default function Physical({ onChange }) {
           { name: "amp_prosthesis_date_fitting", label: "Date of Fitting", type: "date", showIf: { field: "category", includes: "amputation", and: { field: "amp_prosthesis_restored", equals: "Yes" } } },
           { name: "amp_prosthesis_supplier", label: "Supplier / Prosthetic Center", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_prosthesis_restored", equals: "Yes" } } },
           { name: "amp_prosthesis_issues", label: "Any Prosthesis-related issues", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation", and: { field: "amp_prosthesis_restored", equals: "Yes" } } },
+          {
+            name: "amp_prosthesis_issues_specify",
+            label: "Specify",
+            type: "input",
+            showIf: {
+              field: "category",
+              includes: "amputation",
+              and: {
+                field: "amp_prosthesis_restored",
+                equals: "Yes",
+                and: { field: "amp_prosthesis_issues", equals: "Yes" },
+              },
+            },
+          },
 
           { name: "amp_premorbid_mobility", label: "PRE-AMPUTATION FUNCTIONAL STATUS (Premorbid Mobility)", type: "radio", labelAbove: true, options: [{ label: "Independent without aid", value: "independent" }, { label: "With walking aid", value: "walking_aid" }, { label: "Household ambulator", value: "household_ambulator" }, { label: "Wheelchair dependent", value: "wheelchair_dependent" }], showIf: { field: "category", includes: "amputation" } },
 
@@ -2471,10 +2494,24 @@ export default function Physical({ onChange }) {
           { type: "subheading", label: "Sensory Examination", showIf: { field: "category", includes: "amputation" } },
           { name: "amp_light_touch", label: "Light Touch", type: "radio", options: [{ label: "Intact", value: "intact" }, { label: "Absent", value: "absent" }], showIf: { field: "category", includes: "amputation" } },
           { name: "amp_pin_prick", label: "Pin Prick", type: "radio", options: [{ label: "Intact", value: "intact" }, { label: "Absent", value: "absent" }], showIf: { field: "category", includes: "amputation" } },
-          { name: "amp_phantom_limb_sensation", label: "Phantom Limb Sensation", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
-          { name: "amp_phantom_limb_sensation_specify", label: "Severity & frequency", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_phantom_limb_sensation", equals: "Yes" } } },
-          { name: "amp_phantom_limb_pain", label: "Phantom Limb Pain", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
-          { name: "amp_phantom_limb_pain_specify", label: "Severity & frequency", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_phantom_limb_pain", equals: "Yes" } } },
+          { type: "subheading", label: "Phantom limb", showIf: { field: "category", includes: "amputation" } },
+          { name: "amp_phantom_limb_sensation", label: "Sensation", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
+          { name: "amp_phantom_limb_pain", label: "Pain", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
+          {
+            name: "amp_phantom_limb_specify",
+            label: "Severity & frequency",
+            type: "input",
+            showIf: {
+              field: "category",
+              includes: "amputation",
+              and: {
+                or: [
+                  { field: "amp_phantom_limb_sensation", equals: "Yes" },
+                  { field: "amp_phantom_limb_pain", equals: "Yes" },
+                ],
+              },
+            },
+          },
           { name: "amp_neuropathic_pain", label: "Neuropathic Pain", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
           { name: "amp_neuropathic_pain_specify", label: "Severity & frequency", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_neuropathic_pain", equals: "Yes" } } },
 
@@ -2502,9 +2539,22 @@ export default function Physical({ onChange }) {
 
           { type: "subheading", label: "Musculoskeletal Complications", showIf: { field: "category", includes: "amputation" } },
           { name: "amp_contracture", label: "Contracture", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
-          { name: "amp_contracture_joint", label: "Which Joint involved", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_contracture", equals: "Yes" } } },
           { name: "amp_joint_stiffness", label: "Joint Stiffness", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
-          { name: "amp_joint_stiffness_joint", label: "Which Joint involved", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_joint_stiffness", equals: "Yes" } } },
+          {
+            name: "amp_contracture_stiffness_joint",
+            label: "Which Joint involved",
+            type: "input",
+            showIf: {
+              field: "category",
+              includes: "amputation",
+              and: {
+                or: [
+                  { field: "amp_contracture", equals: "Yes" },
+                  { field: "amp_joint_stiffness", equals: "Yes" },
+                ],
+              },
+            },
+          },
 
           { name: "amp_gait_pattern", label: "Gait Pattern Functions", type: "radio", labelAbove: true, options: [{ label: "Spastic gait", value: "spastic" }, { label: "Hemiplegic gait", value: "hemiplegic" }, { label: "Paraplegic gait", value: "paraplegic" }, { label: "Asymmetric gait", value: "asymmetric" }, { label: "Limping gait", value: "limping" }], showIf: { field: "category", includes: "amputation" } },
 
@@ -2514,7 +2564,22 @@ export default function Physical({ onChange }) {
           { name: "amp_alignment", label: "Alignment", type: "radio", options: [{ label: "Good", value: "good" }, { label: "Poor", value: "poor" }], showIf: { field: "category", includes: "amputation" } },
           { name: "amp_alignment_issue", label: "Describe Issue", type: "input", showIf: { field: "category", includes: "amputation", and: { field: "amp_alignment", equals: "poor" } } },
           { name: "amp_bony_prominence", label: "Bony Prominence / Pressure Sensitive Areas", type: "radio", options: ["Yes", "No"], showIf: { field: "category", includes: "amputation" } },
-          { name: "amp_bony_prominence_draw", label: "Body map (draw)", type: "draw-canvas", backgroundImage: humanBodyImage, width: 320, height: 260, showIf: { field: "category", includes: "amputation", and: { field: "amp_bony_prominence", equals: "Yes" } } },
+
+          {
+            name: "amp_bony_prominence_wound_pins",
+            label: "Mark Location of the Bony Prominence / Pressure Sensitive Areas",
+            type: "wound-location-marker",
+            views: SEGMENTED_BODY_DIAGRAM_VIEWS,
+            info: {
+              type: "images",
+              title: "Reference",
+              images: [
+                { src: amputeeRef1, alt: "Bony prominence reference 1" },
+                { src: amputeeRef2, alt: "Bony prominence reference 2" },
+              ],
+            },
+            showIf: AMP_BONY_PROMINENCE_SHOW_IF,
+          },
 
           { type: "subheading", label: "Activities & Participation", showIf: { field: "category", includes: "amputation" } },
           { name: "amp_changing_body_position", label: "Changing body position", type: "scale-table", rows: ["Lying → Sitting", "Squatting / Kneeling", "Sit → Stand", "Rolling", "Bending", "Weight shifting"], columns: [{ label: "Independent", value: "independent" }, { label: "Supervision", value: "supervision" }, { label: "Min Assist", value: "min_assist" }, { label: "Mod Assist", value: "mod_assist" }, { label: "Max Assist", value: "max_assist" }], showIf: { field: "category", includes: "amputation" } },

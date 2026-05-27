@@ -32,8 +32,8 @@ const BLADDER_SCHEMA = {
           name: "urinaryProblem",
           label: "Urinary problem",
           options: [
-            { label: "Continent", value: "CONTINENT" },
-            { label: "Incontinent", value: "INCONTINENT" }
+            { label: "No Urinary Problem", value: "CONTINENT" },
+            { label: "Has Urinary Problem", value: "INCONTINENT" }
           ]
         },
         ...withIncontinent([
@@ -113,29 +113,45 @@ const BLADDER_SCHEMA = {
         { type: "heading", label: "Symptoms" },
         { type: "subheading", label: "Storage" },
         yn("storage_urinary_frequency", "Urinary frequency"),
-        { type: "input", name: "storage_urinary_frequency_specify", label: "Urinary frequency (Specify)", showIf: { field: "storage_urinary_frequency", equals: "Yes" } },
         yn("storage_nocturia", "Nocturia"),
-        { type: "input", name: "storage_nocturia_specify", label: "Nocturia (Specify)", showIf: { field: "storage_nocturia", equals: "Yes" } },
         yn("storage_urgency", "Urgency"),
-        { type: "input", name: "storage_urgency_specify", label: "Urgency (Specify)", showIf: { field: "storage_urgency", equals: "Yes" } },
         yn("storage_incontinence", "Urinary incontinence"),
-        { type: "input", name: "storage_incontinence_specify", label: "Urinary incontinence (Specify)", showIf: { field: "storage_incontinence", equals: "Yes" } },
-        { type: "input", name: "storage_others", label: "Others" },
+        {
+          type: "input",
+          name: "storage_others_specify",
+          label: "Others/Specify",
+          showIf: {
+            or: [
+              { field: "storage_urinary_frequency", equals: "Yes" },
+              { field: "storage_nocturia", equals: "Yes" },
+              { field: "storage_urgency", equals: "Yes" },
+              { field: "storage_incontinence", equals: "Yes" },
+            ],
+          },
+        },
 
         { type: "subheading", label: "Voiding" },
         yn("voiding_slow_stream", "Slow stream"),
-        { type: "input", name: "voiding_slow_stream_specify", label: "Slow stream (Specify)", showIf: { field: "voiding_slow_stream", equals: "Yes" } },
         yn("voiding_spraying_stream", "Spraying (splitting) of urinary stream"),
-        { type: "input", name: "voiding_spraying_stream_specify", label: "Spraying urinary stream (Specify)", showIf: { field: "voiding_spraying_stream", equals: "Yes" } },
         yn("voiding_intermittent_stream", "Intermittent stream"),
-        { type: "input", name: "voiding_intermittent_stream_specify", label: "Intermittent stream (Specify)", showIf: { field: "voiding_intermittent_stream", equals: "Yes" } },
         yn("voiding_hesitancy", "Hesitancy"),
-        { type: "input", name: "voiding_hesitancy_specify", label: "Hesitancy (Specify)", showIf: { field: "voiding_hesitancy", equals: "Yes" } },
         yn("voiding_straining", "Straining to void"),
-        { type: "input", name: "voiding_straining_specify", label: "Straining to void (Specify)", showIf: { field: "voiding_straining", equals: "Yes" } },
         yn("voiding_terminal_dribbling", "Terminal dribbling"),
-        { type: "input", name: "voiding_terminal_dribbling_specify", label: "Terminal dribbling (Specify)", showIf: { field: "voiding_terminal_dribbling", equals: "Yes" } },
-        { type: "input", name: "voiding_others", label: "Others" },
+        {
+          type: "input",
+          name: "voiding_others_specify",
+          label: "Others/Specify",
+          showIf: {
+            or: [
+              { field: "voiding_slow_stream", equals: "Yes" },
+              { field: "voiding_spraying_stream", equals: "Yes" },
+              { field: "voiding_intermittent_stream", equals: "Yes" },
+              { field: "voiding_hesitancy", equals: "Yes" },
+              { field: "voiding_straining", equals: "Yes" },
+              { field: "voiding_terminal_dribbling", equals: "Yes" },
+            ],
+          },
+        },
 
         { type: "subheading", label: "Post micturition" },
         yn("post_incomplete_emptying", "Incomplete emptying"),

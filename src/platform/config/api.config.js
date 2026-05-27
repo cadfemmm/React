@@ -30,8 +30,11 @@ const API_URL = {
     // Patients apis
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
+    PATIENT_ALERT: BASE_API + 'alerts/patient',
     DYNAMIC_FORM_RESPONSE: (patientId) =>
-        `https://api.dev.rehab-software.com/api/v1/dynamic-form/form-response/with-data/?patient_id=${encodeURIComponent(patientId)}`,
+        `https://api.dev.rehab-software.com/api/v1/dynamic-form/form-response/with-data/${patientId ? `?patient_id=${encodeURIComponent(patientId)}` : ""}`,
+    DYNAMIC_FORM_RESPONSE_ACTION: (responseId) =>
+        `https://api.dev.rehab-software.com/api/v1/dynamic-form/form-response/${encodeURIComponent(responseId)}/`,
 }
 
 export {
