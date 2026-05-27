@@ -52,7 +52,7 @@ const DEPARTMENTS = [
  *   onSubmit   – called with { departments: string[], notes: string }
  *   onClose    – called to dismiss
  */
-const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }) {
+const ReferralModal = memo(function ReferralModal({ patient, activeDepartment, onClose }) {
   const [toast, setToast] = useState(null);
   const [selected, setSelected] = useState([]);
   const [notes,    setNotes]    = useState("");
@@ -112,7 +112,7 @@ const ReferralModal = memo(function ReferralModal({ patient, onSubmit, onClose }
     } catch(e) {
       setToast({message: "Referral failed. Please try again", variant: "error"})
     }
-  }, [selected, onSubmit, onClose])
+  }, [selected, onClose])
 
 
   return (

@@ -375,7 +375,7 @@ export default function AssessmentLoader({ patient, department }) {
       {isReferralModal && (
         <ReferralModal
           patient={patient}
-          // ---- onSubmit={handleReferralSubmit}
+          activeDepartment={department}
           onClose={() => setIsReferralModal(false)}
         />
       )}
