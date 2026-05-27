@@ -575,7 +575,7 @@ const handleSubmitReferral = () => {
           <CognitiveAssessmentForm onChange={setCognitiveData} />
         ) :
         tabs[activeTab] === "Physical" ? (
-          <Physical onChange={setPhysicalData} />
+          <Physical onChange={setPhysicalData} patient={patient} />
         ) :
          tabs[activeTab] === "Cardiovascular & Respiratory System" ? (
           <CardiovascularRespiratoryAssessment onChange={setCardiovascularRespiratoryAssessmentData} />

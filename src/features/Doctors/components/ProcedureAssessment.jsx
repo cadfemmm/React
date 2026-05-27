@@ -1025,43 +1025,96 @@ const SC_SCHEMA = {
             title: null,
             fields: [
                 { type: "subheading", label: "Range of Motion (ROM)" },
-                { type: "subheading", label: "Knee" },
                 {
-                    type: "refraction-12col",
-                    name: "rom_knee",
-                    cornerLabel: "Target Muscle",
-                    cornerLikeGroupHeader: true,
-                    showColumnHeaders: true,
-                    groups: [
-                        { label: "Active Range Of Motion (AROM)", columns: [{ key: "Right" }, { key: "Left" }] },
-                        { label: "Passive Range Of Motion (PROM)", columns: [{ key: "Right" }, { key: "Left" }] },
-                    ],
-                    rows: [
-                        { value: "flexion", label: "Flexion", columns: [{}, {}, {}, {},]},
-                        { value: "dorsiflexion", label: "Dorsiflexion", columns: [{}, {}, {}, {},]},
+                    type: "accordion",
+                    name: "rom_accordion_knee",
+                    label: "Knee",
+                    defaultOpen: true,
+                    children: [
+                        {
+                            type: "refraction-12col",
+                            name: "rom_knee",
+                            cornerLabel: "Target Muscle",
+                            cornerLikeGroupHeader: true,
+                            showColumnHeaders: true,
+                            groups: [
+                                { label: "Active Range Of Motion (AROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                                { label: "Passive Range Of Motion (PROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                            ],
+                            rows: [
+                                { value: "flexion", label: "Flexion", columns: [{}, {}, {}, {}] },
+                                { value: "dorsiflexion", label: "Dorsiflexion", columns: [{}, {}, {}, {}] },
+                            ],
+                        },
                     ],
                 },
-                { type: "subheading", label: "Ankle / Foot" },
                 {
-                    type: "refraction-12col",
-                    name: "rom_ankle_foot",
-                    cornerLabel: "Target Muscle",
-                    cornerLikeGroupHeader: true,
-                    showColumnHeaders: true,
-                    groups: [
-                        { label: "Active Range Of Motion (AROM)", columns: [{ key: "Right" }, { key: "Left" }] },
-                        { label: "Passive Range Of Motion (PROM)", columns: [{ key: "Right" }, { key: "Left" }] },
-                    ],
-                    rows: [
+                    type: "accordion",
+                    name: "rom_accordion_ankle_foot",
+                    label: "Ankle / Foot",
+                    children: [
                         {
-                            value: "dorsiflexion",
-                            label: "Dorsiflexion",
-                            columns: [{}, {}, {}, {}],
+                            type: "refraction-12col",
+                            name: "rom_ankle_foot",
+                            cornerLabel: "Target Muscle",
+                            cornerLikeGroupHeader: true,
+                            showColumnHeaders: true,
+                            groups: [
+                                { label: "Active Range Of Motion (AROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                                { label: "Passive Range Of Motion (PROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                            ],
+                            rows: [
+                                { value: "dorsiflexion", label: "Dorsiflexion", columns: [{}, {}, {}, {}] },
+                                { value: "plantarflexion", label: "Plantarflexion", columns: [{}, {}, {}, {}] },
+                            ],
                         },
+                    ],
+                },
+                {
+                    type: "accordion",
+                    name: "rom_accordion_elbow_forearm",
+                    label: "Elbow / Forearm",
+                    children: [
                         {
-                            value: "plantarflexion",
-                            label: "Plantarflexion",
-                            columns: [{}, {}, {}, {}],
+                            type: "refraction-12col",
+                            name: "rom_elbow_forearm",
+                            cornerLabel: "Target Muscle",
+                            cornerLikeGroupHeader: true,
+                            showColumnHeaders: true,
+                            groups: [
+                                { label: "Active Range Of Motion (AROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                                { label: "Passive Range Of Motion (PROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                            ],
+                            rows: [
+                                { value: "flexion", label: "Flexion", columns: [{}, {}, {}, {}] },
+                                { value: "extension", label: "Extension", columns: [{}, {}, {}, {}] },
+                                { value: "pronation", label: "Pronation", columns: [{}, {}, {}, {}] },
+                                { value: "supination", label: "Supination", columns: [{}, {}, {}, {}] },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    type: "accordion",
+                    name: "rom_accordion_wrist_hand",
+                    label: "Wrist / Hand",
+                    children: [
+                        {
+                            type: "refraction-12col",
+                            name: "rom_wrist_hand",
+                            cornerLabel: "Target Muscle",
+                            cornerLikeGroupHeader: true,
+                            showColumnHeaders: true,
+                            groups: [
+                                { label: "Active Range Of Motion (AROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                                { label: "Passive Range Of Motion (PROM)", columns: [{ key: "Right" }, { key: "Left" }] },
+                            ],
+                            rows: [
+                                { value: "flexion", label: "Flexion", columns: [{}, {}, {}, {}] },
+                                { value: "extension", label: "Extension", columns: [{}, {}, {}, {}] },
+                                { value: "radial_deviation", label: "Radial Deviation", columns: [{}, {}, {}, {}] },
+                                { value: "ulnar_deviation", label: "Ulnar Deviation", columns: [{}, {}, {}, {}] },
+                            ],
                         },
                     ],
                 },
@@ -1118,7 +1171,7 @@ const SC_SCHEMA = {
 }
 
 const FEES_SCHEMA = {
-    title: "Flexible Endoscopic Evaluation of Swallowing (Fees)",
+    title: "Fiberoptic Endoscopic Evaluation of Swallowing (FEES)",
     actions: ACTIONS,
     sections: [
         {
@@ -1195,11 +1248,34 @@ const RTMS_SCHEMA = {
                 {
                     name: "rtms_stimulation_site",
                     label: "Stimulation Site",
-                    type: "single-select",
+                    type: "radio",
+                    labelAbove: true,
                     options: [
-                        { label: "Right", value: "right"},
-                        { label: "Left", value: "left"}
-                    ]
+                        { label: "Right Brain", value: "right_brain" },
+                        { label: "Left Brain", value: "left_brain" },
+                        { label: "Bilateral Brain", value: "bilateral_brain" },
+                        { label: "Peripheral", value: "peripheral" },
+                    ],
+                },
+                {
+                    name: "rtms_bilateral_right",
+                    label: "Right Brain",
+                    type: "radio",
+                    options: [
+                        { label: "Right Stimulate", value: "right_stimulate" },
+                        { label: "Right Inhibit", value: "right_inhibit" },
+                    ],
+                    showIf: { field: "rtms_stimulation_site", equals: "bilateral_brain" },
+                },
+                {
+                    name: "rtms_bilateral_left",
+                    label: "Left Brain",
+                    type: "radio",
+                    options: [
+                        { label: "Left Stimulate", value: "left_stimulate" },
+                        { label: "Left Inhibit", value: "left_inhibit" },
+                    ],
+                    showIf: { field: "rtms_stimulation_site", equals: "bilateral_brain" },
                 },
                 {
                     name: "rtms_frequency",
@@ -1340,8 +1416,18 @@ const TDCS_SCHEMA = {
                     options: [
                         { label: "2000", value: 2000},
                         { label: "1500", value: 1500},
-                        { label: "1000", value: 1000}
+                        { label: "1000", value: 1000},
+                        { label: "Others", value: "others" }
                     ]
+                },
+                {
+                    name: "current_other_specify",
+                    label: "Specify",
+                    type: "input",
+                    showIf: {
+                        field: "current",
+                        equals: "others"
+                    }
                 },
                 {
                 name: "complication",

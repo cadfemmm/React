@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { resolveBodyDiagramViews } from "../../../shared/utils/bodyDiagramViews";
 
 const DEFAULT_BODY_VIEWS = [
-  { key: "body",  label: "Body (Front/Back)", src: "/wound-body.png" },
-  { key: "hands", label: "Hands",             src: "/wound-hands.png" },
-  { key: "feet",  label: "Feet",              src: "/wound-feet.png" },
+  { key: "body", label: "Body (Front/Back)", src: "/body_high.png" },
+  { key: "hands", label: "Hands", src: "/palm.png" },
+  { key: "feet", label: "Feet", src: "/feet_high.png" },
 ];
 
 const PIN_COLOR = "#ef4444";
@@ -82,13 +83,32 @@ function PinMarker({ pin, color, readOnly, onRemove }) {
   );
 }
 
-export default function WoundLocationMarker({ value = {}, onChange, readOnly = false, views }) {
-  const BODY_VIEWS = (views && views.length > 0) ? views : DEFAULT_BODY_VIEWS;
-  const [activeView, setActiveView] = useState(BODY_VIEWS[0].key);
+export default function WoundLocationMarker({
+  value = {},
+  onChange,
+  readOnly = false,
+  views,
+  patient,
+  pinLabelPrefix = "W",
+  markerLegendTitle = "Marked Wounds",
+  markerHelperText = "Click on image to mark wound location. Click pin to remove.",
+  markerTotalLabel = "Total wound markers",
+}) {
+  const BODY_VIEWS = useMemo(
+    () => resolveBodyDiagramViews(views && views.length > 0 ? views : DEFAULT_BODY_VIEWS, patient),
+    [views, patient]
+  );
+  const [activeView, setActiveView] = useState(BODY_VIEWS[0]?.key || "body");
   const imgRef = useRef(null);
   const [imgHeight, setImgHeight] = useState(500);
 
-  const viewData = BODY_VIEWS.find(v => v.key === activeView) || BODY_VIEWS[0];
+  const viewData = BODY_VIEWS.find((v) => v.key === activeView) || BODY_VIEWS[0];
+
+  useEffect(() => {
+    if (!BODY_VIEWS.some((v) => v.key === activeView)) {
+      setActiveView(BODY_VIEWS[0]?.key || "body");
+    }
+  }, [BODY_VIEWS, activeView]);
   const pins = value[activeView] || [];
 
   // Recalculate rows whenever image renders or view changes
@@ -103,7 +123,7 @@ export default function WoundLocationMarker({ value = {}, onChange, readOnly = f
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     const id = Date.now();
-    const newPin = { id, x, y, label: `W${(pins.length + 1)}` };
+    const newPin = { id, x, y, label: `${pinLabelPrefix}${pins.length + 1}` };
     const updated = { ...value, [activeView]: [...pins, newPin] };
     onChange(updated);
   };
@@ -162,6 +182,7 @@ export default function WoundLocationMarker({ value = {}, onChange, readOnly = f
       <div style={{ display: "flex", flexDirection: "row", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
         <div style={{ position: "relative", display: "inline-block", flexShrink: 0 }}>
           <img
+            key={activeView}
             ref={imgRef}
             src={viewData.src}
             alt={viewData.label}
@@ -191,7 +212,7 @@ export default function WoundLocationMarker({ value = {}, onChange, readOnly = f
 
           {!readOnly && (
             <div style={{ marginTop: 6, fontSize: 11, color: "#6b7280" }}>
-              Click on image to mark wound location. Click pin to remove.
+              {markerHelperText}
             </div>
           )}
         </div>
@@ -200,7 +221,7 @@ export default function WoundLocationMarker({ value = {}, onChange, readOnly = f
         {pins.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", marginBottom: 2 }}>
-              Marked Wounds
+              {markerLegendTitle}
             </div>
             <div style={{
               display: "grid",
@@ -265,7 +286,7 @@ export default function WoundLocationMarker({ value = {}, onChange, readOnly = f
 
       {totalPins > 0 && (
         <div style={{ marginTop: 10, fontSize: 12, color: "#6b7280" }}>
-          Total wound markers: {totalPins} across all views
+          {markerTotalLabel}: {totalPins} across all views
         </div>
       )}
     </div>

@@ -2512,7 +2512,7 @@ const PsqiModal = ({ onClose, onSave }) => {
           />
         </Card>
 
-        <Card title="Consciousness">
+        <Card >
           <RadioRow
             label="State of consciousness"
             value={alert}
@@ -2607,7 +2607,7 @@ const PsqiModal = ({ onClose, onSave }) => {
           )}
         </Card>
 
-        <Card title="Orientation">
+        <Card >
           <RadioRow
             label="Orientation functions"
             value={orientation.status}
@@ -2700,7 +2700,7 @@ const PsqiModal = ({ onClose, onSave }) => {
           )}
         </Card>
 
-        <Card title="Ability to obey command">
+        <Card >
           <RadioRow
             label="Ability to obey command"
             value={obeyAbility}
@@ -2889,7 +2889,7 @@ const PsqiModal = ({ onClose, onSave }) => {
         </Card>
 
 
-        <Card title="Memory">
+        <Card >
           <RadioRow
             label="Memory function"
             value={memory.status}
@@ -2933,7 +2933,7 @@ const PsqiModal = ({ onClose, onSave }) => {
         </Card>
 
 
-        <Card title="Attention">
+        <Card>
           <RadioRow
             label="Attention function"
             value={attention}
@@ -2970,7 +2970,7 @@ const PsqiModal = ({ onClose, onSave }) => {
           )}
         </Card>
 
-        <Card title="Emotional">
+        <Card >
           <RadioRow
             label="Emotional / Mood functions"
             value={mood}
@@ -3078,7 +3078,7 @@ const PsqiModal = ({ onClose, onSave }) => {
           )}
         </Card>
 
-        <Card title="Perceptual Skills">
+        <Card>
           <RadioRow
             label="Perceptual functions"
             value={visuo.status}
@@ -3242,7 +3242,7 @@ const PsqiModal = ({ onClose, onSave }) => {
         </Card>
 
 
-        <Card title="Sleep">
+        <Card >
           <RadioRow
             label="Sleep Quality"
             value={sleepQuality}
