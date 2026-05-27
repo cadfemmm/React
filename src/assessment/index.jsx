@@ -386,6 +386,7 @@ const loadTemplates = async () => {
               type: sub.type,
               score: sub.score ?? null,
               body: sub.body ?? {},
+              actions: actions.ACTIONS_BUTTON,
 
               // session will override later
               session_id: null
@@ -699,21 +700,29 @@ const onChange = useCallback(
                 ) {
 
                   return [
-                    key,
-                    {
-                      ...template,
+  key,
+  {
+    ...template,
 
-                      // LOAD FORM SCHEMA
-                      sections: tm?.data?.body?.sections || [],
+    // IMPORTANT
+    ...tm.data.body,
 
-                      id: tm.data.id,
-                      name: tm.data.name,
-                      type: tm.data.type,
-                      score: tm.data.score,
+    // KEEP ACTIONS
+    actions: actions.ACTIONS_BUTTON,
 
-                      loaded: true
-                    }
-                  ];
+    // KEEP SESSION INSTANCE ID
+    session_id: template.session_id,
+
+    // KEEP ORIGINAL FORM TEMPLATE ID
+    id: template.id,
+
+    name: tm.data.name,
+    type: tm.data.type,
+    score: tm.data.score,
+
+    loaded: true
+  }
+];
 
                 }
 

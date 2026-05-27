@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AnatomyImageOverlayInputs from "./AnatomyImageSelector";
 import AudiogramGraph from "../Audiology/components/AudioGramGraph";
 import WoundLocationMarker from "../Nursing/components/WoundLocationMarker";
+import forms from "../../assessment/forms";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -1043,94 +1044,187 @@ function AssessmentLauncher({
   assessmentRegistry,
   languageConfig
 }) {
+
   const activeKey = `active_assessment_id`;
-  const active = values[activeKey]
-  // Remarks key per active assessment button
-  const remarksKey = active ? `${active}_remarks` : null;
+  const active = values[activeKey];
+
+  // Active selected assessment
+  const selectedAssessment = (assessmentRegistry || []).find(
+    o => o && o.id === active
+  );
+
+  // Remarks key
+  const remarksKey = active
+    ? `${active}_remarks`
+    : null;
 
   return (
     <div>
+
+      {/* Assessment Buttons */}
       {!field.autoOpen && (
         <div className="fb-inline-group">
+
           {(assessmentRegistry || [])
             .filter(Boolean)
             .map(opt => (
-            <button
-              key={opt.id}
-              type="button"
-              className={`fb-btn-outline ${active === opt.id ? "!border-primary-600 !bg-primary-600 !text-white" : ""}`}
-              onClick={() =>
-              onChange(
-                activeKey,
-                values[activeKey] === opt.id ? null : opt.id
-              )
-            }
-            >
-              {t(opt.name, languageConfig?.enabled ? languageConfig.lang : "en")}
-            </button>
-          ))}
+
+              <button
+                key={opt.id}
+                type="button"
+                className={`fb-btn-outline ${
+                  active === opt.id
+                    ? "!border-primary-600 !bg-primary-600 !text-white"
+                    : ""
+                }`}
+                onClick={() =>
+                  onChange(
+                    activeKey,
+                    values[activeKey] === opt.id
+                      ? null
+                      : opt.id
+                  )
+                }
+              >
+                {
+                  t(
+                    opt.name,
+                    languageConfig?.enabled
+                      ? languageConfig.lang
+                      : "en"
+                  )
+                }
+              </button>
+
+            ))}
+
         </div>
       )}
-      {/* Render Active Sub Assessment Form */}
-{active && (() => {
 
-const selectedAssessment = (assessmentRegistry || []).find(
-  o => o && o.id === active
-);
+      {/* Active Sub Assessment Form */}
+      {active && (() => {
 
-  // not loaded yet
-  if (
-    !selectedAssessment ||
-    !selectedAssessment.sections
-  ) {
-    return null;
-  }
+        // not loaded yet
+        if (
+          !selectedAssessment ||
+          !selectedAssessment.sections
+        ) {
+          return null;
+        }
 
-  return (
-    <div style={{ marginTop: 20 }}>
+        return (
+          <div style={{ marginTop: 20 }}>
 
-      <CommonFormBuilder
-        schema={selectedAssessment}
-        values={values}
-        onChange={onChange}
-        onAction={() => {}}
-        assessmentRegistry={assessmentRegistry}
-        layout="nested"
-      />
+            {/* FORM */}
+            <CommonFormBuilder
+              schema={{
+                ...selectedAssessment,
 
-    </div>
-  );
+                // REMOVE INTERNAL ACTION BUTTONS
+                actions: []
+              }}
 
-})()}
-      {/* Remarks textarea — shown per active assessment */}
-      {active && remarksKey && !field.hideRemarks &&(
-        <div style={{ marginTop: 12 }}>
-          <label className="form-label">
-            Remarks
-          </label>
-          <textarea
-            rows={3}
-            placeholder={`Remarks for ${assessmentRegistry.find(o => o.id === active)?.name || 'Sub Assessment'}...`}
-            value={values[remarksKey] || ""}
-            onChange={e => onChange(remarksKey, e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: 8,
-              fontSize: 13,
-              resize: "vertical",
-              boxSizing: "border-box",
-              fontFamily: "inherit"
-            }}
-          />
-        </div>
-      )}
+              values={values}
+              onChange={onChange}
+              assessmentRegistry={assessmentRegistry}
+              layout="nested"
+            />
+
+            {/* CUSTOM SAVE BUTTON */}
+            <div style={{ marginTop: 16 }}>
+
+              <button
+                type="button"
+                className="fb-btn-ghost"
+
+                onClick={async () => {
+
+                  try {
+
+                    const templateDataId =
+                      selectedAssessment.session_id;
+
+                    if (!templateDataId) {
+                      throw new Error(
+                        "Missing sub assessment session id"
+                      );
+                    }
+
+                    await forms.save(
+                      templateDataId,
+                      values
+                    );
+
+                    console.log(
+                      "Sub Assessment Saved",
+                      selectedAssessment.name
+                    );
+
+                  } catch (e) {
+
+                    console.log(e);
+
+                  }
+
+                }}
+              >
+                Save
+              </button>
+
+            </div>
+
+          </div>
+        );
+
+      })()}
+
+      {/* Remarks */}
+      {
+        active &&
+        remarksKey &&
+        !field.hideRemarks && (
+          <div style={{ marginTop: 12 }}>
+
+            <label className="form-label">
+              Remarks
+            </label>
+
+            <textarea
+              rows={3}
+
+              placeholder={`Remarks for ${
+                selectedAssessment?.name ||
+                'Sub Assessment'
+              }...`}
+
+              value={values[remarksKey] || ""}
+
+              onChange={e =>
+                onChange(
+                  remarksKey,
+                  e.target.value
+                )
+              }
+
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "1px solid #d1d5db",
+                borderRadius: 8,
+                fontSize: 13,
+                resize: "vertical",
+                boxSizing: "border-box",
+                fontFamily: "inherit"
+              }}
+            />
+
+          </div>
+        )
+      }
 
     </div>
   );
 }
-
 function RadioMatrixRow({ field, value, onChange, columnWidth, showScores, languageConfig }) {
   // Fixed width for question column, equal widths for option columns
   const questionColumnWidth = field.wideLabel ? 400 : 200; // Fixed width for question column
