@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AnatomyImageOverlayInputs from "./AnatomyImageSelector";
 import AudiogramGraph from "../Audiology/components/AudioGramGraph";
 import WoundLocationMarker from "../Nursing/components/WoundLocationMarker";
+import forms from "../../assessment/forms";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -1116,96 +1117,263 @@ function AssessmentLauncher({
   values,
   onChange,
   assessmentRegistry,
-  languageConfig
+  languageConfig,
+  parentSections
 }) {
+
   const activeKey = `active_assessment_id`;
-  const active = values[activeKey]
-  // Remarks key per active assessment button
-  const remarksKey = active ? `${active}_remarks` : null;
+  const active = values[activeKey];
+
+  // Active selected assessment
+  const selectedAssessment = (assessmentRegistry || []).find(
+    o => o && o.id === active
+  );
+
+  // Remarks key
+  const remarksKey = active
+    ? `${active}_remarks`
+    : null;
 
   return (
     <div>
+
+      {/* Assessment Buttons */}
       {!field.autoOpen && (
         <div className="fb-inline-group">
+
           {(assessmentRegistry || [])
             .filter(Boolean)
             .map(opt => (
-            <button
-              key={opt.id}
-              type="button"
-              className={`fb-btn-outline ${active === opt.id ? "!border-primary-600 !bg-primary-600 !text-white" : ""}`}
-              onClick={() =>
-              onChange(
-                activeKey,
-                values[activeKey] === opt.id ? null : opt.id
-              )
-            }
-            >
-              {t(opt.name, languageConfig?.enabled ? languageConfig.lang : "en")}
-            </button>
-          ))}
+
+              <button
+                key={opt.id}
+                type="button"
+                className={`fb-btn-outline ${
+                  active === opt.id
+                    ? "!border-primary-600 !bg-primary-600 !text-white"
+                    : ""
+                }`}
+                onClick={() =>
+                  onChange(
+                    activeKey,
+                    values[activeKey] === opt.id
+                      ? null
+                      : opt.id
+                  )
+                }
+              >
+                {
+                  t(
+                    opt.name,
+                    languageConfig?.enabled
+                      ? languageConfig.lang
+                      : "en"
+                  )
+                }
+              </button>
+
+            ))}
+
         </div>
       )}
-      {/* Render Active Sub Assessment Form */}
-{active && (() => {
 
-const selectedAssessment = (assessmentRegistry || []).find(
-  o => o && o.id === active
+      {/* Active Sub Assessment Form */}
+      {active && (() => {
+
+        // not loaded yet
+        if (
+          !selectedAssessment ||
+          !selectedAssessment.sections
+        ) {
+          return null;
+        }
+
+        return (
+          <div style={{ marginTop: 20 }}>
+
+            {/* FORM */}
+            <CommonFormBuilder
+              schema={{
+                ...selectedAssessment,
+
+                // REMOVE INTERNAL ACTION BUTTONS
+                actions: []
+              }}
+              values={values}
+              onChange={onChange}
+              assessmentRegistry={assessmentRegistry}
+              layout="nested"
+            />
+
+            {/* CUSTOM SAVE BUTTON */}
+            <div style={{ marginTop: 16 }}>
+
+              <button
+                type="button"
+                className="fb-btn-ghost"
+
+                onClick={async () => {
+
+                  try {
+
+                    const templateDataId =
+                      selectedAssessment.session_id;
+
+                    if (!templateDataId) {
+                      throw new Error(
+                        "Missing sub assessment session id"
+                      );
+                    }
+
+const parentFieldNames = [];
+
+// MAIN SOAP FIELDS
+(parentSections || []).forEach(section => {
+
+  (section.fields || []).forEach(field => {
+
+    // direct field
+    if (field.name) {
+      parentFieldNames.push(field.name);
+    }
+
+    // cols field
+    if (field.cols?.length) {
+
+      field.cols.forEach(col => {
+
+        if (col.name) {
+          parentFieldNames.push(col.name);
+        }
+
+      });
+
+    }
+
+  });
+
+});
+
+// REMOVE SOAP FIELDS ONLY
+const subPrefixes = [];
+
+// DETECT PREFIXES FROM SUBASSESSMENT
+(selectedAssessment.sections || []).forEach(section => {
+
+  (section.fields || []).forEach(field => {
+
+    const fieldName =
+      field.name ||
+      field.key;
+
+    if (!fieldName) return;
+
+    // prefix before first _
+    const prefix =
+      fieldName.split("_")[0];
+
+    if (prefix) {
+      subPrefixes.push(prefix + "_");
+    }
+
+  });
+
+});
+
+// UNIQUE PREFIXES
+const uniquePrefixes = [...new Set(subPrefixes)];
+
+const subAssessmentData = Object.fromEntries(
+
+  Object.entries(values || {}).filter(
+    ([key]) =>
+
+      // ONLY CURRENT SUBASSESSMENT PREFIXES
+      uniquePrefixes.some(
+        prefix => key.startsWith(prefix)
+      )
+
+      // remove remarks
+      && !key.endsWith("_remarks")
+  )
+
 );
 
-  // not loaded yet
-  if (
-    !selectedAssessment ||
-    !selectedAssessment.sections
-  ) {
-    return null;
-  }
+                    await forms.save(
+                      templateDataId,
+                      subAssessmentData
+                    );
 
-  return (
-    <div style={{ marginTop: 20 }}>
+                    console.log(
+                      "Sub Assessment Saved",
+                      selectedAssessment.name
+                    );
 
-      <CommonFormBuilder
-        schema={selectedAssessment}
-        values={values}
-        onChange={onChange}
-        onAction={() => {}}
-        assessmentRegistry={assessmentRegistry}
-        layout="nested"
-      />
+                  } catch (e) {
 
-    </div>
-  );
+                    console.log(e);
 
-})()}
-      {/* Remarks textarea — shown per active assessment */}
-      {active && remarksKey && !field.hideRemarks &&(
-        <div style={{ marginTop: 12 }}>
-          <label className="form-label">
-            Remarks
-          </label>
-          <textarea
-            rows={3}
-            placeholder={`Remarks for ${assessmentRegistry.find(o => o.id === active)?.name || 'Sub Assessment'}...`}
-            value={values[remarksKey] || ""}
-            onChange={e => onChange(remarksKey, e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: 8,
-              fontSize: 13,
-              resize: "vertical",
-              boxSizing: "border-box",
-              fontFamily: "inherit"
-            }}
-          />
-        </div>
-      )}
+                  }
+
+                }}
+              >
+                Save
+              </button>
+
+            </div>
+
+          </div>
+        );
+
+      })()}
+
+      {/* Remarks */}
+      {
+        active &&
+        remarksKey &&
+        !field.hideRemarks && (
+          <div style={{ marginTop: 12 }}>
+
+            <label className="form-label">
+              Remarks
+            </label>
+
+            <textarea
+              rows={3}
+
+              placeholder={`Remarks for ${
+                selectedAssessment?.name ||
+                'Sub Assessment'
+              }...`}
+
+              value={values[remarksKey] || ""}
+
+              onChange={e =>
+                onChange(
+                  remarksKey,
+                  e.target.value
+                )
+              }
+
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "1px solid #d1d5db",
+                borderRadius: 8,
+                fontSize: 13,
+                resize: "vertical",
+                boxSizing: "border-box",
+                fontFamily: "inherit"
+              }}
+            />
+
+          </div>
+        )
+      }
 
     </div>
   );
 }
-
 function RadioMatrixRow({ field, value, onChange, columnWidth, showScores, languageConfig }) {
   // Fixed width for question column, equal widths for option columns
   const questionColumnWidth = field.wideLabel ? 400 : 200; // Fixed width for question column
@@ -2925,6 +3093,7 @@ if (typeof col === "object" && col.type === "radio") {
           onChange={onChange}
           assessmentRegistry={assessmentRegistry} // ✅ FIX
           languageConfig={languageConfig}
+          parentSections={field.sections || []}
         />
       );
 
