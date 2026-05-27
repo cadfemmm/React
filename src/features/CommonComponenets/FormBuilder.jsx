@@ -1225,10 +1225,45 @@ function AssessmentLauncher({
                       );
                     }
 
-                    await forms.save(
-                      templateDataId,
-                      values
-                    );
+                    const fieldNames = [];
+
+                      (selectedAssessment?.sections || []).forEach(section => {
+
+                        (section.fields || []).forEach(field => {
+
+                          // normal field
+                          if (field.name) {
+                            fieldNames.push(field.name);
+                          }
+
+                          // grouped columns
+                          if (field.cols?.length) {
+
+                            field.cols.forEach(col => {
+
+                              if (col.name) {
+                                fieldNames.push(col.name);
+                              }
+
+                            });
+
+                          }
+
+                        });
+
+                      });
+
+                      const subAssessmentData = Object.fromEntries(
+
+                        Object.entries(values || {}).filter(
+                          ([key]) => fieldNames.includes(key)
+                        )
+
+                      );
+                      await forms.save(
+                        templateDataId,
+                        subAssessmentData
+                      );
 
                     console.log(
                       "Sub Assessment Saved",

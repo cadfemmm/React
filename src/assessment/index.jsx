@@ -225,70 +225,222 @@ export default function AssessmentLoader({ patient, department }) {
   // Action handler
   const handleAction = useCallback(
     async (type) => {
+
       // =========================
       // NEXT
       // =========================
       if (type === "next") {
-        const templateDataId = templates?.[activeTab]?.id;
+
+        const templateDataId =
+          templates?.[activeTab]?.id;
+
         // SAVE CURRENT TAB
-        if (isSessionActive && templateDataId) {
+        if (
+          isSessionActive &&
+          templateDataId
+        ) {
+
           try {
-            await forms.save(templateDataId, assessmentsValues[activeTab]);
+
+            // ALL SUB ASSESSMENT FIELD NAMES
+            const subAssessmentFieldNames =
+              Object.values(
+                subAssessmentTemplate?.[activeTab] || {}
+              ).flatMap(sub => {
+
+                const names = [];
+
+                (sub.sections || []).forEach(section => {
+
+                  (section.fields || []).forEach(field => {
+
+                    // normal field
+                    if (field.name) {
+                      names.push(field.name);
+                    }
+
+                    // grouped columns
+                    if (field.cols?.length) {
+
+                      field.cols.forEach(col => {
+
+                        if (col.name) {
+                          names.push(col.name);
+                        }
+
+                      });
+
+                    }
+
+                  });
+
+                });
+
+                return names;
+
+              });
+
+            // REMOVE SUB ASSESSMENT DATA
+            const parentAssessmentData =
+              Object.fromEntries(
+
+                Object.entries(
+                  assessmentsValues[activeTab] || {}
+                ).filter(
+                  ([key]) =>
+                    !subAssessmentFieldNames.includes(key)
+                )
+
+              );
+
+            // SAVE ONLY PARENT SOAP DATA
+            await forms.save(
+              templateDataId,
+              parentAssessmentData
+            );
+
             setToast({
               message: "Saved",
               variant: "success",
             });
+
           } catch (e) {
+
+            console.log(e);
+
             setToast({
               message: "Failed to save",
               variant: "error",
             });
+
             return;
+
           }
+
         }
+
         // MOVE TO NEXT TAB
         const pos = TABS.indexOf(activeTab);
+
         if (pos < TABS.length - 1) {
           setActiveTab(TABS[pos + 1]);
         }
+
         return;
+
       }
 
       // =========================
       // CLEAR
       // =========================
       if (type === "clear") {
+
         setIsSubmitted(false);
+
         setAssessmentsValues({
           subjective: {},
           objective: {},
           assessment: {},
           plan: {},
         });
+
         return;
+
       }
 
       // =========================
       // SAVE ONLY
       // =========================
       if (type === "save") {
-        const templateDataId = templates?.[activeTab]?.id;
+
+        const templateDataId =
+          templates?.[activeTab]?.id;
+
         if (!templateDataId) return;
+
         try {
-          await forms.save(templateDataId, assessmentsValues[activeTab]);
+
+          // ALL SUB ASSESSMENT FIELD NAMES
+          const subAssessmentFieldNames =
+            Object.values(
+              subAssessmentTemplate?.[activeTab] || {}
+            ).flatMap(sub => {
+
+              const names = [];
+
+              (sub.sections || []).forEach(section => {
+
+                (section.fields || []).forEach(field => {
+
+                  if (field.name) {
+                    names.push(field.name);
+                  }
+
+                  if (field.cols?.length) {
+
+                    field.cols.forEach(col => {
+
+                      if (col.name) {
+                        names.push(col.name);
+                      }
+
+                    });
+
+                  }
+
+                });
+
+              });
+
+              return names;
+
+            });
+
+          // REMOVE SUB ASSESSMENT DATA
+          const parentAssessmentData =
+            Object.fromEntries(
+
+              Object.entries(
+                assessmentsValues[activeTab] || {}
+              ).filter(
+                ([key]) =>
+                  !subAssessmentFieldNames.includes(key)
+              )
+
+            );
+
+          await forms.save(
+            templateDataId,
+            parentAssessmentData
+          );
+
           setToast({
             message: "Saved",
             variant: "success",
           });
+
         } catch (e) {
+
+          console.log(e);
+
           setToast({
             message: "Failed to save",
             variant: "error",
           });
+
         }
+
       }
+
     },
-    [activeTab, sessionId, templates, assessmentsValues, isSessionActive],
+    [
+      activeTab,
+      sessionId,
+      templates,
+      assessmentsValues,
+      isSessionActive,
+      subAssessmentTemplate
+    ],
   );
 
   // OnChange handler
