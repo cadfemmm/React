@@ -225,33 +225,21 @@ export default function AssessmentLoader({ patient, department }) {
   // Action handler
   const handleAction = useCallback(
     async (type) => {
-
       // =========================
       // NEXT
       // =========================
       if (type === "next") {
-
-        const templateDataId =
-          templates?.[activeTab]?.id;
+        const templateDataId = templates?.[activeTab]?.id;
 
         // SAVE CURRENT TAB
-        if (
-          isSessionActive &&
-          templateDataId
-        ) {
-
+        if (isSessionActive && templateDataId) {
           try {
-
             // ALL SUB ASSESSMENT FIELD NAMES
             const parentFieldNames = [];
 
             // ONLY MAIN SOAP TEMPLATE FIELDS
-            (
-              templates?.[activeTab]?.sections || []
-            ).forEach(section => {
-
-              (section.fields || []).forEach(field => {
-
+            (templates?.[activeTab]?.sections || []).forEach((section) => {
+              (section.fields || []).forEach((field) => {
                 // direct field
                 if (field.name) {
                   parentFieldNames.push(field.name);
@@ -259,58 +247,37 @@ export default function AssessmentLoader({ patient, department }) {
 
                 // cols fields
                 if (field.cols?.length) {
-
-                  field.cols.forEach(col => {
-
+                  field.cols.forEach((col) => {
                     if (col.name) {
                       parentFieldNames.push(col.name);
                     }
-
                   });
-
                 }
-
               });
-
             });
 
             // SAVE ONLY PARENT ASSESSMENT DATA
-            const parentAssessmentData =
-              Object.fromEntries(
-
-                Object.entries(
-                  assessmentsValues[activeTab] || {}
-                ).filter(
-                  ([key]) =>
-                    parentFieldNames.includes(key)
-                )
-
-              );
+            const parentAssessmentData = Object.fromEntries(
+              Object.entries(assessmentsValues[activeTab] || {}).filter(
+                ([key]) => parentFieldNames.includes(key),
+              ),
+            );
 
             // SAVE ONLY PARENT SOAP DATA
-            await forms.save(
-              templateDataId,
-              parentAssessmentData
-            );
+            await forms.save(templateDataId, parentAssessmentData);
 
             setToast({
               message: "Saved",
               variant: "success",
             });
-
           } catch (e) {
-
-            console.log(e);
-
             setToast({
               message: "Failed to save",
               variant: "error",
             });
 
             return;
-
           }
-
         }
 
         // MOVE TO NEXT TAB
@@ -321,14 +288,12 @@ export default function AssessmentLoader({ patient, department }) {
         }
 
         return;
-
       }
 
       // =========================
       // CLEAR
       // =========================
       if (type === "clear") {
-
         setIsSubmitted(false);
 
         setAssessmentsValues({
@@ -339,93 +304,62 @@ export default function AssessmentLoader({ patient, department }) {
         });
 
         return;
-
       }
 
       // =========================
       // SAVE ONLY
       // =========================
       if (type === "save") {
-
-        const templateDataId =
-          templates?.[activeTab]?.id;
+        const templateDataId = templates?.[activeTab]?.id;
 
         if (!templateDataId) return;
 
         try {
-
           // ALL SUB ASSESSMENT FIELD NAMES
-          const subAssessmentFieldNames =
-            Object.values(
-              subAssessmentTemplate?.[activeTab] || {}
-            ).flatMap(sub => {
+          const subAssessmentFieldNames = Object.values(
+            subAssessmentTemplate?.[activeTab] || {},
+          ).flatMap((sub) => {
+            const names = [];
 
-              const names = [];
+            (sub.sections || []).forEach((section) => {
+              (section.fields || []).forEach((field) => {
+                if (field.name) {
+                  names.push(field.name);
+                }
 
-              (sub.sections || []).forEach(section => {
-
-                (section.fields || []).forEach(field => {
-
-                  if (field.name) {
-                    names.push(field.name);
-                  }
-
-                  if (field.cols?.length) {
-
-                    field.cols.forEach(col => {
-
-                      if (col.name) {
-                        names.push(col.name);
-                      }
-
-                    });
-
-                  }
-
-                });
-
+                if (field.cols?.length) {
+                  field.cols.forEach((col) => {
+                    if (col.name) {
+                      names.push(col.name);
+                    }
+                  });
+                }
               });
-
-              return names;
-
             });
 
+            return names;
+          });
+
           // REMOVE SUB ASSESSMENT DATA
-          const parentAssessmentData =
-            Object.fromEntries(
-
-              Object.entries(
-                assessmentsValues[activeTab] || {}
-              ).filter(
-                ([key]) =>
-                  !subAssessmentFieldNames.includes(key)
-              )
-
-            );
-
-          await forms.save(
-            templateDataId,
-            parentAssessmentData
+          const parentAssessmentData = Object.fromEntries(
+            Object.entries(assessmentsValues[activeTab] || {}).filter(
+              ([key]) => !subAssessmentFieldNames.includes(key),
+            ),
           );
+
+          await forms.save(templateDataId, parentAssessmentData);
 
           setToast({
             message: "Saved",
             variant: "success",
           });
-
         } catch (e) {
-
-          console.log(e);
-
           setToast({
             message: "Failed to save",
             variant: "error",
           });
-
         }
-
       }
-
     },
     [
       activeTab,
@@ -433,7 +367,7 @@ export default function AssessmentLoader({ patient, department }) {
       templates,
       assessmentsValues,
       isSessionActive,
-      subAssessmentTemplate
+      subAssessmentTemplate,
     ],
   );
 
@@ -546,47 +480,20 @@ export default function AssessmentLoader({ patient, department }) {
           variant="submit"
           title="Submit Assessment?"
           confirmLabel="Submit Assessment"
-
           onConfirm={async () => {
-
             try {
-
               // SAVE FINAL PLAN DATA
               await handleAction("next");
 
               // FETCH SESSION BILLING
               const billingResponse =
-                await forms.fetchSessionCharge(
-                  department
-                );
+                await forms.fetchSessionCharge(department);
 
-              console.log(
-                "Billing Response",
-                billingResponse.data
-              );
+              const billingItem = billingResponse?.data?.data?.[0];
 
-              const billingItem =
-                billingResponse?.data?.data?.[0]
-               console.log(
-                  "Billing Item",
-                  billingItem
-                );
+              const charge_id = billingItem?.id;
 
-              const charge_id =
-                billingItem?.id;
-
-              const cost =
-                billingItem?.cost
-
-              console.log(
-                "Charge ID:",
-                charge_id
-              );
-
-              console.log(
-                "cost:",
-                cost
-              );
+              const cost = billingItem?.cost;
 
               // OPTIONAL:
               // save/store/send these values later
@@ -595,36 +502,21 @@ export default function AssessmentLoader({ patient, department }) {
               await handleEndSession();
 
               setIsConfirmModal(false);
-
             } catch (e) {
-
-              console.log(e);
-
               setToast({
-                message:
-                  "Failed to submit assessment",
-                variant: "error"
+                message: "Failed to submit assessment",
+                variant: "error",
               });
-
             }
-
           }}
-
-          onCancel={() =>
-            setIsConfirmModal(false)
-          }
-
+          onCancel={() => setIsConfirmModal(false)}
           message="You are about to finalise and submit this assessment."
-
           meta={
             patient
               ? [
                   {
                     label: "Patient",
-                    value:
-                      patient.email ||
-                      patient.name ||
-                      "—",
+                    value: patient.email || patient.name || "—",
                   },
                   {
                     label: "Visit Type",
@@ -632,14 +524,11 @@ export default function AssessmentLoader({ patient, department }) {
                   },
                   {
                     label: "Date",
-                    value: localDateTimeString(
-                      new Date()
-                    ),
+                    value: localDateTimeString(new Date()),
                   },
                 ]
               : []
           }
-
           checklist={[
             "All SOAP sections have been reviewed",
             "Assessment data is accurate and complete",
@@ -811,9 +700,7 @@ export default function AssessmentLoader({ patient, department }) {
                 assessmentRegistry={Object.values(
                   subAssessmentTemplate[activeTab] || {},
                 )}
-                parentSections={
-                  templates?.[activeTab]?.sections || []
-                }
+                parentSections={templates?.[activeTab]?.sections || []}
               >
                 <div style={S.actionRow}>
                   <button
