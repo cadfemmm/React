@@ -20,6 +20,7 @@ import MusculoskeletalAssessment from "../FocusedAssessment/MusculoskeletalAsses
 import { localDateTimeString } from "../../../shared/utils/dateFormatter";
 import MedicationAdministrationChart from "./MedicationAdministrationChart";
 import BladderDiaryChart from "./BladderDiaryChart";
+import PUSHTool from "./PUSHTool";
 import AgitatedBehaviourScale from "./AgitatedBehaviourScale";
 import GlucoseMonitorChart from "./GlucoseMonitorChart";
 import NursingRehabChecklist from "./NursingRehabChecklist";
@@ -278,6 +279,11 @@ function BladderDiaryAdapter({ onChange }) {
   return <BladderDiaryChart patient={patient} />;
 }
 
+function PUSHToolAdapter() {
+  const patient = useContext(PatientContext);
+  return <PUSHTool patient={patient} />;
+}
+
 function AgitatedBehaviourAdapter({ onChange }) {
   const patient = useContext(PatientContext);
   return <AgitatedBehaviourScale patient={patient} />;
@@ -367,6 +373,7 @@ export const NURSING_ASSESSMENT_REGISTRY = {
   musculoskeletal_assessment: MusculoskeletalAssessmentAdapter,
   medication_chart: MedicationChartAdapter,
   bladder_diary: BladderDiaryAdapter,
+  push_tool: PUSHToolAdapter,
   agitated_behaviour_scale: AgitatedBehaviourAdapter,
   glucose_monitor: GlucoseMonitorAdapter,
   rehab_checklist: RehabChecklistAdapter,
@@ -2797,6 +2804,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
               { label: "Diabetic Foot Assessment", value: "diabetic_foot_assessment" },
               { label: "Medication Chart", value: "medication_chart" },
               { label: "Bladder Diary", value: "bladder_diary" },
+              { label: "PUSH Tool", value: "push_tool" },
               { label: "Agitated Behaviour Scale", value: "agitated_behaviour_scale" },
               { label: "Glucose Monitor", value: "glucose_monitor" },
               // { label: "Rehab Checklist", value: "rehab_checklist" },
