@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import DryNeedling from "./DryNeedling";
 import WallClimbing from "./WallClimbing";
+import PatientCard from "../../../shared/cards/PatientCard";
 
 import BergBalanceScale from "./BBS";
 import FIMAssessment from "../../OT/components/Fim";
@@ -977,88 +978,15 @@ export default function HomeAssessment({ patient,onSubmit }) {
       setShowConsentModal(true);
     }
   };
-
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history: patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-  });
-
-  function PatientInformationBlock({ patient: currentPatient, history, setHistory }) {
-    if (!currentPatient) return null;
-    const formatDate = (dateStr) => {
-      if (!dateStr) return "-";
-      try {
-        return new Date(dateStr).toLocaleDateString();
-      } catch {
-        return "-";
-      }
-    };
-
-    return (
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, fontSize: 14 }}>
-          <div><b>Name:</b> {currentPatient.name}</div>
-          <div><b>IC:</b> {currentPatient.id}</div>
-          <div><b>DOB:</b> {formatDate(currentPatient.dob)}</div>
-          <div><b>Age / Gender:</b> {currentPatient.age} / {currentPatient.sex}</div>
-          <div><b>ICD:</b> {currentPatient.icd}</div>
-          <div><b>Date of Assessment:</b> {new Date().toLocaleDateString()}</div>
-          <div><b>Date of Onset:</b> {formatDate(currentPatient.date_of_onset)}</div>
-          <div><b>Duration of Diagnosis:</b> -</div>
-          <div><b>Primary Diagnosis:</b> {currentPatient.diagnosis_history || "-"}</div>
-          <div><b>Secondary Diagnosis:</b> {currentPatient.medical_history || "-"}</div>
-          <div><b>Dominant Side:</b> {currentPatient.dominant_side || "-"}</div>
-          <div><b>Language Preference:</b> {currentPatient.language_preference || "-"}</div>
-          <div><b>Education Level:</b> {currentPatient.education_background || "-"}</div>
-          <div><b>Occupation:</b> {currentPatient.occupation || "-"}</div>
-          <div><b>Work Status:</b> {currentPatient.employment_status || "-"}</div>
-          <div><b>Driving Status:</b> {currentPatient.driving_status || "-"}</div>
-          <div><b>Marital Status:</b> {currentPatient.marital_status || "-"}</div>
-          <div><b>PP/OB:</b> {currentPatient.pp_ob || "-"}</div>
-          <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
-            <h3>Patient History</h3>
-            <div>
-              <b>Past Medical History</b>
-              <input
-                style={taStyle}
-                value={history.past_medical_history}
-                onChange={e => setHistory(p => ({ ...p, past_medical_history: e.target.value }))}
-              />
-            </div>
-            <div>
-              <b>Family History</b>
-              <input
-                style={taStyle}
-                value={history.past_family_history}
-                onChange={e => setHistory(p => ({ ...p, past_family_history: e.target.value }))}
-              />
-            </div>
-            <div>
-              <b>Allergies</b>
-              <input
-                style={taStyle}
-                value={history.alerts_and_allergies}
-                onChange={e => setHistory(p => ({ ...p, alerts_and_allergies: e.target.value }))}
-              />
-            </div>
-            <button style={alertBtn}>🚨 Alerts</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+ 
 
   return (
     <div style={{ width: "100%" }}>
-      <CommonFormBuilder schema={CONTAINER_SCHEMA} values={{}} onChange={() => {}}>
-        <PatientInformationBlock
-          patient={patient}
-          history={patientHistory}
-          setHistory={setPatientHistory}
+        <PatientCard
+          patient={patient}/>
           
-        />
-      </CommonFormBuilder>
+          
+       
       
 
       <CommonFormBuilder schema={CONSENT_AND_REFERRAL_SCHEMA} values={values} onChange={onChange} />

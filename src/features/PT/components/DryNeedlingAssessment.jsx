@@ -315,11 +315,7 @@ export default function DryNeedlingAssessment({ patient, sharedAtvValues = {}, s
   const [openConsent, setOpenConsent] = useState(null);
    const [submitted, setSubmitted] = useState(false);
 
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history:  patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || "",
-  });
+  
    const tabOrder = ["subjective", "objective", "assessment", "plan"];
   const activeTabIdx = tabOrder.indexOf(activeTab);
   const handleSubmit = () => {
@@ -329,15 +325,7 @@ export default function DryNeedlingAssessment({ patient, sharedAtvValues = {}, s
   };
   const dryNeedlingRef = useRef({});
 
-  useEffect(() => {
-    if (!patient) return;
-    setPatientHistory({
-      past_medical_history: patient.medical_history              || "",
-      past_family_history:  patient.family_medical_history       || "",
-      alerts_and_allergies: patient.alerts_and_allergies_history || "",
-    });
-  }, [patient]);
-
+ 
   const onChange = (name, value) => {
     setValues(prev => ({ ...prev, [name]: value }));
     // When consent dropdown selected → open popup
@@ -376,32 +364,9 @@ const handleAction = (type) => {
   return (
     <div>
       {/* ===== PATIENT INFORMATION CARD ===== */}
-      <CommonFormBuilder
-        schema={{ title: "Patient Information", sections: [] }}
-        values={{}}
-        onChange={() => {}}
-      >
+      
         <PatientCard patient={patient} />
-        <div style={{ marginTop: 16 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>Patient History</div>
-          {[
-            { key: "past_medical_history", label: "Past Medical History" },
-            { key: "past_family_history",  label: "Family History"       },
-            { key: "alerts_and_allergies", label: "Allergies"            },
-          ].map(({ key, label }) => (
-            <div key={key} style={{ marginBottom: 10 }}>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>{label}</div>
-              <input
-                value={patientHistory[key]}
-                onChange={e => setPatientHistory(p => ({ ...p, [key]: e.target.value }))}
-                style={historyinput}
-              />
-            </div>
-          ))}
-          <button type="button" style={alertBtn}>🚨 Alerts</button>
-        </div>
-        <button style={doctorsReportBtn}>Doctors Reports</button>
-      </CommonFormBuilder>
+        
 
       {/* ===== SOAP TABS ===== */}
       <div style={tabBar}>

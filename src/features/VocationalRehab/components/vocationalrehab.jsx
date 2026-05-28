@@ -92,11 +92,7 @@ export default function VocationalRehab({ patient, onUpdatePatient, onSubmit, on
   const [activeTab, setActiveTab] = useState("subjective");
 
   /* --------- Patient History State --------- */
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history: patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || "",
-  });
+ 
 
   /* ---------------- STORAGE ---------------- */
   const storageKey = patient
@@ -125,26 +121,26 @@ export default function VocationalRehab({ patient, onUpdatePatient, onSubmit, on
   }, [patient]);
 
   /* --------- Keep patient history in sync --------- */
-  useEffect(() => {
-    setPatientHistory({
-      past_medical_history: patient?.medical_history || "",
-      past_family_history: patient?.family_medical_history || "",
-      alerts_and_allergies: patient?.alerts_and_allergies_history || "",
-    });
-  }, [patient?.id]);
+  // useEffect(() => {
+  //   setPatientHistory({
+  //     past_medical_history: patient?.medical_history || "",
+  //     past_family_history: patient?.family_medical_history || "",
+  //     alerts_and_allergies: patient?.alerts_and_allergies_history || "",
+  //   });
+  // }, [patient?.id]);
 
   /* --------- Persist patient history changes --------- */
-  useEffect(() => {
-    if (!patient?.id) return;
-    const updated = {
-      ...patient,
-      medical_history: patientHistory.past_medical_history,
-      family_medical_history: patientHistory.past_family_history,
-      alerts_and_allergies_history: patientHistory.alerts_and_allergies,
-    };
-    localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
-    onUpdatePatient?.(updated);
-  }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
+  // useEffect(() => {
+  //   if (!patient?.id) return;
+  //   const updated = {
+  //     ...patient,
+  //     medical_history: patientHistory.past_medical_history,
+  //     family_medical_history: patientHistory.past_family_history,
+  //     alerts_and_allergies_history: patientHistory.alerts_and_allergies,
+  //   };
+  //   localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+  //   onUpdatePatient?.(updated);
+  // }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
 
   // const onChange = (name, value) => {
   //   setValues(v => ({ ...v, [name]: value }));
@@ -873,22 +869,12 @@ const PLAN_SCHEMA = {
     <div style={mainContent}>
 
       {/* ===== PATIENT INFORMATION CARD ===== */}
-      <CommonFormBuilder
-        schema={VOCATIONAL_CONTAINER_SCHEMA}
-        values={{}}
-        onChange={() => { }}
-      >
-         <PatientInformationBlock
+ 
+         <PatientCard
                   patient={patient}
-                  patientHistory={patientHistory}
-                  setPatientHistory={setPatientHistory}
+                 
                 />
               
-                <button style={doctorsReportBtn}>
-                  Doctors Reports
-                </button>
-        {/* <VocationalRehabPatientInfo patient={patient} patientHistory={patientHistory} setPatientHistory={setPatientHistory} /> */}
-      </CommonFormBuilder>
 
       {/* ===== NEW ENVIRONMENT CARD ===== */}
    <CommonFormBuilder
