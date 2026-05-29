@@ -143,23 +143,11 @@ export default function WallClimbingAssessment({ patient, sharedAtvValues = {}, 
      const [submitted, setSubmitted] = useState(false);
 
 
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history:  patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || "",
-  });
-
+  
   const dryNeedlingRef  = useRef({});
   const wallClimbingRef = useRef({});
 
-  useEffect(() => {
-    if (!patient) return;
-    setPatientHistory({
-      past_medical_history: patient.medical_history              || "",
-      past_family_history:  patient.family_medical_history       || "",
-      alerts_and_allergies: patient.alerts_and_allergies_history || "",
-    });
-  }, [patient]);
+  
 
   const onChange = (name, value) => {
     setValues(prev => ({ ...prev, [name]: value }));
@@ -169,7 +157,7 @@ export default function WallClimbingAssessment({ patient, sharedAtvValues = {}, 
   };
  const tabOrder = ["subjective", "objective", "assessment", "plan"];
   const activeTabIdx = tabOrder.indexOf(activeTab);
-    const storageKey = patient ? `amputee_progress_${patient.id}` : null;
+    const storageKey = patient ? `wallclimbing_assessment_${patient.id}` : null;
 
      const handleAction = (type) => {
     if (type === "back") onBack?.();
@@ -203,7 +191,7 @@ export default function WallClimbingAssessment({ patient, sharedAtvValues = {}, 
   return (
     <div>
       {/* Patient Info */}
-      <CommonFormBuilder schema={{ title: "Patient Information", sections: [] }} values={{}} onChange={() => {}}>
+      {/* <CommonFormBuilder schema={{ title: "Patient Information", sections: [] }} values={{}} onChange={() => {}}>
         <PatientCard patient={patient} />
         <div style={{ marginTop: 16 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>Patient History</div>
@@ -220,7 +208,8 @@ export default function WallClimbingAssessment({ patient, sharedAtvValues = {}, 
           <button type="button" style={alertBtn}>🚨 Alerts</button>
         </div>
         <button style={doctorsReportBtn}>Doctors Reports</button>
-      </CommonFormBuilder>
+      </CommonFormBuilder> */}
+      <PatientCard patient={patient}/>
 
       {/* SOAP Tabs */}
       <div style={tabBar}>

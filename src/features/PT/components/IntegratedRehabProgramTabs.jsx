@@ -20,6 +20,7 @@ import CybernicsAssessment from "./CybernicsAssessment";
 import NeuracTherapyProgress   from "./NeuracTherapyProgress";
 import NeuromodulationProgress from "./NeuromodulationProgress";
 import NeuroroticProgress      from "./NeuroroticProgress";
+import PatientCard from "../../../shared/cards/PatientCard";
 /* ── Consent & Referral schema ── */
 const CONSENT_AND_REFERRAL_SCHEMA = {
   sections: [
@@ -138,20 +139,7 @@ export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
   const [assessmentType, setAssessmentType] = useState(mode || null);
   const [activeTab, setActiveTab]           = useState("motion_capture");
     // const [activeTab, setActiveTab] = useState("subjective");
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: "",
-    past_family_history:  "",
-    alerts_and_allergies: "",
-  });
-
-  useEffect(() => {
-    if (!patient) return;
-    setPatientHistory({
-      past_medical_history: patient.medical_history || "",
-      past_family_history:  patient.family_medical_history || "",
-      alerts_and_allergies: patient.alerts_and_allergies_history || "",
-    });
-  }, [patient]);
+ 
 
   // Back handler: if mode came from prop → call onBack (go to DepartmentPatients card screen)
   // If mode was selected internally → go back to internal selection screen
@@ -246,7 +234,7 @@ export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
     if (assessmentType === "progress") {
       switch (activeTab) {
         case "motion_capture":
-          return <EmptySoapPanel patient={patient} patientHistory={patientHistory} setPatientHistory={setPatientHistory} onBack={handleBack} />;
+          return <EmptySoapPanel patient={patient}  onBack={handleBack} />;
         case "advance_fitness":
           return <AdvanceFitnessWithSubTabs patient={patient} onBack={handleBack} />;
         case "neurac_therapy":
@@ -265,7 +253,7 @@ export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
     /* Initial / Re-Assessment / Group → standard assessment components */
     switch (activeTab) {
       case "motion_capture":
-        return <EmptySoapPanel patient={patient} patientHistory={patientHistory} setPatientHistory={setPatientHistory} onBack={handleBack} />;
+        return <EmptySoapPanel patient={patient} onBack={handleBack} />;
       case "advance_fitness":
         return <AdvanceFitnessWithSubTabs patient={patient} onBack={handleBack} />;
       case "neurac_therapy":
@@ -538,7 +526,7 @@ const MC_SCHEMA_MAP = {
 };
 
 /* ── EmptySoapPanel (Motion Capture main view) ── */
-function EmptySoapPanel({ patient, patientHistory, setPatientHistory, onBack }) {
+function EmptySoapPanel({ patient, onBack }) {
   const storageKey = patient ? `motion_capture_${patient.id}` : null;
   const [values, setValues]       = useState({});
   const [activeSOAP, setActiveSOAP] = useState("subjective");
@@ -565,21 +553,13 @@ function EmptySoapPanel({ patient, patientHistory, setPatientHistory, onBack }) 
   const soapIdx   = soapOrder.indexOf(activeSOAP);
 
   return (
-    <div style={emptyWrap}>
+    // <div style={emptyWrap}>
+    <div>
       {/* Patient Information */}
-      <CommonFormBuilder
-        schema={{ title: "Patient Information", sections: [] }}
-        values={{}}
-        onChange={() => {}}
-      >
-        <PatientInformationBlock
-          patient={patient}
-          patientHistory={patientHistory}
-          setPatientHistory={setPatientHistory}
-        />
-        <button style={doctorsReportBtn}>Doctors Reports</button>
-      </CommonFormBuilder>
-
+    
+        <PatientCard
+          patient={patient}/>
+      
       {/* SOAP Tabs — uppercase centered style */}
       <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid #e5e7eb", background: "#fff" }}>
         {MC_SOAP_TABS.map(t => (
@@ -640,76 +620,7 @@ function EmptySoapPanel({ patient, patientHistory, setPatientHistory, onBack }) 
 }
 
 /* ── Patient Information block ── */
-function PatientInformationBlock({ patient, patientHistory, setPatientHistory }) {
-  if (!patient) return null;
-  const safe       = (v) => v ?? "-";
-  const formatDate = (d) => (d ? new Date(d).toLocaleDateString() : "-");
 
-  return (
-    <div style={{ marginBottom: 24 }}>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: 12,
-        fontSize: 14,
-      }}>
-        <div><b>Name:</b> {safe(patient.name)}</div>
-        <div><b>IC:</b> {safe(patient.id)}</div>
-        <div><b>DOB:</b> {formatDate(patient.dob)}</div>
-        <div><b>Age / Gender:</b> {safe(patient.age)} / {safe(patient.sex)}</div>
-        <div><b>ICD:</b> {safe(patient.icd)}</div>
-        <div><b>Date of Assessment:</b> {new Date().toLocaleDateString()}</div>
-        <div><b>Date of Onset:</b> {formatDate(patient.date_of_onset)}</div>
-        <div><b>Duration of Diagnosis:</b> -</div>
-        <div><b>Primary Diagnosis:</b> {safe(patient.diagnosis_history)}</div>
-        <div><b>Secondary Diagnosis:</b> {safe(patient.medical_history)}</div>
-        <div><b>Dominant Side:</b> {safe(patient.dominant_side)}</div>
-        <div><b>Language Preference:</b> {safe(patient.language_preference)}</div>
-        <div><b>Education Level:</b> {safe(patient.education_background)}</div>
-        <div><b>Occupation:</b> {safe(patient.occupation)}</div>
-        <div><b>Work Status:</b> {safe(patient.employment_status)}</div>
-        <div><b>Driving Status:</b> {safe(patient.driving_status)}</div>
-        <div><b>PP/OB:</b> {safe(patient.pp_ob)}</div>
-        <div><b>Weight:</b> {patient.weight ? `${patient.weight} kg` : "-"}</div>
-
-        <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
-          <h3>Patient History</h3>
-          <div>
-            <b>Past Medical History</b>
-            <input
-              style={input}
-              value={patientHistory.past_medical_history}
-              onChange={(e) =>
-                setPatientHistory((prev) => ({ ...prev, past_medical_history: e.target.value }))
-              }
-            />
-          </div>
-          <div>
-            <b>Family History</b>
-            <input
-              style={input}
-              value={patientHistory.past_family_history}
-              onChange={(e) =>
-                setPatientHistory((prev) => ({ ...prev, past_family_history: e.target.value }))
-              }
-            />
-          </div>
-          <div>
-            <b>Allergies</b>
-            <input
-              style={input}
-              value={patientHistory.alerts_and_allergies}
-              onChange={(e) =>
-                setPatientHistory((prev) => ({ ...prev, alerts_and_allergies: e.target.value }))
-              }
-            />
-          </div>
-          <button style={alertBtn}>🚨 Alerts</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ── Styles ── */
 const tabRow = {
@@ -734,12 +645,12 @@ const activeTabStyle = {
   borderBottom: "3px solid #2563eb",
 };
 const contentContainer = { padding: 16 };
-const emptyWrap = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 10,
-  background: "#fff",
-  overflow: "hidden",
-};
+// const emptyWrap = {
+//   border: "1px solid #e5e7eb",
+//   borderRadius: 10,
+//   background: "#fff",
+//   overflow: "hidden",
+// };
 const subTabRow = {
   display: "flex",
   gap: 0,
