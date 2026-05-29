@@ -478,70 +478,15 @@ export default function DrivingRehab({ patient, onSubmit, onBack }) {
     }
   };
 
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history:  patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || "",
-  });
 
-  function PatientInformationBlock({ patient, patientHistory, setPatientHistory }) {
-    if (!patient) return null;
-    const formatDate = (dateStr) => {
-      if (!dateStr) return "-";
-      try { return new Date(dateStr).toLocaleDateString(); } catch { return "-"; }
-    };
-    return (
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, fontSize: 14 }}>
-          <div><b>Name:</b> {patient.name}</div>
-          <div><b>IC:</b> {patient.id}</div>
-          <div><b>DOB:</b> {formatDate(patient.dob)}</div>
-          <div><b>Age / Gender:</b> {patient.age} / {patient.sex}</div>
-          <div><b>ICD:</b> {patient.icd}</div>
-          <div><b>Date of Assessment:</b> {new Date().toLocaleDateString()}</div>
-          <div><b>Date of Onset:</b> {formatDate(patient.date_of_onset)}</div>
-          <div><b>Duration of Diagnosis:</b> -</div>
-          <div><b>Primary Diagnosis:</b> {patient.diagnosis_history || "-"}</div>
-          <div><b>Secondary Diagnosis:</b> {patient.medical_history || "-"}</div>
-          <div><b>Dominant Side:</b> {patient.dominant_side || "-"}</div>
-          <div><b>Language Preference:</b> {patient.language_preference || "-"}</div>
-          <div><b>Education Level:</b> {patient.education_background || "-"}</div>
-          <div><b>Occupation:</b> {patient.occupation || "-"}</div>
-          <div><b>Work Status:</b> {patient.employment_status || "-"}</div>
-          <div><b>Driving Status:</b> {patient.driving_status || "-"}</div>
-          <div><b>Marital Status:</b> {patient.marital_status || "-"}</div>
-          <div><b>PP/OB:</b> {patient.pp_ob || "-"}</div>
-          <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
-            <h3>Patient History</h3>
-            <div>
-              <b>Past Medical History</b>
-              <textarea style={taStyle} value={patientHistory.past_medical_history}
-                onChange={e => setPatientHistory(p => ({ ...p, past_medical_history: e.target.value }))} />
-            </div>
-            <div>
-              <b>Family History</b>
-              <textarea style={taStyle} value={patientHistory.past_family_history}
-                onChange={e => setPatientHistory(p => ({ ...p, past_family_history: e.target.value }))} />
-            </div>
-            <div>
-              <b>Allergies</b>
-              <textarea style={taStyle} value={patientHistory.alerts_and_allergies}
-                onChange={e => setPatientHistory(p => ({ ...p, alerts_and_allergies: e.target.value }))} />
-            </div>
-            <button style={alertBtn}>🚨 Alerts</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
+ 
 
   return (
     <div style={{ width: "100%" }}>
       {/* Patient Info */}
-      <CommonFormBuilder schema={CONTAINER_SCHEMA} values={{}} onChange={() => {}}>
-        <PatientInformationBlock patient={patient} patientHistory={patientHistory} setPatientHistory={setPatientHistory} />
-      </CommonFormBuilder>
-
+        <PatientCard patient={patient}/>
+\
       {/* Consent & Referral */}
       <CommonFormBuilder schema={CONSENT_AND_REFERRAL_SCHEMA} values={values} onChange={onChange} />
 
