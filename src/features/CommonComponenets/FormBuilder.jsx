@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AnatomyImageOverlayInputs from "./AnatomyImageSelector";
 import AudiogramGraph from "../Audiology/components/AudioGramGraph";
 import WoundLocationMarker from "../Nursing/components/WoundLocationMarker";
+import forms from "../../assessment/forms";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -1116,101 +1117,353 @@ function AssessmentLauncher({
   values,
   onChange,
   assessmentRegistry,
-  languageConfig
+  languageConfig,
+  parentSections
 }) {
-  const activeKey = `${field.name}_active`;
-  const defaultValue = field.options?.[0]?.value || null;
-  const storedActive = values[activeKey] || (field.autoOpen ? defaultValue : null);
 
-  // Filter options by region if filterByRegionField is set
-  const selectedRegions = field.filterByRegionField
-    ? (values[field.filterByRegionField] || [])
-    : null;
+  const registryIsArray = Array.isArray(assessmentRegistry);
+  const registryIsObject =
+    assessmentRegistry &&
+    typeof assessmentRegistry === "object" &&
+    !registryIsArray;
+  const usesOptionRegistry = Array.isArray(field.options) && field.options.length > 0;
+  const activeKey =
+    field.activeKey ||
+    (registryIsArray
+      ? "active_assessment_id"
+      : `${field.name}_active`);
+  const active = values[activeKey];
+  const isRegistryComponent = item =>
+    typeof item === "function" ||
+    Boolean(item && typeof item === "object" && item.$$typeof);
+  const isSameId = (a, b) =>
+    a !== undefined &&
+    a !== null &&
+    b !== undefined &&
+    b !== null &&
+    String(a) === String(b);
 
-  let visibleOptions = (field.options || []).filter(opt => {
-    // per-option condition: { field, equals }
-    if (opt.visibleIf) {
-      const depVal = values[opt.visibleIf.field];
-      if ("equals" in opt.visibleIf) return depVal === opt.visibleIf.equals;
+  const registryOptions = (() => {
+    if (registryIsArray) {
+      return assessmentRegistry
+        .filter(opt => opt && opt.id !== undefined && opt.id !== null)
+        .map(opt => ({
+          ...opt,
+          id: opt.id,
+          value: opt.id,
+          label: opt.label ?? opt.name ?? opt.title ?? opt.id
+        }));
     }
-    if (!selectedRegions) return true;               // no filter — show all
-    if (!opt.regions || opt.regions.length === 0) return true; // regions:[] = all
-    return opt.regions.some(r => selectedRegions.includes(r));
-  });
 
-  const filterIncludedField = field.filterByIncludedValues;
-  const includedVals = filterIncludedField ? values[filterIncludedField] : null;
-  if (Array.isArray(includedVals) && includedVals.length > 0) {
-    visibleOptions = visibleOptions.filter(opt => includedVals.includes(opt.value));
-  }
+    if (usesOptionRegistry) {
+      return field.options
+        .map(opt => {
+          const id = opt?.value ?? opt?.id;
+          const registryItem = registryIsObject ? assessmentRegistry?.[id] : null;
 
-  const active =
-    storedActive != null && visibleOptions.some(o => o.value === storedActive)
-      ? storedActive
-      : null;
+          return {
+            ...(isRegistryComponent(registryItem) ? { Component: registryItem } : registryItem || {}),
+            id,
+            value: id,
+            name: opt?.label ?? registryItem?.name ?? id,
+            label: opt?.label ?? registryItem?.label ?? registryItem?.name ?? id,
+          };
+        })
+        .filter(opt => opt.id !== undefined && opt.id !== null);
+    }
 
-  let component = active ? assessmentRegistry?.[active] : null;
-  const ActiveComponent = component?.default || component;
+    if (registryIsObject) {
+      return Object.entries(assessmentRegistry).map(([key, item]) => ({
+        ...(isRegistryComponent(item) ? { Component: item } : item || {}),
+        id: item?.id ?? item?.value ?? key,
+        value: item?.value ?? item?.id ?? key,
+        name: item?.name ?? item?.label ?? key,
+        label: item?.label ?? item?.name ?? key,
+      }));
+    }
 
-  // Remarks key per active assessment button
-  const remarksKey = active ? `${field.name}_${active}_remarks` : null;
+    return [];
+  })();
+
+  // Active selected assessment
+  const selectedAssessment = registryOptions.find(
+    o => o && (
+      registryIsArray
+        ? isSameId(o.id, active)
+        : (
+            isSameId(o.id, active) ||
+            isSameId(o.value, active) ||
+            isSameId(o.key, active)
+          )
+    )
+  );
+
+  // Remarks key
+  const remarksKey = active
+    ? `${active}_remarks`
+    : null;
 
   return (
     <div>
+
+      {/* Assessment Buttons */}
       {!field.autoOpen && (
         <div className="fb-inline-group">
-          {visibleOptions.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              className={`fb-btn-outline ${active === opt.value ? "!border-primary-600 !bg-primary-600 !text-white" : ""}`}
-              onClick={() =>
+
+          {registryOptions
+            .filter(Boolean)
+            .map(opt => (
+
+              <button
+                key={opt.id}
+                type="button"
+                className={`fb-btn-outline ${
+                  isSameId(active, opt.id)
+                    ? "!border-primary-600 !bg-primary-600 !text-white"
+                    : ""
+                }`}
+                onClick={() =>
+                  onChange(
+                    activeKey,
+                    isSameId(values[activeKey], opt.id)
+                      ? null
+                      : opt.id
+                  )
+                }
+              >
+                {
+                  t(
+                    opt.label ?? opt.name,
+                    languageConfig?.enabled
+                      ? languageConfig.lang
+                      : "en"
+                  )
+                }
+              </button>
+
+            ))}
+
+        </div>
+      )}
+
+      {/* Active Sub Assessment Form */}
+      {active && (() => {
+
+        // not loaded yet
+        if (
+          !selectedAssessment
+        ) {
+          return null;
+        }
+
+        const SelectedComponent =
+          selectedAssessment.Component ||
+          selectedAssessment.component;
+
+        if (SelectedComponent) {
+          return (
+            <div style={{ marginTop: 20 }}>
+              <SelectedComponent
+                values={values}
+                onChange={onChange}
+                layout="nested"
+                field={field}
+                assessmentKey={active}
+              />
+            </div>
+          );
+        }
+
+        if (!selectedAssessment.sections) {
+          return null;
+        }
+
+        return (
+          <div style={{ marginTop: 20 }}>
+
+            {/* FORM */}
+            <CommonFormBuilder
+              schema={{
+                ...selectedAssessment,
+
+                // REMOVE INTERNAL ACTION BUTTONS
+                actions: []
+              }}
+              values={values}
+              onChange={onChange}
+              assessmentRegistry={assessmentRegistry}
+              layout="nested"
+            />
+
+            {/* CUSTOM SAVE BUTTON */}
+            <div style={{ marginTop: 16 }}>
+
+              <button
+                type="button"
+                className="fb-btn-ghost"
+
+                onClick={async () => {
+
+                  try {
+
+                    const templateDataId =
+                      selectedAssessment.session_id;
+
+                    if (!templateDataId) {
+                      throw new Error(
+                        "Missing sub assessment session id"
+                      );
+                    }
+
+const parentFieldNames = [];
+
+// MAIN SOAP FIELDS
+(parentSections || []).forEach(section => {
+
+  (section.fields || []).forEach(field => {
+
+    // direct field
+    if (field.name) {
+      parentFieldNames.push(field.name);
+    }
+
+    // cols field
+    if (field.cols?.length) {
+
+      field.cols.forEach(col => {
+
+        if (col.name) {
+          parentFieldNames.push(col.name);
+        }
+
+      });
+
+    }
+
+  });
+
+});
+
+// REMOVE SOAP FIELDS ONLY
+const subPrefixes = [];
+
+// DETECT PREFIXES FROM SUBASSESSMENT
+(selectedAssessment.sections || []).forEach(section => {
+
+  (section.fields || []).forEach(field => {
+
+    const fieldName =
+      field.name ||
+      field.key;
+
+    if (!fieldName) return;
+
+    // prefix before first _
+    const prefix =
+      fieldName.split("_")[0];
+
+    if (prefix) {
+      subPrefixes.push(prefix + "_");
+    }
+
+  });
+
+});
+
+// UNIQUE PREFIXES
+const uniquePrefixes = [...new Set(subPrefixes)];
+
+const subAssessmentData = Object.fromEntries(
+
+  Object.entries(values || {}).filter(
+    ([key]) =>
+
+      // ONLY CURRENT SUBASSESSMENT PREFIXES
+      uniquePrefixes.some(
+        prefix => key.startsWith(prefix)
+      )
+
+      // remove remarks
+      && !key.endsWith("_remarks")
+  )
+
+);
+
+                    await forms.save(
+                      templateDataId,
+                      subAssessmentData
+                    );
+
+                    console.log(
+                      "Sub Assessment Saved",
+                      selectedAssessment.name
+                    );
+
+                  } catch (e) {
+
+                    console.log(e);
+
+                  }
+
+                }}
+              >
+                Save
+              </button>
+
+            </div>
+
+          </div>
+        );
+
+      })()}
+
+      {/* Remarks */}
+      {
+        active &&
+        remarksKey &&
+        !field.hideRemarks && (
+          <div style={{ marginTop: 12 }}>
+
+            <label className="form-label">
+              Remarks
+            </label>
+
+            <textarea
+              rows={3}
+
+              placeholder={`Remarks for ${
+                selectedAssessment?.name ||
+                'Sub Assessment'
+              }...`}
+
+              value={values[remarksKey] || ""}
+
+              onChange={e =>
                 onChange(
-                  activeKey,
-                  values[activeKey] === opt.value ? null : opt.value
+                  remarksKey,
+                  e.target.value
                 )
               }
-            >
-              {t(opt.label, languageConfig?.enabled ? languageConfig.lang : "en")}
-            </button>
-          ))}
-        </div>
-      )}
 
-      {ActiveComponent ? (
-        <div style={{ marginTop: 20, width: '100%' }}>
-          <ActiveComponent values={values} onChange={onChange} layout="nested" />
-        </div>
-      ) : null}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "1px solid #d1d5db",
+                borderRadius: 8,
+                fontSize: 13,
+                resize: "vertical",
+                boxSizing: "border-box",
+                fontFamily: "inherit"
+              }}
+            />
 
-      {/* Remarks textarea — shown per active assessment */}
-      {active && remarksKey && !field.hideRemarks &&(
-        <div style={{ marginTop: 12 }}>
-          <label className="form-label">
-            Remarks
-          </label>
-          <textarea
-            rows={3}
-            placeholder={`Remarks for ${visibleOptions.find(o => o.value === active)?.label || active}...`}
-            value={values[remarksKey] || ""}
-            onChange={e => onChange(remarksKey, e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: 8,
-              fontSize: 13,
-              resize: "vertical",
-              boxSizing: "border-box",
-              fontFamily: "inherit"
-            }}
-          />
-        </div>
-      )}
+          </div>
+        )
+      }
+
     </div>
   );
 }
-
 function RadioMatrixRow({ field, value, onChange, columnWidth, showScores, languageConfig }) {
   // Fixed width for question column, equal widths for option columns
   const questionColumnWidth = field.wideLabel ? 400 : 200; // Fixed width for question column
@@ -2930,6 +3183,7 @@ if (typeof col === "object" && col.type === "radio") {
           onChange={onChange}
           assessmentRegistry={assessmentRegistry} // ✅ FIX
           languageConfig={languageConfig}
+          parentSections={field.sections || []}
         />
       );
 
