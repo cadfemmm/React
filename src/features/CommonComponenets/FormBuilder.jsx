@@ -1121,12 +1121,81 @@ function AssessmentLauncher({
   parentSections
 }) {
 
-  const activeKey = `active_assessment_id`;
+  const registryIsArray = Array.isArray(assessmentRegistry);
+  const registryIsObject =
+    assessmentRegistry &&
+    typeof assessmentRegistry === "object" &&
+    !registryIsArray;
+  const usesOptionRegistry = Array.isArray(field.options) && field.options.length > 0;
+  const activeKey =
+    field.activeKey ||
+    (registryIsArray
+      ? "active_assessment_id"
+      : `${field.name}_active`);
   const active = values[activeKey];
+  const isRegistryComponent = item =>
+    typeof item === "function" ||
+    Boolean(item && typeof item === "object" && item.$$typeof);
+  const isSameId = (a, b) =>
+    a !== undefined &&
+    a !== null &&
+    b !== undefined &&
+    b !== null &&
+    String(a) === String(b);
+
+  const registryOptions = (() => {
+    if (registryIsArray) {
+      return assessmentRegistry
+        .filter(opt => opt && opt.id !== undefined && opt.id !== null)
+        .map(opt => ({
+          ...opt,
+          id: opt.id,
+          value: opt.id,
+          label: opt.label ?? opt.name ?? opt.title ?? opt.id
+        }));
+    }
+
+    if (usesOptionRegistry) {
+      return field.options
+        .map(opt => {
+          const id = opt?.value ?? opt?.id;
+          const registryItem = registryIsObject ? assessmentRegistry?.[id] : null;
+
+          return {
+            ...(isRegistryComponent(registryItem) ? { Component: registryItem } : registryItem || {}),
+            id,
+            value: id,
+            name: opt?.label ?? registryItem?.name ?? id,
+            label: opt?.label ?? registryItem?.label ?? registryItem?.name ?? id,
+          };
+        })
+        .filter(opt => opt.id !== undefined && opt.id !== null);
+    }
+
+    if (registryIsObject) {
+      return Object.entries(assessmentRegistry).map(([key, item]) => ({
+        ...(isRegistryComponent(item) ? { Component: item } : item || {}),
+        id: item?.id ?? item?.value ?? key,
+        value: item?.value ?? item?.id ?? key,
+        name: item?.name ?? item?.label ?? key,
+        label: item?.label ?? item?.name ?? key,
+      }));
+    }
+
+    return [];
+  })();
 
   // Active selected assessment
-  const selectedAssessment = (assessmentRegistry || []).find(
-    o => o && o.id === active
+  const selectedAssessment = registryOptions.find(
+    o => o && (
+      registryIsArray
+        ? isSameId(o.id, active)
+        : (
+            isSameId(o.id, active) ||
+            isSameId(o.value, active) ||
+            isSameId(o.key, active)
+          )
+    )
   );
 
   // Remarks key
@@ -1141,7 +1210,7 @@ function AssessmentLauncher({
       {!field.autoOpen && (
         <div className="fb-inline-group">
 
-          {(assessmentRegistry || [])
+          {registryOptions
             .filter(Boolean)
             .map(opt => (
 
@@ -1149,14 +1218,14 @@ function AssessmentLauncher({
                 key={opt.id}
                 type="button"
                 className={`fb-btn-outline ${
-                  active === opt.id
+                  isSameId(active, opt.id)
                     ? "!border-primary-600 !bg-primary-600 !text-white"
                     : ""
                 }`}
                 onClick={() =>
                   onChange(
                     activeKey,
-                    values[activeKey] === opt.id
+                    isSameId(values[activeKey], opt.id)
                       ? null
                       : opt.id
                   )
@@ -1164,7 +1233,7 @@ function AssessmentLauncher({
               >
                 {
                   t(
-                    opt.name,
+                    opt.label ?? opt.name,
                     languageConfig?.enabled
                       ? languageConfig.lang
                       : "en"
@@ -1182,9 +1251,30 @@ function AssessmentLauncher({
 
         // not loaded yet
         if (
-          !selectedAssessment ||
-          !selectedAssessment.sections
+          !selectedAssessment
         ) {
+          return null;
+        }
+
+        const SelectedComponent =
+          selectedAssessment.Component ||
+          selectedAssessment.component;
+
+        if (SelectedComponent) {
+          return (
+            <div style={{ marginTop: 20 }}>
+              <SelectedComponent
+                values={values}
+                onChange={onChange}
+                layout="nested"
+                field={field}
+                assessmentKey={active}
+              />
+            </div>
+          );
+        }
+
+        if (!selectedAssessment.sections) {
           return null;
         }
 
