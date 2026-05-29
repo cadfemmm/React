@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import CommonFormBuilder from "../CommonComponenets/FormBuilder";
 import {Hearingaidtrial } from "../Audiology/hearingaidtrial";
+import {TYMPANOGRAM_EXTRACT_URL} from "../../platform/config/api.config"
+
+const valueToText = (value) =>
+  value === undefined || value === null ? "" : String(value);
+
+const setIfPresent = (target, key, value) => {
+  if (value !== undefined && value !== null && value !== "") {
+    target[key] = valueToText(value);
+  }
+};
 
 export function AuditoryAdvancedForm({ onBack, mode }) {
   const [values, setValues] = useState({});
@@ -541,6 +551,60 @@ function CosiSituationSelector({
 export function AuditoryAdvancedFormObj({ onBack, mode  }) {
   const [values, setValues] = useState({});
 
+  const applyTympanogramResult = (payload) => {
+    const data = payload?.data || payload || {};
+    const right = data.right_ear || data.rightEar || {};
+    const left = data.left_ear || data.leftEar || {};
+
+    setValues((prev) => {
+      const peakPressure = { ...(prev.peak_pressure || {}) };
+      const staticCompliance = { ...(prev.static_compliance || {}) };
+      const ecv = { ...(prev.ecv || {}) };
+
+      setIfPresent(peakPressure, "peak_pressure_r", right.pressure);
+      setIfPresent(peakPressure, "peak_pressure_l", left.pressure);
+      setIfPresent(staticCompliance, "static_compliance_r", right.compliance);
+      setIfPresent(staticCompliance, "static_compliance_l", left.compliance);
+      setIfPresent(ecv, "ecv_r", right.volume);
+      setIfPresent(ecv, "ecv_l", left.volume);
+
+      return {
+        ...prev,
+        peak_pressure: peakPressure,
+        static_compliance: staticCompliance,
+        ecv
+      };
+    });
+  };
+
+  const extractTympanogram = async (file) => {
+    if (!(file instanceof File || file instanceof Blob)) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error("Tympanogram extraction failed");
+    }
+
+    applyTympanogramResult(await response.json());
+  };
+
+  const handleChange = (name, value) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "tympanometry_report") {
+      extractTympanogram(value).catch((error) => {
+        console.error(error);
+      });
+    }
+  };
+
   const FREQUENCIES = ["500", "1000", "2000", "4000"];
 
   const reflexOptions = [
@@ -602,22 +666,22 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
               fields: [
                 {
                   type: "attach-file",
-                  name: "tympanometry_report_right",
+                  name: "tympanometry_report",
                   accept: "application/pdf,image/*",
-                  title: "Tympanometry - Right",
+                  title: "Tympanometry",
                   multiple: false,
                   previewSize: { width: 400, height: 400 },
                   hideInputAfterSelect: true
                 },
-                {
-                  type: "attach-file",
-                  name: "tympanometry_report_left",
-                  accept: "application/pdf,image/*",
-                  title: "Tympanometry - Left",
-                  multiple: false,
-                  previewSize: { width: 400, height: 400 },
-                  hideInputAfterSelect: true
-                }
+                // {
+                //   type: "attach-file",
+                //   name: "tympanometry_report_left",
+                //   accept: "application/pdf,image/*",
+                //   title: "Tympanometry - Left",
+                //   multiple: false,
+                //   previewSize: { width: 400, height: 400 },
+                //   hideInputAfterSelect: true
+                // }
               ]
             },
             {
@@ -1012,7 +1076,7 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
       schema={schema}
       values={{ ...values, mode }}
       layout="nested"
-      onChange={(n, v) => setValues((prev) => ({ ...prev, [n]: v }))}
+      onChange={handleChange}
       onAction={(type) => type === "back" && onBack?.()}
       assessmentRegistry={{
         hearingaidtrial_form_obj: ({ onChange }) => (
