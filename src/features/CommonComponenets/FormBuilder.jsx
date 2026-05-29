@@ -1124,6 +1124,8 @@ function AssessmentLauncher({
   const activeKey = `active_assessment_id`;
   const active = values[activeKey];
 
+  assessmentRegistry = Array.isArray(assessmentRegistry) ? assessmentRegistry : [assessmentRegistry]
+
   // Active selected assessment
   const selectedAssessment = (assessmentRegistry || []).find(
     o => o && o.id === active
