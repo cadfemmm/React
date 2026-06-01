@@ -33,6 +33,7 @@ const API_URL = {
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
+    EQUIPMENT_LIST: RMS_API + "rehab-equipment-lists/",
 
     // Billing price
     BILLING: (

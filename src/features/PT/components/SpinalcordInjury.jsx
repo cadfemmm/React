@@ -12,6 +12,9 @@ import { useState, useEffect } from "react";
 import TenMWTForm from "./TenMWTForm";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PatientCard from "../../../shared/cards/PatientCard";
+import { API_URL } from "../../../platform/config/api.config";
+import api, { setAccessToken } from "../../../shared/api/apiClient";
+
 const PROGNOSIS_OPTIONS = [
   { label: "Excellent", value: "excellent" },
   { label: "Good", value: "good" },
@@ -525,12 +528,16 @@ const PLAN_SCHEMA = {
             type: "dynamic-goals",
             name: "long_term_goals"
           }, 
-           { type: "subheading", label: "Interventions and Plan" },  
+           { type: "subheading", label: "Interventions and Plan" }, 
+            {
+  name: "equipment_list",
+  label: "Equipment List",
+  type: "equipment-list",
+  options: []
+},
              { type: "subheading", label: "Treatment Plan" },
-
         {
   name: "intervention_plan",
- 
   type: "checkbox-group",
   options: [
     { label: "Stretching", value: "stretching" },
@@ -854,11 +861,36 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
   const [values, setValues] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
+  const [equipmentOptions, setEquipmentOptions] = useState([]);
   
   /* ---------------- STORAGE ---------------- */
   const storageKey = patient
     ? `spinal_assessment_draft_${patient.id}`
     : null;
+
+useEffect(() => {
+  const fetchEquipmentList = async () => {
+    try {
+      const response = await api.get(API_URL.EQUIPMENT_LIST);
+
+      const result = response.data;
+
+const options =
+  result?.data?.map(item => ({
+    label: item.equipment_name,
+    value: item.id,
+    status: item.status,
+    equipment_code: item.equipment_code,
+  })) || [];
+
+setEquipmentOptions(options);
+    } catch (error) {
+      console.error("Equipment list fetch failed:", error);
+    }
+  };
+
+  fetchEquipmentList();
+}, []);    
    
   useEffect(() => {
     if (!storageKey) return;
@@ -947,7 +979,17 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
     onSubmit?.(values);
     alert("Spinal assessment submitted");
   };
-
+const planSchema = {
+  ...PLAN_SCHEMA,
+  sections: PLAN_SCHEMA.sections.map((section) => ({
+    ...section,
+    fields: section.fields.map((field) =>
+      field.name === "equipment_list"
+        ? { ...field, options: equipmentOptions }
+        : field
+    ),
+  })),
+};
   return (
     <div style={mainContent}>
     
@@ -978,7 +1020,11 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
 
       {/* ===== TAB CONTENT ===== */}
       <CommonFormBuilder
-        schema={schemaMap[activeTab]}
+        schema={
+          activeTab === "plan"
+            ? planSchema
+            : schemaMap[activeTab]
+        }
         values={values}
         onChange={onChange}
         submitted={submitted}

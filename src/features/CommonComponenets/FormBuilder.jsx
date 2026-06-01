@@ -4010,6 +4010,137 @@ if (typeof col === "object" && col.type === "radio") {
 
     default:
       return null;
+
+    case "equipment-list": {
+  const isOpen = values[`${field.name}_open`] || false;
+
+  return (
+    <div key={field.name}>
+      {/* Dropdown Header */}
+      <div
+        onClick={() =>
+          onChange(`${field.name}_open`, !isOpen)
+        }
+        style={{
+          border: "1px solid #d1d5db",
+          borderRadius: isOpen ? "8px 8px 0 0" : "8px",
+          padding: "7px 16px",
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          background: "#fff"
+        }}
+      >
+        <span
+          style={{
+            color: "#6b7280",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "90%"
+          }}
+        >
+          Select Equipment
+        </span>
+
+        <span
+          style={{
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "0.2s"
+          }}
+        >
+          ▼
+        </span>
+      </div>
+
+      {/* Dropdown Body */}
+      {isOpen && (
+        <div
+          style={{
+            border: "1px solid #d1d5db",
+            borderTop: "none",
+            borderRadius: "0 0 8px 8px",
+            maxHeight: 400,
+            overflowY: "auto",
+            background: "#fff"
+          }}
+        >
+          {field.options?.map(option => (
+            <div
+              key={option.value}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "8px 16px",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {/* Equipment Name */}
+              <div
+                style={{
+                  flex: 1,
+                  fontSize: 14,
+                  fontWeight: 400
+                }}
+              >
+                {option.label}
+              </div>
+
+              {/* Status + Book */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12
+                }}
+              >
+                <span
+                  style={{
+                    borderRadius: 999,
+                    background: "#E8F8EE",
+                    border: "1px solid #86EFAC",
+                    color: "#15803D",
+                    fontWeight: 500,
+                    minWidth: 110,
+                    textAlign: "center",
+                  }}
+                >
+                  ● {option.status || "ACTIVE"}
+                </span>
+
+                <button
+                  type="button"
+                  style={{
+                    padding: "4px 18px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#2563EB",
+                    color: "#fff",
+                    cursor: "pointer",
+                    fontWeight: 600
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    if (field.onBook) {
+                      field.onBook(option);
+                    } else {
+                      console.log("Book:", option);
+                    }
+                  }}
+                >
+                  Book
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
   }
 }
 
