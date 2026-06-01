@@ -530,11 +530,11 @@ const PLAN_SCHEMA = {
           }, 
            { type: "subheading", label: "Interventions and Plan" }, 
             {
-            name: "equipment_list",
-            label: "Equipment List",
-            type: "multi-select-dropdown",
-            options: [] // will be injected dynamically
-          }, 
+  name: "equipment_list",
+  label: "Equipment List",
+  type: "equipment-list",
+  options: []
+},
              { type: "subheading", label: "Treatment Plan" },
         {
   name: "intervention_plan",
@@ -876,12 +876,14 @@ useEffect(() => {
       const result = response.data;
 
 const options =
-  result?.data?.map((item) => ({
-    label: `${item.equipment_name} - (${item.status})`,
+  result?.data?.map(item => ({
+    label: item.equipment_name,
     value: item.id,
+    status: item.status,
+    equipment_code: item.equipment_code,
   })) || [];
 
-      setEquipmentOptions(options);
+setEquipmentOptions(options);
     } catch (error) {
       console.error("Equipment list fetch failed:", error);
     }
