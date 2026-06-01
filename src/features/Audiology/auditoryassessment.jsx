@@ -550,6 +550,7 @@ function CosiSituationSelector({
 
 export function AuditoryAdvancedFormObj({ onBack, mode  }) {
   const [values, setValues] = useState({});
+  const [isTympanogramLoading, setIsTympanogramLoading] = useState(false);
 
   const applyTympanogramResult = (payload) => {
     const data = payload?.data || payload || {};
@@ -580,28 +581,48 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
   const extractTympanogram = async (file) => {
     if (!(file instanceof File || file instanceof Blob)) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+    setIsTympanogramLoading(true);
 
-    const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
-      method: "POST",
-      body: formData
-    });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    if (!response.ok) {
-      throw new Error("Tympanogram extraction failed");
+      const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Tympanogram extraction failed");
+      }
+
+      applyTympanogramResult(await response.json());
+    } finally {
+      setIsTympanogramLoading(false);
     }
-
-    applyTympanogramResult(await response.json());
   };
 
   const handleChange = (name, value) => {
     setValues((prev) => ({ ...prev, [name]: value }));
 
     if (name === "tympanometry_report") {
-      extractTympanogram(value).catch((error) => {
-        console.error(error);
-      });
+      setValues((prev) => ({
+        ...prev,
+        peak_pressure: {
+          peak_pressure_r: "Fetching...",
+          peak_pressure_l: "Fetching..."
+        },
+        static_compliance: {
+          static_compliance_r: "Fetching...",
+          static_compliance_l: "Fetching..."
+        },
+        ecv: {
+          ecv_r: "Fetching...",
+          ecv_l: "Fetching..."
+        }
+      }));
+
+      extractTympanogram(value).catch(console.error);
     }
   };
 
