@@ -803,8 +803,22 @@ function SubheadingWithImage({ field, languageConfig }) {
 
 function CustomImageField({ field, languageConfig }) {
   const [showImageModal, setShowImageModal] = React.useState(false);
-  const alt = t(field.label, languageConfig?.enabled ? languageConfig.lang : "en") || "Protocol image";
-  const enlargeOnClick = field.enlargeOnClick !== false;
+
+  const alt =
+    t(
+      field.label,
+      languageConfig?.enabled
+        ? languageConfig.lang
+        : "en"
+    ) || "Protocol image";
+
+  const enlargeOnClick =
+    field.enlargeOnClick !== false;
+
+  // Hide broken image when src is empty
+  if (!field.src) {
+    return null;
+  }
 
   return (
     <>
@@ -812,7 +826,10 @@ function CustomImageField({ field, languageConfig }) {
         <img
           src={field.src}
           alt={alt}
-          onClick={() => enlargeOnClick && setShowImageModal(true)}
+          onClick={() =>
+            enlargeOnClick &&
+            setShowImageModal(true)
+          }
           style={{
             width: "100%",
             maxWidth: 600,
@@ -822,13 +839,26 @@ function CustomImageField({ field, languageConfig }) {
             border: "1px solid #e5e7eb",
             borderRadius: 6,
             marginTop: 8,
-            cursor: enlargeOnClick ? "pointer" : "default",
+            cursor: enlargeOnClick
+              ? "pointer"
+              : "default",
           }}
-          title={enlargeOnClick ? "Click to view full size" : undefined}
+          title={
+            enlargeOnClick
+              ? "Click to view full size"
+              : undefined
+          }
         />
       </div>
+
       {showImageModal && (
-        <ImageModal src={field.src} alt={alt} onClose={() => setShowImageModal(false)} />
+        <ImageModal
+          src={field.src}
+          alt={alt}
+          onClose={() =>
+            setShowImageModal(false)
+          }
+        />
       )}
     </>
   );
@@ -2673,7 +2703,10 @@ case "grid-table-advanced": {
       );
     }
     case "custom-image":
-      return <CustomImageField field={field} languageConfig={languageConfig} />;
+      return <CustomImageField field={{
+        ...field,
+        src: value
+      }} languageConfig={languageConfig} />;
 
     case "audiogram-graph": {
       return(
