@@ -1,5 +1,4 @@
-const SUBJECTIVE = 
-{
+const SUBJECTIVE = {
    "sections":[
       {
          "fields":[
@@ -1153,8 +1152,7 @@ const SUBJECTIVE =
    ]
 }
 
-const OBJECTIVE = 
-{
+const OBJECTIVE = {
    "sections":[
       {
          "fields":[
@@ -2427,785 +2425,782 @@ const ASSESSMENT = {
    ]
 }
 
-const PLAN = 
-{
-   "sections":[
-      {
-         "fields":[
+const PLAN = {
+  "sections": [
+    {
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Short Term Goals (2–4 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
+        },
+        {
+          "type": "subheading",
+          "label": "Long Term Goals (6–12 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
+        },
+        {
+          "name": "intervention_required",
+          "label": "Intervention Required",
+          "type": "single-select",
+          "options": [
             {
-               "type":"subheading",
-               "label":"Short Term Goals (2–4 Weeks)"
+              "label": "Prescription",
+              "value": "prescription"
             },
             {
-               "type":"dynamic-goals",
-               "name":"short_term_goals"
+              "label": "Repair",
+              "value": "repair"
             },
             {
-               "type":"subheading",
-               "label":"Long Term Goals (6–12 Weeks)"
-            },
-            {
-               "type":"dynamic-goals",
-               "name":"long_term_goals"
-            },
-            {
-               "name":"intervention_required",
-               "label":"Intervention Required",
-               "type":"single-select",
-               "options":[
-                  {
-                     "label":"Prescription",
-                     "value":"prescription"
-                  },
-                  {
-                     "label":"Repair",
-                     "value":"repair"
-                  },
-                  {
-                     "label":"No Intervention",
-                     "value":"no_intervention"
-                  }
-               ]
-            },
-            {
-               "name":"request_quotation",
-               "label":"Request for Quotation",
-               "type":"button",
-               "showIf":{
-                  "field":"intervention_required",
-                  "equals":"prescription"
-               }
-            },
-            {
-               "name":"prescription_type",
-               "label":"Prescription Type",
-               "type":"single-select",
-               "showIf":{
-                  "field":"intervention_required",
-                  "equals":"prescription"
-               },
-               "options":[
-                  {
-                     "label":"Prosthetic",
-                     "value":"prosthetic"
-                  },
-                  {
-                     "label":"Orthotic",
-                     "value":"orthotic"
-                  }
-               ]
-            },
-            {
-               "name":"readiness_for_measurement",
-               "label":"Readiness for Measurement",
-               "type":"single-select",
-               "options":[
-                  {
-                     "label":"Suitable for Immediate Measurement",
-                     "value":"immediate_measurement"
-                  },
-                  {
-                     "label":"Requires Training Before Measurement",
-                     "value":"requires_training"
-                  },
-                  {
-                     "label":"Defer Prescription",
-                     "value":"defer_prescription"
-                  }
-               ]
-            },
-            {
-               "name":"reason_training_required",
-               "label":"Reason if Training Required",
-               "type":"input",
-               "showIf":{
-                  "field":"readiness_for_measurement",
-                  "equals":"requires_training"
-               },
-               "placeholder":"Strengthening / Balance training / Stump shaping / ROM improvement / Prosthetic training / Others"
-            },
-            {
-               "name":"training",
-               "label":"Training",
-               "type":"input",
-               "placeholder":"Stump bandaging / Prosthetic donning & doffing / Gait training / Strengthening / Others"
-            },
-            {
-               "name":"education",
-               "label":"Education",
-               "type":"input",
-               "placeholder":"Stump care / Skin care / Prosthetic education / Orthotic education / Others"
-            },
-            {
-               "name":"plan_remarks",
-               "label":"Remarks",
-               "type":"textarea"
-            },
-            {
-               "name":"case_type",
-               "label":"Case Type",
-               "type":"radio",
-               "options":[
-                  {
-                     "label":"Amputee",
-                     "value":"amputee"
-                  },
-                  {
-                     "label":"Non-Amputee",
-                     "value":"non_amputee"
-                  }
-               ]
-            },
-            {
-               "type":"subheading",
-               "label":"Prosthetic Prescription",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               }
-            },
-            {
-               "name":"suspension",
-               "label":"Suspension",
-               "type":"single-select",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               },
-               "options":[
-                  
-               ]
-            },
-            {
-               "name":"socket_design",
-               "label":"Socket Design",
-               "type":"single-select",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               },
-               "options":[
-                  {
-                     "label":"Transtibial pp socket (ptb/pts/tsb)",
-                     "value":"tt_pp_socket_ptb_pts_tsb"
-                  },
-                  {
-                     "label":"Transtibial pp/pe double socket (ptb/pts/tsb)",
-                     "value":"tt_pp_pe_double_socket_ptb_pts_tsb"
-                  },
-                  {
-                     "label":"Transtibial laminated socket (ptb/pts/tsb)",
-                     "value":"tt_laminated_socket_ptb_pts_tsb"
-                  },
-                  {
-                     "label":"Transtibial laminated double socket",
-                     "value":"tt_laminated_double_socket"
-                  },
-                  {
-                     "label":"Knee disarticulation pp socket with pelite liner",
-                     "value":"kd_pp_socket_pelite"
-                  },
-                  {
-                     "label":"Knee disarticulation pp/pe double socket",
-                     "value":"kd_pp_pe_double_socket"
-                  },
-                  {
-                     "label":"Knee disarticulation laminated socket",
-                     "value":"kd_laminated_socket"
-                  },
-                  {
-                     "label":"Transfemoral pp socket (quadrilateral/ischial)",
-                     "value":"tf_pp_socket_quad_ischial"
-                  },
-                  {
-                     "label":"Transfemoral pp/pe double socket (quadrilateral/ischial)",
-                     "value":"tf_pp_pe_double_socket_quad_ischial"
-                  },
-                  {
-                     "label":"Transfemoral laminated socket (quadrilateral/ischial)",
-                     "value":"tf_laminated_socket_quad_ischial"
-                  },
-                  {
-                     "label":"Transfemoral laminated double socket +pp/pe (quadrilateral/ischial)",
-                     "value":"tf_laminated_double_socket_pp_pe_quad_ischial"
-                  },
-                  {
-                     "label":"Hip disarticulation pp socket",
-                     "value":"hip_disarticulation_pp_socket"
-                  },
-                  {
-                     "label":"Hip polypropylene double socket",
-                     "value":"hip_polypropylene_double_socket"
-                  },
-                  {
-                     "label":"Hip disarticulation laminated socket",
-                     "value":"hip_disarticulation_laminated_socket"
-                  },
-                  {
-                     "label":"Symes pp socket",
-                     "value":"symes_pp_socket"
-                  },
-                  {
-                     "label":"Symes laminated socket with pelite",
-                     "value":"symes_laminated_socket_pelite"
-                  },
-                  {
-                     "label":"Chopart socket",
-                     "value":"chopart_socket"
-                  },
-                  {
-                     "label":"Syme 3d socket",
-                     "value":"syme_3d_socket"
-                  },
-                  {
-                     "label":"Syme transparent check socket",
-                     "value":"syme_transparent_check_socket"
-                  },
-                  {
-                     "label":"Below knee carbon laminate socket",
-                     "value":"bk_carbon_laminate_socket"
-                  },
-                  {
-                     "label":"Below knee adjustable carbon laminate socket",
-                     "value":"bk_adjustable_carbon_laminate_socket"
-                  },
-                  {
-                     "label":"Below knee transparent check socket",
-                     "value":"bk_transparent_check_socket"
-                  },
-                  {
-                     "label":"Below knee 3d socket",
-                     "value":"bk_3d_socket"
-                  },
-                  {
-                     "label":"Above knee adjustable carbon laminate socket",
-                     "value":"ak_adjustable_carbon_laminate_socket"
-                  },
-                  {
-                     "label":"Above knee transparent check socket",
-                     "value":"ak_transparent_check_socket"
-                  },
-                  {
-                     "label":"Above knee 3d socket",
-                     "value":"ak_3d_socket"
-                  },
-                  {
-                     "label":"Through knee transparent check socket",
-                     "value":"through_knee_transparent_check_socket"
-                  },
-                  {
-                     "label":"Others",
-                     "value":"others"
-                  }
-               ]
-            },
-            {
-               "name":"suspension_other",
-               "label":"Specify Other Socket",
-               "type":"textarea",
-               "showIf":{
-                  "field":"socket_design",
-                  "equals":"others"
-               }
-            },
-            {
-               "name":"knee_joint",
-               "label":"Knee Joint",
-               "type":"single-select",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               },
-               "options":[
-                  {
-                     "label":"V one microprocessor-controlled knee",
-                     "value":"v_one_microprocessor_knee"
-                  },
-                  {
-                     "label":"Orion 2 knee joint",
-                     "value":"orion_2_knee_joint"
-                  },
-                  {
-                     "label":"Plié® 3 mpc electronic knee",
-                     "value":"plie_3_mpc_electronic_knee"
-                  },
-                  {
-                     "label":"Total knee 1900 polycentric knee with geometric locking system",
-                     "value":"total_knee_1900_polycentric"
-                  },
-                  {
-                     "label":"Total knee® 2100",
-                     "value":"total_knee_2100"
-                  },
-                  {
-                     "label":"3r78 polycentric knee joint with pneumatic swing phase control",
-                     "value":"3r78_polycentric_pneumatic"
-                  },
-                  {
-                     "label":"Endolite esk+ with pspc",
-                     "value":"endolite_esk_pspc"
-                  },
-                  {
-                     "label":"4 bar knee joint system (3r20)",
-                     "value":"4bar_knee_3r20"
-                  },
-                  {
-                     "label":"Four bar knee joint with integrated extension assist (3r20)",
-                     "value":"4bar_extension_assist_3r20"
-                  },
-                  {
-                     "label":"Mauch knee",
-                     "value":"mauch_knee"
-                  },
-                  {
-                     "label":"Modular polycentric ebs knee joint with hydraulic swing phase control (3r60)",
-                     "value":"3r60_hydraulic_polycentric"
-                  },
-                  {
-                     "label":"Compact semi-automatic knee lock (sakl)",
-                     "value":"sakl"
-                  },
-                  {
-                     "label":"Ofm1 se balance knee",
-                     "value":"ofm1_se_balance"
-                  },
-                  {
-                     "label":"Modular single axis knee joints with pneumatic swing phase control (3r92)",
-                     "value":"3r92_single_axis_pneumatic"
-                  },
-                  {
-                     "label":"Hy-stan 4 bar knee",
-                     "value":"hy_stan_4bar"
-                  },
-                  {
-                     "label":"Hy-stan 4 bar pneumatic knee",
-                     "value":"hy_stan_4bar_pneumatic"
-                  },
-                  {
-                     "label":"Graph-lite 4 bar knee with manual lock",
-                     "value":"graph_lite_4bar_manual_lock"
-                  },
-                  {
-                     "label":"Graph-lite 5 bar pneumatic knee high activity",
-                     "value":"graph_lite_5bar_pneumatic"
-                  },
-                  {
-                     "label":"Knee joint with extension assist",
-                     "value":"knee_extension_assist"
-                  },
-                  {
-                     "label":"Monocentric brake knee joint with stance flexion and manual",
-                     "value":"monocentric_brake_knee"
-                  },
-                  {
-                     "label":"Waterproof knee joint with lock",
-                     "value":"waterproof_knee_lock"
-                  },
-                  {
-                     "label":"Stand auto lock pneumatic knee",
-                     "value":"stand_auto_lock_pneumatic"
-                  },
-                  {
-                     "label":"4 bar mechanical knee joint (flat top)",
-                     "value":"4bar_mechanical_flat_top"
-                  },
-                  {
-                     "label":"Hydraulic polycentric knee joint with extension assist",
-                     "value":"hydraulic_polycentric_extension_assist"
-                  },
-                  {
-                     "label":"Polycentric knee joint",
-                     "value":"polycentric_knee_joint"
-                  },
-                  {
-                     "label":"Pneumatic polycentric knee joint",
-                     "value":"pneumatic_polycentric_knee_joint"
-                  },
-                  {
-                     "label":"Phoenix graph-lite 4 bar pneumatic knee",
-                     "value":"phoenix_graph_lite_4bar"
-                  },
-                  {
-                     "label":"Matik",
-                     "value":"matik"
-                  },
-                  {
-                     "label":"Hy-stan 4 bar knee disarticulation knee",
-                     "value":"hy_stan_disarticulation"
-                  },
-                  {
-                     "label":"4-bar knee (economy)",
-                     "value":"4bar_knee_economy"
-                  },
-                  {
-                     "label":"4 bar geometric straight lock pneumatic knee",
-                     "value":"4bar_geometric_straight_lock"
-                  },
-                  {
-                     "label":"Graph lite 4-bar pneumatic knee – disarticulation knee",
-                     "value":"graph_lite_disarticulation"
-                  },
-                  {
-                     "label":"Graph lite 4 bar pneumatic knee(mini)",
-                     "value":"graph_lite_4bar_mini"
-                  },
-                  {
-                     "label":"Others",
-                     "value":"others"
-                  }
-               ]
-            },
-            {
-               "name":"knee_joint_other",
-               "label":"Specify Other Knee Joint",
-               "type":"textarea",
-               "showIf":{
-                  "field":"knee_joint",
-                  "equals":"others"
-               }
-            },
-            {
-               "name":"foot",
-               "label":"Foot",
-               "type":"single-select",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               },
-               "options":[
-                  {
-                     "label":"1s101 sach+ foot",
-                     "value":"1s101_sach_plus_foot"
-                  },
-                  {
-                     "label":"2r8=m10 sach foot adapter",
-                     "value":"2r8_m10_sach_adapter"
-                  },
-                  {
-                     "label":"1h38 single axis foot",
-                     "value":"1h38_single_axis_foot"
-                  },
-                  {
-                     "label":"2r10 single axis foot adapter",
-                     "value":"2r10_single_axis_adapter"
-                  },
-                  {
-                     "label":"2r33 single axis foot adapter with screw",
-                     "value":"2r33_single_axis_adapter_screw"
-                  },
-                  {
-                     "label":"1d10 dynamic foot with adapter",
-                     "value":"1d10_dynamic_foot_adapter"
-                  },
-                  {
-                     "label":"1d35 dynamic motion foot",
-                     "value":"1d35_dynamic_motion_foot"
-                  },
-                  {
-                     "label":"Endolite multiflex foot",
-                     "value":"endolite_multiflex_foot"
-                  },
-                  {
-                     "label":"1wr95 water resistance foot",
-                     "value":"1wr95_water_resistance_foot"
-                  },
-                  {
-                     "label":"Sach foot",
-                     "value":"sach_foot"
-                  },
-                  {
-                     "label":"Single axis flat foot with toes",
-                     "value":"single_axis_flat_foot_toes"
-                  },
-                  {
-                     "label":"Quantum syme foot spring module",
-                     "value":"quantum_syme_foot_spring"
-                  },
-                  {
-                     "label":"1c63 triton low profile",
-                     "value":"1c63_triton_low_profile"
-                  },
-                  {
-                     "label":"Foot shell for triton low profile foot",
-                     "value":"triton_low_profile_shell"
-                  },
-                  {
-                     "label":"Senator prosthetic foot",
-                     "value":"senator_prosthetic_foot"
-                  },
-                  {
-                     "label":"Endurance foot",
-                     "value":"endurance_foot"
-                  },
-                  {
-                     "label":"Feather carbon foot",
-                     "value":"feather_carbon_foot"
-                  },
-                  {
-                     "label":"Trias energy storing foot (1c30)",
-                     "value":"trias_energy_storing_1c30"
-                  },
-                  {
-                     "label":"Adjustable single axis ankle",
-                     "value":"adjustable_single_axis_ankle"
-                  },
-                  {
-                     "label":"Foot adapter with screw connection",
-                     "value":"foot_adapter_screw_connection"
-                  },
-                  {
-                     "label":"Multiflex ankle standard",
-                     "value":"multiflex_ankle_standard"
-                  },
-                  {
-                     "label":"Multiflex snubber",
-                     "value":"multiflex_snubber"
-                  },
-                  {
-                     "label":"Hy –stan single axis ankle",
-                     "value":"hy_stan_single_axis_ankle"
-                  },
-                  {
-                     "label":"Hy –stan ultra-short ankle",
-                     "value":"hy_stan_ultra_short_ankle"
-                  },
-                  {
-                     "label":"Adjustable multi-axis ankle joint",
-                     "value":"adjustable_multi_axis_ankle"
-                  },
-                  {
-                     "label":"Mono-axis ankle joint",
-                     "value":"mono_axis_ankle_joint"
-                  },
-                  {
-                     "label":"Single axis with pyramid",
-                     "value":"single_axis_with_pyramid"
-                  },
-                  {
-                     "label":"Single axis ankle joint with pyramid",
-                     "value":"single_axis_ankle_pyramid"
-                  },
-                  {
-                     "label":"Graph-lite multi-axis ankle",
-                     "value":"graph_lite_multi_axis_ankle"
-                  },
-                  {
-                     "label":"Vacuum ankle adaptor",
-                     "value":"vacuum_ankle_adaptor"
-                  },
-                  {
-                     "label":"Hydraulic vacuum ankle",
-                     "value":"hydraulic_vacuum_ankle"
-                  },
-                  {
-                     "label":"Stainless steel pyramid base (max 125kg)",
-                     "value":"stainless_steel_pyramid_base"
-                  },
-                  {
-                     "label":"Proteor s.a.c.h foot",
-                     "value":"proteor_sach_foot"
-                  },
-                  {
-                     "label":"Sierra (fs1)",
-                     "value":"sierra_fs1"
-                  },
-                  {
-                     "label":"Highlander (fs3)",
-                     "value":"highlander_fs3"
-                  },
-                  {
-                     "label":"Freedom agilix (f15)",
-                     "value":"freedom_agilix_f15"
-                  },
-                  {
-                     "label":"Dynastar",
-                     "value":"dynastar"
-                  },
-                  {
-                     "label":"Dynastep",
-                     "value":"dynastep"
-                  },
-                  {
-                     "label":"Freedom dynadapt (f10)",
-                     "value":"freedom_dynadapt_f10"
-                  },
-                  {
-                     "label":"Rush hipro",
-                     "value":"rush_hipro"
-                  },
-                  {
-                     "label":"Rush rampage lp",
-                     "value":"rush_rampage_lp"
-                  },
-                  {
-                     "label":"Kinterra foot/ankle (rom)",
-                     "value":"kinterra_rom"
-                  },
-                  {
-                     "label":"Super sach foot",
-                     "value":"super_sach_foot"
-                  },
-                  {
-                     "label":"Motion control foot",
-                     "value":"motion_control_foot"
-                  },
-                  {
-                     "label":"Kare dynamic foot with ankle",
-                     "value":"kare_dynamic_foot_ankle"
-                  },
-                  {
-                     "label":"Carbon foot cover (for endurance foot)",
-                     "value":"carbon_foot_cover_endurance"
-                  },
-                  {
-                     "label":"Footshell for trias",
-                     "value":"footshell_trias"
-                  },
-                  {
-                     "label":"Footshell (proteor foot)",
-                     "value":"footshell_proteor"
-                  },
-                  {
-                     "label":"Rush foot cover",
-                     "value":"rush_foot_cover"
-                  },
-                  {
-                     "label":"Feather carbon foot cover",
-                     "value":"feather_carbon_foot_cover"
-                  },
-                  {
-                     "label":"Kare dynamic foot cover",
-                     "value":"kare_dynamic_foot_cover"
-                  },
-                  {
-                     "label":"Foot cover (tehsen)",
-                     "value":"foot_cover_tehsen"
-                  },
-                  {
-                     "label":"Foot shell (gen 3, gen 2, shockwave, kinnex)",
-                     "value":"foot_shell_gen_series"
-                  },
-                  {
-                     "label":"Foot cover",
-                     "value":"foot_cover"
-                  },
-                  {
-                     "label":"Foot shell (ossur foot shell)",
-                     "value":"ossur_foot_shell"
-                  },
-                  {
-                     "label":"Foot cover for cpi",
-                     "value":"foot_cover_cpi"
-                  },
-                  {
-                     "label":"High definition silicone foot cover for partial foot",
-                     "value":"hdsf_partial_foot"
-                  },
-                  {
-                     "label":"Hdsf (with carbon fibre foot plate)",
-                     "value":"hdsf_carbon_plate"
-                  },
-                  {
-                     "label":"High definition silicone foot cover for partial foot - high top ankle",
-                     "value":"hdsf_partial_high_top"
-                  },
-                  {
-                     "label":"Hdsf (with carbon fibre foot plate) - high top ankle",
-                     "value":"hdsf_carbon_plate_high_top"
-                  },
-                  {
-                     "label":"Others",
-                     "value":"others"
-                  }
-               ]
-            },
-            {
-               "name":"foot_other",
-               "label":"Specify Other Foot",
-               "type":"textarea",
-               "showIf":{
-                  "field":"foot",
-                  "equals":"others"
-               }
-            },
-            {
-               "name":"additional_components",
-               "label":"Additional Components",
-               "type":"textarea",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               }
-            },
-            {
-               "name":"casting_date",
-               "label":"Casting Date",
-               "type":"date",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               }
-            },
-            {
-               "name":"fitting_date",
-               "label":"Fitting Date",
-               "type":"date",
-               "readOnly":true,
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               }
-            },
-            {
-               "name":"follow_up_date",
-               "label":"Follow-up Date",
-               "type":"date",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               }
-            },
-            {
-               "name":"upload_measurement_form",
-               "label":"Upload Measurement Form",
-               "type":"attach-file",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               },
-               "accept":"application/pdf,image/*"
-            },
-            {
-               "name":"training_in_prosthesis_use",
-               "label":"Training in Prosthesis Use",
-               "type":"radio",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               },
-               "options":[
-                  {
-                     "label":"Yes",
-                     "value":"yes"
-                  },
-                  {
-                     "label":"No",
-                     "value":"no"
-                  }
-               ]
-            },
-            {
-               "name":"prosthetic_prescription_remarks",
-               "label":"Remarks",
-               "type":"textarea",
-               "showIf":{
-                  "field":"prescription_type",
-                  "equals":"prosthetic"
-               }
+              "label": "No Intervention",
+              "value": "no_intervention"
             }
-         ]
-      }
-   ]
+          ]
+        },
+        {
+          "name": "request_quotation",
+          "label": "Request for Quotation",
+          "type": "button",
+          "showIf": {
+            "field": "intervention_required",
+            "equals": "prescription"
+          }
+        },
+        {
+          "name": "prescription_type",
+          "label": "Prescription Type",
+          "type": "single-select",
+          "showIf": {
+            "field": "intervention_required",
+            "equals": "prescription"
+          },
+          "options": [
+            {
+              "label": "Prosthetic",
+              "value": "prosthetic"
+            },
+            {
+              "label": "Orthotic",
+              "value": "orthotic"
+            }
+          ]
+        },
+        {
+          "name": "readiness_for_measurement",
+          "label": "Readiness for Measurement",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "Suitable for Immediate Measurement",
+              "value": "immediate_measurement"
+            },
+            {
+              "label": "Requires Training Before Measurement",
+              "value": "requires_training"
+            },
+            {
+              "label": "Defer Prescription",
+              "value": "defer_prescription"
+            }
+          ]
+        },
+        {
+          "name": "reason_training_required",
+          "label": "Reason if Training Required",
+          "type": "input",
+          "showIf": {
+            "field": "readiness_for_measurement",
+            "equals": "requires_training"
+          },
+          "placeholder": "Strengthening / Balance training / Stump shaping / ROM improvement / Prosthetic training / Others"
+        },
+        {
+          "name": "training",
+          "label": "Training",
+          "type": "input",
+          "placeholder": "Stump bandaging / Prosthetic donning & doffing / Gait training / Strengthening / Others"
+        },
+        {
+          "name": "education",
+          "label": "Education",
+          "type": "input",
+          "placeholder": "Stump care / Skin care / Prosthetic education / Orthotic education / Others"
+        },
+        {
+          "name": "plan_remarks",
+          "label": "Remarks",
+          "type": "textarea"
+        },
+        {
+          "name": "case_type",
+          "label": "Case Type",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Amputee",
+              "value": "amputee"
+            },
+            {
+              "label": "Non-Amputee",
+              "value": "non_amputee"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Prosthetic Prescription",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          }
+        },
+        {
+          "name": "suspension",
+          "label": "Suspension",
+          "type": "single-select",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          },
+          "options": []
+        },
+        {
+          "name": "socket_design",
+          "label": "Socket Design",
+          "type": "single-select",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          },
+          "options": [
+            {
+              "label": "Transtibial pp socket (ptb/pts/tsb)",
+              "value": "tt_pp_socket_ptb_pts_tsb"
+            },
+            {
+              "label": "Transtibial pp/pe double socket (ptb/pts/tsb)",
+              "value": "tt_pp_pe_double_socket_ptb_pts_tsb"
+            },
+            {
+              "label": "Transtibial laminated socket (ptb/pts/tsb)",
+              "value": "tt_laminated_socket_ptb_pts_tsb"
+            },
+            {
+              "label": "Transtibial laminated double socket",
+              "value": "tt_laminated_double_socket"
+            },
+            {
+              "label": "Knee disarticulation pp socket with pelite liner",
+              "value": "kd_pp_socket_pelite"
+            },
+            {
+              "label": "Knee disarticulation pp/pe double socket",
+              "value": "kd_pp_pe_double_socket"
+            },
+            {
+              "label": "Knee disarticulation laminated socket",
+              "value": "kd_laminated_socket"
+            },
+            {
+              "label": "Transfemoral pp socket (quadrilateral/ischial)",
+              "value": "tf_pp_socket_quad_ischial"
+            },
+            {
+              "label": "Transfemoral pp/pe double socket (quadrilateral/ischial)",
+              "value": "tf_pp_pe_double_socket_quad_ischial"
+            },
+            {
+              "label": "Transfemoral laminated socket (quadrilateral/ischial)",
+              "value": "tf_laminated_socket_quad_ischial"
+            },
+            {
+              "label": "Transfemoral laminated double socket +pp/pe (quadrilateral/ischial)",
+              "value": "tf_laminated_double_socket_pp_pe_quad_ischial"
+            },
+            {
+              "label": "Hip disarticulation pp socket",
+              "value": "hip_disarticulation_pp_socket"
+            },
+            {
+              "label": "Hip polypropylene double socket",
+              "value": "hip_polypropylene_double_socket"
+            },
+            {
+              "label": "Hip disarticulation laminated socket",
+              "value": "hip_disarticulation_laminated_socket"
+            },
+            {
+              "label": "Symes pp socket",
+              "value": "symes_pp_socket"
+            },
+            {
+              "label": "Symes laminated socket with pelite",
+              "value": "symes_laminated_socket_pelite"
+            },
+            {
+              "label": "Chopart socket",
+              "value": "chopart_socket"
+            },
+            {
+              "label": "Syme 3d socket",
+              "value": "syme_3d_socket"
+            },
+            {
+              "label": "Syme transparent check socket",
+              "value": "syme_transparent_check_socket"
+            },
+            {
+              "label": "Below knee carbon laminate socket",
+              "value": "bk_carbon_laminate_socket"
+            },
+            {
+              "label": "Below knee adjustable carbon laminate socket",
+              "value": "bk_adjustable_carbon_laminate_socket"
+            },
+            {
+              "label": "Below knee transparent check socket",
+              "value": "bk_transparent_check_socket"
+            },
+            {
+              "label": "Below knee 3d socket",
+              "value": "bk_3d_socket"
+            },
+            {
+              "label": "Above knee adjustable carbon laminate socket",
+              "value": "ak_adjustable_carbon_laminate_socket"
+            },
+            {
+              "label": "Above knee transparent check socket",
+              "value": "ak_transparent_check_socket"
+            },
+            {
+              "label": "Above knee 3d socket",
+              "value": "ak_3d_socket"
+            },
+            {
+              "label": "Through knee transparent check socket",
+              "value": "through_knee_transparent_check_socket"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "name": "suspension_other",
+          "label": "Specify Other Socket",
+          "type": "textarea",
+          "showIf": {
+            "field": "socket_design",
+            "equals": "others"
+          }
+        },
+        {
+          "name": "knee_joint",
+          "label": "Knee Joint",
+          "type": "single-select",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          },
+          "options": [
+            {
+              "label": "V one microprocessor-controlled knee",
+              "value": "v_one_microprocessor_knee"
+            },
+            {
+              "label": "Orion 2 knee joint",
+              "value": "orion_2_knee_joint"
+            },
+            {
+              "label": "Plié® 3 mpc electronic knee",
+              "value": "plie_3_mpc_electronic_knee"
+            },
+            {
+              "label": "Total knee 1900 polycentric knee with geometric locking system",
+              "value": "total_knee_1900_polycentric"
+            },
+            {
+              "label": "Total knee® 2100",
+              "value": "total_knee_2100"
+            },
+            {
+              "label": "3r78 polycentric knee joint with pneumatic swing phase control",
+              "value": "3r78_polycentric_pneumatic"
+            },
+            {
+              "label": "Endolite esk+ with pspc",
+              "value": "endolite_esk_pspc"
+            },
+            {
+              "label": "4 bar knee joint system (3r20)",
+              "value": "4bar_knee_3r20"
+            },
+            {
+              "label": "Four bar knee joint with integrated extension assist (3r20)",
+              "value": "4bar_extension_assist_3r20"
+            },
+            {
+              "label": "Mauch knee",
+              "value": "mauch_knee"
+            },
+            {
+              "label": "Modular polycentric ebs knee joint with hydraulic swing phase control (3r60)",
+              "value": "3r60_hydraulic_polycentric"
+            },
+            {
+              "label": "Compact semi-automatic knee lock (sakl)",
+              "value": "sakl"
+            },
+            {
+              "label": "Ofm1 se balance knee",
+              "value": "ofm1_se_balance"
+            },
+            {
+              "label": "Modular single axis knee joints with pneumatic swing phase control (3r92)",
+              "value": "3r92_single_axis_pneumatic"
+            },
+            {
+              "label": "Hy-stan 4 bar knee",
+              "value": "hy_stan_4bar"
+            },
+            {
+              "label": "Hy-stan 4 bar pneumatic knee",
+              "value": "hy_stan_4bar_pneumatic"
+            },
+            {
+              "label": "Graph-lite 4 bar knee with manual lock",
+              "value": "graph_lite_4bar_manual_lock"
+            },
+            {
+              "label": "Graph-lite 5 bar pneumatic knee high activity",
+              "value": "graph_lite_5bar_pneumatic"
+            },
+            {
+              "label": "Knee joint with extension assist",
+              "value": "knee_extension_assist"
+            },
+            {
+              "label": "Monocentric brake knee joint with stance flexion and manual",
+              "value": "monocentric_brake_knee"
+            },
+            {
+              "label": "Waterproof knee joint with lock",
+              "value": "waterproof_knee_lock"
+            },
+            {
+              "label": "Stand auto lock pneumatic knee",
+              "value": "stand_auto_lock_pneumatic"
+            },
+            {
+              "label": "4 bar mechanical knee joint (flat top)",
+              "value": "4bar_mechanical_flat_top"
+            },
+            {
+              "label": "Hydraulic polycentric knee joint with extension assist",
+              "value": "hydraulic_polycentric_extension_assist"
+            },
+            {
+              "label": "Polycentric knee joint",
+              "value": "polycentric_knee_joint"
+            },
+            {
+              "label": "Pneumatic polycentric knee joint",
+              "value": "pneumatic_polycentric_knee_joint"
+            },
+            {
+              "label": "Phoenix graph-lite 4 bar pneumatic knee",
+              "value": "phoenix_graph_lite_4bar"
+            },
+            {
+              "label": "Matik",
+              "value": "matik"
+            },
+            {
+              "label": "Hy-stan 4 bar knee disarticulation knee",
+              "value": "hy_stan_disarticulation"
+            },
+            {
+              "label": "4-bar knee (economy)",
+              "value": "4bar_knee_economy"
+            },
+            {
+              "label": "4 bar geometric straight lock pneumatic knee",
+              "value": "4bar_geometric_straight_lock"
+            },
+            {
+              "label": "Graph lite 4-bar pneumatic knee – disarticulation knee",
+              "value": "graph_lite_disarticulation"
+            },
+            {
+              "label": "Graph lite 4 bar pneumatic knee(mini)",
+              "value": "graph_lite_4bar_mini"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "name": "knee_joint_other",
+          "label": "Specify Other Knee Joint",
+          "type": "textarea",
+          "showIf": {
+            "field": "knee_joint",
+            "equals": "others"
+          }
+        },
+        {
+          "name": "foot",
+          "label": "Foot",
+          "type": "single-select",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          },
+          "options": [
+            {
+              "label": "1s101 sach+ foot",
+              "value": "1s101_sach_plus_foot"
+            },
+            {
+              "label": "2r8=m10 sach foot adapter",
+              "value": "2r8_m10_sach_adapter"
+            },
+            {
+              "label": "1h38 single axis foot",
+              "value": "1h38_single_axis_foot"
+            },
+            {
+              "label": "2r10 single axis foot adapter",
+              "value": "2r10_single_axis_adapter"
+            },
+            {
+              "label": "2r33 single axis foot adapter with screw",
+              "value": "2r33_single_axis_adapter_screw"
+            },
+            {
+              "label": "1d10 dynamic foot with adapter",
+              "value": "1d10_dynamic_foot_adapter"
+            },
+            {
+              "label": "1d35 dynamic motion foot",
+              "value": "1d35_dynamic_motion_foot"
+            },
+            {
+              "label": "Endolite multiflex foot",
+              "value": "endolite_multiflex_foot"
+            },
+            {
+              "label": "1wr95 water resistance foot",
+              "value": "1wr95_water_resistance_foot"
+            },
+            {
+              "label": "Sach foot",
+              "value": "sach_foot"
+            },
+            {
+              "label": "Single axis flat foot with toes",
+              "value": "single_axis_flat_foot_toes"
+            },
+            {
+              "label": "Quantum syme foot spring module",
+              "value": "quantum_syme_foot_spring"
+            },
+            {
+              "label": "1c63 triton low profile",
+              "value": "1c63_triton_low_profile"
+            },
+            {
+              "label": "Foot shell for triton low profile foot",
+              "value": "triton_low_profile_shell"
+            },
+            {
+              "label": "Senator prosthetic foot",
+              "value": "senator_prosthetic_foot"
+            },
+            {
+              "label": "Endurance foot",
+              "value": "endurance_foot"
+            },
+            {
+              "label": "Feather carbon foot",
+              "value": "feather_carbon_foot"
+            },
+            {
+              "label": "Trias energy storing foot (1c30)",
+              "value": "trias_energy_storing_1c30"
+            },
+            {
+              "label": "Adjustable single axis ankle",
+              "value": "adjustable_single_axis_ankle"
+            },
+            {
+              "label": "Foot adapter with screw connection",
+              "value": "foot_adapter_screw_connection"
+            },
+            {
+              "label": "Multiflex ankle standard",
+              "value": "multiflex_ankle_standard"
+            },
+            {
+              "label": "Multiflex snubber",
+              "value": "multiflex_snubber"
+            },
+            {
+              "label": "Hy –stan single axis ankle",
+              "value": "hy_stan_single_axis_ankle"
+            },
+            {
+              "label": "Hy –stan ultra-short ankle",
+              "value": "hy_stan_ultra_short_ankle"
+            },
+            {
+              "label": "Adjustable multi-axis ankle joint",
+              "value": "adjustable_multi_axis_ankle"
+            },
+            {
+              "label": "Mono-axis ankle joint",
+              "value": "mono_axis_ankle_joint"
+            },
+            {
+              "label": "Single axis with pyramid",
+              "value": "single_axis_with_pyramid"
+            },
+            {
+              "label": "Single axis ankle joint with pyramid",
+              "value": "single_axis_ankle_pyramid"
+            },
+            {
+              "label": "Graph-lite multi-axis ankle",
+              "value": "graph_lite_multi_axis_ankle"
+            },
+            {
+              "label": "Vacuum ankle adaptor",
+              "value": "vacuum_ankle_adaptor"
+            },
+            {
+              "label": "Hydraulic vacuum ankle",
+              "value": "hydraulic_vacuum_ankle"
+            },
+            {
+              "label": "Stainless steel pyramid base (max 125kg)",
+              "value": "stainless_steel_pyramid_base"
+            },
+            {
+              "label": "Proteor s.a.c.h foot",
+              "value": "proteor_sach_foot"
+            },
+            {
+              "label": "Sierra (fs1)",
+              "value": "sierra_fs1"
+            },
+            {
+              "label": "Highlander (fs3)",
+              "value": "highlander_fs3"
+            },
+            {
+              "label": "Freedom agilix (f15)",
+              "value": "freedom_agilix_f15"
+            },
+            {
+              "label": "Dynastar",
+              "value": "dynastar"
+            },
+            {
+              "label": "Dynastep",
+              "value": "dynastep"
+            },
+            {
+              "label": "Freedom dynadapt (f10)",
+              "value": "freedom_dynadapt_f10"
+            },
+            {
+              "label": "Rush hipro",
+              "value": "rush_hipro"
+            },
+            {
+              "label": "Rush rampage lp",
+              "value": "rush_rampage_lp"
+            },
+            {
+              "label": "Kinterra foot/ankle (rom)",
+              "value": "kinterra_rom"
+            },
+            {
+              "label": "Super sach foot",
+              "value": "super_sach_foot"
+            },
+            {
+              "label": "Motion control foot",
+              "value": "motion_control_foot"
+            },
+            {
+              "label": "Kare dynamic foot with ankle",
+              "value": "kare_dynamic_foot_ankle"
+            },
+            {
+              "label": "Carbon foot cover (for endurance foot)",
+              "value": "carbon_foot_cover_endurance"
+            },
+            {
+              "label": "Footshell for trias",
+              "value": "footshell_trias"
+            },
+            {
+              "label": "Footshell (proteor foot)",
+              "value": "footshell_proteor"
+            },
+            {
+              "label": "Rush foot cover",
+              "value": "rush_foot_cover"
+            },
+            {
+              "label": "Feather carbon foot cover",
+              "value": "feather_carbon_foot_cover"
+            },
+            {
+              "label": "Kare dynamic foot cover",
+              "value": "kare_dynamic_foot_cover"
+            },
+            {
+              "label": "Foot cover (tehsen)",
+              "value": "foot_cover_tehsen"
+            },
+            {
+              "label": "Foot shell (gen 3, gen 2, shockwave, kinnex)",
+              "value": "foot_shell_gen_series"
+            },
+            {
+              "label": "Foot cover",
+              "value": "foot_cover"
+            },
+            {
+              "label": "Foot shell (ossur foot shell)",
+              "value": "ossur_foot_shell"
+            },
+            {
+              "label": "Foot cover for cpi",
+              "value": "foot_cover_cpi"
+            },
+            {
+              "label": "High definition silicone foot cover for partial foot",
+              "value": "hdsf_partial_foot"
+            },
+            {
+              "label": "Hdsf (with carbon fibre foot plate)",
+              "value": "hdsf_carbon_plate"
+            },
+            {
+              "label": "High definition silicone foot cover for partial foot - high top ankle",
+              "value": "hdsf_partial_high_top"
+            },
+            {
+              "label": "Hdsf (with carbon fibre foot plate) - high top ankle",
+              "value": "hdsf_carbon_plate_high_top"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "name": "foot_other",
+          "label": "Specify Other Foot",
+          "type": "textarea",
+          "showIf": {
+            "field": "foot",
+            "equals": "others"
+          }
+        },
+        {
+          "name": "additional_components",
+          "label": "Additional Components",
+          "type": "textarea",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          }
+        },
+        {
+          "name": "casting_date",
+          "label": "Casting Date",
+          "type": "date",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          }
+        },
+        {
+          "name": "fitting_date",
+          "label": "Fitting Date",
+          "type": "date",
+          "readOnly": true,
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          }
+        },
+        {
+          "name": "follow_up_date",
+          "label": "Follow-up Date",
+          "type": "date",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          }
+        },
+        {
+          "name": "upload_measurement_form",
+          "label": "Upload Measurement Form",
+          "type": "attach-file",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          },
+          "accept": "application/pdf,image/*"
+        },
+        {
+          "name": "training_in_prosthesis_use",
+          "label": "Training in Prosthesis Use",
+          "type": "radio",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          },
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "prosthetic_prescription_remarks",
+          "label": "Remarks",
+          "type": "textarea",
+          "showIf": {
+            "field": "prescription_type",
+            "equals": "prosthetic"
+          }
+        }
+      ]
+    }
+  ]
 }
 
 export default {

@@ -1,6 +1,4 @@
 const SUBJECTIVE = {
-  
- 
   "sections": [
     {
       "fields": [
@@ -170,8 +168,6 @@ const SUBJECTIVE = {
 
 
 const OBJECTIVE = {
-
-  
   "sections": [
     {
       "fields": [
@@ -275,8 +271,6 @@ const OBJECTIVE = {
 
 
 const ASSESSMENT = {
- 
-
   "sections": [
     {
       "fields": [
@@ -325,8 +319,6 @@ const ASSESSMENT = {
 
 
 const PLAN = {
-  
- 
   "sections": [
     {
       "fields": [
