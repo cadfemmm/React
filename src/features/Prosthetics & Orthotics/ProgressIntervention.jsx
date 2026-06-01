@@ -84,16 +84,49 @@ const SUBJECTIVE_SCHEMA = {
           ]
         },
 
+        // {
+        //   type: "scale-slider",
+        //   name: "pain_score",
+        //   label: "Pain Score",
+        //   min: 0,
+        //   max: 10,
+        //   showIf: {
+        //     field: "pain_during_session",
+        //     equals: "yes"
+        //   }
+        // },
         {
-          type: "scale-slider",
-          name: "pain_score",
-          label: "Pain Score",
-          min: 0,
-          max: 10,
-          showIf: {
-            field: "pain_during_session",
-            equals: "yes"
-          }
+          "name": "pain_score",
+          "label": "Pain Score",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10,
+          "ranges": [
+            {
+              "min": 0,
+              "max": 3,
+              "label": "Mild",
+              "color": "#22c55e"
+            },
+            {
+              "min": 4,
+              "max": 7,
+              "label": "Moderate",
+              "color": "#facc15"
+            },
+            {
+              "min": 8,
+              "max": 10,
+              "label": "Severe",
+              "color": "#ef4444"
+            }
+          ],
+          "showValue": true,
+          "showIf": {
+            "field": "pain_during_session",
+            "equals": "yes"
+  }
+          
         },
 
         {
