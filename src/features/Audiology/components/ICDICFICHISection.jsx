@@ -55,17 +55,14 @@ function ICDICFICHISection({ values = {}, onChange, mode = "icd-icf" }) {
       setIcdBusy(true);
       setIcdMsg("");
       
-      // GET /api/codes/icd/Audiology/ using authenticated api client
       const endpoint = API_URL.icdByDepartment(DEPARTMENT);
       const res = await api.get(endpoint);
       
-      // Extract ICDs from results
       const icds = res.data?.results || [];
       setIcdList(icds);
       
     } catch (e) {
       setIcdMsg(`Failed to load ICDs: ${e.message}`);
-      console.error("ICD Load Error:", e);
     } finally {
       setIcdBusy(false);
     }
