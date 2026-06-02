@@ -34,6 +34,9 @@ const API_URL = {
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
 
+    // Medication api
+    MEDICATION_MASTER: RMS_API + "medication-masters/",
+
     // Billing price
     BILLING: (
         dept,

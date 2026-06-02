@@ -1,34 +1,96 @@
-import { useState } from "react"
+import { useState, useEffect } from "react";
+import Select from "react-select";
+import { API_URL } from "../../../platform/config/api.config";
 
 export default function MedicationAssessment({patient, onSubmit, onBack}) {
     const [formData, setFormData] = useState({})
-    const [medications, setMedications] = useState([])
+    const [medications, setMedications] = useState([]);
+    const [medicationOptions, setMedicationOptions] = useState([]);
+    const [unitOptions, setUnitOptions] = useState([]);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target
-        let finalValue = value
+    useEffect(() => {
+        fetchMedicationMasters();
+        }, []);
 
-        // Validate and clamp dose (1-1000)
-        if (name === "dose" && value !== "") {
-            const numValue = parseInt(value)
-            if (numValue < 1) finalValue = "1"
-            else if (numValue > 1000) finalValue = "1000"
-            else finalValue = numValue
+        const fetchMedicationMasters = async () => {
+        try {
+            const token =
+            localStorage.getItem("access_token");
+
+            const response = await fetch(
+            API_URL.MEDICATION_MASTER,
+            {
+                headers: {
+                Authorization: `Bearer ${token}`
+                }
+            }
+            );
+
+            const result = await response.json();
+
+            const data = result?.data || [];
+
+            setMedicationOptions(data);
+
+            const uniqueUnits = [
+            ...new Set(
+                data
+                .map(item => item.unit)
+                .filter(Boolean)
+            )
+            ];
+
+            setUnitOptions(uniqueUnits);
+
+        } catch (error) {
+            console.error(
+            "Failed to fetch medications",
+            error
+            );
         }
+        };
+        const handleInputChange = (e) => {
+            const { name, value } = e.target;
+            let finalValue = value;
 
-        // Validate and clamp duration (1-30)
-        if (name === "duration" && value !== "") {
-            const numValue = parseInt(value)
-            if (numValue < 1) finalValue = "1"
-            else if (numValue > 30) finalValue = "30"
-            else finalValue = numValue
-        }
+            // Medication selected -> auto fill unit
+            if (name === "medication_name") {
+                const selectedMedication = medicationOptions.find(
+                    item => item.medication_name === value
+                );
 
-        setFormData(prev => ({
-            ...prev,
-            [name]: finalValue
-        }))
-    }
+                setFormData(prev => ({
+                    ...prev,
+                    medication_name: value,
+                    unit: selectedMedication?.unit || ""
+                }));
+
+                return;
+            }
+
+            // Validate and clamp dose (1-1000)
+            if (name === "dose" && value !== "") {
+                const numValue = parseInt(value, 10);
+
+                if (numValue < 1) finalValue = "1";
+                else if (numValue > 1000) finalValue = "1000";
+                else finalValue = numValue.toString();
+            }
+
+            // Validate and clamp duration (1-30)
+            if (name === "duration" && value !== "") {
+                const numValue = parseInt(value, 10);
+
+                if (numValue < 1) finalValue = "1";
+                else if (numValue > 30) finalValue = "30";
+                else finalValue = numValue.toString();
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                [name]: finalValue
+            }));
+        };
 
     const calculateCompletionDate = (prescribedDate, duration) => {
         if (!prescribedDate || !duration) return "—"
@@ -38,7 +100,7 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
     }
 
     const handleAddMedication = () => {
-        if (!formData.medication_name || !formData.dose || !formData.unit || !formData.frequency || !formData.prescribed_date || !formData.duration) {
+        if (!formData.medication_name || !formData.dose || !formData.unit || !formData.frequency || !formData.prescribed_date || !formData.duration || !formData.type) {
             alert("Please fill all fields")
             return
         }
@@ -86,39 +148,56 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
                     <table style={tableStyle}>
                         <thead>
                             <tr>
-                                <th style={thStyle}>Medication Name</th>
+                                <th style={{ ...thStyle, width: "18%" }}>Medication Name</th>
                                 <th style={thStyle}>Dose</th>
                                 <th style={thStyle}>Unit</th>
                                 <th style={thStyle}>Frequency</th>
                                 <th style={thStyle}>Prescribed Date</th>
                                 <th style={thStyle}>Duration (Days)</th>
                                 <th style={thStyle}>Remark</th>
+                                <th style={thStyle}>Medication</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td style={tdStyle}>
-                                    <select 
-                                        style={selectStyle} 
-                                        name="medication_name" 
-                                        value={formData.medication_name || ""}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Select</option>
-                                        <option value="metformin">Tab Metformin</option>
-                                        <option value="gliclazide">Tab Gliclazide</option>
-                                        <option value="perindopril">Tab Perindopril</option>
-                                        <option value="amlodipine">Tab Amlodipine</option>
-                                        <option value="cardiprin">Tab Cardiprin</option>
-                                        <option value="gabapentin">Gabapentin</option>
-                                        <option value="lactulose">Sy Lactulose</option>
-                                        <option value="pcm">Tab PCM</option>
-                                        <option value="tramadol">Cap Tramadol</option>
-                                        <option value="ravin_enema">Ravin Enema</option>
-                                        <option value="cloxacillin">Tab Cloxacillin</option>
-                                        <option value="celebrex">Cap Celebrex</option>
-                                    </select>
-                                </td>
+                                    <Select
+                                    placeholder="Search"
+                                    options={medicationOptions.map(item => ({
+                                        value: item.medication_name,
+                                        label: item.medication_name,
+                                        unit: item.unit
+                                    }))}
+                                    value={
+                                        formData.medication_name
+                                        ? {
+                                            value: formData.medication_name,
+                                            label: formData.medication_name
+                                            }
+                                        : null
+                                    }
+                                    onChange={(selected) => {
+                                        setFormData(prev => ({
+                                        ...prev,
+                                        medication_name: selected?.value || "",
+                                        unit: selected?.unit || ""
+                                        }));
+                                    }}
+                                    isClearable
+                                    isSearchable
+
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    menuPlacement="auto"
+
+                                    styles={{
+                                        menuPortal: base => ({
+                                        ...base,
+                                        zIndex: 9999
+                                        })
+                                    }}
+                                    />
+                                    </td>
                                 <td style={tdStyle}>
                                     <input 
                                         min="1"
@@ -138,9 +217,14 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
                                         onChange={handleInputChange}
                                     >
                                         <option value="">Select</option>
-                                        <option value="g">g</option>
-                                        <option value="ml">ml</option>
-                                        <option value="mg">mg</option>
+                                            {unitOptions.map(unit => (
+                                            <option
+                                                key={unit}
+                                                value={unit}
+                                            >
+                                                {unit}
+                                            </option>
+                                            ))}
                                     </select>
                                 </td>
                                 <td style={tdStyle}>
@@ -193,6 +277,18 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
                                         onChange={handleInputChange}
                                     />
                                 </td>
+                                <td style={tdStyle}>
+                                <select
+                                    style={selectStyle}
+                                    name="type"
+                                    value={formData.type || ""}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="">Select</option>
+                                    <option value="HOME">Home Medication</option>
+                                    <option value="PRESCRIBED">Prescribed Medication</option>
+                                </select>
+                            </td>
                             </tr>
                         </tbody>
                     </table>
@@ -220,31 +316,88 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
                                     <th style={thStyle}>Duration</th>
                                     <th style={thStyle}>Date Completed</th>
                                     <th style={thStyle}>Remark</th>
+                                    <th style={thStyle}>Type</th>
                                     <th style={thStyle}>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {medications.map((med) => (
-                                    <tr key={med.id}>
-                                        <td style={tdStyle}>{getMedicationName(med.medication_name)}</td>
-                                        <td style={tdStyle}>{med.dose} {med.unit}</td>
-                                        <td style={tdStyle}>{med.frequency}</td>
-                                        <td style={tdStyle}>{med.prescribed_date}</td>
-                                        <td style={tdStyle}>{med.duration} days</td>
-                                        <td style={tdStyle}><strong>{med.completed_date}</strong></td>
-                                        <td style={tdStyle}>{med.remark || "—"}</td>
-                                        <td style={tdStyle}>
-                                            <button 
-                                                style={deleteButtonStyle} 
-                                                onClick={() => handleDeleteMedication(med.id)}
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
+                                    <tr key={med.id}
+                                    style={{
+                                        color:
+                                        med.type === "HOME"
+                                            ? "#3b62e0"
+                                            : "#0ca948"
+                                    }}>
+                                    <td style={tdStyle}>{getMedicationName(med.medication_name)}</td>
+                                    <td style={tdStyle}>{med.dose} {med.unit}</td>
+                                    <td style={tdStyle}>{med.frequency}</td>
+                                    <td style={tdStyle}>{med.prescribed_date}</td>
+                                    <td style={tdStyle}>{med.duration} days</td>
+                                    <td style={tdStyle}>
+                                        <strong>{med.completed_date}</strong>
+                                    </td>
+                                    <td style={tdStyle}>{med.remark || "—"}</td>
+
+                                    <td style={tdStyle}>
+                                        <span
+                                        style={{
+                                            padding: "4px 10px",
+                                            borderRadius: "12px",
+                                            background:
+                                            med.type === "HOME"
+                                                ? "#E3F2FD"
+                                                : "#E8F5E9",
+                                            color:
+                                            med.type === "HOME"
+                                                ? "#1565C0"
+                                                : "#2E7D32",
+                                            fontWeight: 600,
+                                            fontSize: "11px"
+                                        }}
+                                        >
+                                        {med.type === "HOME"
+                                            ? "Home Medication"
+                                            : "Prescribed Medication"}
+                                        </span>
+                                    </td>
+
+                                    <td style={tdStyle}>
+                                        <button
+                                        style={deleteButtonStyle}
+                                        onClick={() => handleDeleteMedication(med.id)}
+                                        >
+                                        Remove
+                                        </button>
+                                    </td>
                                     </tr>
                                 ))}
-                            </tbody>
+                                </tbody>
                         </table>
+                          <div
+                            style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            padding: "16px"
+                            }}
+                        >
+                            <button
+                            type="button"
+                            onClick={() => alert("Prescribed")}
+                            style={{
+                                background: "#16A34A",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "8px",
+                                padding: "10px 24px",
+                                fontSize: "14px",
+                                fontWeight: 600,
+                                cursor: "pointer"
+                            }}
+                            >
+                            Prescribe
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -253,7 +406,6 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
 }
 
 const containerStyle = {
-    padding: "20px",
     width: "100%",
     backgroundColor: "#f9f9f9"
 }
