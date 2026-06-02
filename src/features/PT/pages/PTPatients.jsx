@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import PTPatientDetails from "../components/PatientDetails";
+import { filterApprovedPatients } from "../../../shared/utils/patientFilters";
 
 /* ── Assessment type cards ── */
 const ASSESSMENT_TYPES = [
@@ -106,7 +107,10 @@ function PatientRow({ patient: p, idx, onStart }) {
       Each tab shows the assessment in the selected mode
 ══════════════════════════════════════════════════════════ */
 export default function PTPatients({ patients = [], Patients, onBack }) {
-  const allPatients = patients.length ? patients : (Patients || []);
+  const allPatients = useMemo(
+    () => filterApprovedPatients(patients.length ? patients : (Patients || [])),
+    [patients, Patients]
+  );
   const [search, setSearch]                   = useState("");
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [assessmentType, setAssessmentType]   = useState(null);
@@ -137,10 +141,7 @@ export default function PTPatients({ patients = [], Patients, onBack }) {
     return (
       <div style={page}>
         <div style={pageHeader}>
-          <div>
-            <h1 style={pageTitle}>Select Assessment Type</h1>
-            <p style={pageSubtitle}>Choose the appropriate assessment for this patient visit</p>
-          </div>
+
           <button type="button" style={backBtnStyle} onClick={() => setSelectedPatient(null)}>
             ← Back to Patients
           </button>

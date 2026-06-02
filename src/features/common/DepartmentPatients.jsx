@@ -19,6 +19,7 @@ import GroupIntervention from "../Nursing/components/GroupIntervention";
 import Intervention from "../Nursing/components/Intervention";
 import Procedures from "../Nursing/components/Procedures";
 import RAPPatientAssessmentsList from "../../components/RAPPatientAssessmentsList";
+import { filterApprovedPatients } from "../../shared/utils/patientFilters";
 import MedicalAssistantPatientDetails from "../MedicalAssistant/components/PatientDetails";
 
 /* ── Assessment type cards ─────────────────────────────── */
@@ -100,6 +101,9 @@ function assessmentViewTitle(assessmentView, department) {
 
 /* ── Status palette ────────────────────────────────────── */
 const STATUS = {
+  approved: { bg: "#ECFDF5", color: "#166534", border: "#A7F3D0", dot: "#22C55E" },
+  pending:  { bg: "#FFFBEB", color: "#92400E", border: "#FDE68A", dot: "#F59E0B" },
+  denied:   { bg: "#FEF2F2", color: "#991B1B", border: "#FECACA", dot: "#EF4444" },
   new:      { bg: "#ECFDF5", color: "#166534", border: "#A7F3D0", dot: "#22C55E" },
   ongoing:  { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE", dot: "#3B82F6" },
   done:     { bg: "#F0FDF4", color: "#15803D", border: "#BBF7D0", dot: "#22C55E" },
@@ -112,7 +116,7 @@ function StatusPill({ status }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 700, background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot }} />
-      {n === "new" ? "New" : status}
+      {n === "new" ? "New" : n === "approved" ? "Approved" : n === "pending" ? "Pending" : status}
     </span>
   );
 }
@@ -308,10 +312,15 @@ export default function DepartmentPatients({
 
   /* RAP / all-patients: no department filter — entire registry */
   const deptPatients = useMemo(() => {
-    if (showAllPatients) return patients;
-    return patients.filter(
-      (p) => !department || patientBelongsToDepartment(p, department)
-    );
+    let list = showAllPatients
+      ? patients
+      : patients.filter(
+          (p) => !department || patientBelongsToDepartment(p, department)
+        );
+    if (!showAllPatients) {
+      list = filterApprovedPatients(list);
+    }
+    return list;
   }, [patients, department, showAllPatients]);
 
   const departmentLabel = department === "Nursing" ? "Nursing & MA" : department;
@@ -647,7 +656,7 @@ export default function DepartmentPatients({
         </div>
         {loading ? Array.from({ length: 5 }, (_, i) => <ShimmerRow key={i} />) :
           filtered.length === 0 ? (
-            <EmptyState icon="🧑‍⚕️" title={search ? "No patients match your search" : "No patients found"} message={search ? "Try a different name or MRN." : showAllPatients ? "All registered patients from every department will appear here." : `Patients assigned to ${department} will appear here.`} />
+            <EmptyState icon="🧑‍⚕️" title={search ? "No patients match your search" : "No patients found"} message={search ? "Try a different name or MRN." : showAllPatients ? "All registered patients from every department will appear here." : `Approved patients assigned to ${department} will appear here. Pending patients are not shown in this list.`} />
           ) : (
             filtered.map((p, idx) => (
               <PatientRow
