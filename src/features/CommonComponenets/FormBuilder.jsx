@@ -4048,6 +4048,7 @@ if (typeof col === "object" && col.type === "radio") {
 
     case "equipment-list": {
   const isOpen = values[`${field.name}_open`] || false;
+  const bookedEquipmentIds = field.bookedEquipmentIds || [];
 
   return (
     <div key={field.name}>
@@ -4145,29 +4146,35 @@ if (typeof col === "object" && col.type === "radio") {
                   ● {option.status || "ACTIVE"}
                 </span>
 
+                {bookedEquipmentIds.includes(option.value) ? (
                 <button
-                  type="button"
+                  disabled
                   style={{
                     padding: "4px 18px",
-                    borderRadius: 8,
+                    borderRadius: 30,
+                    border: "none",
+                    background: "#9CA3AF",
+                    color: "#fff",
+                    cursor: "not-allowed"
+                  }}
+                >
+                  Booked
+                </button>
+              ) : (
+                <button
+                  onClick={() => field.onBook?.(option)}
+                  style={{
+                    padding: "4px 18px",
+                    borderRadius: 30,
                     border: "none",
                     background: "#2563EB",
                     color: "#fff",
-                    cursor: "pointer",
-                    fontWeight: 600
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-
-                    if (field.onBook) {
-                      field.onBook(option);
-                    } else {
-                      console.log("Book:", option);
-                    }
+                    cursor: "pointer"
                   }}
                 >
                   Book
                 </button>
+              )}
               </div>
             </div>
           ))}
