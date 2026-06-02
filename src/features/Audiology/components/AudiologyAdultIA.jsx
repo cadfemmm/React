@@ -10,6 +10,8 @@ import { Hearingaidtrial } from "../hearingaidtrial";
 import { IndustrialAudiometry } from "../industrialaudiometry";
 import PatientCard from "../../../shared/cards/PatientCard";
 import ICDICFICHISection from "./ICDICFICHISection";
+import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
+import api from "../../../shared/api/apiClient";
 /* ===================== OPTIONS ===================== */
 
 const INTACT_IMPAIRED = [
@@ -50,6 +52,10 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
   const [processingOCR, setProcessingOCR] = useState(false);
+  const [equipmentOptions, setEquipmentOptions] = useState([]);
+  const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [bookedEquipmentIds, setBookedEquipmentIds] = useState([]);
 
   /* --------- Patient History State --------- */
   const [patientHistory, setPatientHistory] = useState({
@@ -115,6 +121,29 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
       setValues(savedValues);
     }
   }, [storageKey, patient]);
+
+  /* ---------------- EQUIPMENT LIST FROM API ---------------- */
+  useEffect(() => {
+    const fetchEquipmentList = async () => {
+      try {
+        const response = await api.get(API_URL.EQUIPMENT_LIST + "?search=audiology");
+        const result = response.data;
+        const options =
+          result?.data?.map(item => ({
+            label: item.equipment_name,
+            value: item.id,
+            status: item.status,
+            equipment_code: item.equipment_code,
+            department_name: item.department_name,
+            raw: item,
+          })) || [];
+        setEquipmentOptions(options);
+      } catch (error) {
+        console.error("Equipment list fetch failed:", error);
+      }
+    };
+    fetchEquipmentList();
+  }, []);
 
   // Extract tympanometry values from OCR text
   const extractTympanometryValues = (text) => {
@@ -685,11 +714,21 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   };
 
   const onChange = async (name, value) => {   
+    
     // Check if this is a tympanometry file upload
     // Handle both image files and check the name pattern
     const isRightTympanometry = name === 'tympanometry_report_right';
     const isLeftTympanometry = name === 'tympanometry_report_left';
-    
+    if (
+      name === "otoscopic_report" &&
+      value?.data
+    ) {
+      // console.log("OTOSCOPIC UPLOAD TRIGGERED");
+
+      await handleOtoscopicUpload(value);
+
+      return;
+    }
     if ((isRightTympanometry || isLeftTympanometry) && value) {
       // Check if it's a File object
       const isFile = value instanceof File || (value && typeof value === 'object' && value.constructor?.name === 'File');
@@ -764,7 +803,67 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
     onSubmit?.(mergedValues);
     alert("Audiology assessment submitted");
   };
+const [isOtoscopicLoading, setIsOtoscopicLoading] = useState(false);
+const handleOtoscopicUpload = async (file) => {
+  try {
+    setIsOtoscopicLoading(true);
 
+    const base64Data = file.data.split(",")[1];
+
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const pdfBlob = new Blob(
+      [byteArray],
+      { type: file.type }
+    );
+
+    const pdfFile = new File(
+      [pdfBlob],
+      file.filename,
+      { type: file.type }
+    );
+
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+
+    const rightImage =
+      result?.data?.canals?.right?.image?.data;
+
+    const leftImage =
+      result?.data?.canals?.left?.image?.data;
+
+    setValues(prev => ({
+      ...prev,
+      objective: {
+        ...(prev.objective || {}),
+        otoscopic_right_image: rightImage
+          ? `data:image/jpeg;base64,${rightImage}`
+          : "",
+        otoscopic_left_image: leftImage
+          ? `data:image/jpeg;base64,${leftImage}`
+          : ""
+      }
+    }));
+  } catch (error) {
+    console.error("Otoscopic extraction failed", error);
+  } finally {
+    setIsOtoscopicLoading(false);
+  }
+};
   const AUDIOLOGY_ASSESSMENT_REGISTRY = {
     tinnitus_form: TinnitusAdvancedAdapter,
     loudness_form: HyperacusisAdvancedAdapter,
@@ -1315,28 +1414,35 @@ const OBJECTIVE_SCHEMA = {
           label: "Otoscopic Examination",
           defaultOpen: false,
           children: [
-            {
+                {
+              type: "row",
+              columns: 1,
+              fields: [
+                {
+                  type: "file-upload-modal",
+                  name: "otoscopic_report",
+                  label: "Upload Otoscopic Report"
+                }
+              ]
+            },
+                {
               type: "row",
               columns: 2,
               fields: [
                 {
-                  type: "attach-file",
-                  name: "otoscopic_examination_right",
-                  accept: "application/pdf,image/*",
-                  title: "Otoscopic Examination - Right",
-                  multiple: false,
-                  previewSize: { width: 400, height: 400 },
-                  hideInputAfterSelect: true
-                },
-                {
-                  type: "attach-file",
-                  name: "otoscopic_examination_left",
-                  accept: "application/pdf,image/*",
-                  title: "Otoscopic Examination - Left",
-                  multiple: false,
-                  previewSize: { width: 400, height: 400 },
-                  hideInputAfterSelect: true
-                }
+                type: "custom-image",
+                name: "otoscopic_right_image",
+                label: isOtoscopicLoading
+                  ? "Otoscopic Examination - Right (Fetching...)"
+                  : "Otoscopic Examination - Right"
+              },
+              {
+                type: "custom-image",
+                name: "otoscopic_left_image",
+                label: isOtoscopicLoading
+                  ? "Otoscopic Examination - Left (Fetching...)"
+                  : "Otoscopic Examination - Left"
+              }
               ]
             },
             {
@@ -1403,7 +1509,7 @@ const OBJECTIVE_SCHEMA = {
               previewSize: { width: 400, height: 400 },
               hideInputAfterSelect: true
             },
-            // { type: "audiogram-graph", name: "audiogram_graph" },
+            { type: "audiogram-graph", name: "audiogram_graph" },
             {
               type: "row",
               fields: [
@@ -1511,6 +1617,12 @@ const OBJECTIVE_SCHEMA = {
         
         { type: "subheading", label: "Long Term Goals (6–12 Weeks)" },
         { type: "dynamic-goals", name: "long_term_goals" },
+        {
+          name: "equipment_list",
+          label: "Equipment List",
+          type: "equipment-list",
+          options: []
+        },
         {
           name: "intervention_plan",
           label: "Intervention Plan",
@@ -1676,11 +1788,25 @@ const OBJECTIVE_SCHEMA = {
     ]
   };
 
+  const handleEquipmentBook = (equipment) => {
+    setSelectedEquipment(equipment);
+    setEquipmentBookingOpen(true);
+  };
+
+  const planSchemaWithEquipment = {
+    ...PLAN_SCHEMA,
+    fields: PLAN_SCHEMA.fields.map((field) =>
+      field.name === "equipment_list"
+        ? { ...field, options: equipmentOptions, onBook: handleEquipmentBook, bookedEquipmentIds }
+        : field
+    ),
+  };
+
   const schemaMap = {
     subjective: SUBJECTIVE_SCHEMA,
     objective: OBJECTIVE_SCHEMA,
     assessment: ASSESSMENT_SCHEMA,
-    plan: PLAN_SCHEMA
+    plan: planSchemaWithEquipment
   };
 
   /* ===================== PATIENT INFO ===================== */
@@ -1844,6 +1970,16 @@ function AudiometryFrequencyTable({ value = {}, onChange }) {
           )}
         </div>
   </CommonFormBuilder>
+
+  <EquipmentBookingPopup
+    open={equipmentBookingOpen}
+    equipmentOptions={equipmentOptions}
+    selectedEquipment={selectedEquipment}
+    onClose={() => setEquipmentBookingOpen(false)}
+    onBooked={(equipmentId) => {
+      setBookedEquipmentIds(prev => [...prev, equipmentId]);
+    }}
+  />
 </div>
 
   );
@@ -1892,4 +2028,165 @@ const submitBtn = {
 
 const section = {
   marginBottom: 24
+};
+
+/* ── Equipment Booking Popup ── */
+function EquipmentBookingPopup({ open, equipmentOptions, selectedEquipment, onClose, onBooked }) {
+  const [equipmentId, setEquipmentId] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setEquipmentId(selectedEquipment?.value || "");
+    }
+  }, [open, selectedEquipment]);
+
+  if (!open) return null;
+
+  return (
+    <div style={equipmentModalOverlay}>
+      <div style={equipmentModal}>
+        <div style={equipmentModalHeader}>
+          <div>
+            <div style={equipmentModalTitle}>Create Equipment Booking</div>
+            <div style={equipmentModalSubtitle}>
+              Reserve equipment for internal use. Fields marked with * are required.
+            </div>
+          </div>
+          <button type="button" style={equipmentCloseBtn} onClick={onClose}>×</button>
+        </div>
+
+        <div style={equipmentModalBody}>
+          <div style={equipmentSectionTitle}>Basic Details</div>
+          <div style={equipmentGrid}>
+            <EquipmentPopupField label="Equipment *">
+              <select
+                style={equipmentInput}
+                value={equipmentId}
+                onChange={(e) => setEquipmentId(e.target.value)}
+              >
+                <option value="">Select equipment</option>
+                {equipmentOptions.map(item => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Booking Date *">
+              <input type="date" style={equipmentInput} />
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Start Time *">
+              <input type="time" style={equipmentInput} />
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="End Time *">
+              <input type="time" style={equipmentInput} />
+            </EquipmentPopupField>
+          </div>
+
+          <div style={equipmentSectionTitle}>Usage Context</div>
+          <div style={equipmentGrid}>
+            <EquipmentPopupField label="Department *">
+              <select style={equipmentInput} value="Audiology" disabled>
+                <option value="Audiology">Audiology</option>
+              </select>
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Appointment Reference *">
+              <input type="text" style={equipmentInput} placeholder="Enter appointment reference id" />
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Assigned Staff *">
+              <select style={equipmentInput}>
+                <option value="">Select staff</option>
+              </select>
+            </EquipmentPopupField>
+          </div>
+
+          <div style={equipmentSectionTitle}>Note</div>
+          <EquipmentPopupField label="Purpose of Booking *">
+            <textarea style={equipmentTextarea} placeholder="Describe purpose of booking..." />
+          </EquipmentPopupField>
+
+          <EquipmentPopupField label="Special Handling Instructions *">
+            <textarea style={equipmentTextarea} placeholder="Describe special handling instructions..." />
+          </EquipmentPopupField>
+        </div>
+
+        <div style={equipmentModalFooter}>
+          <button type="button" style={equipmentCancelBtn} onClick={onClose}>× Cancel</button>
+          <button
+            type="button"
+            style={equipmentBookBtn}
+            onClick={() => {
+              alert("Equipment booked");
+              onBooked?.(equipmentId);
+              onClose();
+            }}
+          >
+            Book Equipment
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EquipmentPopupField({ label, children }) {
+  return (
+    <label style={equipmentField}>
+      <span style={equipmentLabel}>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+const equipmentModalOverlay = {
+  position: "fixed", inset: 0, zIndex: 10000,
+  background: "rgba(0,0,0,0.45)",
+  display: "flex", alignItems: "center", justifyContent: "center", padding: 16
+};
+const equipmentModal = {
+  width: "min(660px, 100%)", maxHeight: "98vh", overflow: "hidden",
+  background: "#fff", borderRadius: 10,
+  boxShadow: "0 24px 70px rgba(15,23,42,0.25)",
+  display: "flex", flexDirection: "column"
+};
+const equipmentModalHeader = {
+  display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+  gap: 16, padding: "18px 22px 14px", borderBottom: "1px solid #e5e7eb"
+};
+const equipmentModalTitle = { fontSize: 16, fontWeight: 800, color: "#24272d", lineHeight: 1.2 };
+const equipmentModalSubtitle = { marginTop: 6, fontSize: 14, color: "#7a7f88" };
+const equipmentCloseBtn = {
+  width: 40, height: 40, borderRadius: 10, border: "1px solid #d7dde7",
+  background: "#fff", color: "#1f2937", fontSize: 24, lineHeight: "36px", cursor: "pointer"
+};
+const equipmentModalBody = {
+  margin: "5px 14px 0", padding: "12px 16px 18px",
+  border: "1px solid #dce2ea", borderRadius: 12, overflowY: "auto"
+};
+const equipmentSectionTitle = { margin: "0 0 14px", fontSize: 14, fontWeight: 800, color: "#24272d" };
+const equipmentGrid = {
+  display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "14px 10px", marginBottom: 22
+};
+const equipmentField = { display: "flex", flexDirection: "column", gap: 7, minWidth: 0 };
+const equipmentLabel = { fontSize: 14, fontWeight: 700, color: "#344054" };
+const equipmentInput = {
+  width: "100%", minHeight: 26, border: "1px solid #cfd7e4", borderRadius: 10,
+  padding: "10px 16px", fontSize: 16, color: "#111827", background: "#fff", boxSizing: "border-box"
+};
+const equipmentTextarea = { ...equipmentInput, minHeight: 68, resize: "vertical", marginBottom: 14 };
+const equipmentModalFooter = {
+  display: "flex", justifyContent: "flex-end", gap: 10,
+  padding: "14px 20px", borderTop: "1px solid #e5e7eb"
+};
+const equipmentCancelBtn = {
+  padding: "10px 18px", border: "1px solid #d7dde7", borderRadius: 10,
+  background: "#fff", color: "#24272d", fontSize: 16, fontWeight: 600, cursor: "pointer"
+};
+const equipmentBookBtn = {
+  padding: "10px 20px", border: "none", borderRadius: 10,
+  background: "#0b5cff", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer"
 };

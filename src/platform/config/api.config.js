@@ -1,6 +1,7 @@
 const BASE_API = (process.env.REACT_APP_API_DJANGO || 'https://backend.tps-ind.com') + '/api/'
 const RMS_API = 'https://api.dev.rehab-software.com/api/v1/'
 const TYMPANOGRAM_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/tympanogram";
+const OTOSCOPIC_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/otoscopic";
 
 const API_URL = {
     // Users apis
@@ -37,6 +38,10 @@ const API_URL = {
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
+    EQUIPMENT_LIST: RMS_API + "rehab-equipment-lists/",
+
+    // Medication api
+    MEDICATION_MASTER: RMS_API + "medication-masters/",
 
     // Billing price
     BILLING: (
@@ -52,5 +57,6 @@ const API_URL = {
 export {
     API_URL,
     BASE_API,
-    TYMPANOGRAM_EXTRACT_URL
+    TYMPANOGRAM_EXTRACT_URL,
+    OTOSCOPIC_EXTRACT_URL
 }
