@@ -9,6 +9,7 @@ import { VestibularAdvancedForm, VestibularAdvancedFormObj } from "../vestibular
 import { Hearingaidtrial } from "../hearingaidtrial";
 import { IndustrialAudiometry } from "../industrialaudiometry";
 import PatientCard from "../../../shared/cards/PatientCard";
+import {OTOSCOPIC_EXTRACT_URL} from "../../../platform/config/api.config"
 /* ===================== OPTIONS ===================== */
 
 const INTACT_IMPAIRED = [
@@ -684,11 +685,21 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   };
 
   const onChange = async (name, value) => {   
+    
     // Check if this is a tympanometry file upload
     // Handle both image files and check the name pattern
     const isRightTympanometry = name === 'tympanometry_report_right';
     const isLeftTympanometry = name === 'tympanometry_report_left';
-    
+    if (
+      name === "otoscopic_report" &&
+      value?.data
+    ) {
+      // console.log("OTOSCOPIC UPLOAD TRIGGERED");
+
+      await handleOtoscopicUpload(value);
+
+      return;
+    }
     if ((isRightTympanometry || isLeftTympanometry) && value) {
       // Check if it's a File object
       const isFile = value instanceof File || (value && typeof value === 'object' && value.constructor?.name === 'File');
@@ -763,7 +774,67 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
     onSubmit?.(mergedValues);
     alert("Audiology assessment submitted");
   };
+const [isOtoscopicLoading, setIsOtoscopicLoading] = useState(false);
+const handleOtoscopicUpload = async (file) => {
+  try {
+    setIsOtoscopicLoading(true);
 
+    const base64Data = file.data.split(",")[1];
+
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const pdfBlob = new Blob(
+      [byteArray],
+      { type: file.type }
+    );
+
+    const pdfFile = new File(
+      [pdfBlob],
+      file.filename,
+      { type: file.type }
+    );
+
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+
+    const rightImage =
+      result?.data?.canals?.right?.image?.data;
+
+    const leftImage =
+      result?.data?.canals?.left?.image?.data;
+
+    setValues(prev => ({
+      ...prev,
+      objective: {
+        ...(prev.objective || {}),
+        otoscopic_right_image: rightImage
+          ? `data:image/jpeg;base64,${rightImage}`
+          : "",
+        otoscopic_left_image: leftImage
+          ? `data:image/jpeg;base64,${leftImage}`
+          : ""
+      }
+    }));
+  } catch (error) {
+    console.error("Otoscopic extraction failed", error);
+  } finally {
+    setIsOtoscopicLoading(false);
+  }
+};
   const AUDIOLOGY_ASSESSMENT_REGISTRY = {
     tinnitus_form: TinnitusAdvancedAdapter,
     loudness_form: HyperacusisAdvancedAdapter,
@@ -1314,28 +1385,35 @@ const OBJECTIVE_SCHEMA = {
           label: "Otoscopic Examination",
           defaultOpen: false,
           children: [
-            {
+                {
+              type: "row",
+              columns: 1,
+              fields: [
+                {
+                  type: "file-upload-modal",
+                  name: "otoscopic_report",
+                  label: "Upload Otoscopic Report"
+                }
+              ]
+            },
+                {
               type: "row",
               columns: 2,
               fields: [
                 {
-                  type: "attach-file",
-                  name: "otoscopic_examination_right",
-                  accept: "application/pdf,image/*",
-                  title: "Otoscopic Examination - Right",
-                  multiple: false,
-                  previewSize: { width: 400, height: 400 },
-                  hideInputAfterSelect: true
-                },
-                {
-                  type: "attach-file",
-                  name: "otoscopic_examination_left",
-                  accept: "application/pdf,image/*",
-                  title: "Otoscopic Examination - Left",
-                  multiple: false,
-                  previewSize: { width: 400, height: 400 },
-                  hideInputAfterSelect: true
-                }
+                type: "custom-image",
+                name: "otoscopic_right_image",
+                label: isOtoscopicLoading
+                  ? "Otoscopic Examination - Right (Fetching...)"
+                  : "Otoscopic Examination - Right"
+              },
+              {
+                type: "custom-image",
+                name: "otoscopic_left_image",
+                label: isOtoscopicLoading
+                  ? "Otoscopic Examination - Left (Fetching...)"
+                  : "Otoscopic Examination - Left"
+              }
               ]
             },
             {
@@ -1402,7 +1480,7 @@ const OBJECTIVE_SCHEMA = {
               previewSize: { width: 400, height: 400 },
               hideInputAfterSelect: true
             },
-            // { type: "audiogram-graph", name: "audiogram_graph" },
+            { type: "audiogram-graph", name: "audiogram_graph" },
             {
               type: "row",
               fields: [

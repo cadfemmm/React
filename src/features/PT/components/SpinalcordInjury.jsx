@@ -12,6 +12,11 @@ import { useState, useEffect } from "react";
 import TenMWTForm from "./TenMWTForm";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PatientCard from "../../../shared/cards/PatientCard";
+import { API_URL } from "../../../platform/config/api.config";
+import api, { setAccessToken } from "../../../shared/api/apiClient";
+import { BookAppointmentModal } from "../book-appointment-modal/BookAppointmentModal.jsx";
+import { fetchBookingQueue } from "../book-appointment-modal/bookingQueueService.jsx";
+
 const PROGNOSIS_OPTIONS = [
   { label: "Excellent", value: "excellent" },
   { label: "Good", value: "good" },
@@ -525,12 +530,16 @@ const PLAN_SCHEMA = {
             type: "dynamic-goals",
             name: "long_term_goals"
           }, 
-           { type: "subheading", label: "Interventions and Plan" },  
+           { type: "subheading", label: "Interventions and Plan" }, 
+            {
+  name: "equipment_list",
+  label: "Equipment List",
+  type: "equipment-list",
+  options: []
+},
              { type: "subheading", label: "Treatment Plan" },
-
         {
   name: "intervention_plan",
- 
   type: "checkbox-group",
   options: [
     { label: "Stretching", value: "stretching" },
@@ -854,11 +863,38 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
   const [values, setValues] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
+  const [equipmentOptions, setEquipmentOptions] = useState([]);
+  const [bookingRow, setBookingRow] = useState(null);
+  const [bookingLookupLoading, setBookingLookupLoading] = useState(false);
   
   /* ---------------- STORAGE ---------------- */
   const storageKey = patient
     ? `spinal_assessment_draft_${patient.id}`
     : null;
+
+useEffect(() => {
+  const fetchEquipmentList = async () => {
+    try {
+      const response = await api.get(API_URL.EQUIPMENT_LIST);
+
+      const result = response.data;
+
+const options =
+  result?.data?.map(item => ({
+    label: item.equipment_name,
+    value: item.id,
+    status: item.status,
+    equipment_code: item.equipment_code,
+  })) || [];
+
+setEquipmentOptions(options);
+    } catch (error) {
+      console.error("Equipment list fetch failed:", error);
+    }
+  };
+
+  fetchEquipmentList();
+}, []);    
    
   useEffect(() => {
     if (!storageKey) return;
@@ -948,6 +984,135 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
     alert("Spinal assessment submitted");
   };
 
+  const getPatientName = () =>
+    patient?.name ||
+    patient?.patient_name ||
+    patient?.full_name ||
+    [patient?.first_name, patient?.last_name].filter(Boolean).join(" ") ||
+    "Patient";
+
+  const getPatientCode = () =>
+    patient?.patient_code ||
+    patient?.mrn ||
+    patient?.code ||
+    patient?.id ||
+    "";
+
+  const getDirectBookingId = () =>
+    patient?.booking_id ||
+    patient?.booking_queue_id ||
+    patient?.queue_id ||
+    values.booking_id ||
+    values.booking_queue_id ||
+    "";
+
+  const getBookingSearchTerms = () =>
+    [
+      patient?.booking_id,
+      patient?.booking_queue_id,
+      patient?.referral_id,
+      patient?.referral_no,
+      patient?.patient_code,
+      patient?.mrn,
+      patient?.name,
+      patient?.patient_name,
+      values.referral_id,
+      values.booking_id,
+      values.booking_queue_id,
+    ]
+      .filter(Boolean)
+      .map(String)
+      .filter((value, index, list) => list.indexOf(value) === index);
+
+  const sameText = (a, b) =>
+    String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+
+  const isMatchingQueueRow = (row) => {
+    if (!row) return false;
+    const patientName = getPatientName();
+    const patientCode = getPatientCode();
+    const referralId = patient?.referral_id || patient?.referral_no || values.referral_id;
+
+    return (
+      sameText(row.patient_code, patientCode) ||
+      sameText(row.patient_name, patientName) ||
+      sameText(row.referral_id, referralId) ||
+      sameText(row.booking_id || row.id, getDirectBookingId())
+    );
+  };
+
+  const toBookingRow = (queueRow, equipment) => ({
+    id:
+      queueRow?.booking_id ||
+      queueRow?.id ||
+      getDirectBookingId(),
+    patient: queueRow?.patient_name || getPatientName(),
+    refId:
+      queueRow?.referral_id ||
+      patient?.referral_id ||
+      patient?.refId ||
+      patient?.referral_no ||
+      values.referral_id ||
+      `Equipment: ${equipment.label}`,
+    department: queueRow?.department || "Physiotherapy",
+    disciplineCode: queueRow?.suggested_discipline || "PT",
+    priority: queueRow?.priority || "Medium",
+    slaLabel: queueRow?.sla_remaining || "from equipment list",
+    slaTone: "on-track",
+    createdLabel: queueRow?.created_date || "Today",
+    createdDate: queueRow?.created_date || new Date().toISOString().slice(0, 10),
+    consent: queueRow?.consent_status || "Valid",
+    equipment,
+  });
+
+  const findBookingQueueRow = async () => {
+    const terms = getBookingSearchTerms();
+    for (const term of terms) {
+      try {
+        const result = await fetchBookingQueue({ search: term, limit: 25 });
+        const rows = result?.rows || [];
+        const match = rows.find(isMatchingQueueRow) || rows[0];
+        if (match?.booking_id || match?.id) return match;
+      } catch (error) {
+        console.error("Booking queue lookup failed:", error);
+      }
+    }
+    return null;
+  };
+
+  const handleEquipmentBook = async (equipment) => {
+    if (bookingLookupLoading) return;
+    setBookingLookupLoading(true);
+    try {
+      const directBookingId = getDirectBookingId();
+      if (directBookingId) {
+        setBookingRow(toBookingRow({ booking_id: directBookingId }, equipment));
+        return;
+      }
+
+      const queueRow = await findBookingQueueRow();
+      if (!queueRow?.booking_id && !queueRow?.id) {
+        alert("No booking queue entry found for this patient. Please create or select a booking queue entry before booking equipment.");
+        return;
+      }
+
+      setBookingRow(toBookingRow(queueRow, equipment));
+    } finally {
+      setBookingLookupLoading(false);
+    }
+  };
+
+const planSchema = {
+  ...PLAN_SCHEMA,
+  sections: PLAN_SCHEMA.sections.map((section) => ({
+    ...section,
+    fields: section.fields.map((field) =>
+      field.name === "equipment_list"
+        ? { ...field, options: equipmentOptions, onBook: handleEquipmentBook }
+        : field
+    ),
+  })),
+};
   return (
     <div style={mainContent}>
     
@@ -978,7 +1143,11 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
 
       {/* ===== TAB CONTENT ===== */}
       <CommonFormBuilder
-        schema={schemaMap[activeTab]}
+        schema={
+          activeTab === "plan"
+            ? planSchema
+            : schemaMap[activeTab]
+        }
         values={values}
         onChange={onChange}
         submitted={submitted}
@@ -1014,6 +1183,19 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
           )}
         </div>
       </CommonFormBuilder>
+      <BookAppointmentModal
+        open={Boolean(bookingRow)}
+        row={bookingRow}
+        initialMode="equipment"
+        onClose={() => setBookingRow(null)}
+        onConfirm={(data) => {
+          setBookingRow(null);
+          console.log("Equipment booking confirmed:", data);
+        }}
+        onRequestOverride={() => console.log("Request override")}
+        onAddWaitlist={() => console.log("Add waitlist")}
+        onConflict={() => console.log("Booking conflict")}
+      />
     </div>
   );
 }

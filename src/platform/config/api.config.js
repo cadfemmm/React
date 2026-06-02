@@ -1,6 +1,7 @@
 const BASE_API = (process.env.REACT_APP_API_DJANGO || 'https://backend.tps-ind.com') + '/api/'
 const RMS_API = 'https://api.dev.rehab-software.com/api/v1/'
 const TYMPANOGRAM_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/tympanogram";
+const OTOSCOPIC_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/otoscopic";
 
 const API_URL = {
     // Users apis
@@ -33,6 +34,17 @@ const API_URL = {
     PATIENT: BASE_API + 'patient/',
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
+    EQUIPMENT_LIST: RMS_API + "rehab-equipment-lists/",
+    BOOKING_QUEUE: RMS_API + "booking-queue/",
+    BOOKING_QUEUE_SUMMARY: RMS_API + "booking-queue/summary/",
+    BOOKING_QUEUE_CONTINUE_SLOTS: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/appmts/continue-slots/`,
+    BOOKING_QUEUE_BOOK_PREVIEW: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/preview/`,
+    BOOKING_QUEUE_BOOK_RESERVE: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/reserve/`,
+    BOOKING_QUEUE_BOOK_CONFIRM: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/confirm/`,
 
     // Medication api
     MEDICATION_MASTER: RMS_API + "medication-masters/",
@@ -51,5 +63,7 @@ const API_URL = {
 export {
     API_URL,
     BASE_API,
-    TYMPANOGRAM_EXTRACT_URL
+    RMS_API,
+    TYMPANOGRAM_EXTRACT_URL,
+    OTOSCOPIC_EXTRACT_URL
 }
