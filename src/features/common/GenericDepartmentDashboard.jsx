@@ -115,6 +115,8 @@ export default function GenericDepartmentDashboard({
         loading={approveDenyLoading}
         title="Approve / Deny Patients"
         actionLabel="View"
+        patientStatusFilter="pending"
+        requireAssessments
         onRowAction={(patient) => setApproveDenyPatient(patient)}
       />
     );

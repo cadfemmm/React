@@ -1,5 +1,5 @@
 import api from "../../shared/api/apiClient";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import EmptyState from "../../shared/ui/EmptyState";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import { API_URL } from "../../platform/config/api.config";
@@ -19,7 +19,7 @@ import GroupIntervention from "../Nursing/components/GroupIntervention";
 import Intervention from "../Nursing/components/Intervention";
 import Procedures from "../Nursing/components/Procedures";
 import RAPPatientAssessmentsList from "../../components/RAPPatientAssessmentsList";
-import { filterApprovedPatients } from "../../shared/utils/patientFilters";
+import { isPatientPending } from "../../shared/utils/patientFilters";
 import MedicalAssistantPatientDetails from "../MedicalAssistant/components/PatientDetails";
 
 /* ── Assessment type cards ─────────────────────────────── */
@@ -121,6 +121,18 @@ function StatusPill({ status }) {
   );
 }
 
+function getAssessmentCount(patient, mappedCount) {
+  if (Number.isFinite(mappedCount)) return mappedCount;
+  const raw =
+    patient?.assessments_count ??
+    patient?.assessment_count ??
+    patient?.total_assessments ??
+    patient?.form_response_count ??
+    patient?.responses_count;
+  const count = Number(raw);
+  return Number.isFinite(count) ? count : null;
+}
+
 function AssessmentCard({ card, onClick }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -144,7 +156,7 @@ function AssessmentCard({ card, onClick }) {
 
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
 
-function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, selectable, actionLabel, onActionClick }) {
+function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, selectable, actionLabel, onActionClick, showAssessmentCount = false, assessmentCount }) {
   const [hovered, setHovered] = useState(false);
   const displayName = p.name || p.patient_name || p.email || "—";
   const initial = (displayName[0] || "P").toUpperCase();
@@ -173,7 +185,11 @@ function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, select
       }
       style={{
         display: "grid",
-        gridTemplateColumns: listOnly ? "2.5fr 1.8fr 1.2fr 2fr" : "2.5fr 1.8fr 1.2fr 1fr",
+        gridTemplateColumns: listOnly
+          ? "2.5fr 1.8fr 1.2fr 2fr"
+          : showAssessmentCount
+          ? "2.2fr 1.6fr 1fr 1.1fr 1fr"
+          : "2.5fr 1.8fr 1.2fr 1fr",
         padding: "14px 20px",
         alignItems: "center",
         borderBottom: "1px solid #F1F5F9",
@@ -192,6 +208,11 @@ function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, select
         </div>
       </div>
       <div style={{ fontSize: 13, color: "#6B7280", fontFamily: "monospace" }}>{p.mrn || p.icd || p.patient_id || "—"}</div>
+      {!listOnly && showAssessmentCount && (
+        <div style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>
+          {getAssessmentCount(p, assessmentCount) ?? "—"}
+        </div>
+      )}
       <div><StatusPill status={p.status} /></div>
       {listOnly ? (
         <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.4 }}>
@@ -242,31 +263,6 @@ function patientBelongsToDepartment(p, department) {
   return p.departments.includes(department);
 }
 
-const ALL_CLINICAL_DEPARTMENTS = [
-  "Nursing",
-  "Doctor",
-  "Physiotherapy",
-  "Integrated Rehab",
-  "Work & Vocational Rehab",
-  "Occupational Therapy",
-  "Optometry",
-  "Prosthetics & Orthotics",
-  "Audiology",
-  "Dietetics",
-  "Speech & Language Therapy",
-  "Psychology",
-];
-
-function mergePatientsById(lists) {
-  const byKey = new Map();
-  for (const p of lists.flat()) {
-    const key = p?.id ?? p?.patient_id ?? p?.mrn;
-    if (key != null) byKey.set(String(key), p);
-    else if (p) byKey.set(`${p.name || p.patient_name}-${p.email}`, p);
-  }
-  return Array.from(byKey.values());
-}
-
 async function fetchAllPatientsRegistry(userRole) {
   const isScopedUser = ["Admin", "Staff"].includes(userRole);
 
@@ -275,15 +271,37 @@ async function fetchAllPatientsRegistry(userRole) {
     return normalizePatientList(res.data);
   }
 
+  const allClinicalDepartments = [
+    "Nursing",
+    "Doctor",
+    "Physiotherapy",
+    "Integrated Rehab",
+    "Work & Vocational Rehab",
+    "Occupational Therapy",
+    "Optometry",
+    "Prosthetics & Orthotics",
+    "Audiology",
+    "Dietetics",
+    "Speech & Language Therapy",
+    "Psychology",
+  ];
+
   const batches = await Promise.all(
-    ALL_CLINICAL_DEPARTMENTS.map((dept) =>
+    allClinicalDepartments.map((dept) =>
       api
         .get(`${API_URL.PATIENT}?department=${encodeURIComponent(dept)}`)
         .then((res) => normalizePatientList(res.data))
         .catch(() => [])
     )
   );
-  return mergePatientsById(batches);
+
+  const byKey = new Map();
+  for (const p of batches.flat()) {
+    const key = p?.id ?? p?.patient_id ?? p?.mrn;
+    if (key != null) byKey.set(String(key), p);
+    else if (p) byKey.set(`${p.name || p.patient_name}-${p.email}`, p);
+  }
+  return Array.from(byKey.values());
 }
 
 export default function DepartmentPatients({
@@ -299,6 +317,9 @@ export default function DepartmentPatients({
   actionLabel,    // optional: overrides "Begin assessment" button text
   onRowAction,    // optional: overrides button click — receives the patient object
   updatePatientInMainList,
+  showAssessmentCount = false,
+  requireAssessments = false,
+  patientStatusFilter = null, // optional: "pending"
 }) {
   const userRole = localStorage.getItem("userRole") || "";
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -308,7 +329,10 @@ export default function DepartmentPatients({
     showAllPatients ? normalizePatientList(patientsFromApp) : []
   );
   const [fetchLoading, setFetchLoading] = useState(false);
-  const loading = loadingProp || fetchLoading;
+  const [assessmentCounts, setAssessmentCounts] = useState({});
+  const [assessmentCountsLoading, setAssessmentCountsLoading] = useState(false);
+  const needsAssessmentCounts = showAssessmentCount || requireAssessments;
+  const loading = loadingProp || fetchLoading || (needsAssessmentCounts && assessmentCountsLoading);
 
   /* RAP / all-patients: no department filter — entire registry */
   const deptPatients = useMemo(() => {
@@ -317,11 +341,11 @@ export default function DepartmentPatients({
       : patients.filter(
           (p) => !department || patientBelongsToDepartment(p, department)
         );
-    if (!showAllPatients) {
-      list = filterApprovedPatients(list);
+    if (patientStatusFilter === "pending") {
+      list = list.filter(isPatientPending);
     }
     return list;
-  }, [patients, department, showAllPatients]);
+  }, [patients, department, showAllPatients, patientStatusFilter]);
 
   const departmentLabel = department === "Nursing" ? "Nursing & MA" : department;
   const pageTitle = title || (showAllPatients ? "RAP" : `${departmentLabel} Patients`);
@@ -342,6 +366,11 @@ export default function DepartmentPatients({
     const fetchPatients = async () => {
       setFetchLoading(true);
       try {
+        if (patientStatusFilter === "pending") {
+          const res = await api.get(`${API_URL.PATIENT_ALL}?status=PENDING`);
+          if (!cancelled) setPatients(normalizePatientList(res.data));
+          return;
+        }
         if (showAllPatients) {
           const list = await fetchAllPatientsRegistry(userRole);
           if (cancelled) return;
@@ -369,7 +398,7 @@ export default function DepartmentPatients({
     return () => {
       cancelled = true;
     };
-  }, [department, showAllPatients, userRole, patientsFromApp]);
+  }, [department, showAllPatients, userRole, patientsFromApp, patientStatusFilter]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -380,6 +409,66 @@ export default function DepartmentPatients({
       String(p.patient_id || "").toLowerCase().includes(q)
     );
   }, [deptPatients, search]);
+
+  const filteredWithAssessments = useMemo(() => {
+    if (!needsAssessmentCounts || listOnly) return filtered;
+    return filtered.filter((p) => {
+      const id = p?.id || p?.patient_id || p?.mrn;
+      const count = getAssessmentCount(p, id ? assessmentCounts[id] : undefined);
+      return Number.isFinite(count) && count > 0;
+    });
+  }, [filtered, needsAssessmentCounts, listOnly, assessmentCounts]);
+
+  useEffect(() => {
+    if (!needsAssessmentCounts || listOnly) return;
+    let cancelled = false;
+    const targets = deptPatients
+      .map((p) => p?.id || p?.patient_id || p?.mrn)
+      .filter(Boolean)
+      .filter((id) => !Number.isFinite(assessmentCounts[id]));
+    if (targets.length === 0) {
+      setAssessmentCountsLoading(false);
+      return;
+    }
+
+    const fetchCounts = async () => {
+      setAssessmentCountsLoading(true);
+      const results = await Promise.all(
+        targets.map(async (id) => {
+          try {
+            const res = await api.get(API_URL.DYNAMIC_FORM_RESPONSE(id));
+            const raw = res.data;
+            const list = Array.isArray(raw)
+              ? raw
+              : Array.isArray(raw?.results)
+              ? raw.results
+              : Array.isArray(raw?.data)
+              ? raw.data
+              : Array.isArray(raw?.data?.results)
+              ? raw.data.results
+              : [];
+            return [id, list.length];
+          } catch {
+            return [id, 0];
+          }
+        })
+      );
+      if (cancelled) return;
+      setAssessmentCounts((prev) => {
+        const next = { ...prev };
+        results.forEach(([id, count]) => {
+          next[id] = count;
+        });
+        return next;
+      });
+      setAssessmentCountsLoading(false);
+    };
+
+    fetchCounts();
+    return () => {
+      cancelled = true;
+    };
+  }, [needsAssessmentCounts, listOnly, deptPatients, assessmentCounts]);
 
   const handleBack = () => { setAssessmentView(null); setSelectedPatient(null); };
   const handleBackToCards = () => setAssessmentView(null);
@@ -646,19 +735,21 @@ export default function DepartmentPatients({
 
       {/* Table */}
       <div style={{ background: "#fff", borderRadius: 28, border: "1px solid #E5E7EB", overflow: "hidden", boxShadow: "0 24px 80px rgba(15,23,42,0.08)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: listOnly ? "2.5fr 1.8fr 1.2fr 2fr" : "2.5fr 2fr 1.2fr 1fr", padding: "18px 24px", background: "#F8FAFC", borderBottom: "1px solid #E6E8F0" }}>
+        <div style={{ display: "grid", gridTemplateColumns: listOnly ? "2.5fr 1.8fr 1.2fr 2fr" : showAssessmentCount ? "2.2fr 1.6fr 1fr 1.1fr 1fr" : "2.5fr 2fr 1.2fr 1fr", padding: "18px 24px", background: "#F8FAFC", borderBottom: "1px solid #E6E8F0" }}>
           {(listOnly
             ? ["Patient", "MRN / ID", "Status", rapPatientPicker ? "Action" : "Departments"]
+            : showAssessmentCount
+            ? ["Patient", "MRN / ICD", "Assessments", "Status", "Action"]
             : ["Patient", "MRN / ICD", "Status", "Action"]
           ).map(h => (
             <div key={h} style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.18em" }}>{h}</div>
           ))}
         </div>
         {loading ? Array.from({ length: 5 }, (_, i) => <ShimmerRow key={i} />) :
-          filtered.length === 0 ? (
+          filteredWithAssessments.length === 0 ? (
             <EmptyState icon="🧑‍⚕️" title={search ? "No patients match your search" : "No patients found"} message={search ? "Try a different name or MRN." : showAllPatients ? "All registered patients from every department will appear here." : `Approved patients assigned to ${department} will appear here. Pending patients are not shown in this list.`} />
           ) : (
-            filtered.map((p, idx) => (
+            filteredWithAssessments.map((p, idx) => (
               <PatientRow
                 key={p.id || p.patient_id || idx}
                 patient={p}
@@ -669,14 +760,16 @@ export default function DepartmentPatients({
                 onStart={listOnly ? undefined : () => setSelectedPatient(p)}
                 actionLabel={actionLabel}
                 onActionClick={onRowAction}
+                showAssessmentCount={showAssessmentCount}
+                assessmentCount={assessmentCounts[p.id || p.patient_id || p.mrn]}
               />
             ))
           )
         }
       </div>
-      {!loading && filtered.length > 0 && (
+      {!loading && filteredWithAssessments.length > 0 && (
         <div style={{ marginTop: 12, fontSize: 12, color: "#94A3B8", textAlign: "right" }}>
-          Showing <strong>{filtered.length}</strong> of <strong>{deptPatients.length}</strong> patient{deptPatients.length !== 1 ? "s" : ""}
+          Showing <strong>{filteredWithAssessments.length}</strong> of <strong>{deptPatients.length}</strong> patient{deptPatients.length !== 1 ? "s" : ""}
         </div>
       )}
     </div>
