@@ -14,8 +14,6 @@ import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PatientCard from "../../../shared/cards/PatientCard";
 import { API_URL } from "../../../platform/config/api.config";
 import api, { setAccessToken } from "../../../shared/api/apiClient";
-import { BookAppointmentModal } from "../book-appointment-modal/BookAppointmentModal.jsx";
-import { fetchBookingQueue } from "../book-appointment-modal/bookingQueueService.jsx";
 
 const PROGNOSIS_OPTIONS = [
   { label: "Excellent", value: "excellent" },
@@ -864,8 +862,9 @@ export default function SpinalCordInjury({patient, onSubmit, onBack}) {
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
   const [equipmentOptions, setEquipmentOptions] = useState([]);
-  const [bookingRow, setBookingRow] = useState(null);
-  const [bookingLookupLoading, setBookingLookupLoading] = useState(false);
+  const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [bookedEquipmentIds, setBookedEquipmentIds] = useState([]);
   
   /* ---------------- STORAGE ---------------- */
   const storageKey = patient
@@ -885,6 +884,8 @@ const options =
     value: item.id,
     status: item.status,
     equipment_code: item.equipment_code,
+    department_name: item.department_name,
+    raw: item,
   })) || [];
 
 setEquipmentOptions(options);
@@ -984,122 +985,9 @@ setEquipmentOptions(options);
     alert("Spinal assessment submitted");
   };
 
-  const getPatientName = () =>
-    patient?.name ||
-    patient?.patient_name ||
-    patient?.full_name ||
-    [patient?.first_name, patient?.last_name].filter(Boolean).join(" ") ||
-    "Patient";
-
-  const getPatientCode = () =>
-    patient?.patient_code ||
-    patient?.mrn ||
-    patient?.code ||
-    patient?.id ||
-    "";
-
-  const getDirectBookingId = () =>
-    patient?.booking_id ||
-    patient?.booking_queue_id ||
-    patient?.queue_id ||
-    values.booking_id ||
-    values.booking_queue_id ||
-    "";
-
-  const getBookingSearchTerms = () =>
-    [
-      patient?.booking_id,
-      patient?.booking_queue_id,
-      patient?.referral_id,
-      patient?.referral_no,
-      patient?.patient_code,
-      patient?.mrn,
-      patient?.name,
-      patient?.patient_name,
-      values.referral_id,
-      values.booking_id,
-      values.booking_queue_id,
-    ]
-      .filter(Boolean)
-      .map(String)
-      .filter((value, index, list) => list.indexOf(value) === index);
-
-  const sameText = (a, b) =>
-    String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
-
-  const isMatchingQueueRow = (row) => {
-    if (!row) return false;
-    const patientName = getPatientName();
-    const patientCode = getPatientCode();
-    const referralId = patient?.referral_id || patient?.referral_no || values.referral_id;
-
-    return (
-      sameText(row.patient_code, patientCode) ||
-      sameText(row.patient_name, patientName) ||
-      sameText(row.referral_id, referralId) ||
-      sameText(row.booking_id || row.id, getDirectBookingId())
-    );
-  };
-
-  const toBookingRow = (queueRow, equipment) => ({
-    id:
-      queueRow?.booking_id ||
-      queueRow?.id ||
-      getDirectBookingId(),
-    patient: queueRow?.patient_name || getPatientName(),
-    refId:
-      queueRow?.referral_id ||
-      patient?.referral_id ||
-      patient?.refId ||
-      patient?.referral_no ||
-      values.referral_id ||
-      `Equipment: ${equipment.label}`,
-    department: queueRow?.department || "Physiotherapy",
-    disciplineCode: queueRow?.suggested_discipline || "PT",
-    priority: queueRow?.priority || "Medium",
-    slaLabel: queueRow?.sla_remaining || "from equipment list",
-    slaTone: "on-track",
-    createdLabel: queueRow?.created_date || "Today",
-    createdDate: queueRow?.created_date || new Date().toISOString().slice(0, 10),
-    consent: queueRow?.consent_status || "Valid",
-    equipment,
-  });
-
-  const findBookingQueueRow = async () => {
-    const terms = getBookingSearchTerms();
-    for (const term of terms) {
-      try {
-        const result = await fetchBookingQueue({ search: term, limit: 25 });
-        const rows = result?.rows || [];
-        const match = rows.find(isMatchingQueueRow) || rows[0];
-        if (match?.booking_id || match?.id) return match;
-      } catch (error) {
-        console.error("Booking queue lookup failed:", error);
-      }
-    }
-    return null;
-  };
-
-  const handleEquipmentBook = async (equipment) => {
-    if (bookingLookupLoading) return;
-    setBookingLookupLoading(true);
-    try {
-      const directBookingId = getDirectBookingId();
-      if (directBookingId) {
-        setBookingRow(toBookingRow({ booking_id: directBookingId }, equipment));
-        return;
-      }
-
-      const queueRow = await findBookingQueueRow();
-      if (!queueRow?.booking_id && !queueRow?.id) {
-        alert("No booking queue entry found for this patient. Please create or select a booking queue entry before booking equipment.");
-        return;
-      }
-
-      setBookingRow(toBookingRow(queueRow, equipment));
-    } finally {
-      setBookingLookupLoading(false);
-    }
+  const handleEquipmentBook = (equipment) => {
+    setSelectedEquipment(equipment);
+    setEquipmentBookingOpen(true);
   };
 
 const planSchema = {
@@ -1108,11 +996,12 @@ const planSchema = {
     ...section,
     fields: section.fields.map((field) =>
       field.name === "equipment_list"
-        ? { ...field, options: equipmentOptions, onBook: handleEquipmentBook }
+        ? { ...field, options: equipmentOptions, onBook: handleEquipmentBook, bookedEquipmentIds }
         : field
     ),
   })),
 };
+
   return (
     <div style={mainContent}>
     
@@ -1183,18 +1072,14 @@ const planSchema = {
           )}
         </div>
       </CommonFormBuilder>
-      <BookAppointmentModal
-        open={Boolean(bookingRow)}
-        row={bookingRow}
-        initialMode="equipment"
-        onClose={() => setBookingRow(null)}
-        onConfirm={(data) => {
-          setBookingRow(null);
-          console.log("Equipment booking confirmed:", data);
+      <EquipmentBookingPopup
+        open={equipmentBookingOpen}
+        equipmentOptions={equipmentOptions}
+        selectedEquipment={selectedEquipment}
+        onClose={() => setEquipmentBookingOpen(false)}
+        onBooked={(equipmentId) => {
+          setBookedEquipmentIds(prev => [...prev, equipmentId]);
         }}
-        onRequestOverride={() => console.log("Request override")}
-        onAddWaitlist={() => console.log("Add waitlist")}
-        onConflict={() => console.log("Booking conflict")}
       />
     </div>
   );
@@ -1202,6 +1087,159 @@ const planSchema = {
 
 
 /* ── Generated Observation Banner ── */
+function EquipmentBookingPopup({
+  open,
+  equipmentOptions,
+  selectedEquipment,
+  onClose,
+  onBooked
+}) {
+  const [equipmentId, setEquipmentId] = useState("");
+  const handleBookEquipment = () => {
+  alert("Equipment booked");
+
+  onBooked?.(equipmentId);
+
+  onClose();
+};
+
+  useEffect(() => {
+    if (open) {
+      setEquipmentId(selectedEquipment?.value || "");
+    }
+  }, [open, selectedEquipment]);
+
+  if (!open) return null;
+
+  const currentEquipment =
+    equipmentOptions.find(item => String(item.value) === String(equipmentId)) ||
+    selectedEquipment ||
+    {};
+
+  const departmentOptions = Array.from(
+    new Set(equipmentOptions.map(item => item.department_name).filter(Boolean))
+  );
+
+  const selectedDepartment = currentEquipment.department_name || "";
+
+  return (
+    <div style={equipmentModalOverlay}>
+      <div style={equipmentModal}>
+        <div style={equipmentModalHeader}>
+          <div>
+            <div style={equipmentModalTitle}>Create Equipment Booking</div>
+            <div style={equipmentModalSubtitle}>
+              Reserve equipment for internal use. Fields marked with * are required.
+            </div>
+          </div>
+          <button type="button" style={equipmentCloseBtn} onClick={onClose}>×</button>
+        </div>
+
+        <div style={equipmentModalBody}>
+          <div style={equipmentSectionTitle}>Basic Details</div>
+          <div style={equipmentGrid}>
+            <EquipmentPopupField label="Equipment *">
+              <select
+                style={equipmentInput}
+                value={equipmentId}
+                onChange={(event) => setEquipmentId(event.target.value)}
+              >
+                <option value="">Select equipment</option>
+                {equipmentOptions.map(item => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Booking Date *">
+              <input type="date" style={equipmentInput} />
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Start Time *">
+              <input type="time" style={equipmentInput} />
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="End Time *">
+              <input type="time" style={equipmentInput} />
+            </EquipmentPopupField>
+          </div>
+
+          <div style={equipmentSectionTitle}>Usage Context</div>
+          <div style={equipmentGrid}>
+            <EquipmentPopupField label="Department *">
+              <select style={equipmentInput} value={selectedDepartment} disabled>
+                <option value="">Select department</option>
+                {departmentOptions.map(department => (
+                  <option key={department} value={department}>
+                    {department}
+                  </option>
+                ))}
+              </select>
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Appointment Reference *">
+              <input
+                type="text"
+                style={equipmentInput}
+                placeholder="Enter appointment reference id"
+              />
+            </EquipmentPopupField>
+
+            <EquipmentPopupField label="Assigned Staff *">
+              <select style={equipmentInput}>
+                <option value="">Select staff</option>
+              </select>
+            </EquipmentPopupField>
+          </div>
+
+          <div style={equipmentSectionTitle}>Note</div>
+          <EquipmentPopupField label="Purpose of Booking *">
+            <textarea
+              style={equipmentTextarea}
+              placeholder="Describe purpose of booking..."
+            />
+          </EquipmentPopupField>
+
+          <EquipmentPopupField label="Special Handling Instructions *">
+            <textarea
+              style={equipmentTextarea}
+              placeholder="Describe special handling instructions..."
+            />
+          </EquipmentPopupField>
+        </div>
+
+        <div style={equipmentModalFooter}>
+          <button type="button" style={equipmentCancelBtn} onClick={onClose}>
+            × Cancel
+          </button>
+          <button
+          type="button"
+          style={equipmentBookBtn}
+          onClick={() => {
+            alert("Equipment booked");
+            onBooked?.(equipmentId);
+            onClose();
+          }}
+        >
+          Book Equipment
+        </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EquipmentPopupField({ label, children }) {
+  return (
+    <label style={equipmentField}>
+      <span style={equipmentLabel}>{label}</span>
+      {children}
+    </label>
+  );
+}
+
 function GeneratedObservationBanner({ values }) {
   const bodySize = values.body_size
     ? values.body_size.charAt(0).toUpperCase() + values.body_size.slice(1)
@@ -1308,6 +1346,147 @@ const submitBtn = {
   fontSize: 15,
   fontWeight: 700
 };
+
+const equipmentModalOverlay = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 10000,
+  background: "rgba(0,0,0,0.45)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 16
+};
+
+const equipmentModal = {
+  width: "min(660px, 100%)",
+  maxHeight: "98vh",
+  overflow: "hidden",
+  background: "#fff",
+  borderRadius: 10,
+  boxShadow: "0 24px 70px rgba(15,23,42,0.25)",
+  display: "flex",
+  flexDirection: "column"
+};
+
+const equipmentModalHeader = {
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 16,
+  padding: "18px 22px 14px",
+  borderBottom: "1px solid #e5e7eb"
+};
+
+const equipmentModalTitle = {
+  fontSize: 16,
+  fontWeight: 800,
+  color: "#24272d",
+  lineHeight: 1.2
+};
+
+const equipmentModalSubtitle = {
+  marginTop: 6,
+  fontSize: 14,
+  color: "#7a7f88"
+};
+
+const equipmentCloseBtn = {
+  width: 40,
+  height: 40,
+  borderRadius: 10,
+  border: "1px solid #d7dde7",
+  background: "#fff",
+  color: "#1f2937",
+  fontSize: 24,
+  lineHeight: "36px",
+  cursor: "pointer"
+};
+
+const equipmentModalBody = {
+  margin: "5px 14px 0",
+  padding: "12px 16px 18px",
+  border: "1px solid #dce2ea",
+  borderRadius: 12,
+  overflowY: "auto"
+};
+
+const equipmentSectionTitle = {
+  margin: "0 0 14px",
+  fontSize: 14,
+  fontWeight: 800,
+  color: "#24272d"
+};
+
+const equipmentGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "14px 10px",
+  marginBottom: 22
+};
+
+const equipmentField = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 7,
+  minWidth: 0
+};
+
+const equipmentLabel = {
+  fontSize: 14,
+  fontWeight: 700,
+  color: "#344054"
+};
+
+const equipmentInput = {
+  width: "100%",
+  minHeight: 26,
+  border: "1px solid #cfd7e4",
+  borderRadius: 10,
+  padding: "10px 16px",
+  fontSize: 16,
+  color: "#111827",
+  background: "#fff",
+  boxSizing: "border-box"
+};
+
+const equipmentTextarea = {
+  ...equipmentInput,
+  minHeight: 68,
+  resize: "vertical",
+  marginBottom: 14
+};
+
+const equipmentModalFooter = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 10,
+  padding: "14px 20px",
+  borderTop: "1px solid #e5e7eb"
+};
+
+const equipmentCancelBtn = {
+  padding: "10px 18px",
+  border: "1px solid #d7dde7",
+  borderRadius: 10,
+  background: "#fff",
+  color: "#24272d",
+  fontSize: 16,
+  fontWeight: 600,
+  cursor: "pointer"
+};
+
+const equipmentBookBtn = {
+  padding: "10px 20px",
+  border: "none",
+  borderRadius: 10,
+  background: "#0b5cff",
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: 700,
+  cursor: "pointer"
+};
+
 const th = {
   border: "1px solid #ccc",
   padding: 10,
