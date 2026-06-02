@@ -6,21 +6,6 @@ const API = "http://127.0.0.1:5000";
 export default function PatientsByDepartment({ department, setTab }) {
   const [patientsData, setPatientsData] = useState([]);
   const [removedPatients, setRemovedPatients] = useState([]); // Track removed patients temporarily
-
-  useEffect(() => {
-    // Fetching patients based only on department, no doctor filter
-    axios
-      .get(`${API}/api/patients/departments/${department}`)
-      .then((res) => {
-        // Filter out the removed patients from the server data
-        const updatedData = res.data.filter((patient) => 
-          !removedPatients.includes(patient.patient_id)
-        );
-        setPatientsData(updatedData);
-      })
-      .catch((err) => console.error("Error fetching patients:", err));
-  }, [department, removedPatients]); // Re-fetch when department or removedPatients changes
-
   const formatDate = (d) => new Date(d).toLocaleString();
 
   const handleView = (patientId) => {

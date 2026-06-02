@@ -1215,6 +1215,8 @@ function AssessmentLauncher({
     return [];
   })();
 
+  assessmentRegistry = Array.isArray(assessmentRegistry) ? assessmentRegistry : [assessmentRegistry]
+
   // Active selected assessment
   const selectedAssessment = registryOptions.find(
     o => o && (

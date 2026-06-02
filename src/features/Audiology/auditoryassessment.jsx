@@ -626,6 +626,60 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
     }
   };
 
+  const applyTympanogramResult = (payload) => {
+    const data = payload?.data || payload || {};
+    const right = data.right_ear || data.rightEar || {};
+    const left = data.left_ear || data.leftEar || {};
+
+    setValues((prev) => {
+      const peakPressure = { ...(prev.peak_pressure || {}) };
+      const staticCompliance = { ...(prev.static_compliance || {}) };
+      const ecv = { ...(prev.ecv || {}) };
+
+      setIfPresent(peakPressure, "peak_pressure_r", right.pressure);
+      setIfPresent(peakPressure, "peak_pressure_l", left.pressure);
+      setIfPresent(staticCompliance, "static_compliance_r", right.compliance);
+      setIfPresent(staticCompliance, "static_compliance_l", left.compliance);
+      setIfPresent(ecv, "ecv_r", right.volume);
+      setIfPresent(ecv, "ecv_l", left.volume);
+
+      return {
+        ...prev,
+        peak_pressure: peakPressure,
+        static_compliance: staticCompliance,
+        ecv
+      };
+    });
+  };
+
+  const extractTympanogram = async (file) => {
+    if (!(file instanceof File || file instanceof Blob)) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error("Tympanogram extraction failed");
+    }
+
+    applyTympanogramResult(await response.json());
+  };
+
+  const handleChange = (name, value) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "tympanometry_report") {
+      extractTympanogram(value).catch((error) => {
+        console.error(error);
+      });
+    }
+  };
+
   const FREQUENCIES = ["500", "1000", "2000", "4000"];
 
   const reflexOptions = [

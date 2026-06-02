@@ -544,20 +544,6 @@ useEffect(() => {
   });
 }, [distinctAssessments]);
 
-  // ──────────────────────────────────────
-  // 2) Load modalities once (or per ICD)
-  // ──────────────────────────────────────
-  useEffect(() => {
-    setModsOptions([]); setModsSelected(new Set());
-    (async () => {
-      try {
-        const opts = await getJSON(`${API}/modalities`);
-        setModsOptions(opts || []);
-      } catch (e) {
-        setMsg(m => (m ? m + " | " : "") + `Failed to load modalities: ${e.message || e}`);
-      }
-    })();
-  }, [API]);
 // prune treatment selections when modalities are unselected
 useEffect(() => {
   setTreatRange(prev => {
