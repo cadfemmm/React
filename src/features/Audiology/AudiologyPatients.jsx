@@ -5,6 +5,7 @@ import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
 import AudiologyGroupAssessmentForm from "./components/AudiologyGroup";
 import api from "../../shared/api/apiClient";
 import { API_URL } from "../../platform/config/api.config";
+import { filterApprovedPatients } from "../../shared/utils/patientFilters";
 
 /* ── Assessment type cards ── */
 const OPTION_CARDS = [
@@ -55,16 +56,20 @@ export default function AudiologyPatients({ onBack }) {
   }, []);
 
   /* ── Search filter ── */
+  const approvedPatients = useMemo(() => filterApprovedPatients(patients), [patients]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    if (!q) return patients;
-    return patients.filter(p =>
-      (p.name  || "").toLowerCase().includes(q) ||
-      (p.email || "").toLowerCase().includes(q) ||
-      (p.mrn   || "").toLowerCase().includes(q) ||
-      (p.icd   || "").toLowerCase().includes(q)
-    );
-  }, [patients, search]);
+    const base = !q
+      ? approvedPatients
+      : approvedPatients.filter(p =>
+          (p.name  || "").toLowerCase().includes(q) ||
+          (p.email || "").toLowerCase().includes(q) ||
+          (p.mrn   || "").toLowerCase().includes(q) ||
+          (p.icd   || "").toLowerCase().includes(q)
+        );
+    return base;
+  }, [approvedPatients, search]);
 
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentView) {
@@ -148,10 +153,7 @@ export default function AudiologyPatients({ onBack }) {
 
         {/* Cards */}
         <div style={S.selectionBody}>
-          <div style={S.selectionHeading}>Select Assessment Type</div>
-          <div style={S.selectionSub}>
-            Choose the appropriate assessment for this patient visit
-          </div>
+       
           <div style={S.cardsGrid}>
             {OPTION_CARDS.map(card => (
               <AssessmentCard
@@ -224,7 +226,7 @@ export default function AudiologyPatients({ onBack }) {
               {search ? "No patients match your search" : "No patients assigned"}
             </div>
             <div style={{ fontSize: 13, color: "#94A3B8" }}>
-              {search ? "Try a different name or MRN." : "Patients assigned to Audiology will appear here."}
+              {search ? "Try a different name or MRN." : "Approved patients assigned to Audiology will appear here. Pending patients are not shown."}
             </div>
           </div>
         ) : (
@@ -290,7 +292,7 @@ export default function AudiologyPatients({ onBack }) {
 
       {!loading && filtered.length > 0 && (
         <div style={{ marginTop: 10, fontSize: 12, color: "#94A3B8", textAlign: "right" }}>
-          Showing <strong>{filtered.length}</strong> of <strong>{patients.length}</strong> patient{patients.length !== 1 ? "s" : ""}
+          Showing <strong>{filtered.length}</strong> of <strong>{approvedPatients.length}</strong> approved patient{approvedPatients.length !== 1 ? "s" : ""}
         </div>
       )}
 

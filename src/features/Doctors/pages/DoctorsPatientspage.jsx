@@ -229,8 +229,7 @@ if (existingPatient && openExistingForm) {
         </div>
         {/* Cards */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 28px" }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 6 }}>Select Assessment Type</div>
-          <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 32 }}>Choose the appropriate assessment for this patient visit</div>
+
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, width: "100%", maxWidth: 1100 }}>
             {DOCTOR_ASSESSMENT_CARDS.map(card => (
               <DoctorAssessmentCard key={card.id} card={card} onClick={() => setAssessmentView(card.id)} />

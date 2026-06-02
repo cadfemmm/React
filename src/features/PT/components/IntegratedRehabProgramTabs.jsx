@@ -164,41 +164,9 @@ export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
         )}
         {/* Centered title */}
         {/* <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#111827" }}>Select Assessment Type</h1>
-          <p style={{ margin: "8px 0 0", fontSize: 14, color: "#6b7280" }}>Choose the appropriate assessment for this patient visit</p>
+
         </div> */}
-        <div
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    marginBottom: 36,
-    width: "100%"
-  }}
->
-  <h1
-    style={{
-      margin: 0,
-      fontSize: 26,
-      fontWeight: 800,
-      color: "#111827"
-    }}
-  >
-    Select Assessment Type
-  </h1>
-  <p
-    style={{
-      margin: "8px 0 0",
-      fontSize: 14,
-      color: "#6b7280",
-      maxWidth: "600px"
-    }}
-  >
-    Choose the appropriate assessment for this patient visit
-  </p>
-</div>
+       
         {/* Strict 2-column grid */}
         <div style={{
           display: "grid",

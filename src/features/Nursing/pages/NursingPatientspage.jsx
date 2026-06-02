@@ -1,22 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import PatientDetails from "../components/PatientDetails";
+import { filterApprovedPatients } from "../../../shared/utils/patientFilters";
 
 export default function NursingDepartmentPage({ patients = [], department, initialView = "dashboard", onBack }) {
   const [view, setView] = useState(initialView); // dashboard | patients | details
   const [selectedPatient, setSelectedPatient] = useState(null);
 
+  const departmentPatients = useMemo(() => {
+    if (!department) return [];
+    const dept = patients.filter((p) => {
+      if (!Array.isArray(p.departments)) return true;
+      if (department === "Nursing") {
+        return p.departments.includes("Nursing") || p.departments.includes("Medical Assistant");
+      }
+      return p.departments.includes(department);
+    });
+    return filterApprovedPatients(dept);
+  }, [patients, department]);
+
   /* ================= SAFETY GUARD ================= */
   if (!department) {
     return <div style={{ padding: 20 }}>Department not assigned</div>;
   }
-
-  const departmentPatients = patients.filter((p) => {
-    if (!Array.isArray(p.departments)) return true;
-    if (department === "Nursing") {
-      return p.departments.includes("Nursing") || p.departments.includes("Medical Assistant");
-    }
-    return p.departments.includes(department);
-  });
 
   /* ================= PATIENT DETAILS ================= */
   if (view === "details" && selectedPatient) {
