@@ -625,12 +625,12 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
 
     sections: [
      {
-      title: "Hearing Aid Trial",
+      title: "Hearing device Trial",
       showIf: { field: "mode", equals: "followup" },
       fields: [
         {
           name: "hearingaidtrial_required",
-          label: "Hearing Aid Trial",
+          label: "Hearing device Trial",
           type: "radio",
           options: [
             { label: "Yes", value: "yes" },
@@ -642,7 +642,7 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
           label: "",
           type: "assessment-launcher",
           showIf: { field: "hearingaidtrial_required", equals: "yes" },
-          options: [{ label: "Hearing Aid Trial", value: "hearingaidtrial_form_obj" }]
+          options: [{ label: "Hearing device Trial", value: "hearingaidtrial_form_obj" }]
         }
       ]
     },

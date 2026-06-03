@@ -234,7 +234,7 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
           {
             name: "tinnitus_type_details",
             label: "Specify",
-            type: "textarea",
+            type: "input",
             showIf: { field: "tinnitus_type", notEmpty: true }
           },
 
@@ -276,12 +276,26 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
           {
             name: "associated_symptoms_details",
             label: "Specify",
-            type: "textarea",
+            type: "input",
             showIf: { field: "associated_symptoms", notEmpty: true }
           },
 
-          { name: "previous_treatment", label: "Previous treatment / intervention", type: "input" },
-
+          // { name: "previous_treatment", label: "Previous treatment / intervention", type: "input" },
+{
+  name: "previous_treatment",
+  label: "Previous Treatment / Intervention",
+  type: "radio",
+  options: ["No", "Yes"]
+},
+{
+  name: "previous_treatment_remarks",
+  label: "Intervention Remarks",
+  type: "input",
+  showIf: {
+    field: "previous_treatment",
+    equals: "Yes"
+  }
+},
           {
             name: "noise_exposure",
             label: "Noise exposure history",
@@ -295,12 +309,12 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
           {
             name: "noise_exposure_details",
             label: "Specify",
-            type: "textarea",
+            type: "input",
             showIf: { field: "noise_exposure", notEmpty: true }
           },
 
           { name: "ototoxic_drugs", label: "Ototoxic drug use", type: "input" },
-          { name: "family_history", label: "Family history", type: "input" },
+          // { name: "family_history", label: "Family history", type: "input" },
 
           // ══════════════════════════════════════════════════════════
           // SUBJECTIVE RATING SCALES — selectors only
@@ -375,32 +389,62 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
   // ══════════════════════════════════════════════════════════
   // TFI SCHEMA — own Doctor View toggle
   // ══════════════════════════════════════════════════════════
-  const tfiSchema = {
-    title: "TFI",
-    enableScoreToggle: true,
-    actions: [{ type: "toggle-show-scores" }],
-    sections: [
-      {
-        title: null,
-        fields: [
-          { type: "info-text", text: "0 = none, 10 = worst possible" },
-          ...TFI_QUESTIONS.map((q, i) => ({
-            name: `tfi_${i + 1}`,
-            label: `${i + 1}. ${q}`,
-            type: "scale-slider",
-            min: 0,
-            max: 10
-          })),
+  // const tfiSchema = {
+  //   title: "TFI",
+  //   enableScoreToggle: true,
+  //   actions: [{ type: "toggle-show-scores",  label: "Audio View" }],
+  //   sections: [
+  //     {
+  //       title: null,
+  //       fields: [
+  //         { type: "info-text", text: "0 = none, 10 = worst possible" },
+  //         ...TFI_QUESTIONS.map((q, i) => ({
+  //           name: `tfi_${i + 1}`,
+  //           label: `${i + 1}. ${q}`,
+  //           type: "scale-slider",
+  //           min: 0,
+  //           max: 10
+  //         })),
 
-          ...(tfiScoresVisible ? [
-            { name: "tfi_score", label: "TFI Score", type: "score-box" },
-            { name: "tfi_severity_level", label: "Severity Level", type: "score-box" },
-            { name: "tfi_interpretation", label: "Interpretation", type: "score-box" }
-          ] : [])
-        ]
-      }
-    ]
-  };
+  //         ...(tfiScoresVisible ? [
+  //           { name: "tfi_score", label: "TFI Score", type: "score-box" },
+  //           { name: "tfi_severity_level", label: "Severity Level", type: "score-box" },
+  //           { name: "tfi_interpretation", label: "Interpretation", type: "score-box" }
+  //         ] : [])
+  //       ]
+  //     }
+  //   ]
+  // };
+  const tfiSchema = {
+  title: "TFI",
+  enableScoreToggle: true,
+  scoreToggleLabel: "Audio View",
+  actions: [{ type: "toggle-show-scores" }],
+  sections: [
+    {
+      title: null,
+      fields: [
+        { type: "info-text", text: "0 = none, 10 = worst possible" },
+
+        ...TFI_QUESTIONS.map((q, i) => ({
+          name: `tfi_${i + 1}`,
+          label: `${i + 1}. ${q}`,
+          type: "scale-slider",
+          min: 0,
+          max: 10
+        })),
+
+        ...(tfiScoresVisible
+          ? [
+              { name: "tfi_score", label: "TFI Score", type: "score-box" },
+              { name: "tfi_severity_level", label: "Severity Level", type: "score-box" },
+              { name: "tfi_interpretation", label: "Interpretation", type: "score-box" }
+            ]
+          : [])
+      ]
+    }
+  ]
+};
 
   // ══════════════════════════════════════════════════════════
   // LIFESTYLE & COUNSELING SCHEMA — no toggle

@@ -206,7 +206,25 @@ const MVVSS_OPTIONS = [
 
         { type: "info-text", label: "1. Symptoms" },
         { name: "vertigo", label: "Vertigo / Spinning", type: "radio", options: ["No", "Yes"] },
+        {
+  name: "vertigo_details",
+  label: "Please specify",
+  type: "input",
+  showIf: {
+    field: "vertigo",
+    equals: "Yes"
+  }
+},
         { name: "dizziness", label: "Dizziness / Spatial disorientation", type: "radio", options: ["No", "Yes"] },
+        {
+  name: "dizziness_details",
+  label: "Please specify",
+  type: "input",
+  showIf: {
+    field: "dizziness",
+    equals: "Yes"
+  }
+},
         { name: "postural", label: "Postural symptoms", type: "checkbox-group", options: [
           { label: "None", value: "none"},
           { label: "Postural instability / unsteadiness", value: "Postural instability / unsteadiness" },
@@ -214,6 +232,16 @@ const MVVSS_OPTIONS = [
           { label: "Near falls", value: "Near falls" },
           { label: "Directional pulsion", value: "Directional pulsion" }
         ]},
+        {
+  name: "postural_details",
+  label: "Please specify",
+  type: "input",
+  showIf: {
+    field: "postural",
+    includes: "none"
+  }
+},
+        
         { name: "visual", label: "Visuo-vestibular symptoms", type: "checkbox-group", options: [
           { label: "None", value: "none"},
           { label: "Visual tilt", value: "Visual tilt" },
@@ -221,7 +249,15 @@ const MVVSS_OPTIONS = [
           { label: "Oscillopsia", value: "Oscillopsia" },
           { label: "Movement induced blur", value: "Movement induced blur" }
         ]},
-
+{
+  name: "visual_details",
+  label: "Please specify",
+  type: "input",
+  showIf: {
+    field: "visual",
+    includes: "none"
+  }
+},
         { type: "info-text", label: "2. Triggers" },
         { name: "situational", label: "Situational", type: "checkbox-group", options: [
           { label: "None", value: "none"},
@@ -235,7 +271,16 @@ const MVVSS_OPTIONS = [
           { label: "Travel", value: "Travel" },
           { label: "Others", value: "Others" }
         ]},
-        { name: "situational_details", label: "Specify", type: "textarea", showIf: { field: "situational", includes: "Others" } },
+        // { name: "situational_details", label: "Specify", type: "input", showIf: { field: "situational", includes: "Others" } },
+        {
+  name: "situational_details",
+  label: "Specify",
+  type: "input",
+  showIf: {
+    field: "situational",
+    notEmpty: true
+  }
+},
         { name: "third_window", label: "Third window", type: "checkbox-group", options: [
           { label: "None", value: "none"},
           { label: "Loud sounds", value: "Loud sounds" },
@@ -246,7 +291,16 @@ const MVVSS_OPTIONS = [
           { label: "Straining", value: "Straining" },
           { label: "Others", value: "Others" }
         ]},
-        { name: "third_window_details", label: "Specify", type: "textarea", showIf: { field: "third_window", includes: "Others" } },
+        {
+  name: "third_window_details",
+  label: "Specify",
+  type: "input",
+  showIf: {
+    field: "third_window",
+    notEmpty: true
+  }
+},
+        // { name: "third_window_details", label: "Specify", type: "input", showIf: { field: "third_window", includes: "Others" } },
         { name: "movement", label: "Movement", type: "checkbox-group", options: [
           { label: "None", value: "none"},
           { label: "Bending over", value: "Bending over" },
@@ -259,7 +313,17 @@ const MVVSS_OPTIONS = [
           { label: "Turning head R/L", value: "Turning head R/L" },
           { label: "Others", value: "Others" }
         ]},
-        { name: "movement_details", label: "Specify", type: "textarea", showIf: { field: "movement", includes: "Others" } },
+        {
+  name: "movement_details",
+  label: "Specify",
+  type: "input",
+  showIf: {
+    field: "movement",
+    notEmpty: true
+  }
+},
+        
+        // { name: "movement_details", label: "Specify", type: "input", showIf: { field: "movement", includes: "Others" } },
         { name: "environmental", label: "Environmental", type: "checkbox-group", options: [
           { label: "None", value: "none"},
           { label: "Open spaces", value: "Open spaces" },
@@ -270,7 +334,7 @@ const MVVSS_OPTIONS = [
           { label: "Uneven ground", value: "Uneven ground" },
           { label: "Others", value: "Others" }
         ]},
-        { name: "environmental_details", label: "Specify", type: "textarea", showIf: { field: "environmental", includes: "Others" } },
+        { name: "environmental_details", label: "Specify", type: "input", showIf: { field: "environmental",  notEmpty: true } },
 
         { type: "info-text", label: "3. Duration" },
         { name: "duration", label: "Episode duration", type: "checkbox-group", options: [
@@ -285,22 +349,24 @@ const MVVSS_OPTIONS = [
         ]},
 
         { type: "info-text", label: "4. Onset" },
-        { name: "onset_date", label: "Date / How long ago", type: "input" },
-        { name: "onset_after", label: "After what?", type: "checkbox-group", options: [
+        { name: "onset_date", label: "  Duration", type: "input" },
+        { name: "onset_after", label: "Prior condition", type: "checkbox-group", options: [
+          { label: "None", value: "none" },
           { label: "Severe vertigo", value: "severe_vertigo" },
           { label: "Trauma", value: "trauma" },
           { label: "Immobilization", value: "immobilization" },
           { label: "Surgery", value: "surgery" },
-          { label: "No association", value: "none" },
+          { label: "None", value: "none" },
           { label: "Medication", value: "medication" },
-          { label: "New diagnosis", value: "new_diagnosis" },
+          // { label: "New diagnosis", value: "new_diagnosis" },
           { label: "Fever", value: "fever" },
           { label: "Others", value: "other" }
         ]},
-        { name: "onset_after_details", label: "Specify", type: "textarea", showIf: { field: "onset_after", includes: "other" } },
+        { name: "onset_after_details", label: "Specify", type: "input", showIf: { field: "onset_after",notEmpty: true} },
 
         { type: "info-text", label: "5. Frequency" },
         { name: "frequency", label: "Symptom frequency", type: "checkbox-group", options: [
+          { label: "None", value: "none" },
           { label: "Only once", value: "once" },
           { label: "Several times/day", value: "several_per_day" },
           { label: "Daily (intermittent)", value: "daily_intermittent" },
@@ -313,26 +379,27 @@ const MVVSS_OPTIONS = [
           { label: "Continuous with worsening", value: "worsening" },
           { label: "Others", value: "other" }
         ]},
-        { name: "frequency_details", label: "Specify", type: "textarea", showIf: { field: "frequency", includes: "other" } },
+        { name: "frequency_details", label: "Specify", type: "input", showIf: { field: "frequency", notEmpty: true } },
 
         { type: "info-text", label: "6. Evolution" },
         { name: "evolution", label: "Symptom evolution", type: "checkbox-group", options: [
+          { label: "None", value: "none" },
           { label: "Worst initially then improving", value: "initial_worst_improving" },
           { label: "Worsening day by day", value: "worsening_daily" },
           { label: "Severe during attacks only", value: "attack_only" },
           { label: "Stable with little fluctuation", value: "stable" },
           { label: "Others", value: "other" }
         ]},
-        { name: "evolution_details", label: "Specify", type: "textarea", showIf: { field: "evolution", includes: "other" } },
+        { name: "evolution_details", label: "Specify", type: "input", showIf: { field: "evolution", notEmpty: true } },
 
         { type: "info-text", label: "7. Otological" },
-        { name: "hearing",       label: "Hearing loss",                type: "input" },
+        // { name: "hearing",       label: "Hearing loss",                type: "input" },
         { name: "ear_pressure",  label: "Ear pressure / fullness",     type: "radio", options: ["No","Right","Left","Bilateral"] },
         { name: "vesicles",      label: "Vesicles in or around ear",   type: "radio", options: ["No","Right","Left","Bilateral"] },
         { name: "paresthesia",   label: "Paresthesia",                 type: "radio", options: ["No","Right","Left","Bilateral"] },
-        { name: "tinnitus",      label: "Tinnitus",                    type: "radio", options: ["No","Right","Left","Bilateral"] },
+        // { name: "tinnitus",      label: "Tinnitus",                    type: "radio", options: ["No","Right","Left","Bilateral"] },
         { name: "ear_pain",      label: "Pain in or around ear",       type: "radio", options: ["No","Right","Left","Bilateral"] },
-        { name: "ear_discharge", label: "Ear discharge",               type: "radio", options: ["No","Right","Left","Bilateral"] },
+        // { name: "ear_discharge", label: "Ear discharge",               type: "radio", options: ["No","Right","Left","Bilateral"] },
         { name: "autophony",     label: "Autophony",                   type: "radio", options: ["No","Right","Left","Bilateral"] },
 
         { type: "info-text", label: "8. Neurological" },
@@ -343,16 +410,16 @@ const MVVSS_OPTIONS = [
         { name: "diplopia",        label: "Diplopia",        type: "radio", options: ["No","Yes"] },
         { name: "neuro_other",     label: "Others",          type: "input" },
 
-        { type: "info-text", label: "9. Others" },
-        { name: "meds", label: "Current medications", type: "input" },
-        { name: "conditions", label: "Concurrent medical conditions", type: "checkbox-group", options: [
-          { label: "Diabetes", value: "Diabetes" },
-          { label: "Hypertension", value: "Hypertension" },
-          { label: "Dyslipidemia", value: "Dyslipidemia" },
-          { label: "Others", value: "Others" }
-        ]},
-        { name: "conditions_details", label: "Specify", type: "textarea", showIf: { field: "conditions", includes: "Others" } },
-        { name: "improved_meds", label: "Which medicine improved symptoms?", type: "input" },
+        // { type: "info-text", label: "9. Others" },
+        // { name: "meds", label: "Current medications", type: "input" },
+        // { name: "conditions", label: "Concurrent medical conditions", type: "checkbox-group", options: [
+        //   { label: "Diabetes", value: "Diabetes" },
+        //   { label: "Hypertension", value: "Hypertension" },
+        //   { label: "Dyslipidemia", value: "Dyslipidemia" },
+        //   { label: "Others", value: "Others" }
+        // ]},
+        // { name: "conditions_details", label: "Specify", type: "input", showIf: { field: "conditions", includes: "Others" } },
+        // { name: "improved_meds", label: "Which medicine improved symptoms?", type: "input" },
 
         // Scale selectors
         { type: "subheading", label: "Scales" },
@@ -440,9 +507,9 @@ const MVVSS_OPTIONS = [
             ? [{ label: "No (0)", value: 0 }, { label: "Yes (1)", value: 1 }]
             : [{ label: "No", value: 0 }, { label: "Yes", value: 1 }]
         },
-        { name: "vhq_26a", label: "Did you give up work because of vertigo?",      type: "radio", options: ["No", "Yes"], showIf: { field: "vhq_work", equals: 0 } },
-        { name: "vhq_26b", label: "Have you changed your work because of vertigo?", type: "radio", options: ["No", "Yes"], showIf: { field: "vhq_work", equals: 1 } },
-        { name: "vhq_26c", label: "Does vertigo cause difficulty at work?",         type: "radio", options: ["No", "Yes"], showIf: { field: "vhq_work", equals: 1 } }
+        { name: "vhq_26a", label: "26.a Did you give up work because of vertigo?",      type: "radio", options: ["No", "Yes"], showIf: { field: "vhq_work", equals: 0 } },
+        { name: "vhq_26b", label: "26.b Have you changed your work because of vertigo?", type: "radio", options: ["No", "Yes"], showIf: { field: "vhq_work", equals: 1 } },
+        { name: "vhq_26c", label: "26.c Does vertigo cause difficulty at work?",         type: "radio", options: ["No", "Yes"], showIf: { field: "vhq_work", equals: 1 } }
       ]
     }]
   };

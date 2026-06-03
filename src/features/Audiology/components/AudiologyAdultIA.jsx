@@ -58,31 +58,31 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   const [bookedEquipmentIds, setBookedEquipmentIds] = useState([]);
 
   /* --------- Patient History State --------- */
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history: patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-  });
+  // const [patientHistory, setPatientHistory] = useState({
+  //   past_medical_history: patient?.medical_history || "",
+  //   past_family_history: patient?.family_medical_history || "",
+  //   alerts_and_allergies: patient?.alerts_and_allergies_history || ""
+  // });
 
-  useEffect(() => {
-    setPatientHistory({
-      past_medical_history: patient?.medical_history || "",
-      past_family_history: patient?.family_medical_history || "",
-      alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-    });
-  }, [patient?.id]);
+  // useEffect(() => {
+  //   setPatientHistory({
+  //     past_medical_history: patient?.medical_history || "",
+  //     past_family_history: patient?.family_medical_history || "",
+  //     alerts_and_allergies: patient?.alerts_and_allergies_history || ""
+  //   });
+  // }, [patient?.id]);
 
-  useEffect(() => {
-    if (!patient) return;
-    const updated = {
-      ...patient,
-      medical_history: patientHistory.past_medical_history,
-      family_medical_history: patientHistory.past_family_history,
-      alerts_and_allergies_history: patientHistory.alerts_and_allergies
-    };
-    localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
-    onUpdatePatient?.(updated);
-  }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
+  // useEffect(() => {
+  //   if (!patient) return;
+  //   const updated = {
+  //     ...patient,
+  //     medical_history: patientHistory.past_medical_history,
+  //     family_medical_history: patientHistory.past_family_history,
+  //     alerts_and_allergies_history: patientHistory.alerts_and_allergies
+  //   };
+  //   localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+  //   onUpdatePatient?.(updated);
+  // }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
 
   const today = new Date();
   const formatDate = (dateStr) => {
@@ -974,7 +974,23 @@ const SUBJECTIVE_SCHEMA = {
     { type: "save", label: "Save" }
   ],
   sections: [
+     {
+   
+    fields: [
+      {
+        type: "input",
+        name: "chief_complaints",
+        label: "Chief Complaints"
+      },
+      {
+        type: "input",
+        name: "hpi",
+        label: "History of Present Illness (HPI)"
+      }
+    ]
+  },
     /* ===================== A. OTOLOGY ===================== */
+    
     {
       title: "A. Otology",
       fields: [
@@ -990,7 +1006,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "ear_infection_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "ear_infection", 
             oneOf: ["right", "left", "bilateral","none"] 
@@ -1009,7 +1025,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "ear_fullness_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "ear_fullness", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1027,7 +1043,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "head_neck_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: {
             field: "head_neck_injury",
             equals: "1"
@@ -1045,7 +1061,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "ear_pain_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "ear_pain", 
             oneOf: ["right", "left", "bilateral","none"] 
@@ -1064,7 +1080,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "otorrhea_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "otorrhea", 
             oneOf: ["right", "left", "bilateral","none"] 
@@ -1074,7 +1090,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "otology_others",
           label: "Others",
-          type: "textarea"
+          type: "input"
         }
       ]
     },
@@ -1098,7 +1114,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "tinnitus_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "tinnitus", 
             oneOf: ["right", "left", "bilateral", "in_head"] 
@@ -1117,7 +1133,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "loudness_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "loudness_discomfort", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1136,7 +1152,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "hearing_difficulties_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "hearing_difficulties", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1154,7 +1170,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "better_hearing_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "better_hearing", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1175,7 +1191,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "communication_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "communication_difficulties", 
             oneOf: ["in_quiet", "in_noise", "group", "telephone"] 
@@ -1195,26 +1211,26 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "exposure_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "exposure_loud_sounds", 
             oneOf: ["occupational", "recreational"] 
           }
         },
 
-        {
-          name: "family_social_from_registration",
-          label: "Family History",
-          type: "radio",
-          options: [
-            { label: "Yes", value: "1"},
-            { label: "No", value: "0"}
-          ]
-        },
+        // {
+        //   name: "family_social_from_registration",
+        //   label: "Family History",
+        //   type: "radio",
+        //   options: [
+        //     { label: "Yes", value: "1"},
+        //     { label: "No", value: "0"}
+        //   ]
+        // },
         {
           name: "family_history_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: {
             field: "family_social_from_registration",
             equals: "1"
@@ -1236,7 +1252,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "psychosocial_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { field: "psychosocial_impact", oneOf: ["1", "2", "3", "4"] }
         },
 
@@ -1254,7 +1270,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "environmental_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "environmental_context", 
             oneOf: ["1", "2", "3"] 
@@ -1273,13 +1289,13 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "amplification_notes",
           label: "",
-          type: "textarea",
+          type: "input",
           showIf: { field: "presence_amplification", equals: "1" }
         },
         {
           name: "others",
           label: "Others",
-          type: "textarea"
+          type: "input"
         },
         {
           name: "hearing_assessments_launcher",
@@ -1313,14 +1329,14 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "vestibular_notes",
           label: "",
-          type: "textarea",
+          type: "input",
           showIf: { field: "vestibular_symptoms", oneOf: ["1", "2", "3", "4"] }
         },
 
         {
           name: "duration_frequency",
           label: "Duration / Frequency",
-          type: "textarea"
+          type: "input"
         },
 
         {
@@ -1338,20 +1354,20 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "trigger_notes",
           label: "",
-          type: "textarea",
+          type: "input",
           showIf: { field: "triggers", oneOf: ["1", "2", "3", "4"] }
         },
 
         {
           name: "falls_history",
           label: "Fall History",
-          type: "textarea"
+          type: "input"
         },
 
         {
           name: "vestibular_others",
           label: "Others",
-          type: "textarea"
+          type: "input"
         },
         {
           name: "vestibular_assessments_launcher",
@@ -1516,12 +1532,12 @@ const OBJECTIVE_SCHEMA = {
                 {
                   name: "impression_r",
                   label: "Impression – Right Ear",
-                  type: "textarea"
+                  type: "input"
                 },
                 {
                   name: "impression_l",
                   label: "Impression – Left Ear",
-                  type: "textarea"
+                  type: "input"
                 }
               ]
             },
@@ -1588,7 +1604,7 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "problem_list",
         label: "Problem Listing",
-        type: "textarea"
+        type: "input"
       },
       {
         name: "clinical_impression",
@@ -1605,6 +1621,8 @@ const OBJECTIVE_SCHEMA = {
             mode="icd-icf"
           />
         )
+
+
       }
     ]
   };
@@ -1643,7 +1661,7 @@ const OBJECTIVE_SCHEMA = {
         {
           name: "intervention_plan_details",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { field: "intervention_plan", includes: "other" }
       },
       {
@@ -1698,7 +1716,7 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "plan_options_details",
         label: "Specify",
-        type: "textarea",
+        type: "input",
         showIf: { field: "plan_options", includes: "other" }
       },
       {
@@ -1749,7 +1767,7 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "plan_special_test_details",
         label: "Special Test Details",
-        type: "textarea",
+        type: "input",
         placeholder: "Enter special test details...",
         showIf: { field: "plan_options", includes: "special_test" }
       },
@@ -1901,8 +1919,8 @@ function AudiometryFrequencyTable({ value = {}, onChange }) {
   {/* ===== PATIENT INFORMATION CARD ===== */}
   <PatientCard
     patient={patient}
-    patientHistory={patientHistory}
-    setPatientHistory={setPatientHistory}
+    // patientHistory={patientHistory}
+    // setPatientHistory={setPatientHistory}
   />
 
   {/* ===== TABS ===== */}

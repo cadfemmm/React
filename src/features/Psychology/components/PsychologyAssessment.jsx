@@ -241,6 +241,7 @@ export default function PsychologyAssessment({ patient, onSubmit, onBack,mode })
   //     />
   //   );
   // }
+
 //   if (mode === "progress") {
 //   const age = Number(patient?.age || 0);
 
@@ -263,6 +264,31 @@ export default function PsychologyAssessment({ patient, onSubmit, onBack,mode })
 //     />
 //   );
 // }
+
+  if (mode === "followup") {
+  const age = Number(patient?.age || 0);
+
+  // Age below 20 → Pediatric Progress
+  if (age < 20) {
+    return (
+      <PediatricPsychologyAssessment
+        patient={patient}
+        onSubmit={onSubmit}
+        onBack={onBack}
+      />
+    );
+  }
+
+  // Age 20 and above → Adult Progress
+  return (
+    <PsychologyFollowUpAssessment
+      patient={patient}
+      onSubmit={onSubmit}
+      onBack={onBack}
+    />
+  );
+}
+
   //  if (mode === "progress") {
   //   return (
   //     <PsychologyProgress
