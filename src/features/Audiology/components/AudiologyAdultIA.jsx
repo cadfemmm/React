@@ -12,6 +12,7 @@ import PatientCard from "../../../shared/cards/PatientCard";
 import ICDICFICHISection from "./ICDICFICHISection";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
 import api from "../../../shared/api/apiClient";
+import { BookAppointmentModal } from "../../book-appointment-modal/BookAppointmentModal"
 /* ===================== OPTIONS ===================== */
 
 const INTACT_IMPAIRED = [
@@ -56,7 +57,15 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [bookedEquipmentIds, setBookedEquipmentIds] = useState([]);
-
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const bookingRow = {
+    id: patient?.id,
+    patient: patient?.full_name || patient?.name || "",
+    refId: patient?.referral_id || "",
+    department: "Audiology",
+    // disciplineCode: "AUD",
+    priority: "Medium",
+  };
   /* --------- Patient History State --------- */
   const [patientHistory, setPatientHistory] = useState({
     past_medical_history: patient?.medical_history || "",
@@ -123,27 +132,49 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   }, [storageKey, patient]);
 
   /* ---------------- EQUIPMENT LIST FROM API ---------------- */
+  const departmentId = "5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98";
   useEffect(() => {
     const fetchEquipmentList = async () => {
       try {
-        const response = await api.get(API_URL.EQUIPMENT_LIST + "?search=audiology");
-        const result = response.data;
-        const options =
-          result?.data?.map(item => ({
-            label: item.equipment_name,
-            value: item.id,
-            status: item.status,
-            equipment_code: item.equipment_code,
-            department_name: item.department_name,
-            raw: item,
-          })) || [];
+        let page = 1;
+        let hasNext = true;
+        let allEquipment = [];
+
+        while (hasNext) {
+          const response = await api.get(
+            `${API_URL.EQUIPMENT_LIST}?department_id=${departmentId}&page=${page}`
+          );
+
+          allEquipment = [
+            ...allEquipment,
+            ...(response?.data?.data || [])
+          ];
+
+          hasNext = response?.data?.meta?.has_next;
+          page++;
+        }
+
+        const options = allEquipment.map(item => ({
+          label: item.equipment_name,
+          value: item.id,
+          status: item.status,
+          equipment_code: item.equipment_code,
+          department_name: item.department_name,
+          raw: item,
+        }));
+
         setEquipmentOptions(options);
+
+        console.log("Total Equipment:", options.length);
       } catch (error) {
         console.error("Equipment list fetch failed:", error);
       }
     };
-    fetchEquipmentList();
-  }, []);
+
+    if (departmentId) {
+      fetchEquipmentList();
+    }
+  }, [departmentId]);
 
   // Extract tympanometry values from OCR text
   const extractTympanometryValues = (text) => {
@@ -1759,6 +1790,29 @@ const OBJECTIVE_SCHEMA = {
         type: "date"
       },
       {
+        name: "book_appointment_btn",
+        type: "custom",
+        render: () => (
+          <div style={{ marginTop: "8px" }}>
+          <button
+            type="button"
+            onClick={() => setAppointmentModalOpen(true)}
+            style={{
+              backgroundColor: "#0d6efd",
+              color: "#fff",
+              border: "1px solid #0d6efd",
+              borderRadius: "6px",
+              padding: "8px 16px",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            Book Appointment
+          </button>
+          </div>
+        )
+      },
+      {
         name: "plan_required_referral",
         label: "Required Referral",
         type: "radio",
@@ -1980,6 +2034,20 @@ function AudiometryFrequencyTable({ value = {}, onChange }) {
       setBookedEquipmentIds(prev => [...prev, equipmentId]);
     }}
   />
+      <BookAppointmentModal
+      open={appointmentModalOpen}
+      row={bookingRow}
+      initialMode="doctor"
+      onClose={() => setAppointmentModalOpen(false)}
+      onConfirm={(data) => {
+        console.log("Booking confirmed", data);
+        setAppointmentModalOpen(false);
+      }}
+      onRequestOverride={() => {}}
+      onAddWaitlist={() => {}}
+      onConflict={() => {}}
+      onCancel={() => setAppointmentModalOpen(false)}
+    />
 </div>
 
   );
