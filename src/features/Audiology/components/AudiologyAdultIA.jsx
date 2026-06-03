@@ -1609,7 +1609,6 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "clinical_impression",
         label: "Clinical Impression",
-<<<<<<< Updated upstream
         type: "textarea"
       },
       {
@@ -1622,9 +1621,8 @@ const OBJECTIVE_SCHEMA = {
             mode="icd-icf"
           />
         )
-=======
-        type: "input"
->>>>>>> Stashed changes
+
+
       }
     ]
   };
