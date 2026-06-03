@@ -1274,7 +1274,6 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           {
             type: "assessment-launcher",
             name: "spasticity_inline",
-            autoOpen: true,
             hideRemarks: true,
             options: [
               {
@@ -1295,13 +1294,13 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
         fields: [
           { type: "subheading", label: "Vital Signs" },
           { type: "row", fields: [
-            { name: "obj_body_temp", label: "Body Temperature (Â°C)", type: "input", placeholder: "Â°C" },
+            { name: "obj_body_temp", label: "Body Temperature (°C)", type: "input", placeholder: "°C" },
             { name: "obj_heart_rate", label: "Heart Rate (/min)", type: "input", placeholder: "/min" },
             { name: "obj_resp_rate", label: "Respiratory Rate (/min)", type: "input", placeholder: "/min" }
           ]},
           { type: "row", fields: [
             { name: "obj_bp", label: "Blood Pressure (mmHg)", type: "input", placeholder: "e.g. 120/80" },
-            { name: "obj_spo2", label: "Oxygen Saturation (SpOâ‚‚) (%)", type: "input", placeholder: "%" }
+            { name: "obj_spo2", label: "Oxygen Saturation (SpO2) (%)", type: "input", placeholder: "%" }
           ]},
           {
             name: "objective_pain_assessment_form",
@@ -1678,7 +1677,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
             type: "radio",
             options: [
               { label: "Room air (RA)", value: "ra" },
-              { label: "Oâ‚‚", value: "o2" }
+              { label: "O2", value: "o2" }
             ]
           },
           {
