@@ -73,9 +73,6 @@ export default function AudiologyPatients({ onBack }) {
 
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentView) {
-    const Component = getAssessmentComponent(selectedPatient);
-    const isAdult   = Component === AudiologyDepartmentAdultPage;
-
     // progress — dedicated form for both adult and pediatric
     if (assessmentView === "progress") {
       return (
@@ -87,7 +84,7 @@ export default function AudiologyPatients({ onBack }) {
       );
     }
 
-    // group — coming soon
+    // group — dedicated form
     if (assessmentView === "group") {
       return (
         <AudiologyGroupAssessmentForm
@@ -98,6 +95,8 @@ export default function AudiologyPatients({ onBack }) {
       );
     }
 
+    // initial and followup use age-based components
+    const Component = getAssessmentComponent(selectedPatient);
     return (
       <Component
         patient={selectedPatient}

@@ -9,7 +9,7 @@ import { VestibularAdvancedForm, VestibularAdvancedFormObj } from "../vestibular
 import { Hearingaidtrial } from "../hearingaidtrial";
 import { IndustrialAudiometry } from "../industrialaudiometry";
 import PatientCard from "../../../shared/cards/PatientCard";
-import ICDICFICHISection from "./ICDICFICHISection";
+import AudiologyICDSection from "./AudiologyICDSection";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
 import api from "../../../shared/api/apiClient";
 /* ===================== OPTIONS ===================== */
@@ -1615,7 +1615,7 @@ const OBJECTIVE_SCHEMA = {
         name: "icd_icf_ichi_data",
         type: "custom",
         render: ({ values, onChange }) => (
-          <ICDICFICHISection 
+          <AudiologyICDSection 
             values={values}
             onChange={onChange}
             mode="icd-icf"
@@ -1796,7 +1796,7 @@ const OBJECTIVE_SCHEMA = {
         name: "icd_icf_ichi_data",
         type: "custom",
         render: ({ values, onChange }) => (
-          <ICDICFICHISection 
+          <AudiologyICDSection 
             values={values}
             onChange={onChange}
             mode="plan"
