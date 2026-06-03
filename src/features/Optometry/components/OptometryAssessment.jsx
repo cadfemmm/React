@@ -13,6 +13,7 @@ import ConfirmModal from "../../../shared/ui/ConfirmModal";
 import Toast from "../../../shared/ui/Toast";
 import ReferralModal from "../../../shared/ui/ReferralModal";
 import PatientCard from "../../../shared/cards/PatientCard";
+import OptometryICDICFICHISection from './OptometryICDICFICHISection';
 
 // ── Lazy-loaded assessment components ──────────────────────────────────────
 const BinocularVisionAssessment   = lazy(() => import("../BinocularVisionAssessment"));
@@ -320,14 +321,15 @@ export default function OptometryAssessment({
   initialSessionId     = null,   // pre-seeded when opened via direct link
   initialAssessmentIds = [],     // pre-seeded assessment_ids array
 }) {
+  console.log("🔥 OptometryAssessment component started!", { patient: patient?.name, readOnly });
   const [values,        setValues]        = useState(() => {
     const initial = { subjective: {}, objective: {}, assessment: {}, plan: {} };
     return readOnly && savedValues ? savedValues : initial;
   });
   const [submitted,     setSubmitted]     = useState(readOnly);
   const [activeTab,     setActiveTab]     = useState("subjective");
-  const [forms,         setForms]         = useState([]);  // kept for future API integration
-  const [formsLoading,  setFormsLoading]  = useState(false);
+  const [forms,         setForms]         = useState([]);
+  const [formsLoading,  setFormsLoading]  = useState(true);  // Start as true to load from API
   const [formsError,    setFormsError]    = useState(false);
   const [showConfirm,   setShowConfirm]   = useState(false);
   const [isDirty,       setIsDirty]       = useState(false);
@@ -1272,6 +1274,17 @@ export default function OptometryAssessment({
               field: "functional_vision_status",
               equals: "abnormal"
             }
+          },
+          {
+            type: "custom",
+            name: "icd_icf_ichi_section",
+            render: ({ values, onChange }) => (
+              <OptometryICDICFICHISection 
+                values={values} 
+                onChange={onChange} 
+                mode="icd-icf" 
+              />
+            )
           }
         ]
       }
@@ -1292,6 +1305,17 @@ export default function OptometryAssessment({
             type: "textarea",
             name: "intervention_plan",
             label: "Intervention Plan"
+          },
+          {
+            type: "custom",
+            name: "ichi_section",
+            render: ({ values, onChange }) => (
+              <OptometryICDICFICHISection 
+                values={values} 
+                onChange={onChange} 
+                mode="plan" 
+              />
+            )
           },
           {
             type: "radio",
@@ -1367,12 +1391,112 @@ export default function OptometryAssessment({
     ]
   };
 
-  const schemaMap = {
-    subjective: SUBJECTIVE_SCHEMA,
-    objective: OBJECTIVE_SCHEMA,
-    assessment: ASSESSMENT_SCHEMA,
-    plan: PLAN_SCHEMA
-  };
+  // Load forms from API
+  useEffect(() => {
+    const loadForms = async () => {
+      console.log("Starting to load forms for Optometry...");
+      setFormsLoading(true);
+      setFormsError(false);
+      try {
+        const endpoint = API_URL.fetchTemplate("Optometry");
+        console.log("Forms API endpoint:", endpoint);
+        const res = await api.get(endpoint);
+        const apiforms = res.data.results || [];
+        console.log("Loaded Optometry forms from API:", apiforms);
+        console.log("Number of forms:", apiforms.length);
+        setForms(apiforms);
+      } catch (e) {
+        console.error("Failed to load forms:", e);
+        setFormsError(true);
+        // Fallback to hardcoded schemas if API fails
+        setForms([]);
+      } finally {
+        setFormsLoading(false);
+      }
+    };
+    loadForms();
+  }, []);
+
+  // Create schema map from API forms + add our custom ICD component
+  const schemaMap = useMemo(() => {
+    console.log("Creating schemaMap, forms.length:", forms.length);
+    console.log("Forms data:", forms);
+    
+    if (forms.length > 0) {
+      // Use API forms
+      const map = {};
+      forms.forEach(form => {
+        const key = (form.assessment_type || form.name || "").toLowerCase();
+        console.log("Processing form:", form.name, "key:", key, "TAB_ORDER includes:", TAB_ORDER.includes(key));
+        
+        if (TAB_ORDER.includes(key)) {
+          let schema = { ...form.body, actions: key === "plan" ? ACTIONS_PLAN_ONLY : ACTIONS_WITH_NEXT };
+          
+          // Add our custom ICD component to Assessment and Plan tabs
+          if (key === "assessment") {
+            console.log("Adding ICD component to assessment tab");
+            // Add ICD component to assessment tab
+            if (schema.sections && schema.sections[0] && schema.sections[0].fields) {
+              schema.sections[0].fields.push({
+                type: "custom",
+                name: "icd_icf_ichi_section",
+                render: ({ values, onChange }) => {
+                  console.log("Rendering ICD component in Assessment tab");
+                  return (
+                    <OptometryICDICFICHISection 
+                      values={values} 
+                      onChange={onChange} 
+                      mode="icd-icf" 
+                    />
+                  );
+                }
+              });
+              console.log("Added ICD component to assessment, fields count:", schema.sections[0].fields.length);
+            }
+          } else if (key === "plan") {
+            console.log("Adding ICHI component to plan tab");
+            // Add ICHI component to plan tab
+            if (schema.sections && schema.sections[0] && schema.sections[0].fields) {
+              // Insert after intervention_plan field
+              const fields = schema.sections[0].fields;
+              const interventionIndex = fields.findIndex(f => f.name === "intervention_plan");
+              console.log("intervention_plan index:", interventionIndex);
+              if (interventionIndex !== -1) {
+                fields.splice(interventionIndex + 1, 0, {
+                  type: "custom",
+                  name: "ichi_section",
+                  render: ({ values, onChange }) => {
+                    console.log("Rendering ICHI component in Plan tab");
+                    return (
+                      <OptometryICDICFICHISection 
+                        values={values} 
+                        onChange={onChange} 
+                        mode="plan" 
+                      />
+                    );
+                  }
+                });
+                console.log("Added ICHI component to plan, fields count:", fields.length);
+              }
+            }
+          }
+          
+          map[key] = schema;
+        }
+      });
+      console.log("Final schemaMap from API:", Object.keys(map));
+      return map;
+    } else {
+      // Fallback to hardcoded schemas if API fails
+      console.log("Using hardcoded schemas as fallback");
+      return {
+        subjective: SUBJECTIVE_SCHEMA,
+        objective: OBJECTIVE_SCHEMA,
+        assessment: ASSESSMENT_SCHEMA,
+        plan: PLAN_SCHEMA
+      };
+    }
+  }, [forms]);
 
   useEffect(() => {
     if (!isDirty || readOnly) return;
@@ -1530,14 +1654,14 @@ export default function OptometryAssessment({
     }
   }, [patient]);
 
-  // const retryForms = useCallback(() => {
-  //   setFormsError(false);
-  //   setFormsLoading(true);
-  //   api.get(API_URL.FORM + "department/optometry/")
-  //     .then(res => setForms(res.data.results))
-  //     .catch(() => setFormsError(true))
-  //     .finally(() => setFormsLoading(false));
-  // }, []);
+  const retryForms = useCallback(() => {
+    setFormsError(false);
+    setFormsLoading(true);
+    api.get(API_URL.fetchTemplate("Optometry"))
+      .then(res => setForms(res.data.results || []))
+      .catch(() => setFormsError(true))
+      .finally(() => setFormsLoading(false));
+  }, []);
 
   const activeTabIdx = TAB_ORDER.indexOf(activeTab);
 
@@ -1652,7 +1776,7 @@ export default function OptometryAssessment({
                   icon="⚠️"
                   title="Failed to load form"
                   message="Could not fetch the assessment form. Please check your connection and try again."
-                  // action={{ label: "Retry", onClick: retryForms }}
+                  action={{ label: "Retry", onClick: retryForms }}
                 />
               </div>
             ) : !schemaMap[activeTab] ? (
@@ -1664,40 +1788,46 @@ export default function OptometryAssessment({
                 />
               </div>
             ) : (
-              <CommonFormBuilder
-                schema={schemaMap[activeTab]}
-                values={values[activeTab] || {}}
-                onChange={onChange}
-                submitted={submitted}
-                onAction={handleAction}
-                assessmentRegistry={OPTOMETRY_ASSESSMENT_REGISTRY}
-                readOnly={readOnly}
-              >
-                {!readOnly && activeTab !== "plan" && (
-                  <div style={S.actionRow}>
-                    <button
-                      style={S.nextBtn}
-                      onMouseEnter={e => e.currentTarget.style.background = "#1a6fc4"}
-                      onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
-                      onClick={() => handleAction("next")}
-                    >
-                      Next: {TAB_META[TAB_ORDER[activeTabIdx + 1]]?.label} →
-                    </button>
-                  </div>
-                )}
-                {!readOnly && activeTab === "plan" && (
-                  <div style={S.actionRow}>
-                    <button
-                      style={S.submitBtn}
-                      onMouseEnter={e => e.currentTarget.style.background = "#1d4ed8"}
-                      onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
-                      onClick={() => {handleAction('next'); setShowConfirm(true)}}
-                    >
-                      {isFollowup ? "Submit Follow-up Visit" : "Submit Assessment"}
-                    </button>
-                  </div>
-                )}
-              </CommonFormBuilder>
+              (() => {
+                console.log(`Rendering ${activeTab} tab with schema:`, schemaMap[activeTab]);
+                console.log(`${activeTab} fields:`, schemaMap[activeTab]?.sections?.[0]?.fields?.map(f => ({ type: f.type, name: f.name })));
+                return (
+                  <CommonFormBuilder
+                    schema={schemaMap[activeTab]}
+                    values={values[activeTab] || {}}
+                    onChange={onChange}
+                    submitted={submitted}
+                    onAction={handleAction}
+                    assessmentRegistry={OPTOMETRY_ASSESSMENT_REGISTRY}
+                    readOnly={readOnly}
+                  >
+                    {!readOnly && activeTab !== "plan" && (
+                      <div style={S.actionRow}>
+                        <button
+                          style={S.nextBtn}
+                          onMouseEnter={e => e.currentTarget.style.background = "#1a6fc4"}
+                          onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
+                          onClick={() => handleAction("next")}
+                        >
+                          Next: {TAB_META[TAB_ORDER[activeTabIdx + 1]]?.label} →
+                        </button>
+                      </div>
+                    )}
+                    {!readOnly && activeTab === "plan" && (
+                      <div style={S.actionRow}>
+                        <button
+                          style={S.submitBtn}
+                          onMouseEnter={e => e.currentTarget.style.background = "#1d4ed8"}
+                          onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
+                          onClick={() => {handleAction('next'); setShowConfirm(true)}}
+                        >
+                          {isFollowup ? "Submit Follow-up Visit" : "Submit Assessment"}
+                        </button>
+                      </div>
+                    )}
+                  </CommonFormBuilder>
+                );
+              })()
             )}
           </div>
         </div>

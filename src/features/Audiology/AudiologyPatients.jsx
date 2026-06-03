@@ -47,7 +47,7 @@ export default function AudiologyPatients({ onBack }) {
         const res = await api.get(url);
         setPatients(res.data.results || []);
       } catch {
-        setPatients([]);
+       setPatients([]);
       } finally {
         setLoading(false);
       }

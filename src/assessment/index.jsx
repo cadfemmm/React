@@ -23,6 +23,10 @@ import actions from "../schema/actions.js";
 import forms from "./forms.js";
 import session from "./session.js";
 
+// ICD Components
+import ICDICFICHISection from "../features/Audiology/components/ICDICFICHISection";
+import OptometryICDICFICHISection from "../features/Optometry/components/OptometryICDICFICHISection";
+
 // ── Context ────────────────────────────────────────────────────────────────
 // Carries patient + the questionaire FormData ID map + save helper
 const PatientContext = createContext(null);
@@ -70,21 +74,76 @@ export default function AssessmentLoader({ patient, department }) {
     try {
       const map = {};
       const subAssessment = {};
-      const data = await forms.fetch(department);
+      const data = await forms.fetch(department);      
       if (!data || data.length === 0) {
         setError(true);
         return;
       }
       data.forEach((template) => {
-        const key = template.assessment_type?.toLowerCase();
+        const key = template.assessment_type?.toLowerCase();        
         // MAIN ASSESSMENT
         if (TABS.includes(key)) {
-          map[key] = {
+          let processedTemplate = {
             ...template.body,
             id: template.id,
             name: template.name,
             actions: actions.ACTIONS_BUTTON,
           };
+          
+          // ✨ ADD ICD COMPONENTS FOR SPECIFIC DEPARTMENTS AND TABS
+          if ((department === "Audiology" || department === "Optometry") && (key === "assessment" || key === "plan")) {
+            
+            // Choose the right component based on department
+            const ICDComponent = department === "Optometry" ? OptometryICDICFICHISection : ICDICFICHISection;
+            
+            if (processedTemplate.sections && processedTemplate.sections[0] && processedTemplate.sections[0].fields) {
+              if (key === "assessment") {
+                // Add ICD selection + ICF display to Assessment tab
+                processedTemplate.sections[0].fields.push({
+                  type: "custom",
+                  name: "icd_icf_ichi_section",
+                  render: ({ values, onChange }) => {
+                    return (
+                      <ICDComponent 
+                        values={values} 
+                        onChange={onChange} 
+                        mode="icd-icf" 
+                      />
+                    );
+                  }
+                });
+              } else if (key === "plan") {
+                // Add ICHI display to Plan tab (insert after intervention_plan if it exists)
+                const fields = processedTemplate.sections[0].fields;
+                
+                const interventionIndex = fields.findIndex(f => f.name === "intervention_plan");
+                
+                const ichiComponent = {
+                  type: "custom",
+                  name: "ichi_section", 
+                  render: ({ values, onChange }) => {
+                    return (
+                      <ICDComponent 
+                        values={values} 
+                        onChange={onChange} 
+                        mode="plan" 
+                      />
+                    );
+                  }
+                };
+                
+                if (interventionIndex !== -1) {
+                  // Insert after intervention_plan
+                  fields.splice(interventionIndex + 1, 0, ichiComponent);
+                } else {
+                  // If no intervention_plan field, add at the end
+                  fields.push(ichiComponent);
+                }
+              }
+            }
+          }
+          
+          map[key] = processedTemplate;
         }
         // SUB ASSESSMENTS
         if (template?.sub_assessment?.length) {
@@ -369,7 +428,7 @@ export default function AssessmentLoader({ patient, department }) {
 
   // OnChange handler
   const onChange = useCallback(
-    async (name, value) => {
+    async (name, value) => {      
       // =========================
       // SUB ASSESSMENT HANDLING
       // =========================
@@ -432,6 +491,27 @@ export default function AssessmentLoader({ patient, department }) {
           });
         }
       }
+      
+      // =========================
+      // ICD/ICF/ICHI DATA PERSISTENCE
+      // =========================
+      // When ICD data is updated, we need to persist it across ALL tabs
+      // so it's available in the Plan tab
+      if (name === "selected_icds" || name === "icf_data" || name === "ichi_data") {
+        setAssessmentsValues((v) => {
+          const newValues = { ...v };
+          // Update ALL tabs with the ICD-related data to ensure persistence
+          ["subjective", "objective", "assessment", "plan"].forEach(tab => {
+            newValues[tab] = {
+              ...newValues[tab],
+              [name]: value
+            };
+          });
+          return newValues;
+        });
+        return;
+      }
+      
       // =========================
       // MAIN ASSESSMENT VALUES
       // =========================
@@ -657,57 +737,62 @@ export default function AssessmentLoader({ patient, department }) {
                 />
               </div>
             ) : (
-              <CommonFormBuilder
-                readOnly={false}
-                onChange={onChange}
-                submitted={isSubmitted}
-                onAction={handleAction}
-                schema={templates[activeTab]}
-                values={assessmentsValues[activeTab] || {}}
-                assessmentRegistry={Object.values(
-                  subAssessmentTemplate[activeTab] || {},
-                )}
-                parentSections={templates?.[activeTab]?.sections || []}
-              >
-                <div style={S.actionRow}>
-                  <button
-                    style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "#2563eb")
-                    }
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        activeTab === "plan" ? "#1d4ed8" : "#1a6fc4")
-                    }
-                    onClick={() => {
-                      // FINAL STEP
-                      if (activeTab === "plan") {
-                        setIsConfirmModal(true);
-
-                        return;
-                      }
-
-                      // NORMAL NEXT
-                      handleAction("next");
-                    }}
+              (() => {
+                
+                return (
+                  <CommonFormBuilder
+                    readOnly={false}
+                    onChange={onChange}
+                    submitted={isSubmitted}
+                    onAction={handleAction}
+                    schema={templates[activeTab]}
+                    values={assessmentsValues[activeTab] || {}}
+                    assessmentRegistry={Object.values(
+                      subAssessmentTemplate[activeTab] || {},
+                    )}
+                    parentSections={templates?.[activeTab]?.sections || []}
                   >
-                    {activeTab === "plan"
-                      ? "Submit Assessment"
-                      : (() => {
-                          const currentIndex = TABS.indexOf(activeTab);
+                    <div style={S.actionRow}>
+                      <button
+                        style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "#2563eb")
+                        }
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            activeTab === "plan" ? "#1d4ed8" : "#1a6fc4")
+                        }
+                        onClick={() => {
+                          // FINAL STEP
+                          if (activeTab === "plan") {
+                            setIsConfirmModal(true);
 
-                          const nextTab =
-                            currentIndex < TABS.length - 1
-                              ? TABS[currentIndex + 1]
-                              : null;
+                            return;
+                          }
 
-                          return nextTab
-                            ? `Next :${nextTab.charAt(0).toUpperCase() + nextTab.slice(1)} →`
-                            : "Submit";
-                        })()}
-                  </button>
-                </div>
-              </CommonFormBuilder>
+                          // NORMAL NEXT
+                          handleAction("next");
+                        }}
+                      >
+                        {activeTab === "plan"
+                          ? "Submit Assessment"
+                          : (() => {
+                              const currentIndex = TABS.indexOf(activeTab);
+
+                              const nextTab =
+                                currentIndex < TABS.length - 1
+                                  ? TABS[currentIndex + 1]
+                                  : null;
+
+                              return nextTab
+                                ? `Next :${nextTab.charAt(0).toUpperCase() + nextTab.slice(1)} →`
+                                : "Submit";
+                            })()}
+                      </button>
+                    </div>
+                  </CommonFormBuilder>
+                );
+              })()
             )}
           </div>
         </div>

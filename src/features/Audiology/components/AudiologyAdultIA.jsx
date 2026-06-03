@@ -9,6 +9,7 @@ import { VestibularAdvancedForm, VestibularAdvancedFormObj } from "../vestibular
 import { Hearingaidtrial } from "../hearingaidtrial";
 import { IndustrialAudiometry } from "../industrialaudiometry";
 import PatientCard from "../../../shared/cards/PatientCard";
+import ICDICFICHISection from "./ICDICFICHISection";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
 import api from "../../../shared/api/apiClient";
 /* ===================== OPTIONS ===================== */
@@ -1593,6 +1594,17 @@ const OBJECTIVE_SCHEMA = {
         name: "clinical_impression",
         label: "Clinical Impression",
         type: "textarea"
+      },
+      {
+        name: "icd_icf_ichi_data",
+        type: "custom",
+        render: ({ values, onChange }) => (
+          <ICDICFICHISection 
+            values={values}
+            onChange={onChange}
+            mode="icd-icf"
+          />
+        )
       }
     ]
   };
@@ -1761,6 +1773,17 @@ const OBJECTIVE_SCHEMA = {
         type: "input",
         placeholder: "Specify referral details...",
         showIf: { field: "plan_required_referral", equals: "yes" }
+      },
+      {
+        name: "icd_icf_ichi_data",
+        type: "custom",
+        render: ({ values, onChange }) => (
+          <ICDICFICHISection 
+            values={values}
+            onChange={onChange}
+            mode="plan"
+          />
+        )
       }
     ]
   };

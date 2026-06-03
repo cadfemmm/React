@@ -29,6 +29,10 @@ const API_URL = {
     
     // Department
     DEPTARMENT: BASE_API + 'department/',
+    
+    // ICD codes with ICF and ICHI
+    icdByDepartment: (department) =>
+        BASE_API + `codes/icd/${encodeURIComponent(department)}/`,
 
     // Patients apis
     PATIENT: BASE_API + 'patient/',
