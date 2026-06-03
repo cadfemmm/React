@@ -316,7 +316,9 @@ const VisionTherapyAssessmentSchema = {
           name: "cycloplegic_refraction",
           columns: ["Sphere", "Cylinder", "Axis", "Prism", "Visual Acuity"],
           rows: [
-            { label: "Distance", value: "distance" }
+            { label: "Distance", value: "distance" },
+            { label: "ADD", value: "add_ref", merge: 4 },
+            { label: "Near", value: "near_ref" }
           ],
           showIf: {
             field: "binocular_examination_sections",
