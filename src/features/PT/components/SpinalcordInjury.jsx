@@ -1095,13 +1095,6 @@ function EquipmentBookingPopup({
   onBooked
 }) {
   const [equipmentId, setEquipmentId] = useState("");
-  const handleBookEquipment = () => {
-  alert("Equipment booked");
-
-  onBooked?.(equipmentId);
-
-  onClose();
-};
 
   useEffect(() => {
     if (open) {
