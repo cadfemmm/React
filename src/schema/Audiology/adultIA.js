@@ -416,21 +416,21 @@ const SUBJECTIVE = {
             ]
           }
         },
-        {
-          "type": "radio",
-          "name": "family_social_from_registration",
-          "label": "Family History",
-          "options": [
-            {
-              "label": "Yes",
-              "value": "1"
-            },
-            {
-              "label": "No",
-              "value": "0"
-            }
-          ]
-        },
+        // {
+        //   "type": "radio",
+        //   "name": "family_social_from_registration",
+        //   "label": "Family History",
+        //   "options": [
+        //     {
+        //       "label": "Yes",
+        //       "value": "1"
+        //     },
+        //     {
+        //       "label": "No",
+        //       "value": "0"
+        //     }
+        //   ]
+        // },
         {
           "type": "input",
           "name": "family_history_notes",

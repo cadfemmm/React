@@ -135,7 +135,7 @@ export function HyperacusisAdvancedForm({ onBack, mode }) {
           {
             name: "associated_details",
             label: "Specify",
-            type: "textarea",
+            type: "input",
             showIf: { field: "associated", notEmpty: true }
           },
         {
@@ -151,7 +151,7 @@ export function HyperacusisAdvancedForm({ onBack, mode }) {
           {
             name: "exposure_details",
             label: "Specify",
-            type: "textarea",
+            type: "input",
             showIf: { field: "exposure", notEmpty: true }
           },
         { name: "triggers",   label: "Type of sounds that trigger discomfort", type: "input" },

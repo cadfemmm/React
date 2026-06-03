@@ -98,55 +98,13 @@ const SCHEMA = {
           "type": "subheading",
           "label": "Subjective Refraction",
           "showIf": {
-            "field": "binocular_examination_sections",
-            "includes": "general_examination"
-          }
-        },
-        {
-          "type": "refraction-table",
-          "name": "subjective_refraction",
-          "columns": [
-            "Sphere",
-            "Cylinder",
-            "Axis",
-            "Prism",
-            "Visual Acuity"
-          ],
-          "extraColumns": [
-            "Pupil Distance",
-            "Pupil Height"
-          ],
-          "rows": [
-            {
-              "label": "Distance",
-              "value": "distance"
-            },
-            {
-              "label": "ADD",
-              "value": "add",
-              "merge": 4
-            },
-            {
-              "label": "Near",
-              "value": "near"
-            }
-          ],
-          "showIf": {
-            "field": "binocular_examination_sections",
-            "includes": "general_examination"
-          }
-        },
-        {
-          "type": "subheading",
-          "label": "Final Prescription",
-          "showIf": {
             "field": "refraction_sections",
-            "includes": "final_prescription"
+            "includes": "subjective_refraction"
           }
         },
-        {
+          {
           "type": "refraction-col",
-          "name": "final_refraction",
+          "name": "subjective_refraction",
           "rows": [
             {
               "label": "Distance",
@@ -190,7 +148,107 @@ const SCHEMA = {
                 "Height"
               ]
             }
-          ]
+          ],
+          showIf: {
+            field: "refraction_sections",
+            includes: "subjective_refraction"
+          }
+
+        },
+        // {
+        //   "type": "refraction-col",
+        //   "name": "subjective_refraction",
+        //   "columns": [
+        //     "Sphere",
+        //     "Cylinder",
+        //     "Axis",
+        //     "Prism",
+        //     "Visual Acuity"
+        //   ],
+        //   "extraColumns": [
+        //     "Pupil Distance",
+        //     "Pupil Height"
+        //   ],
+        //   "rows": [
+        //     {
+        //       "label": "Distance",
+        //       "value": "distance"
+        //     },
+        //     {
+        //       "label": "ADD",
+        //       "value": "add",
+        //       "merge": 4
+        //     },
+        //     {
+        //       "label": "Near",
+        //       "value": "near"
+        //     }
+        //   ],
+        //   "showIf": {
+        //     "field": "refraction_sections",
+        //     "includes": "subjective_refraction"
+        //   }
+        // },
+        {
+          "type": "subheading",
+          "label": "Final Prescription",
+          "showIf": {
+            "field": "refraction_sections",
+            "includes": "final_prescription"
+          }
+        },
+        {
+          "type": "refraction-col",
+          "name": "final_prescription",
+          "rows": [
+            {
+              "label": "Distance",
+              "value": "distance"
+            },
+            {
+              "label": "ADD",
+              "value": "add",
+              "merge": 4
+            },
+            {
+              "label": "Near",
+              "value": "near"
+            }
+          ],
+          "groups": [
+            {
+              "label": "Right Eye",
+              "columns": [
+                "Sphere",
+                "Cylinder",
+                "Axis",
+                "Prism",
+                "Acuity"
+              ]
+            },
+            {
+              "label": "Left Eye",
+              "columns": [
+                "Sphere",
+                "Cylinder",
+                "Axis",
+                "Prism",
+                "Acuity"
+              ]
+            },
+            {
+              "label": "Pupil",
+              "columns": [
+                "Distance",
+                "Height"
+              ]
+            }
+          ],
+          showIf: {
+            field: "refraction_sections",
+            includes: "final_prescription"
+          }
+
         },
         {
           "type": "input",

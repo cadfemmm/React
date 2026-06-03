@@ -82,36 +82,33 @@ const RefractionAssessmentSchema = {
             includes: "retinoscopy"
           }
         },
-        {
+       {
           type: "subheading",
           label: "Subjective Refraction",
           showIf: {
-            field: "binocular_examination_sections",
-            includes: "general_examination"
+            field: "refraction_sections",
+            includes: "subjective_refraction"
           }
         },
         {
-          type: "refraction-table",
+          type: "refraction-col",
           name: "subjective_refraction",
-
-          // Eye columns (used for Right & Left)
-          columns: ["Sphere", "Cylinder", "Axis", "Prism", "Visual Acuity"],
-
-          // Extra columns after Left Eye → Pupil
-          extraColumns: ["Pupil Distance", "Pupil Height"],
-
           rows: [
             { label: "Distance", value: "distance" },
-            { label: "ADD", value: "add", merge: 4 },
+            { label: "ADD", value: "add", merge: 4 }, // merges Sphere→Prism inside EACH group
             { label: "Near", value: "near" }
           ],
-
+          groups: [
+            { label: "Right Eye", columns: ["Sphere", "Cylinder", "Axis", "Prism", "Acuity"] },
+            { label: "Left Eye", columns: ["Sphere", "Cylinder", "Axis", "Prism", "Acuity"] },
+            { label: "Pupil", columns: ["Distance", "Height"] }
+          ],
           showIf: {
-            field: "binocular_examination_sections",
-            includes: "general_examination"
-          }
-        },
+            field: "refraction_sections",
+            includes: "subjective_refraction"
+        }
 
+        },
 
         {
           type: "subheading",
@@ -123,7 +120,7 @@ const RefractionAssessmentSchema = {
         },
         {
           type: "refraction-col",
-          name: "final_refraction",
+          name: "final_prescription",
           rows: [
             { label: "Distance", value: "distance" },
             { label: "ADD", value: "add", merge: 4 }, // merges Sphere→Prism inside EACH group
@@ -133,8 +130,14 @@ const RefractionAssessmentSchema = {
             { label: "Right Eye", columns: ["Sphere", "Cylinder", "Axis", "Prism", "Acuity"] },
             { label: "Left Eye", columns: ["Sphere", "Cylinder", "Axis", "Prism", "Acuity"] },
             { label: "Pupil", columns: ["Distance", "Height"] }
-          ]
+          ],
+          showIf: {
+            field: "refraction_sections",
+            includes: "final_prescription"
+          }
         },
+        
+
 
 
         {
