@@ -176,7 +176,7 @@ const ModeCard = ({ icon, title, description, active, isDefault, onClick }) => (
     React.createElement("div", { className: "text-xs text-gray-600 mt-0.5" }, description)));
 export const BookAppointmentModal = ({ open, row, initialMode = 'doctor', onClose, onConfirm, onRequestOverride, onAddWaitlist, onConflict, onCancel, }) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
-    console.log('row', row);
+    // console.log('row', row);
     const [step, setStep] = useState(1);
     const [mode, setMode] = useState('doctor');
     const [view, setView] = useState('grid');

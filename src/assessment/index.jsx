@@ -3,6 +3,11 @@ import { useEffect, useState, useCallback, createContext } from "react";
 // Common Form Builder
 import CommonFormBuilder from "../features/CommonComponenets/FormBuilder.jsx";
 
+// Equipment Booking
+import EquipmentBookingPopup from "../features/Audiology/components/EquipmentBookingPopup.jsx";
+import { BookAppointmentModal } from "../features/book-appointment-modal/BookAppointmentModal";
+import { fetchBookingQueue } from "../features/book-appointment-modal/bookingQueueService";
+
 // Utils
 import { localDateTimeString } from "../shared/utils/dateFormatter";
 
@@ -65,6 +70,29 @@ export default function AssessmentLoader({ patient, department }) {
     assessment: {},
     plan: {},
   });
+
+  // Equipment booking state
+  const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment]       = useState(null);
+  const [bookedEquipmentIds, setBookedEquipmentIds]     = useState([]);
+  const [equipmentOptions, setEquipmentOptions]         = useState([]);
+
+  // Appointment booking state
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const [bookingQueueRow, setBookingQueueRow]           = useState(null);
+
+  useEffect(() => {
+    if (!patient || department !== "Audiology") return;
+    const departmentId = "5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98";
+    fetchBookingQueue({ department_id: departmentId, limit: 100 })
+      .then((data) => {
+        const row = data.rows?.find(
+          (r) => r.patient_name === (patient?.full_name || patient?.name)
+        );
+        setBookingQueueRow(row || null);
+      })
+      .catch(console.error);
+  }, [patient, department]);
 
   // Mapping template to the schema registry
   const loadTemplates = async () => {
@@ -430,6 +458,15 @@ export default function AssessmentLoader({ patient, department }) {
   const onChange = useCallback(
     async (name, value) => {      
       // =========================
+      // EQUIPMENT OPTIONS CAPTURE
+      // =========================
+      // When FormBuilder lazily loads equipment into `*_options`, capture it
+      // so the booking popup has the full list available.
+      if (name.endsWith("_options") && Array.isArray(value) && value.length > 0) {
+        setEquipmentOptions(value);
+      }
+
+      // =========================
       // SUB ASSESSMENT HANDLING
       // =========================
       if (name === "active_assessment_id") {
@@ -738,14 +775,46 @@ export default function AssessmentLoader({ patient, department }) {
               </div>
             ) : (
               (() => {
-                
+                // Patch equipment-list fields in the plan tab with onBook handler
+                const handleEquipmentBook = (equipment) => {
+                  setSelectedEquipment(equipment);
+                  setEquipmentBookingOpen(true);
+                };
+
+                let activeSchema = templates[activeTab];
+                if (activeTab === "plan" && activeSchema) {
+                  const patchFields = (fields) =>
+                    fields.map((f) => {
+                      if (f.type === "equipment-list") {
+                        return {
+                          ...f,
+                          onBook: handleEquipmentBook,
+                          bookedEquipmentIds,
+                        };
+                      }
+                      return f;
+                    });
+
+                  activeSchema = {
+                    ...activeSchema,
+                    sections: (activeSchema.sections || []).map((sec) => ({
+                      ...sec,
+                      fields: patchFields(sec.fields || []),
+                    })),
+                    // also patch top-level fields if the schema uses that shape
+                    ...(activeSchema.fields
+                      ? { fields: patchFields(activeSchema.fields) }
+                      : {}),
+                  };
+                }
+
                 return (
                   <CommonFormBuilder
                     readOnly={false}
                     onChange={onChange}
                     submitted={isSubmitted}
                     onAction={handleAction}
-                    schema={templates[activeTab]}
+                    schema={activeSchema}
                     values={assessmentsValues[activeTab] || {}}
                     assessmentRegistry={Object.values(
                       subAssessmentTemplate[activeTab] || {},
@@ -753,6 +822,17 @@ export default function AssessmentLoader({ patient, department }) {
                     parentSections={templates?.[activeTab]?.sections || []}
                   >
                     <div style={S.actionRow}>
+                      {activeTab === "plan" && (
+                        <button
+                          type="button"
+                          style={S.bookAppointmentBtn}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#0b4fd4")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "#0d6efd")}
+                          onClick={() => setAppointmentModalOpen(true)}
+                        >
+                          Book Appointment
+                        </button>
+                      )}
                       <button
                         style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
                         onMouseLeave={(e) =>
@@ -797,6 +877,36 @@ export default function AssessmentLoader({ patient, department }) {
           </div>
         </div>
       </div>
+      <EquipmentBookingPopup
+        open={equipmentBookingOpen}
+        equipmentOptions={equipmentOptions}
+        selectedEquipment={selectedEquipment}
+        onClose={() => setEquipmentBookingOpen(false)}
+        onBooked={(equipmentId) => {
+          setBookedEquipmentIds((prev) => [...prev, equipmentId]);
+          setEquipmentBookingOpen(false);
+        }}
+      />
+      <BookAppointmentModal
+        open={appointmentModalOpen}
+        row={{
+          id: bookingQueueRow?.booking_id,
+          patient: patient?.full_name || patient?.name || "",
+          refId: patient?.referral_id || "",
+          department,
+          priority: "Medium",
+        }}
+        initialMode="doctor"
+        onClose={() => setAppointmentModalOpen(false)}
+        onConfirm={(data) => {
+          console.log("Booking confirmed", data);
+          setAppointmentModalOpen(false);
+        }}
+        onRequestOverride={() => {}}
+        onAddWaitlist={() => {}}
+        onConflict={() => {}}
+        onCancel={() => setAppointmentModalOpen(false)}
+      />
     </PatientContext.Provider>
   );
 }
@@ -898,6 +1008,17 @@ const S = {
     cursor: "pointer",
     transition: "background .15s",
     boxShadow: "0 1px 4px rgba(37,99,235,0.2)",
+  },
+  bookAppointmentBtn: {
+    background: "#0d6efd",
+    color: "#fff",
+    border: "1px solid #0d6efd",
+    borderRadius: 6,
+    padding: "9px 20px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "background .15s",
   },
   submitBtn: {
     background: "#2563eb",
