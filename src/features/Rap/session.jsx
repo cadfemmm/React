@@ -158,7 +158,9 @@ function SessionRow({ sessionData, idx, onView }) {
                     </div>
                 </div>
             </div>
-
+            <div style={dateCellStyle}>
+                            {sessionData.department_name}
+                        </div>
             <div style={dateCellStyle}>
                 {sessionData.visit_type}
             </div>
@@ -265,7 +267,7 @@ export default function SOAPSession({
     return (
         <div
             style={{
-                padding: "28px 28px 32px",
+                padding: "2px 28px 32px",
                 minHeight: "100vh",
                 fontFamily:
                     "Inter, Roboto, sans-serif",
@@ -282,7 +284,7 @@ export default function SOAPSession({
                     flexWrap: "wrap",
                 }}
             >
-                <div
+                {/* <div
                     style={{
                         display: "flex",
                         alignItems: "center",
@@ -333,24 +335,24 @@ export default function SOAPSession({
                                 : ""}
                         </p>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Search */}
                 <div
-                    style={{
-                        width: "100%",
-                        maxWidth: 520,
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "center",
-                        background: "#fff",
-                        border: "1px solid #D1D5DB",
-                        borderRadius: 16,
-                        boxShadow:
-                            "0 10px 30px rgba(15,23,42,0.08)",
-                    }}
+                    // style={{
+                    //     width: "100%",
+                    //     maxWidth: 520,
+                    //     position: "relative",
+                    //     display: "flex",
+                    //     alignItems: "center",
+                    //     background: "#fff",
+                    //     border: "1px solid #D1D5DB",
+                    //     borderRadius: 16,
+                    //     boxShadow:
+                    //         "0 10px 30px rgba(15,23,42,0.08)",
+                    // }}
                 >
-                    <svg
+                    {/* <svg
                         style={{
                             position: "absolute",
                             left: 16,
@@ -374,9 +376,9 @@ export default function SOAPSession({
                             strokeWidth="1.8"
                             strokeLinecap="round"
                         />
-                    </svg>
+                    </svg> */}
 
-                    <input
+                    {/* <input
                         style={{
                             width: "100%",
                             padding: "12px 44px",
@@ -393,7 +395,7 @@ export default function SOAPSession({
                         onChange={(e) =>
                             setSearch(e.target.value)
                         }
-                    />
+                    /> */}
 
                     {search && (
                         <button
@@ -440,6 +442,7 @@ export default function SOAPSession({
                 >
                     {[
                         "Session ID",
+                        "Department",
                         "Visit Type",
                         "Completed",
                         "Duration",

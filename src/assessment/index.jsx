@@ -77,6 +77,29 @@ export default function AssessmentLoader({ patient, department }) {
   const [bookedEquipmentIds, setBookedEquipmentIds]     = useState([]);
   const [equipmentOptions, setEquipmentOptions]         = useState([]);
 
+  const equipmentStorageKey = patient?.id ? `patient_${patient.id}_equipment` : null;
+
+  const getStoredEquipmentItems = () => {
+    if (!equipmentStorageKey) return [];
+    try {
+      const raw = localStorage.getItem(equipmentStorageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.error("Failed to parse stored equipment", e);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (!equipmentStorageKey) return;
+    const storedItems = getStoredEquipmentItems();
+    setBookedEquipmentIds(
+      storedItems
+        .map((item) => item.id || item.value)
+        .filter((id) => !!id),
+    );
+  }, [equipmentStorageKey]);
+
   // Appointment booking state
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const [bookingQueueRow, setBookingQueueRow]           = useState(null);
@@ -882,8 +905,46 @@ export default function AssessmentLoader({ patient, department }) {
         equipmentOptions={equipmentOptions}
         selectedEquipment={selectedEquipment}
         onClose={() => setEquipmentBookingOpen(false)}
-        onBooked={(equipmentId) => {
-          setBookedEquipmentIds((prev) => [...prev, equipmentId]);
+        onBooked={(equipment) => {
+          const entry = (() => {
+            if (!equipment) return null;
+            if (typeof equipment === "object") {
+              return {
+                id: equipment.id || equipment.value || String(equipment),
+                name: equipment.name || equipment.label || String(equipment),
+                status: equipment.status || "Booked",
+              };
+            }
+            const option = equipmentOptions.find(
+              (item) => item.value === equipment || item.id === equipment,
+            );
+            return {
+              id: equipment,
+              name: option?.label || option?.name || String(equipment),
+              status: "Booked",
+            };
+          })();
+
+          if (!entry?.id) {
+            setEquipmentBookingOpen(false);
+            return;
+          }
+
+          setBookedEquipmentIds((prev) =>
+            prev.includes(entry.id) ? prev : [...prev, entry.id],
+          );
+
+          if (equipmentStorageKey) {
+            try {
+              const stored = getStoredEquipmentItems();
+              const exists = stored.some((item) => item.id === entry.id);
+              const updated = exists ? stored : [entry, ...stored];
+              localStorage.setItem(equipmentStorageKey, JSON.stringify(updated));
+            } catch (e) {
+              console.error("Failed to save booked equipment", e);
+            }
+          }
+
           setEquipmentBookingOpen(false);
         }}
       />
