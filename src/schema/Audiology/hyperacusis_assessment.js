@@ -1,5 +1,5 @@
  const schema = 
-  {
+ {
   "title": "Hyperacusis Assessment",
   "actions": [
     {

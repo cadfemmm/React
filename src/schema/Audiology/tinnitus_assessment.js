@@ -201,11 +201,6 @@ const mainSchema = {
           "type": "input"
         },
         {
-          "name": "family_history",
-          "label": "Family history",
-          "type": "input"
-        },
-        {
           "type": "subheading",
           "label": "Subjective Rating Scales For Tinnitus"
         },
@@ -928,15 +923,6 @@ const mainSchema = {
                     "field": "enable_thi",
                     "equals": "Yes"
                   }
-                },
-                {
-                  "name": "enable_tfi",
-                  "label": "Tinnitus Functional Index (TFI)",
-                  "type": "radio",
-                  "options": [
-                    "Yes",
-                    "No"
-                  ]
                 }
               ]
             }
