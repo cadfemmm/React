@@ -9,7 +9,6 @@ import { VestibularAdvancedForm, VestibularAdvancedFormObj } from "../vestibular
 import { Hearingaidtrial } from "../hearingaidtrial";
 import { IndustrialAudiometry } from "../industrialaudiometry";
 import PatientCard from "../../../shared/cards/PatientCard";
-import ICDICFICHISection from "./ICDICFICHISection";
 import EquipmentBookingPopup from "./EquipmentBookingPopup";
 import AudiologyICDSection from "./AudiologyICDSection";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";

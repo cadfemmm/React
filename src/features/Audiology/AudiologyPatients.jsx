@@ -104,7 +104,7 @@ export default function AudiologyPatients({ onBack }) {
     }
 
     // initial and followup use age-based components
-    const Component = getAssessmentComponent(selectedPatient);
+   
     return (
       <Component
         patient={selectedPatient}
