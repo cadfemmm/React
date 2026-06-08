@@ -3,6 +3,8 @@ import AnatomyImageOverlayInputs from "./AnatomyImageSelector";
 import AudiogramGraph from "../Audiology/components/AudioGramGraph";
 import WoundLocationMarker from "../Nursing/components/WoundLocationMarker";
 import forms from "../../assessment/forms";
+import api from "../../shared/api/apiClient";
+import { API_URL } from "../../platform/config/api.config";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -4046,17 +4048,47 @@ if (typeof col === "object" && col.type === "radio") {
     default:
       return null;
 
-    case "equipment-list": {
+case "equipment-list": {
   const isOpen = values[`${field.name}_open`] || false;
   const bookedEquipmentIds = field.bookedEquipmentIds || [];
 
+  const equipmentOptions =
+    values[`${field.name}_options`] || field.options || [];
+
+  const loadEquipment = async () => {
+    try {
+      if (equipmentOptions.length > 0) return;
+
+      const response = await api.get(
+        `${API_URL.EQUIPMENT_LIST}?department_id=5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98&limit=100`
+      );
+
+      const options =
+        response?.data?.data?.map(item => ({
+          label: item.equipment_name,
+          value: item.id,
+          status: item.status,
+          equipment_code: item.equipment_code,
+          department_name: item.department_name,
+          raw: item,
+        })) || [];
+
+      onChange(`${field.name}_options`, options);
+    } catch (err) {
+      console.error("Equipment fetch failed", err);
+    }
+  };
+
   return (
     <div key={field.name}>
-      {/* Dropdown Header */}
       <div
-        onClick={() =>
-          onChange(`${field.name}_open`, !isOpen)
-        }
+        onClick={async () => {
+          if (!isOpen) {
+            await loadEquipment();
+          }
+
+          onChange(`${field.name}_open`, !isOpen);
+        }}
         style={{
           border: "1px solid #d1d5db",
           borderRadius: isOpen ? "8px 8px 0 0" : "8px",
@@ -4090,7 +4122,6 @@ if (typeof col === "object" && col.type === "radio") {
         </span>
       </div>
 
-      {/* Dropdown Body */}
       {isOpen && (
         <div
           style={{
@@ -4102,7 +4133,7 @@ if (typeof col === "object" && col.type === "radio") {
             background: "#fff"
           }}
         >
-          {field.options?.map(option => (
+          {equipmentOptions.map(option => (
             <div
               key={option.value}
               style={{
@@ -4113,7 +4144,6 @@ if (typeof col === "object" && col.type === "radio") {
                 borderBottom: "1px solid #eee"
               }}
             >
-              {/* Equipment Name */}
               <div
                 style={{
                   flex: 1,
@@ -4124,7 +4154,6 @@ if (typeof col === "object" && col.type === "radio") {
                 {option.label}
               </div>
 
-              {/* Status + Book */}
               <div
                 style={{
                   display: "flex",
@@ -4147,34 +4176,34 @@ if (typeof col === "object" && col.type === "radio") {
                 </span>
 
                 {bookedEquipmentIds.includes(option.value) ? (
-                <button
-                  disabled
-                  style={{
-                    padding: "4px 18px",
-                    borderRadius: 30,
-                    border: "none",
-                    background: "#9CA3AF",
-                    color: "#fff",
-                    cursor: "not-allowed"
-                  }}
-                >
-                  Booked
-                </button>
-              ) : (
-                <button
-                  onClick={() => field.onBook?.(option)}
-                  style={{
-                    padding: "4px 18px",
-                    borderRadius: 30,
-                    border: "none",
-                    background: "#2563EB",
-                    color: "#fff",
-                    cursor: "pointer"
-                  }}
-                >
-                  Book
-                </button>
-              )}
+                  <button
+                    disabled
+                    style={{
+                      padding: "4px 18px",
+                      borderRadius: 30,
+                      border: "none",
+                      background: "#9CA3AF",
+                      color: "#fff",
+                      cursor: "not-allowed"
+                    }}
+                  >
+                    Booked
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => field.onBook?.(option)}
+                    style={{
+                      padding: "4px 18px",
+                      borderRadius: 30,
+                      border: "none",
+                      background: "#2563EB",
+                      color: "#fff",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Book
+                  </button>
+                )}
               </div>
             </div>
           ))}

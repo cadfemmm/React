@@ -42,7 +42,16 @@ const API_URL = {
 
     // Medication api
     MEDICATION_MASTER: RMS_API + "medication-masters/",
-
+    BOOKING_QUEUE: RMS_API + "booking-queue/",
+    BOOKING_QUEUE_SUMMARY: RMS_API + "booking-queue/summary/",
+    BOOKING_QUEUE_CONTINUE_SLOTS: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/appmts/continue-slots/`,
+    BOOKING_QUEUE_BOOK_PREVIEW: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/preview/`,
+    BOOKING_QUEUE_BOOK_RESERVE: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/reserve/`,
+    BOOKING_QUEUE_BOOK_CONFIRM: (bookingId) =>
+        RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/confirm/`,
     // Billing price
     BILLING: (
         dept,
@@ -57,6 +66,7 @@ const API_URL = {
 export {
     API_URL,
     BASE_API,
+    RMS_API,
     TYMPANOGRAM_EXTRACT_URL,
     OTOSCOPIC_EXTRACT_URL
 }

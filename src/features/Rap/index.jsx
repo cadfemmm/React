@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import EmptyState from "../../shared/ui/EmptyState";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import { API_URL } from "../../platform/config/api.config";
+import RAPDashboard from "./RapDashboard";
 
 
 /* ── Status palette ────────────────────────────────────── */
@@ -282,7 +283,7 @@ export default function RAP({ title }) {
   /* ── RAP: patient assessments ── */
   if (selectedPatient) {
     return (
-      <SOAPSession
+      <RAPDashboard
         patient={selectedPatient}
         onBack={() => setSelectedPatient(null)}
       />
