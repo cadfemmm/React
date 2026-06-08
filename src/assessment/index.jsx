@@ -29,8 +29,8 @@ import forms from "./forms.js";
 import session from "./session.js";
 
 // ICD Components
-import ICDICFICHISection from "../features/Audiology/components/ICDICFICHISection";
-import OptometryICDICFICHISection from "../features/Optometry/components/OptometryICDICFICHISection";
+import AudiologyICDSection from "../features/Audiology/components/AudiologyICDSection";
+import OptometryICDSection from "../features/Optometry/components/OptometryICDSection";
 
 // ── Context ────────────────────────────────────────────────────────────────
 // Carries patient + the questionaire FormData ID map + save helper
@@ -145,7 +145,7 @@ export default function AssessmentLoader({ patient, department }) {
           if ((department === "Audiology" || department === "Optometry") && (key === "assessment" || key === "plan")) {
             
             // Choose the right component based on department
-            const ICDComponent = department === "Optometry" ? OptometryICDICFICHISection : ICDICFICHISection;
+            const ICDComponent = department === "Optometry" ? OptometryICDSection : AudiologyICDSection;
             
             if (processedTemplate.sections && processedTemplate.sections[0] && processedTemplate.sections[0].fields) {
               if (key === "assessment") {

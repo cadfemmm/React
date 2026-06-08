@@ -103,7 +103,9 @@ export default function OptometryProgressAssessment({ patient, onSubmit, onBack 
             options: [
               { label: "Home Exercise",      value: "home_exercise"      },
               { label: "In Office Training", value: "in_office_training" },
-              { label: "Both",               value: "both"               }
+              { label: "Both",               value: "both"               },
+              {label:"Robotics", value:'robotics'},
+              {label:'Others', value:'others'}
             ]
           },
           { name: "strategies", label: "Strategies", type: "textarea" },
