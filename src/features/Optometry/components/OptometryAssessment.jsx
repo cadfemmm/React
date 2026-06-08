@@ -13,7 +13,7 @@ import ConfirmModal from "../../../shared/ui/ConfirmModal";
 import Toast from "../../../shared/ui/Toast";
 import ReferralModal from "../../../shared/ui/ReferralModal";
 import PatientCard from "../../../shared/cards/PatientCard";
-import OptometryICDICFICHISection from './OptometryICDICFICHISection';
+import OptometryICDSection from './OptometryICDSection';
 
 // ── Lazy-loaded assessment components ──────────────────────────────────────
 const BinocularVisionAssessment   = lazy(() => import("../BinocularVisionAssessment"));
@@ -1279,7 +1279,7 @@ export default function OptometryAssessment({
             type: "custom",
             name: "icd_icf_ichi_section",
             render: ({ values, onChange }) => (
-              <OptometryICDICFICHISection 
+              <OptometryICDSection 
                 values={values} 
                 onChange={onChange} 
                 mode="icd-icf" 
@@ -1310,7 +1310,7 @@ export default function OptometryAssessment({
             type: "custom",
             name: "ichi_section",
             render: ({ values, onChange }) => (
-              <OptometryICDICFICHISection 
+              <OptometryICDSection 
                 values={values} 
                 onChange={onChange} 
                 mode="plan" 
@@ -1441,9 +1441,8 @@ export default function OptometryAssessment({
                 type: "custom",
                 name: "icd_icf_ichi_section",
                 render: ({ values, onChange }) => {
-                  console.log("Rendering ICD component in Assessment tab");
                   return (
-                    <OptometryICDICFICHISection 
+                    <OptometryICDSection 
                       values={values} 
                       onChange={onChange} 
                       mode="icd-icf" 
@@ -1466,9 +1465,8 @@ export default function OptometryAssessment({
                   type: "custom",
                   name: "ichi_section",
                   render: ({ values, onChange }) => {
-                    console.log("Rendering ICHI component in Plan tab");
                     return (
-                      <OptometryICDICFICHISection 
+                      <OptometryICDSection 
                         values={values} 
                         onChange={onChange} 
                         mode="plan" 

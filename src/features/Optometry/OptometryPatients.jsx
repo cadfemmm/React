@@ -9,7 +9,7 @@ import { filterApprovedPatients } from "../../shared/utils/patientFilters";
 import { API_URL } from "../../platform/config/api.config";
 
 // Assessment Loader
-import AssessmentLoader from "../../assessment"
+import AssessmentLoader from "../../assessment";
 
 /* ── Status palette ─────────────────────────────────────────────────────── */
 const STATUS = {
