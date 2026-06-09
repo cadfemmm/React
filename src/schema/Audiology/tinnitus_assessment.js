@@ -1,10 +1,9 @@
-
 const mainSchema = {
   "title": "Additional Tinnitus Profile",
+  "enableScoreToggle": true,
   "actions": [
     {
-      "type": "back",
-      "label": "Back"
+      "type": "toggle-show-scores"
     }
   ],
   "sections": [
@@ -66,10 +65,22 @@ const mainSchema = {
           "label": "Ears affected",
           "type": "radio",
           "options": [
-            "Right",
-            "Left",
-            "Bilateral",
-            "In head"
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            },
+            {
+              "label": "In head",
+              "value": "in_head"
+            }
           ],
           "showIf": {
             "field": "mode",
@@ -83,15 +94,15 @@ const mainSchema = {
           "options": [
             {
               "label": "Low",
-              "value": "0"
+              "value": "low"
             },
             {
               "label": "Mid",
-              "value": "1"
+              "value": "mid"
             },
             {
               "label": "High",
-              "value": "2"
+              "value": "high"
             }
           ]
         },
@@ -146,26 +157,29 @@ const mainSchema = {
         },
         {
           "name": "previous_treatment",
-          "label": "Previous treatment / intervention",
-          "type": "input"
-        },
-        {
-          "name": "previous_treatment",
           "label": "Previous Treatment / Intervention",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
+          "type": "input",
           "name": "previous_treatment_remarks",
           "label": "Intervention Remarks",
-          "type": "input",
           "showIf": {
             "field": "previous_treatment",
-            "equals": "Yes"
-          }
+            "equals": "yes"
+          },
+          "placeholder": "Enter treatment",
+          "addButtonLabel": "+ Add Treatment"
         },
         {
           "name": "noise_exposure",
@@ -209,8 +223,14 @@ const mainSchema = {
           "label": "Tinnitus Visual Analog Scale (VAS)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -218,8 +238,14 @@ const mainSchema = {
           "label": "Tinnitus Handicap Inventory (THI)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -227,889 +253,751 @@ const mainSchema = {
           "label": "Tinnitus Functional Index (TFI)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
-          ]
-        },
-        {
-          "title": "Tinnitus Visual Analog Scale (VAS)",
-          "enableScoreToggle": true,
-          "actions": [
             {
-              "type": "toggle-show-scores"
-            }
-          ],
-          "sections": [
+              "label": "No",
+              "value": "no"
+            },
             {
-              "title": null,
-              "fields": [
-                {
-                  "type": "info-text",
-                  "text": "0 = none, 10 = worst possible"
-                },
-                {
-                  "name": "vas_loudness",
-                  "label": "Tinnitus Loudness - How loud is your tinnitus most of the time?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10,
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "vas_loudness_severity",
-                  "label": "Loudness Severity",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "vas_annoyance",
-                  "label": "Annoyance - How annoying or bothersome is your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10,
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "vas_annoyance_severity",
-                  "label": "Annoyance Severity",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "vas_awareness",
-                  "label": "Tinnitus Awareness - How much of the time are you aware of your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10,
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "vas_awareness_severity",
-                  "label": "Awareness Severity",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                }
-              ]
+              "label": "Yes",
+              "value": "yes"
             }
           ]
+        }
+      ]
+    },
+    {
+      "title": "Tinnitus Visual Analog Scale (VAS)",
+      "enableScoreToggle": true,
+      "showIf": {
+        "field": "enable_vas",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "type": "info-text",
+          "text": "0 = none, 10 = worst possible"
         },
         {
-          "title": "THI",
-          "enableScoreToggle": true,
-          "actions": [
+          "name": "vas_loudness",
+          "label": "Tinnitus Loudness - How loud is your tinnitus most of the time?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vas_loudness_severity",
+          "label": "Loudness Severity",
+          "type": "score-box"
+        },
+        {
+          "name": "vas_annoyance",
+          "label": "Annoyance - How annoying or bothersome is your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vas_annoyance_severity",
+          "label": "Annoyance Severity",
+          "type": "score-box"
+        },
+        {
+          "name": "vas_awareness",
+          "label": "Tinnitus Awareness - How much of the time are you aware of your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vas_awareness_severity",
+          "label": "Awareness Severity",
+          "type": "score-box"
+        }
+      ]
+    },
+    {
+      "title": "Tinnitus Handicap Inventory (THI)",
+      "actions": [
+        {
+          "type": "toggle-show-scores"
+        }
+      ],
+      "showIf": {
+        "field": "enable_thi",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "name": "thi_1",
+          "label": "1. Because of your tinnitus, is it difficult for you to concentrate?",
+          "type": "radio-matrix",
+          "options": [
             {
-              "type": "toggle-show-scores"
-            }
-          ],
-          "sections": [
+              "label": "No (0)",
+              "value": 0
+            },
             {
-              "title": "Tinnitus Handicap Inventory (THI)",
-              "fields": [
-                {
-                  "name": "thi_1",
-                  "label": "1. Because of your tinnitus, is it difficult for you to concentrate?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_2",
-                  "label": "2. Does the loudness of your tinnitus make it difficult for you to hear people?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_3",
-                  "label": "3. Does your tinnitus make you angry?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_4",
-                  "label": "4. Does your tinnitus make you confused?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_5",
-                  "label": "5. Because of your tinnitus, do you feel desperate?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_6",
-                  "label": "6. Do you complain a great deal about your tinnitus?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_7",
-                  "label": "7. Because of your tinnitus, do you have trouble falling asleep at night?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_8",
-                  "label": "8. Do you feel as though you cannot escape your tinnitus?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_9",
-                  "label": "9. Does your tinnitus interfere with your ability to enjoy social activities?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_10",
-                  "label": "10. Because of your tinnitus, do you feel frustrated?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_11",
-                  "label": "11. Because of your tinnitus, do you feel that you have a terrible disease?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_12",
-                  "label": "12. Does your tinnitus make it difficult to enjoy life?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_13",
-                  "label": "13. Does your tinnitus interfere with your job or household responsibilities?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_14",
-                  "label": "14. Because of your tinnitus, do you find that you are often irritable?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_15",
-                  "label": "15. Because of your tinnitus, is it difficult for you to read?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_16",
-                  "label": "16. Does your tinnitus make you upset?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_17",
-                  "label": "17. Do you feel that your tinnitus has placed stress on your relationships?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_18",
-                  "label": "18. Do you find it difficult to focus your attention away from your tinnitus?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_19",
-                  "label": "19. Do you feel that you have no control over your tinnitus?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_20",
-                  "label": "20. Because of your tinnitus, do you often feel tired?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_21",
-                  "label": "21. Because of your tinnitus, do you feel depressed?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_22",
-                  "label": "22. Does your tinnitus make you feel anxious?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_23",
-                  "label": "23. Do you feel that you can no longer cope with your tinnitus?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_24",
-                  "label": "24. Does your tinnitus get worse when you are under stress?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "thi_25",
-                  "label": "25. Does your tinnitus make you feel insecure?",
-                  "type": "radio-matrix",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  },
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "type": "info-text",
-                  "text": "Scoring: No = 0, Sometimes = 2, Yes = 4",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "thi_score",
-                  "label": "THI Score",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "thi_interpretation",
-                  "label": "Interpretation",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_thi",
-                    "equals": "Yes"
-                  }
-                }
-              ]
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
             }
           ]
         },
         {
-          "title": "TFI",
-          "enableScoreToggle": true,
-          "scoreToggleLabel": "Audio View",
-          "actions": [
+          "name": "thi_2",
+          "label": "2. Does the loudness of your tinnitus make it difficult for you to hear people?",
+          "type": "radio-matrix",
+          "options": [
             {
-              "type": "toggle-show-scores"
-            }
-          ],
-          "sections": [
+              "label": "No (0)",
+              "value": 0
+            },
             {
-              "title": null,
-              "fields": [
-                {
-                  "type": "info-text",
-                  "text": "0 = none, 10 = worst possible"
-                },
-                {
-                  "name": "tfi_1",
-                  "label": "1. What percentage of your time awake were you consciously aware of your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_2",
-                  "label": "2. How strong or loud was your tinnitus on average?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_3",
-                  "label": "3. What percentage of your time awake were you annoyed by your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_4",
-                  "label": "4. How easy was it for you to ignore your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_5",
-                  "label": "5. How much control do you feel you have over your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_6",
-                  "label": "6. How often did your tinnitus make it difficult to concentrate?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_7",
-                  "label": "7. How often did your tinnitus make it difficult to think clearly?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_8",
-                  "label": "8. How often did your tinnitus disturb your sleep?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_9",
-                  "label": "9. How often did your tinnitus make it difficult to fall asleep?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_10",
-                  "label": "10. How often did your tinnitus make it difficult to stay asleep?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_11",
-                  "label": "11. How much did your tinnitus interfere with your ability to hear clearly?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_12",
-                  "label": "12. How much did your tinnitus interfere with understanding people's voices?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_13",
-                  "label": "13. How much did your tinnitus interfere with enjoyment of music or TV?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_14",
-                  "label": "14. How much did your tinnitus interfere with your ability to relax?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_15",
-                  "label": "15. How much did your tinnitus stress you out?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_16",
-                  "label": "16. How much did your tinnitus interfere with social activities?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_17",
-                  "label": "17. How often did your tinnitus make you feel irritable?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_18",
-                  "label": "18. How much did your tinnitus interfere with enjoyment of life?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_19",
-                  "label": "19. How anxious did you feel because of your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_20",
-                  "label": "20. How depressed did you feel because of your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_21",
-                  "label": "21. How hopeless did you feel because of your tinnitus?",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "tfi_score",
-                  "label": "TFI Score",
-                  "type": "score-box"
-                },
-                {
-                  "name": "tfi_severity_level",
-                  "label": "Severity Level",
-                  "type": "score-box"
-                },
-                {
-                  "name": "tfi_interpretation",
-                  "label": "Interpretation",
-                  "type": "score-box"
-                }
-              ]
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
             }
           ]
+        },
+        {
+          "name": "thi_3",
+          "label": "3. Does your tinnitus make you angry?",
+          "type": "radio-matrix",
+          "showIf": {
+            "field": "enable_thi",
+            "equals": "es"
+          },
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_4",
+          "label": "4. Does your tinnitus make you confused?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_5",
+          "label": "5. Because of your tinnitus, do you feel desperate?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_6",
+          "label": "6. Do you complain a great deal about your tinnitus?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_7",
+          "label": "7. Because of your tinnitus, do you have trouble falling asleep at night?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_8",
+          "label": "8. Do you feel as though you cannot escape your tinnitus?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_9",
+          "label": "9. Does your tinnitus interfere with your ability to enjoy social activities?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_10",
+          "label": "10. Because of your tinnitus, do you feel frustrated?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_11",
+          "label": "11. Because of your tinnitus, do you feel that you have a terrible disease?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_12",
+          "label": "12. Does your tinnitus make it difficult to enjoy life?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_13",
+          "label": "13. Does your tinnitus interfere with your job or household responsibilities?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_14",
+          "label": "14. Because of your tinnitus, do you find that you are often irritable?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_15",
+          "label": "15. Because of your tinnitus, is it difficult for you to read?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_16",
+          "label": "16. Does your tinnitus make you upset?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_17",
+          "label": "17. Do you feel that your tinnitus has placed stress on your relationships?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_18",
+          "label": "18. Do you find it difficult to focus your attention away from your tinnitus?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_19",
+          "label": "19. Do you feel that you have no control over your tinnitus?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_20",
+          "label": "20. Because of your tinnitus, do you often feel tired?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_21",
+          "label": "21. Because of your tinnitus, do you feel depressed?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_22",
+          "label": "22. Does your tinnitus make you feel anxious?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_23",
+          "label": "23. Do you feel that you can no longer cope with your tinnitus?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_24",
+          "label": "24. Does your tinnitus get worse when you are under stress?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "thi_25",
+          "label": "25. Does your tinnitus make you feel insecure?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "type": "info-text",
+          "text": "Scoring: No = 0, Sometimes = 2, Yes = 4"
+        },
+        {
+          "name": "thi_score",
+          "label": "THI Score",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_thi",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "thi_interpretation",
+          "label": "Interpretation",
+          "type": "score-box"
+        }
+      ]
+    },
+    {
+      "title": "Tinnitus Functional Index (TFI)",
+      "showIf": {
+        "field": "enable_tfi",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "type": "info-text",
+          "text": "0 = none, 10 = worst possible"
+        },
+        {
+          "name": "tfi_1",
+          "label": "1. What percentage of your time awake were you consciously aware of your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_2",
+          "label": "2. How strong or loud was your tinnitus on average?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_3",
+          "label": "3. What percentage of your time awake were you annoyed by your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_4",
+          "label": "4. How easy was it for you to ignore your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_5",
+          "label": "5. How much control do you feel you have over your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_6",
+          "label": "6. How often did your tinnitus make it difficult to concentrate?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_7",
+          "label": "7. How often did your tinnitus make it difficult to think clearly?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_8",
+          "label": "8. How often did your tinnitus disturb your sleep?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_9",
+          "label": "9. How often did your tinnitus make it difficult to fall asleep?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_10",
+          "label": "10. How often did your tinnitus make it difficult to stay asleep?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_11",
+          "label": "11. How much did your tinnitus interfere with your ability to hear clearly?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_12",
+          "label": "12. How much did your tinnitus interfere with understanding people's voices?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_13",
+          "label": "13. How much did your tinnitus interfere with enjoyment of music or TV?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_14",
+          "label": "14. How much did your tinnitus interfere with your ability to relax?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_15",
+          "label": "15. How much did your tinnitus stress you out?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_16",
+          "label": "16. How much did your tinnitus interfere with social activities?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_17",
+          "label": "17. How often did your tinnitus make you feel irritable?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_18",
+          "label": "18. How much did your tinnitus interfere with enjoyment of life?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_19",
+          "label": "19. How anxious did you feel because of your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_20",
+          "label": "20. How depressed did you feel because of your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_21",
+          "label": "21. How hopeless did you feel because of your tinnitus?",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "tfi_score",
+          "label": "TFI Score",
+          "type": "score-box"
+        },
+        {
+          "name": "tfi_severity_level",
+          "label": "Severity Level",
+          "type": "score-box"
+        },
+        {
+          "name": "tfi_interpretation",
+          "label": "Interpretation",
+          "type": "score-box"
         },
         {
           "sections": [
@@ -1176,12 +1064,30 @@ const mainSchema = {
           ]
         }
       ]
+    },
+    {
+      "title": "Counseling Summary",
+      "showIf": {
+        "field": "mode",
+        "equals": "followup"
+      },
+      "fields": [
+        {
+          "name": "understanding",
+          "label": "Client's Understanding Of Tinnitus",
+          "type": "input"
+        },
+        {
+          "name": "recommendations",
+          "label": "Recommendations",
+          "type": "input"
+        }
+      ]
     }
   ]
 }
 
- const schema = 
- {
+const schema = {
   "title": "Tinnitus Assessment",
   "actions": [
     {
@@ -1249,6 +1155,10 @@ const mainSchema = {
                 {
                   "value": "pitch",
                   "label": "Pitch Matching (Hz)",
+                  "showIf": {
+                    "field": "psychoacoustic_fields",
+                    "includes": "pitch"
+                  },
                   "columns": [
                     {
                       "type": "input"
@@ -1261,6 +1171,10 @@ const mainSchema = {
                 {
                   "value": "loudness",
                   "label": "Loudness Matching (dB HL)",
+                  "showIf": {
+                    "field": "psychoacoustic_fields",
+                    "includes": "loudness"
+                  },
                   "columns": [
                     {
                       "type": "input"
@@ -1273,6 +1187,10 @@ const mainSchema = {
                 {
                   "value": "mml",
                   "label": "Minimum Masking Level (MML) (dB HL)",
+                  "showIf": {
+                    "field": "psychoacoustic_fields",
+                    "includes": "mml"
+                  },
                   "columns": [
                     {
                       "type": "input"
@@ -1285,6 +1203,10 @@ const mainSchema = {
                 {
                   "value": "ri",
                   "label": "Residual Inhibition",
+                  "showIf": {
+                    "field": "psychoacoustic_fields",
+                    "includes": "ri"
+                  },
                   "columns": [
                     {
                       "type": "input"
@@ -1297,6 +1219,10 @@ const mainSchema = {
                 {
                   "value": "ldl",
                   "label": "Loudness Discomfort Level (LDL)",
+                  "showIf": {
+                    "field": "psychoacoustic_fields",
+                    "includes": "ldl"
+                  },
                   "columns": [
                     {
                       "type": "input"
