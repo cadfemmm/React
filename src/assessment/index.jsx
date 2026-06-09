@@ -104,18 +104,41 @@ export default function AssessmentLoader({ patient, department }) {
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const [bookingQueueRow, setBookingQueueRow]           = useState(null);
 
-  useEffect(() => {
-    if (!patient || department !== "Audiology") return;
-    const departmentId = "5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98";
-    fetchBookingQueue({ department_id: departmentId, limit: 100 })
-      .then((data) => {
-        const row = data.rows?.find(
-          (r) => r.patient_name === (patient?.full_name || patient?.name)
-        );
-        setBookingQueueRow(row || null);
-      })
-      .catch(console.error);
-  }, [patient, department]);
+useEffect(() => {
+  if (!patient || !department) return;
+
+  fetchBookingQueue({ limit: 100 })
+    .then((data) => {
+      const patientName = (
+        patient?.full_name ||
+        patient?.name ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const departmentName = department
+        .trim()
+        .toLowerCase();
+
+      const row = data.rows?.find(
+        (r) =>
+          (r.patient_name || "")
+            .trim()
+            .toLowerCase() === patientName &&
+          (r.department || "")
+            .trim()
+            .toLowerCase() === departmentName
+      );
+
+      // console.log("department:", department);
+      // console.log("patient:", patientName);
+      // console.log("matched booking row:", row);
+
+      setBookingQueueRow(row || null);
+    })
+    .catch(console.error);
+}, [patient, department]);
 
   // Mapping template to the schema registry
   const loadTemplates = async () => {
