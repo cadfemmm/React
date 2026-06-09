@@ -1832,9 +1832,8 @@ const schema = {
     }
   ]
 }
-const mainSchema = 
-{
-  "title": "Additional Auditory Profile",
+const mainSchema = {
+  "title": "Additional Tinnitus Profile",
   "actions": [
     {
       "type": "back",
@@ -1846,12 +1845,22 @@ const mainSchema =
       "title": null,
       "fields": [
         {
+          "type": "subheading",
+          "label": "Subjective Rating Scales For Tinnitus"
+        },
+        {
           "name": "enable_vas",
           "label": "Subjective Rating Scales (Hearing Loss)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -1859,8 +1868,14 @@ const mainSchema =
           "label": "HHIA (Hearing Handicap Inventory for Adults)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -1868,741 +1883,761 @@ const mainSchema =
           "label": "COSI (Client Oriented Scale of Improvement)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
+        }
+      ]
+    },
+    {
+      "title": "Subjective Rating Scales (Hearing Loss)",
+      "enableScoreToggle": true,
+      "showIf": {
+        "field": "enable_vas",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "type": "info-text",
+          "text": "0 = none, 10 = worst possible"
         },
         {
-          "title": "Subjective Rating Scales (Hearing Loss)",
-          "enableScoreToggle": true,
-          "actions": [
-            {
-              "type": "toggle-show-scores"
-            }
-          ],
+          "name": "emotional_vas",
+          "label": "Analogue Scale : Emotional (0-10)",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10,
           "showIf": {
             "field": "enable_vas",
-            "equals": "Yes"
-          },
-          "sections": [
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "emotional_severity",
+          "label": "Emotional Severity",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_vas",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "social_vas",
+          "label": "Analogue Scale : Social / Situational (0-10)",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10,
+          "showIf": {
+            "field": "enable_vas",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "social_severity",
+          "label": "Social Severity",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_vas",
+            "equals": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "title": "HHIA (Hearing Handicap Inventory for Adults)",
+      "actions": [
+        {
+          "type": "toggle-show-scores"
+        }
+      ],
+      "showIf": {
+        "field": "enable_hhia",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "type": "info-text",
+          "text": "HHIA Scoring: No = 0, Sometimes = 2, Yes = 4"
+        },
+        {
+          "name": "hhia_1",
+          "label": "1. Does a hearing problem cause you to feel embarrassed when meeting new people?",
+          "type": "radio-matrix",
+          "options": [
             {
-              "title": null,
-              "fields": [
-                {
-                  "type": "info-text",
-                  "text": "0 = none, 10 = worst possible"
-                },
-                {
-                  "name": "emotional_vas",
-                  "label": "Analogue Scale : Emotional (0-10)",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10,
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "emotional_severity",
-                  "label": "Emotional Severity",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "social_vas",
-                  "label": "Analogue Scale : Social / Situational (0-10)",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10,
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "social_severity",
-                  "label": "Social Severity",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_vas",
-                    "equals": "Yes"
-                  }
-                }
-              ]
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
             }
           ]
         },
         {
-          "title": "HHIA (Hearing Handicap Inventory for Adults)",
-          "enableScoreToggle": true,
-          "actions": [
+          "name": "hhia_2",
+          "label": "2. Does a hearing problem cause you to feel frustrated when talking to family members?",
+          "type": "radio-matrix",
+          "options": [
             {
-              "type": "toggle-show-scores"
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
             }
-          ],
+          ]
+        },
+        {
+          "name": "hhia_3",
+          "label": "3. Do you have difficulty hearing when someone speaks softly or from another room?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_4",
+          "label": "4. Does a hearing problem cause you difficulty when visiting friends, relatives, or neighbors?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_5",
+          "label": "5. Does a hearing problem cause you to attend religious services less often than you would like?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_6",
+          "label": "6. Does a hearing problem cause you arguments with family members?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_7",
+          "label": "7. Does a hearing problem cause you difficulty when listening to TV or radio?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_8",
+          "label": "8. Does a hearing problem cause you to feel left out of conversations?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_9",
+          "label": "9. Does a hearing problem cause you difficulty when talking on the telephone?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_10",
+          "label": "10. Does a hearing problem make you feel isolated or alone?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_11",
+          "label": "11. Does a hearing problem cause you difficulty in understanding speech in a group of people?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_12",
+          "label": "12. Does a hearing problem make you feel stressed or anxious in social situations?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_13",
+          "label": "13. Does a hearing problem cause you difficulty in understanding speech in noisy places?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_14",
+          "label": "14. Does a hearing problem make it difficult to enjoy social gatherings?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_15",
+          "label": "15. Does a hearing problem cause you difficulty in understanding speech in quiet environments?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_16",
+          "label": "16. Does a hearing problem affect your work or job performance?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_17",
+          "label": "17. Does a hearing problem cause you to avoid social situations?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_18",
+          "label": "18. Does a hearing problem cause misunderstandings with family or friends?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_19",
+          "label": "19. Does a hearing problem make you feel frustrated in conversations?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_20",
+          "label": "20. Does a hearing problem affect your confidence in social situations?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_21",
+          "label": "21. Does a hearing problem cause difficulty in understanding speech when watching TV with others?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_22",
+          "label": "22. Does a hearing problem make you feel dependent on others?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_23",
+          "label": "23. Does a hearing problem cause difficulty in hearing doorbells or alarms?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_24",
+          "label": "24. Does a hearing problem make you feel irritated in daily communication?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_25",
+          "label": "25. Does a hearing problem affect your overall quality of life?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": 0
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": 2
+            },
+            {
+              "label": "Yes (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "hhia_social",
+          "label": "Social Score (/48)",
+          "type": "score-box",
           "showIf": {
             "field": "enable_hhia",
-            "equals": "Yes"
-          },
-          "sections": [
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "hhia_emotional",
+          "label": "Emotional Score (/52)",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_hhia",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "hhia_total",
+          "label": "Total Score (/100)",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_hhia",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "hhia_social_percent",
+          "label": "Social %",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_hhia",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "hhia_emotional_percent",
+          "label": "Emotional %",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_hhia",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "hhia_total_percent",
+          "label": "Total %",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_hhia",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "hhia_interpretation",
+          "label": "Interpretation",
+          "type": "score-box",
+          "showIf": {
+            "field": "enable_hhia",
+            "equals": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "title": "COSI (Client Oriented Scale of Improvement)",
+      "showIf": {
+        "field": "enable_cosi",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "name": "cosi_situations",
+          "label": "Select listening situations (choose up to 5)",
+          "type": "checkbox-group",
+          "maxSelect": 5,
+          "options": [
             {
-              "title": null,
-              "showIf": {
-                "field": "enable_hhia",
-                "equals": "Yes"
-              },
-              "fields": [
-                {
-                  "type": "info-text",
-                  "text": "HHIA Scoring: No = 0, Sometimes = 2, Yes = 4"
-                },
-                {
-                  "name": "hhia_1",
-                  "label": "1. Does a hearing problem cause you to feel embarrassed when meeting new people?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_2",
-                  "label": "2. Does a hearing problem cause you to feel frustrated when talking to family members?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_3",
-                  "label": "3. Do you have difficulty hearing when someone speaks softly or from another room?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_4",
-                  "label": "4. Does a hearing problem cause you difficulty when visiting friends, relatives, or neighbors?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_5",
-                  "label": "5. Does a hearing problem cause you to attend religious services less often than you would like?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_6",
-                  "label": "6. Does a hearing problem cause you arguments with family members?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_7",
-                  "label": "7. Does a hearing problem cause you difficulty when listening to TV or radio?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_8",
-                  "label": "8. Does a hearing problem cause you to feel left out of conversations?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_9",
-                  "label": "9. Does a hearing problem cause you difficulty when talking on the telephone?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_10",
-                  "label": "10. Does a hearing problem make you feel isolated or alone?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_11",
-                  "label": "11. Does a hearing problem cause you difficulty in understanding speech in a group of people?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_12",
-                  "label": "12. Does a hearing problem make you feel stressed or anxious in social situations?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_13",
-                  "label": "13. Does a hearing problem cause you difficulty in understanding speech in noisy places?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_14",
-                  "label": "14. Does a hearing problem make it difficult to enjoy social gatherings?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_15",
-                  "label": "15. Does a hearing problem cause you difficulty in understanding speech in quiet environments?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_16",
-                  "label": "16. Does a hearing problem affect your work or job performance?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_17",
-                  "label": "17. Does a hearing problem cause you to avoid social situations?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_18",
-                  "label": "18. Does a hearing problem cause misunderstandings with family or friends?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_19",
-                  "label": "19. Does a hearing problem make you feel frustrated in conversations?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_20",
-                  "label": "20. Does a hearing problem affect your confidence in social situations?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_21",
-                  "label": "21. Does a hearing problem cause difficulty in understanding speech when watching TV with others?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_22",
-                  "label": "22. Does a hearing problem make you feel dependent on others?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_23",
-                  "label": "23. Does a hearing problem cause difficulty in hearing doorbells or alarms?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_24",
-                  "label": "24. Does a hearing problem make you feel irritated in daily communication?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_25",
-                  "label": "25. Does a hearing problem affect your overall quality of life?",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "No (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Yes (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "hhia_social",
-                  "label": "Social Score (/48)",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "hhia_emotional",
-                  "label": "Emotional Score (/52)",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "hhia_total",
-                  "label": "Total Score (/100)",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "hhia_social_percent",
-                  "label": "Social %",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "hhia_emotional_percent",
-                  "label": "Emotional %",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "hhia_total_percent",
-                  "label": "Total %",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                },
-                {
-                  "name": "hhia_interpretation",
-                  "label": "Interpretation",
-                  "type": "score-box",
-                  "showIf": {
-                    "field": "enable_hhia",
-                    "equals": "Yes"
-                  }
-                }
-              ]
+              "label": "Conversation with 1 or 2 in quiet",
+              "value": "conversation_1_2_quiet"
+            },
+            {
+              "label": "Conversation with 1 or 2 in noise",
+              "value": "conversation_1_2_noise"
+            },
+            {
+              "label": "Conversation with group in quiet",
+              "value": "conversation_group_quiet"
+            },
+            {
+              "label": "Conversation with group in noise",
+              "value": "conversation_group_noise"
+            },
+            {
+              "label": "Television / Radio at normal volume",
+              "value": "tv_radio_normal_volume"
+            },
+            {
+              "label": "Familiar speaker on phone",
+              "value": "familiar_speaker_phone"
+            },
+            {
+              "label": "Unfamiliar speaker on phone",
+              "value": "unfamiliar_speaker_phone"
+            },
+            {
+              "label": "Hearing phone ring from another room",
+              "value": "phone_ring_other_room"
+            },
+            {
+              "label": "Hear front door bell or knock",
+              "value": "door_bell_knock"
+            },
+            {
+              "label": "Hear traffic",
+              "value": "hear_traffic"
+            },
+            {
+              "label": "Increased social contact",
+              "value": "increased_social_contact"
+            },
+            {
+              "label": "Feel embarrassed or stupid",
+              "value": "feel_embarrassed_stupid"
+            },
+            {
+              "label": "Feeling left out",
+              "value": "feeling_left_out"
+            },
+            {
+              "label": "Feeling upset or angry",
+              "value": "feeling_upset_angry"
+            },
+            {
+              "label": "Church or meeting",
+              "value": "church_meeting"
+            },
+            {
+              "label": "Other",
+              "value": "other"
             }
           ]
         },
         {
-          "title": "Client oriented scale of improvement (COSI)",
-          "type": "form",
+          "name": "cosi_other_text",
+          "label": "If 'Other', specify",
+          "type": "text",
+          "placeholder": "Describe additional listening situation...",
           "showIf": {
-            "field": "enable_cosi",
-            "equals": "Yes"
+            "field": "cosi_situations",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "cosi_priority_ranking",
+          "label": "Selected goals — priority ranking (1 = most important)",
+          "type": "ranking",
+          "sourceField": "cosi_situations",
+          "minRank": 1,
+          "maxRank": 5,
+          "showIf": {
+            "field": "cosi_situations",
+            "notEmpty": true
+          }
+        },
+        {
+          "type": "info-text",
+          "label": "Step-2: Post-Intervention - Degree of Change",
+          "showIf": {
+            "field": "mode",
+            "equals": "followup"
+          }
+        },
+        {
+          "type": "dynamic-section",
+          "name": "cosi_change",
+          "showIf": {
+            "field": "mode",
+            "equals": "followup"
           },
           "fields": [
             {
-              "name": "cosi_situations",
-              "label": "Select listening situations (choose up to 5)",
-              "type": "checkbox-group",
-              "maxSelect": 5,
+              "name": "goal",
+              "label": "Goal",
+              "type": "input"
+            },
+            {
+              "name": "change",
+              "label": "Degree of Change",
+              "type": "radio",
               "options": [
-                {
-                  "label": "Conversation with 1 or 2 in quiet",
-                  "value": "conversation_1_2_quiet"
-                },
-                {
-                  "label": "Conversation with 1 or 2 in noise",
-                  "value": "conversation_1_2_noise"
-                },
-                {
-                  "label": "Conversation with group in quiet",
-                  "value": "conversation_group_quiet"
-                },
-                {
-                  "label": "Conversation with group in noise",
-                  "value": "conversation_group_noise"
-                },
-                {
-                  "label": "Television / Radio at normal volume",
-                  "value": "tv_radio_normal_volume"
-                },
-                {
-                  "label": "Familiar speaker on phone",
-                  "value": "familiar_speaker_phone"
-                },
-                {
-                  "label": "Unfamiliar speaker on phone",
-                  "value": "unfamiliar_speaker_phone"
-                },
-                {
-                  "label": "Hearing phone ring from another room",
-                  "value": "phone_ring_other_room"
-                },
-                {
-                  "label": "Hear front door bell or knock",
-                  "value": "door_bell_knock"
-                },
-                {
-                  "label": "Hear traffic",
-                  "value": "hear_traffic"
-                },
-                {
-                  "label": "Increased social contact",
-                  "value": "increased_social_contact"
-                },
-                {
-                  "label": "Feel embarrassed or stupid",
-                  "value": "feel_embarrassed_stupid"
-                },
-                {
-                  "label": "Feeling left out",
-                  "value": "feeling_left_out"
-                },
-                {
-                  "label": "Feeling upset or angry",
-                  "value": "feeling_upset_angry"
-                },
-                {
-                  "label": "Church or meeting",
-                  "value": "church_meeting"
-                },
-                {
-                  "label": "Other",
-                  "value": "other"
-                }
+                "Much better",
+                "Better",
+                "Slightly better",
+                "No change",
+                "Worse"
               ]
-            },
-            {
-              "name": "cosi_other_text",
-              "label": "If 'Other', specify",
-              "type": "text",
-              "placeholder": "Describe additional listening situation...",
-              "showIf": {
-                "field": "cosi_situations",
-                "includes": "other"
-              }
-            },
-            {
-              "name": "cosi_priority_ranking",
-              "label": "Selected goals — priority ranking (1 = most important)",
-              "type": "ranking",
-              "sourceField": "cosi_situations",
-              "minRank": 1,
-              "maxRank": 5,
-              "showIf": {
-                "field": "cosi_situations",
-                "notEmpty": true
-              }
             }
           ]
         },
@@ -2728,6 +2763,60 @@ const mainSchema =
               ]
             }
           ]
+        },
+        {
+          "type": "info-text",
+          "label": "Step 3: Post-Intervention - Final Ability Rating",
+          "showIf": {
+            "field": "mode",
+            "equals": "followup"
+          }
+        },
+        {
+          "type": "dynamic-section",
+          "name": "cosi_final",
+          "showIf": {
+            "field": "mode",
+            "equals": "followup"
+          },
+          "fields": [
+            {
+              "name": "goal",
+              "label": "Goal",
+              "type": "input"
+            },
+            {
+              "name": "final",
+              "label": "Final Ability Rating",
+              "type": "radio",
+              "options": [
+                "Hardly ever",
+                "Occasionally",
+                "Half the time",
+                "Most of the time",
+                "Almost always"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Counseling Summary",
+      "showIf": {
+        "field": "mode",
+        "equals": "followup"
+      },
+      "fields": [
+        {
+          "name": "understanding",
+          "label": "Client's Understanding Of Tinnitus",
+          "type": "input"
+        },
+        {
+          "name": "recommendations",
+          "label": "Recommendations",
+          "type": "input"
         }
       ]
     }

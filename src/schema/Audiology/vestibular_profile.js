@@ -1,4 +1,4 @@
-const mainSchema = {
+export const mainSchema = {
   "title": "Additional Vestibular Profile",
   "actions": [
     {
@@ -23,8 +23,14 @@ const mainSchema = {
           "label": "Vertigo / Spinning",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -33,7 +39,7 @@ const mainSchema = {
           "type": "input",
           "showIf": {
             "field": "vertigo",
-            "equals": "Yes"
+            "equals": "yes"
           }
         },
         {
@@ -41,8 +47,14 @@ const mainSchema = {
           "label": "Dizziness / Spatial disorientation",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -51,7 +63,7 @@ const mainSchema = {
           "type": "input",
           "showIf": {
             "field": "dizziness",
-            "equals": "Yes"
+            "equals": "yes"
           }
         },
         {
@@ -599,10 +611,22 @@ const mainSchema = {
           "label": "Ear pressure / fullness",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -610,10 +634,22 @@ const mainSchema = {
           "label": "Vesicles in or around ear",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -621,10 +657,22 @@ const mainSchema = {
           "label": "Paresthesia",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -632,10 +680,22 @@ const mainSchema = {
           "label": "Tinnitus",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -643,10 +703,22 @@ const mainSchema = {
           "label": "Pain in or around ear",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -654,10 +726,22 @@ const mainSchema = {
           "label": "Ear discharge",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -665,10 +749,22 @@ const mainSchema = {
           "label": "Autophony",
           "type": "radio",
           "options": [
-            "No",
-            "Right",
-            "Left",
-            "Bilateral"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Bilateral",
+              "value": "bilateral"
+            }
           ]
         },
         {
@@ -680,8 +776,14 @@ const mainSchema = {
           "label": "Headache",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -689,8 +791,14 @@ const mainSchema = {
           "label": "Facial weakness",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -698,8 +806,14 @@ const mainSchema = {
           "label": "Photophobia",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -707,8 +821,14 @@ const mainSchema = {
           "label": "Facial numbness",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -716,8 +836,14 @@ const mainSchema = {
           "label": "Diplopia",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -776,21 +902,33 @@ const mainSchema = {
           "label": "Scales"
         },
         {
-          "name": "enable_dhi",
-          "label": "Dizziness Handicap Inventory (DHI)",
-          "type": "radio",
-          "options": [
-            "Yes",
-            "No"
-          ]
-        },
-        {
           "name": "enable_vvas",
           "label": "Visual Vertigo Analogue Score (VVAS)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
+          ]
+        },
+        {
+          "name": "enable_dhi",
+          "label": "Dizziness Handicap Inventory (DHI)",
+          "type": "radio",
+          "options": [
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -798,8 +936,14 @@ const mainSchema = {
           "label": "Vertigo Handicap Questionnaire (VHQ)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
           ]
         },
         {
@@ -807,1866 +951,1859 @@ const mainSchema = {
           "label": "Malay Version Vertigo Symptom Scale (MVVSS)",
           "type": "radio",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Visual Vertigo Analogue Score (VVAS)",
+      "enableScoreToggle": true,
+      "showIf": {
+        "field": "enable_vvas",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "type": "info-text",
+          "text": "0 = no dizziness, 10 = extreme dizziness"
+        },
+        {
+          "name": "vvas_1",
+          "label": "1. Walking through a supermarket aisle",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_2",
+          "label": "2. Being a passenger in a car",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_3",
+          "label": "3. Being under fluorescent lights",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_4",
+          "label": "4. Watching traffic at a busy intersection",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_5",
+          "label": "5. Walking through a shopping mall",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_6",
+          "label": "6. Going down an escalator",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_7",
+          "label": "7. Watching a movie at the movie theatre",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_8",
+          "label": "8. Walking over a patterned floor",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_9",
+          "label": "9. Watching action television",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "vvas_score",
+          "label": "VVAS Score",
+          "type": "score-box"
+        },
+        {
+          "name": "vvas_interpretation",
+          "label": "Interpretation",
+          "type": "score-box"
+        }
+      ]
+    },
+    {
+      "title": "Dizziness Handicap Inventory (DHI)",
+      "actions": [
+        {
+          "type": "toggle-show-scores"
+        }
+      ],
+      "showIf": {
+        "field": "enable_dhi",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "name": "dhi_1",
+          "label": "1. Does looking up increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
           ]
         },
         {
-          "title": "Dizziness Handicap Inventory (DHI)",
+          "name": "dhi_2",
+          "label": "2. Because of your problem, do you feel frustrated?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_3",
+          "label": "3. Because of your problem, do you restrict your travel for business or pleasure?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_4",
+          "label": "4. Does walking down the aisle of a supermarket increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_5",
+          "label": "5. Because of your problem, do you have difficulty getting into or out of bed?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_6",
+          "label": "6. Does your problem significantly restrict your participation in social activities (dinner, movies, parties)?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_7",
+          "label": "7. Because of your problem, do you have difficulty reading?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_8",
+          "label": "8. Does performing activities like sports or household chores increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_9",
+          "label": "9. Because of your problem, are you afraid to leave your home without someone accompanying you?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_10",
+          "label": "10. Because of your problem, have you been embarrassed in front of others?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_11",
+          "label": "11. Do quick movements of your head increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_12",
+          "label": "12. Because of your problem, do you avoid heights?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_13",
+          "label": "13. Does turning over in bed increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_14",
+          "label": "14. Because of your problem, is it difficult to do strenuous housework or yard work?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_15",
+          "label": "15. Because of your problem, are you afraid people may think you are intoxicated?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_16",
+          "label": "16. Because of your problem, is it difficult to go for a walk by yourself?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_17",
+          "label": "17. Does walking down a sidewalk increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_18",
+          "label": "18. Because of your problem, is it difficult for you to concentrate?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_19",
+          "label": "19. Because of your problem, is it difficult to walk around your house in the dark?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_20",
+          "label": "20. Because of your problem, are you afraid to stay home alone?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_21",
+          "label": "21. Because of your problem, do you feel handicapped?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_22",
+          "label": "22. Has your problem placed stress on your relationships with family or friends?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_23",
+          "label": "23. Because of your problem, are you depressed?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_24",
+          "label": "24. Does your problem interfere with your job or household responsibilities?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "dhi_25",
+          "label": "25. Does bending over increase your problem?",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "No (0)",
+              "value": "0"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Yes (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "type": "info-text",
+          "text": "Scoring: No = 0, Sometimes = 2, Yes = 4"
+        },
+        {
+          "name": "dhi_physical",
+          "label": "Physical Score",
+          "type": "score-box"
+        },
+        {
+          "name": "dhi_emotional",
+          "label": "Emotional Score",
+          "type": "score-box"
+        },
+        {
+          "name": "dhi_functional",
+          "label": "Functional Score",
+          "type": "score-box"
+        },
+        {
+          "name": "dhi_total",
+          "label": "Total",
+          "type": "score-box"
+        },
+        {
+          "name": "dhi_interpretation",
+          "label": "Interpretation",
+          "type": "score-box"
+        }
+      ]
+    },
+    {
+      "title": "Vertigo Handicap Questionnaire (VHQ)",
+      "showIf": {
+        "field": "enable_vhq",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "name": "vhq_1",
+          "label": "1. I find that the vertigo does restrict me socially",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_2",
+          "label": "2. I can still take part in active leisure pursuits",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_3",
+          "label": "3. Some of my friends or relations get impatient because of the vertigo",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_4",
+          "label": "4. I can move around quickly and freely",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_5",
+          "label": "5. I feel less confident than I used to",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_6",
+          "label": "6. I am happy to go out alone",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_7",
+          "label": "7. My vertigo means that my family life is restricted",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_8",
+          "label": "8. I find some of my less active hobbies difficult",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_9",
+          "label": "9. I am still able to travel despite the vertigo",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_10",
+          "label": "10. I try to avoid bending over",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_11",
+          "label": "11. My family takes the vertigo in its stride",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_12",
+          "label": "12. My friends are unsure how to react",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_13",
+          "label": "13. I think something seriously wrong with me",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_14",
+          "label": "14. People are understanding about the vertigo",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_15",
+          "label": "15. I get anxious about unexpected vertigo attacks",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_16",
+          "label": "16. During an attack I can carry on",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_17",
+          "label": "17. I find the attacks frightening",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_18",
+          "label": "18. I am able to walk long distances",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_19",
+          "label": "19. The vertigo worries me",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_20",
+          "label": "20. I avoid making plans in advance",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_21",
+          "label": "21. I can carry out everyday activities",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_22",
+          "label": "22. I am afraid of spoiling things for others",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_23",
+          "label": "23. I get depressed because of vertigo",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_24",
+          "label": "24. If I sit during an attack I am fine",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_25",
+          "label": "25. If I have vertigo in public I get embarrassed",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Never (0)",
+              "value": "0"
+            },
+            {
+              "label": "Occasionally (1)",
+              "value": "1"
+            },
+            {
+              "label": "Sometimes (2)",
+              "value": "2"
+            },
+            {
+              "label": "Often (3)",
+              "value": "3"
+            },
+            {
+              "label": "Always (4)",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "vhq_total",
+          "label": "Total Score",
+          "type": "score-box"
+        },
+        {
+          "name": "vhq_work",
+          "label": "26. Are you currently employed?",
+          "type": "radio",
+          "options": [
+            {
+              "label": "No",
+              "value": 0
+            },
+            {
+              "label": "Yes",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "vhq_26a",
+          "label": "26.a Did you give up work because of vertigo?",
+          "type": "radio",
+          "options": [
+            "No",
+            "Yes"
+          ],
           "showIf": {
-            "field": "enable_dhi",
-            "equals": "Yes"
-          },
+            "field": "vhq_work",
+            "equals": 0
+          }
+        },
+        {
+          "name": "vhq_26b",
+          "label": "26.b Have you changed your work because of vertigo?",
+          "type": "radio",
+          "options": [
+            "No",
+            "Yes"
+          ],
+          "showIf": {
+            "field": "vhq_work",
+            "equals": 1
+          }
+        },
+        {
+          "name": "vhq_26c",
+          "label": "26.c Does vertigo cause difficulty at work?",
+          "type": "radio",
+          "options": [
+            "No",
+            "Yes"
+          ],
+          "showIf": {
+            "field": "vhq_work",
+            "equals": 1
+          }
+        }
+      ]
+    },
+    {
+      "title": "Malay Version Vertigo Symptom Scale (MVVSS)",
+      "showIf": {
+        "field": "enable_mvvss",
+        "equals": "yes"
+      },
+      "fields": [
+        {
+          "name": "mvvss_1",
+          "label": "1. Perasaan seolah-olah benda atau keadaan sekeliling berpusing atau bergerak, selama kurang dari dua minit",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_2",
+          "label": "2. Berasa telinga tersumbat",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_3",
+          "label": "3. Menggigil, menggeletar",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_4",
+          "label": "4. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama lebih dari 12 jam",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_5",
+          "label": "5. Kesukaran untuk bernafas, bernafas dengan tercungap-cungap",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_6",
+          "label": "6. Berpeluh berlebihan",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_7",
+          "label": "7. Perasaan seolah-olah benda atau sekeliling berpusing atau bergerak, selama 20 minit hingga satu jam",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_8",
+          "label": "8. Muntah",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_9",
+          "label": "9. Sakit kepala atau berasa berat dalam kepala",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_10",
+          "label": "10. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjangan lebih dari 12 jam",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_11",
+          "label": "11. Berdenyut-denyut, mencucuk-cucuk atau kebas di bahagian badan tertentu",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_12",
+          "label": "12. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjanjangan kurang dari dua minit",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_13",
+          "label": "13. Sakit di bahagian jantung atau dada",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_14",
+          "label": "14. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama kurang 20 minit hingga satu jam",
+          "type": "radio-matrix",
+          "options": [
+            {
+              "label": "Tidak pernah (0)",
+              "value": 0
+            },
+            {
+              "label": "Beberapa kali (1–3 kali setahun) (1)",
+              "value": 1
+            },
+            {
+              "label": "Banyak kali (4–12 kali setahun) (2)",
+              "value": 2
+            },
+            {
+              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+              "value": 3
+            },
+            {
+              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "mvvss_total",
+          "label": "MVVSS Total Score",
+          "type": "score-box"
+        }
+      ]
+    },
+    {
+      "title": "Counseling Summary",
+      "showIf": {
+        "field": "mode",
+        "equals": "followup"
+      },
+      "fields": [
+        {
+          "name": "understanding",
+          "label": "Client's Understanding Of Tinnitus",
+          "type": "input"
+        },
+        {
+          "name": "recommendations",
+          "label": "Recommendations",
+          "type": "input"
+        },
+        {
+          "title": null,
           "fields": [
             {
-              "name": "dhi_1",
-              "label": "1. Does looking up increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "type": "subheading",
+              "label": "Functional and Daily Life Impact for vestibular"
             },
             {
-              "name": "dhi_2",
-              "label": "2. Because of your problem, do you feel frustrated?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "work",
+              "label": "Work / Study",
+              "type": "input"
             },
             {
-              "name": "dhi_3",
-              "label": "3. Because of your problem, do you restrict your travel for business or pleasure?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "communication",
+              "label": "Communication",
+              "type": "input"
             },
             {
-              "name": "dhi_4",
-              "label": "4. Does walking down the aisle of a supermarket increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "social",
+              "label": "Family / Social",
+              "type": "input"
             },
             {
-              "name": "dhi_5",
-              "label": "5. Because of your problem, do you have difficulty getting into or out of bed?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "rest",
+              "label": "Relaxation / Rest",
+              "type": "input"
             },
             {
-              "name": "dhi_6",
-              "label": "6. Does your problem significantly restrict your participation in social activities (dinner, movies, parties)?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "outdoor",
+              "label": "Outdoor / Public noise tolerance",
+              "type": "input"
             },
             {
-              "name": "dhi_7",
-              "label": "7. Because of your problem, do you have difficulty reading?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "type": "subheading",
+              "label": "Counseling Summary",
+              "showIf": {
+                "field": "mode",
+                "equals": "followup"
+              }
             },
             {
-              "name": "dhi_8",
-              "label": "8. Does performing activities like sports or household chores increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "understanding",
+              "label": "Patient's understanding of vestibular disorder",
+              "type": "input",
+              "showIf": {
+                "field": "mode",
+                "equals": "followup"
+              }
             },
             {
-              "name": "dhi_9",
-              "label": "9. Because of your problem, are you afraid to leave your home without someone accompanying you?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "goals",
+              "label": "Expectations / goals",
+              "type": "input",
+              "showIf": {
+                "field": "mode",
+                "equals": "followup"
+              }
             },
             {
-              "name": "dhi_10",
-              "label": "10. Because of your problem, have you been embarrassed in front of others?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "motivation",
+              "label": "Motivation for therapy",
+              "type": "input",
+              "showIf": {
+                "field": "mode",
+                "equals": "followup"
+              }
             },
             {
-              "name": "dhi_11",
-              "label": "11. Do quick movements of your head increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
+              "name": "education",
+              "label": "Education & counseling provided",
+              "type": "input",
+              "showIf": {
+                "field": "mode",
+                "equals": "followup"
+              }
             },
             {
-              "name": "dhi_12",
-              "label": "12. Because of your problem, do you avoid heights?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_13",
-              "label": "13. Does turning over in bed increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_14",
-              "label": "14. Because of your problem, is it difficult to do strenuous housework or yard work?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_15",
-              "label": "15. Because of your problem, are you afraid people may think you are intoxicated?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_16",
-              "label": "16. Because of your problem, is it difficult to go for a walk by yourself?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_17",
-              "label": "17. Does walking down a sidewalk increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_18",
-              "label": "18. Because of your problem, is it difficult for you to concentrate?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_19",
-              "label": "19. Because of your problem, is it difficult to walk around your house in the dark?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_20",
-              "label": "20. Because of your problem, are you afraid to stay home alone?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_21",
-              "label": "21. Because of your problem, do you feel handicapped?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_22",
-              "label": "22. Has your problem placed stress on your relationships with family or friends?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_23",
-              "label": "23. Because of your problem, are you depressed?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_24",
-              "label": "24. Does your problem interfere with your job or household responsibilities?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "name": "dhi_25",
-              "label": "25. Does bending over increase your problem?",
-              "type": "radio-matrix",
-              "options": [
-                {
-                  "label": "No (0)",
-                  "value": "0"
-                },
-                {
-                  "label": "Sometimes (2)",
-                  "value": "2"
-                },
-                {
-                  "label": "Yes (4)",
-                  "value": "4"
-                }
-              ]
-            },
-            {
-              "type": "info-text",
-              "text": "Scoring: No = 0, Sometimes = 2, Yes = 4"
-            },
-            {
-              "name": "dhi_physical",
-              "label": "Physical Score",
-              "type": "score-box"
-            },
-            {
-              "name": "dhi_emotional",
-              "label": "Emotional Score",
-              "type": "score-box"
-            },
-            {
-              "name": "dhi_functional",
-              "label": "Functional Score",
-              "type": "score-box"
-            },
-            {
-              "name": "dhi_total",
-              "label": "Total",
-              "type": "score-box"
-            },
-            {
-              "name": "dhi_interpretation",
-              "label": "Interpretation",
-              "type": "score-box"
-            }
-          ]
-        },
-        {
-          "title": "VVAS",
-          "enableScoreToggle": true,
-          "scoreToggleLabel": "Audio View",
-          "actions": [
-            {
-              "type": "toggle-show-scores"
-            }
-          ],
-          "showIf": {
-            "field": "enable_vvas",
-            "equals": "Yes"
-          },
-          "sections": [
-            {
-              "title": null,
-              "fields": [
-                {
-                  "type": "info-text",
-                  "text": "0 = no dizziness, 10 = extreme dizziness"
-                },
-                {
-                  "name": "vvas_1",
-                  "label": "1. Walking through a supermarket aisle",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_2",
-                  "label": "2. Being a passenger in a car",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_3",
-                  "label": "3. Being under fluorescent lights",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_4",
-                  "label": "4. Watching traffic at a busy intersection",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_5",
-                  "label": "5. Walking through a shopping mall",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_6",
-                  "label": "6. Going down an escalator",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_7",
-                  "label": "7. Watching a movie at the movie theatre",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_8",
-                  "label": "8. Walking over a patterned floor",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_9",
-                  "label": "9. Watching action television",
-                  "type": "scale-slider",
-                  "min": 0,
-                  "max": 10
-                },
-                {
-                  "name": "vvas_score",
-                  "label": "VVAS Score",
-                  "type": "score-box"
-                },
-                {
-                  "name": "vvas_interpretation",
-                  "label": "Interpretation",
-                  "type": "score-box"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Vertigo Handicap Questionnaire (VHQ)",
-          "enableScoreToggle": true,
-          "actions": [
-            {
-              "type": "toggle-show-scores"
-            }
-          ],
-          "showIf": {
-            "field": "enable_vhq",
-            "equals": "Yes"
-          },
-          "sections": [
-            {
-              "title": null,
-              "fields": [
-                {
-                  "name": "vhq_1",
-                  "label": "1. I find that the vertigo does restrict me socially",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_2",
-                  "label": "2. I can still take part in active leisure pursuits",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_3",
-                  "label": "3. Some of my friends or relations get impatient because of the vertigo",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_4",
-                  "label": "4. I can move around quickly and freely",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_5",
-                  "label": "5. I feel less confident than I used to",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_6",
-                  "label": "6. I am happy to go out alone",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_7",
-                  "label": "7. My vertigo means that my family life is restricted",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_8",
-                  "label": "8. I find some of my less active hobbies difficult",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_9",
-                  "label": "9. I am still able to travel despite the vertigo",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_10",
-                  "label": "10. I try to avoid bending over",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_11",
-                  "label": "11. My family takes the vertigo in its stride",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_12",
-                  "label": "12. My friends are unsure how to react",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_13",
-                  "label": "13. I think something seriously wrong with me",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_14",
-                  "label": "14. People are understanding about the vertigo",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_15",
-                  "label": "15. I get anxious about unexpected vertigo attacks",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_16",
-                  "label": "16. During an attack I can carry on",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_17",
-                  "label": "17. I find the attacks frightening",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_18",
-                  "label": "18. I am able to walk long distances",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_19",
-                  "label": "19. The vertigo worries me",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_20",
-                  "label": "20. I avoid making plans in advance",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_21",
-                  "label": "21. I can carry out everyday activities",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_22",
-                  "label": "22. I am afraid of spoiling things for others",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_23",
-                  "label": "23. I get depressed because of vertigo",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_24",
-                  "label": "24. If I sit during an attack I am fine",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_25",
-                  "label": "25. If I have vertigo in public I get embarrassed",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Never (0)",
-                      "value": "0"
-                    },
-                    {
-                      "label": "Occasionally (1)",
-                      "value": "1"
-                    },
-                    {
-                      "label": "Sometimes (2)",
-                      "value": "2"
-                    },
-                    {
-                      "label": "Often (3)",
-                      "value": "3"
-                    },
-                    {
-                      "label": "Always (4)",
-                      "value": "4"
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_total",
-                  "label": "Total Score",
-                  "type": "score-box"
-                },
-                {
-                  "name": "vhq_work",
-                  "label": "26. Are you currently employed?",
-                  "type": "radio",
-                  "options": [
-                    {
-                      "label": "No",
-                      "value": 0
-                    },
-                    {
-                      "label": "Yes",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "vhq_26a",
-                  "label": "26.a Did you give up work because of vertigo?",
-                  "type": "radio",
-                  "options": [
-                    "No",
-                    "Yes"
-                  ],
-                  "showIf": {
-                    "field": "vhq_work",
-                    "equals": 0
-                  }
-                },
-                {
-                  "name": "vhq_26b",
-                  "label": "26.b Have you changed your work because of vertigo?",
-                  "type": "radio",
-                  "options": [
-                    "No",
-                    "Yes"
-                  ],
-                  "showIf": {
-                    "field": "vhq_work",
-                    "equals": 1
-                  }
-                },
-                {
-                  "name": "vhq_26c",
-                  "label": "26.c Does vertigo cause difficulty at work?",
-                  "type": "radio",
-                  "options": [
-                    "No",
-                    "Yes"
-                  ],
-                  "showIf": {
-                    "field": "vhq_work",
-                    "equals": 1
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Malay Version Vertigo Symptom Scale (MVVSS)",
-          "enableScoreToggle": true,
-          "actions": [
-            {
-              "type": "toggle-show-scores"
-            }
-          ],
-          "showIf": {
-            "field": "enable_mvvss",
-            "equals": "Yes"
-          },
-          "sections": [
-            {
-              "title": null,
-              "fields": [
-                {
-                  "name": "mvvss_1",
-                  "label": "1. Perasaan seolah-olah benda atau keadaan sekeliling berpusing atau bergerak, selama kurang dari dua minit",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_2",
-                  "label": "2. Berasa telinga tersumbat",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_3",
-                  "label": "3. Menggigil, menggeletar",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_4",
-                  "label": "4. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama lebih dari 12 jam",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_5",
-                  "label": "5. Kesukaran untuk bernafas, bernafas dengan tercungap-cungap",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_6",
-                  "label": "6. Berpeluh berlebihan",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_7",
-                  "label": "7. Perasaan seolah-olah benda atau sekeliling berpusing atau bergerak, selama 20 minit hingga satu jam",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_8",
-                  "label": "8. Muntah",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_9",
-                  "label": "9. Sakit kepala atau berasa berat dalam kepala",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_10",
-                  "label": "10. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjangan lebih dari 12 jam",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_11",
-                  "label": "11. Berdenyut-denyut, mencucuk-cucuk atau kebas di bahagian badan tertentu",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_12",
-                  "label": "12. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjanjangan kurang dari dua minit",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_13",
-                  "label": "13. Sakit di bahagian jantung atau dada",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_14",
-                  "label": "14. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama kurang 20 minit hingga satu jam",
-                  "type": "radio-matrix",
-                  "options": [
-                    {
-                      "label": "Tidak pernah (0)",
-                      "value": 0
-                    },
-                    {
-                      "label": "Beberapa kali (1–3 kali setahun) (1)",
-                      "value": 1
-                    },
-                    {
-                      "label": "Banyak kali (4–12 kali setahun) (2)",
-                      "value": 2
-                    },
-                    {
-                      "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-                      "value": 3
-                    },
-                    {
-                      "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "mvvss_total",
-                  "label": "MVVSS Total Score",
-                  "type": "score-box"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "sections": [
-            {
-              "title": null,
-              "fields": [
-                {
-                  "type": "subheading",
-                  "label": "Functional and Daily Life Impact for vestibular"
-                },
-                {
-                  "name": "work",
-                  "label": "Work / Study",
-                  "type": "input"
-                },
-                {
-                  "name": "communication",
-                  "label": "Communication",
-                  "type": "input"
-                },
-                {
-                  "name": "social",
-                  "label": "Family / Social",
-                  "type": "input"
-                },
-                {
-                  "name": "rest",
-                  "label": "Relaxation / Rest",
-                  "type": "input"
-                },
-                {
-                  "name": "outdoor",
-                  "label": "Outdoor / Public noise tolerance",
-                  "type": "input"
-                },
-                {
-                  "type": "subheading",
-                  "label": "Counseling Summary",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "understanding",
-                  "label": "Patient's understanding of vestibular disorder",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "goals",
-                  "label": "Expectations / goals",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "motivation",
-                  "label": "Motivation for therapy",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "education",
-                  "label": "Education & counseling provided",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "next_steps",
-                  "label": "Recommended next steps",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                }
-              ]
+              "name": "next_steps",
+              "label": "Recommended next steps",
+              "type": "input",
+              "showIf": {
+                "field": "mode",
+                "equals": "followup"
+              }
             }
           ]
         }
@@ -2674,7 +2811,7 @@ const mainSchema = {
     }
   ]
 }
-const schema = {
+ export const schema = {
   "title": "Vestibular Assessment",
   "actions": [
     {
