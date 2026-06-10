@@ -1353,7 +1353,7 @@ export default function Amputee({patient, onSubmit, onBack}) {
     onSubmit?.(values);
     alert("amputee assessment submitted");
   };
-  console.log(values, 'hjkhjjklk')
+  // console.log(values, 'hjkhjjklk')
 
  
   return (
