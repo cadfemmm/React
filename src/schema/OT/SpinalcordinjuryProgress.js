@@ -1,0 +1,1525 @@
+const SUBJECTIVE = {
+  "sections": [
+    {
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Session Notes"
+        },
+        {
+          "name": "any_complaints",
+          "label": "Any Complaints",
+          "type": "input",
+          "placeholder": "Enter patient's complaints",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "History of Present",
+          "label": "History of Present Illnes",
+          "type": "input"
+        },
+        {
+          "name": "new_finding",
+          "label": "New Finding",
+          "type": "input",
+          "placeholder": "Example: Wound, low mood, swelling, redness, dizziness",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "pain_score",
+          "label": "Pain Score(Visual Analog Scale)",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10,
+          "ranges": [
+            {
+              "min": 0,
+              "max": 1,
+              "label": "Mild",
+              "color": "#22c55e"
+            },
+            {
+              "min": 1,
+              "max": 5,
+              "label": "Moderate",
+              "color": "#facc15"
+            },
+            {
+              "min": 5,
+              "max": 10,
+              "label": "Severe",
+              "color": "#ef4444"
+            }
+          ],
+          "showValue": true
+        }
+      ]
+    }
+  ]
+}
+
+const OBJECTIVE = {
+  "sections": [
+    {
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Interventions Provided"
+        },
+        {
+          "type": "subheading",
+          "label": "Modalities"
+        },
+        {
+          "name": "modalities",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Motomed",
+              "value": "motomed"
+            },
+            {
+              "label": "Fesia Grasp",
+              "value": "fesia_grasp"
+            },
+            {
+              "label": "Fesia Bike",
+              "value": "fesia_bike"
+            },
+            {
+              "label": "Fesia Gait",
+              "value": "fesia_gait"
+            },
+            {
+              "label": "Robo Hand",
+              "value": "robo_hand"
+            },
+            {
+              "label": "Fluidotherapy",
+              "value": "fluidotherapy"
+            },
+            {
+              "label": "Chattanooga",
+              "value": "chattanooga"
+            },
+            {
+              "label": "Flint Rehab - FITMI",
+              "value": "flint_rehab_fitmi"
+            },
+            {
+              "label": "Flint Rehab - Music Glove",
+              "value": "flint_rehab_music_glove"
+            },
+            {
+              "label": "Saebo Stim",
+              "value": "saebo_stim"
+            },
+            {
+              "label": "Galileo",
+              "value": "galileo"
+            },
+            {
+              "label": "Recumbent Stepper",
+              "value": "recumbent_stepper"
+            },
+            {
+              "label": "Multigym",
+              "value": "multigym"
+            },
+            {
+              "label": "Tilt Table",
+              "value": "tilt_table"
+            },
+            {
+              "label": "Treadmill",
+              "value": "treadmill"
+            },
+            {
+              "label": "Ceiling Hoist",
+              "value": "ceiling_hoist"
+            },
+            {
+              "label": "Hot Pack",
+              "value": "hot_pack"
+            },
+            {
+              "label": "Cryocuff",
+              "value": "cryocuff"
+            },
+            {
+              "label": "Xcite2",
+              "value": "xcite2"
+            },
+            {
+              "label": "Sonopuls",
+              "value": "sonopuls"
+            },
+            {
+              "label": "Laser",
+              "value": "laser"
+            },
+            {
+              "label": "Syrebo Robotic Glove",
+              "value": "syrebo_robotic_glove"
+            },
+            {
+              "label": "Stella Bio",
+              "value": "stella_bio"
+            },
+            {
+              "label": "SCI Fit Step One",
+              "value": "sci_fit_step_one"
+            },
+            {
+              "label": "Ankle Motus",
+              "value": "ankle_motus"
+            },
+            {
+              "label": "Arm Motus",
+              "value": "arm_motus"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Motomed",
+          "showIf": {
+            "field": "modalities",
+            "includes": "Motomed"
+          }
+        },
+        {
+          "name": "motomed_minutes",
+          "label": "Motomed - Minutes",
+          "type": "input",
+          "placeholder": "Enter minutes",
+          "showIf": {
+            "field": "modalities",
+            "includes": "motomed"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Fesia Grasp",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fesia_grasp"
+          }
+        },
+        {
+          "name": "fesia_grasp",
+          "label": "Fesia Grasp",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fesia_grasp"
+          },
+          "fields": [
+            {
+              "name": "fesia_grasp_exercise_type",
+              "label": "Type of Exercise",
+              "type": "input",
+              "placeholder": "Enter exercise type"
+            },
+            {
+              "name": "fesia_grasp_minutes",
+              "label": "Minutes",
+              "type": "input",
+              "placeholder": "Enter minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Fesia Bike",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fesia_bike"
+          }
+        },
+        {
+          "name": "fesia_bike",
+          "label": "Fesia Bike",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fesia_bike"
+          },
+          "fields": [
+            {
+              "name": "fesia_bike_exercise_type",
+              "label": "Type of Exercise",
+              "type": "input",
+              "placeholder": "Enter exercise type"
+            },
+            {
+              "name": "fesia_bike_minutes",
+              "label": "Minutes",
+              "type": "input",
+              "placeholder": "Enter minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Fesia Gait",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fesia_gait"
+          }
+        },
+        {
+          "name": "fesia_gait",
+          "label": "Fesia Gait",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fesia_gait"
+          },
+          "fields": [
+            {
+              "name": "fesia_gait_exercise_type",
+              "label": "Type of Exercise",
+              "type": "input",
+              "placeholder": "Enter exercise type"
+            },
+            {
+              "name": "fesia_gait_minutes",
+              "label": "Minutes",
+              "type": "input",
+              "placeholder": "Enter minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Robo Hand",
+          "showIf": {
+            "field": "modalities",
+            "includes": "robo_hand"
+          }
+        },
+        {
+          "name": "robo_hand",
+          "label": "Robo Hand",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "robo_hand"
+          },
+          "fields": [
+            {
+              "name": "robo_hand_exercise_type",
+              "label": "Type of Exercise",
+              "type": "input",
+              "placeholder": "Enter exercise type"
+            },
+            {
+              "name": "robo_hand_minutes",
+              "label": "Minutes",
+              "type": "input",
+              "placeholder": "Enter minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Fluidotherapy",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fluidotherapy"
+          }
+        },
+        {
+          "name": "fluidotherapy",
+          "label": "Fluidotherapy",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "fluidotherapy"
+          },
+          "fields": [
+            {
+              "name": "fluidotherapy_temperature",
+              "label": "Temperature",
+              "type": "input",
+              "placeholder": "Enter temperature"
+            },
+            {
+              "name": "fluidotherapy_minutes",
+              "label": "Minutes",
+              "type": "input",
+              "placeholder": "Enter minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Chattanooga",
+          "showIf": {
+            "field": "modalities",
+            "includes": "chattanooga"
+          }
+        },
+        {
+          "name": "chattanooga",
+          "label": "Chattanooga (Wireless Pro)",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "chattanooga"
+          },
+          "fields": [
+            {
+              "name": "chattanooga_body_region",
+              "label": "Body Region",
+              "type": "input",
+              "placeholder": "Enter body region"
+            },
+            {
+              "name": "chattanooga_hz",
+              "label": "Hz",
+              "type": "input",
+              "placeholder": "Enter frequency (Hz)"
+            },
+            {
+              "name": "chattanooga_ma",
+              "label": "mA",
+              "type": "input",
+              "placeholder": "Enter intensity (mA)"
+            },
+            {
+              "name": "chattanooga_minutes",
+              "label": "Minutes",
+              "type": "input",
+              "placeholder": "Enter minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Flint Rehab",
+          "showIf": {
+            "field": "modalities",
+            "includes": "flint_rehab_music_glove"
+          }
+        },
+        {
+          "name": "flint_rehab_music_glove",
+          "label": "Flint Rehab - Music Glove",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "flint_rehab_music_glove"
+          },
+          "fields": [
+            {
+              "name": "music_glove_region",
+              "label": "Region",
+              "type": "input",
+              "placeholder": "Enter region"
+            },
+            {
+              "name": "music_glove_difficulty",
+              "label": "Difficulty Level / Speed",
+              "type": "input",
+              "placeholder": "Enter difficulty level or speed"
+            },
+            {
+              "name": "music_glove_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Saebo Stim",
+          "showIf": {
+            "field": "modalities",
+            "includes": "saebo_stim"
+          }
+        },
+        {
+          "name": "saebo_stim",
+          "label": "Saebo Stim",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "saebo_stim"
+          },
+          "fields": [
+            {
+              "name": "saebo_body_region",
+              "label": "Body Region",
+              "type": "input",
+              "placeholder": "Enter body region"
+            },
+            {
+              "name": "saebo_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "FITMI",
+          "showIf": {
+            "field": "modalities",
+            "includes": "flint_rehab_fitmi"
+          }
+        },
+        {
+          "name": "flint_rehab_fitmi",
+          "label": "Flint Rehab - FITMI",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "flint_rehab_fitmi"
+          },
+          "fields": [
+            {
+              "name": "fitmi_exercise_type",
+              "label": "Type of Exercise",
+              "type": "input",
+              "placeholder": "Enter type of exercise"
+            },
+            {
+              "name": "fitmi_repetition",
+              "label": "Repetition",
+              "type": "input",
+              "placeholder": "Enter repetition"
+            },
+            {
+              "name": "fitmi_duration_minutes",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Tilt Table",
+          "showIf": {
+            "field": "modalities",
+            "includes": "tilt_table"
+          }
+        },
+        {
+          "name": "tilt_table",
+          "label": "Tilt Table",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "tilt_table"
+          },
+          "fields": [
+            {
+              "name": "tilt_table_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "tilt_table_angle",
+              "label": "Angle (Degrees)",
+              "type": "input",
+              "placeholder": "Enter tilt angle"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Galileo",
+          "showIf": {
+            "field": "modalities",
+            "includes": "galileo"
+          }
+        },
+        {
+          "name": "galileo",
+          "label": "Galileo",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "galileo"
+          },
+          "fields": [
+            {
+              "name": "galileo_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "galileo_frequency",
+              "label": "Frequency",
+              "type": "input",
+              "placeholder": "Enter frequency"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Recumbent Stepper",
+          "showIf": {
+            "field": "modalities",
+            "includes": "recumbent_stepper"
+          }
+        },
+        {
+          "name": "recumbent_stepper",
+          "label": "Recumbent Stepper",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "recumbent_stepper"
+          },
+          "fields": [
+            {
+              "name": "recumbent_stepper_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "recumbent_stepper_resistance",
+              "label": "Difficulty / Resistance",
+              "type": "input",
+              "placeholder": "Enter resistance or difficulty level"
+            }
+          ]
+        },
+        {
+          "name": "multigym_details",
+          "label": "Multigym",
+          "type": "input",
+          "placeholder": "Enter multigym exercises / parameters / remarks",
+          "showIf": {
+            "field": "modalities",
+            "includes": "multigym"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Treadmill ",
+          "showIf": {
+            "field": "modalities",
+            "includes": "treadmill"
+          }
+        },
+        {
+          "name": "treadmill",
+          "label": "Treadmill - Speed & Duration",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "treadmill"
+          },
+          "fields": [
+            {
+              "name": "treadmill_speed_difficulty",
+              "label": "Speed / Difficulty Level",
+              "type": "input",
+              "placeholder": "Enter speed or difficulty level"
+            },
+            {
+              "name": "treadmill_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Xcite2",
+          "showIf": {
+            "field": "modalities",
+            "includes": "xcite2"
+          }
+        },
+        {
+          "name": "xcite2",
+          "label": "Xcite2",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "xcite2"
+          },
+          "fields": [
+            {
+              "name": "xcite2_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "xcite2_mode",
+              "label": "Mode",
+              "type": "input",
+              "placeholder": "Enter mode"
+            },
+            {
+              "name": "xcite2_frequency",
+              "label": "Frequency",
+              "type": "input",
+              "placeholder": "Enter frequency"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Sonopuls",
+          "showIf": {
+            "field": "modalities",
+            "includes": "sonopuls"
+          }
+        },
+        {
+          "name": "sonopuls",
+          "label": "Sonopuls",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "sonopuls"
+          },
+          "fields": [
+            {
+              "name": "sonopuls_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "sonopuls_placement",
+              "label": "Placement",
+              "type": "input",
+              "placeholder": "Enter treatment placement / body area"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Hot Pack",
+          "showIf": {
+            "field": "modalities",
+            "includes": "hot_pack"
+          }
+        },
+        {
+          "name": "hot_pack",
+          "label": "Hot Pack",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "hot_pack"
+          },
+          "fields": [
+            {
+              "name": "hot_pack_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "hot_pack_placement",
+              "label": "Placement",
+              "type": "input",
+              "placeholder": "Enter treatment placement / body area"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Cryocuff",
+          "showIf": {
+            "field": "modalities",
+            "includes": "cryocuff"
+          }
+        },
+        {
+          "name": "cryocuff",
+          "label": "Cryocuff",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "cryocuff"
+          },
+          "fields": [
+            {
+              "name": "cryocuff_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "cryocuff_placement",
+              "label": "Placement",
+              "type": "input",
+              "placeholder": "Enter treatment placement / body area"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Laser",
+          "showIf": {
+            "field": "modalities",
+            "includes": "laser"
+          }
+        },
+        {
+          "name": "laser",
+          "label": "Laser",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "laser"
+          },
+          "fields": [
+            {
+              "name": "laser_duration",
+              "label": "Duration (Minutes)",
+              "type": "input",
+              "placeholder": "Enter duration in minutes"
+            },
+            {
+              "name": "laser_frequency",
+              "label": "Frequency",
+              "type": "input",
+              "placeholder": "Enter frequency"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Syrebo Robotic Glove",
+          "showIf": {
+            "field": "modalities",
+            "includes": "syrebo_robotic_glove"
+          }
+        },
+        {
+          "name": "syrebo_robotic_glove",
+          "label": "Syrebo Robotic Glove",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "syrebo_robotic_glove"
+          },
+          "fields": [
+            {
+              "name": "syrebo_robotic_glove_mode",
+              "label": "Mode",
+              "type": "input",
+              "placeholder": "Enter mode"
+            },
+            {
+              "name": "syrebo_robotic_glove_duration",
+              "label": "Duration (min)",
+              "type": "input",
+              "placeholder": "Minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Stella Bio",
+          "showIf": {
+            "field": "modalities",
+            "includes": "stella_bio"
+          }
+        },
+        {
+          "name": "stella_bio",
+          "label": "Stella Bio",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "stella_bio"
+          },
+          "fields": [
+            {
+              "name": "stella_bio_mode",
+              "label": "Mode",
+              "type": "input",
+              "placeholder": "Enter mode"
+            },
+            {
+              "name": "stella_bio_frequency",
+              "label": "Frequency",
+              "type": "input",
+              "placeholder": "Enter frequency"
+            },
+            {
+              "name": "stella_bio_duration",
+              "label": "Duration (min)",
+              "type": "input",
+              "placeholder": "Minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "SCI Fit Step One",
+          "showIf": {
+            "field": "modalities",
+            "includes": "sci_fit_step_one"
+          }
+        },
+        {
+          "name": "sci_fit_step_one",
+          "label": "SCI Fit Step One",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "sci_fit_step_one"
+          },
+          "fields": [
+            {
+              "name": "sci_fit_step_one_difficulty_resistance",
+              "label": "Difficulty / Resistance",
+              "type": "input",
+              "placeholder": "Enter difficulty or resistance level"
+            },
+            {
+              "name": "sci_fit_step_one_duration",
+              "label": "Duration (min)",
+              "type": "input",
+              "placeholder": "Minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Ankle Motus",
+          "showIf": {
+            "field": "modalities",
+            "includes": "ankle_motus"
+          }
+        },
+        {
+          "name": "ankle_motus",
+          "label": "Ankle Motus",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "ankle_motus"
+          },
+          "fields": [
+            {
+              "name": "ankle_motus_mode",
+              "label": "Mode",
+              "type": "input",
+              "placeholder": "Enter mode"
+            },
+            {
+              "name": "ankle_motus_duration",
+              "label": "Duration (min)",
+              "type": "input",
+              "placeholder": "Minutes"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "ARM Motus",
+          "showIf": {
+            "field": "modalities",
+            "includes": "arm_motus"
+          }
+        },
+        {
+          "name": "arm_motus",
+          "label": "Arm Motus",
+          "type": "row",
+          "showIf": {
+            "field": "modalities",
+            "includes": "arm_motus"
+          },
+          "fields": [
+            {
+              "name": "arm_motus_mode",
+              "label": "Mode",
+              "type": "input",
+              "placeholder": "Enter mode"
+            },
+            {
+              "name": "arm_motus_duration",
+              "label": "Duration (min)",
+              "type": "input",
+              "placeholder": "Minutes"
+            }
+          ]
+        },
+        {
+          "name": "modalities_other",
+          "label": "Other Modality",
+          "type": "input",
+          "placeholder": "Specify other modality",
+          "showIf": {
+            "field": "modalities",
+            "includes": "others"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Therapeutic Exercises"
+        },
+        {
+          "name": "therapeutic_exercises",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Functional ROM Exercise",
+              "value": "functional_rom_exercise"
+            },
+            {
+              "label": "Functional Strengthening Exercise",
+              "value": "functional_strengthening_exercise"
+            },
+            {
+              "label": "Muscle Tone Management",
+              "value": "muscle_tone_management"
+            },
+            {
+              "label": "Fine Motor and Dexterity Training",
+              "value": "fine_motor_and_dexterity_training"
+            },
+            {
+              "label": "Bobath/NDT Therapy",
+              "value": "bobath_ndt_therapy"
+            },
+            {
+              "label": "Trunk and Core Control Training",
+              "value": "trunk_and_core_control_training"
+            },
+            {
+              "label": "Lower Limbs Activity Training",
+              "value": "lower_limbs_activity_training"
+            },
+            {
+              "label": "Endurance / Cardiovascular Training",
+              "value": "endurance_cardiovascular_training"
+            },
+            {
+              "label": "Balance Training",
+              "value": "balance_training"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Bobath/NDT Therapy",
+          "showIf": {
+            "field": "therapeutic_exercises",
+            "includes": "bobath_ndt_therapy"
+          }
+        },
+        {
+          "name": "bobath_ndt_regions",
+          "label": "Bobath/NDT Therapy - Choose Region",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Trunk & Pelvis",
+              "value": "trunk_pelvis"
+            },
+            {
+              "label": "Lower Limb",
+              "value": "lower_limb"
+            },
+            {
+              "label": "Upper Limb & Hand",
+              "value": "upper_limb_hand"
+            },
+            {
+              "label": "Neck",
+              "value": "neck"
+            }
+          ],
+          "showIf": {
+            "field": "therapeutic_exercises",
+            "includes": "bobath_ndt_therapy"
+          }
+        },
+        {
+          "name": "therapeutic_exercises_others",
+          "label": "Others (Specify)",
+          "type": "input",
+          "placeholder": "Enter other therapeutic exercises",
+          "showIf": {
+            "field": "therapeutic_exercises",
+            "includes": "others"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "ADL and Functional Training"
+        },
+        {
+          "name": "adl_functional_training",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "ADL Training",
+              "value": "adl_training"
+            },
+            {
+              "label": "IADL Training",
+              "value": "iadl_training"
+            },
+            {
+              "label": "Driving Rehabilitation",
+              "value": "driving_rehabilitation"
+            },
+            {
+              "label": "Riding Rehabilitation",
+              "value": "riding_rehabilitation"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "name": "adl_training_items",
+          "label": "ADL Training Activities",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Eating/Feeding",
+              "value": "eating_feeding"
+            },
+            {
+              "label": "Bathing/Showering Simulation",
+              "value": "bathing_showering_simulation"
+            },
+            {
+              "label": "Dressing (UG/LG/Inner Garment/Socks/Shoes)",
+              "value": "dressing"
+            },
+            {
+              "label": "Grooming",
+              "value": "grooming"
+            },
+            {
+              "label": "Toileting Simulation",
+              "value": "toileting_simulation"
+            },
+            {
+              "label": "Sphincter Control",
+              "value": "sphincter_control"
+            },
+            {
+              "label": "Bed Mobility",
+              "value": "bed_mobility"
+            },
+            {
+              "label": "Transfers (Bed)",
+              "value": "transfers_bed"
+            },
+            {
+              "label": "Transfers (Toilet)",
+              "value": "transfers_toilet"
+            },
+            {
+              "label": "Advanced Transfer (Car)",
+              "value": "advanced_transfer_car"
+            },
+            {
+              "label": "Advanced Transfer (Ground)",
+              "value": "advanced_transfer_ground"
+            },
+            {
+              "label": "Locomotion/Functional Mobility (Walking/Wheelchair Training)",
+              "value": "locomotion_functional_mobility"
+            },
+            {
+              "label": "Stair Training",
+              "value": "stair_training"
+            }
+          ],
+          "showIf": {
+            "field": "adl_functional_training",
+            "includes": "adl_training"
+          }
+        },
+        {
+          "name": "iadl_training_items",
+          "label": "IADL Training Activities",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Telephone Use",
+              "value": "telephone_use"
+            },
+            {
+              "label": "Shopping",
+              "value": "shopping"
+            },
+            {
+              "label": "Food Preparation",
+              "value": "food_preparation"
+            },
+            {
+              "label": "Housekeeping",
+              "value": "housekeeping"
+            },
+            {
+              "label": "Laundry",
+              "value": "laundry"
+            },
+            {
+              "label": "Mode of Transportation",
+              "value": "mode_of_transportation"
+            },
+            {
+              "label": "Medication Management",
+              "value": "medication_management"
+            },
+            {
+              "label": "Financial Management",
+              "value": "financial_management"
+            }
+          ],
+          "showIf": {
+            "field": "adl_functional_training",
+            "includes": "iadl_training"
+          }
+        },
+        {
+          "name": "driving_rehabilitation_items",
+          "label": "Driving Rehabilitation Activities",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Off-road Driving",
+              "value": "off_road_driving"
+            },
+            {
+              "label": "On-road Driving",
+              "value": "on_road_driving"
+            }
+          ],
+          "showIf": {
+            "field": "adl_functional_training",
+            "includes": "driving_rehabilitation"
+          }
+        },
+        {
+          "name": "adl_functional_training_others",
+          "label": "Others (Specify)",
+          "type": "input",
+          "placeholder": "Enter other ADL and functional training activities",
+          "showIf": {
+            "field": "adl_functional_training",
+            "includes": "others"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Assistive & Adaptive Devices"
+        },
+        {
+          "name": "assistive_adaptive_devices",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Splint",
+              "value": "splint"
+            },
+            {
+              "label": "Pressure Garment",
+              "value": "pressure_garment"
+            },
+            {
+              "label": "Tubigrip",
+              "value": "tubigrip"
+            },
+            {
+              "label": "Adaptive Nail Clipper",
+              "value": "adaptive_nail_clipper"
+            },
+            {
+              "label": "Lightweight Wheelchair",
+              "value": "lightweight_wheelchair"
+            },
+            {
+              "label": "Ultralight Weight Wheelchair",
+              "value": "ultralight_weight_wheelchair"
+            },
+            {
+              "label": "Motorised Wheelchair",
+              "value": "motorised_wheelchair"
+            },
+            {
+              "label": "Commode Chair / Commode Wheelchair",
+              "value": "commode_chair_wheelchair"
+            },
+            {
+              "label": "Cushion (Air/Foam/Gel)",
+              "value": "cushion"
+            },
+            {
+              "label": "Palmar Pocket",
+              "value": "palmar_pocket"
+            },
+            {
+              "label": "Transfer Board",
+              "value": "transfer_board"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "name": "splint_details",
+          "label": "Splint Details",
+          "type": "input",
+          "placeholder": "Enter splint details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "splint"
+          }
+        },
+        {
+          "name": "pressure_garment_details",
+          "label": "Pressure Garment Details",
+          "type": "input",
+          "placeholder": "Enter pressure garment details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "pressure_garment"
+          }
+        },
+        {
+          "name": "lightweight_wheelchair_details",
+          "label": "Lightweight Wheelchair Details",
+          "type": "input",
+          "placeholder": "Enter lightweight wheelchair details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "lightweight_wheelchair"
+          }
+        },
+        {
+          "name": "ultralight_weight_wheelchair_details",
+          "label": "Ultralight Weight Wheelchair Details",
+          "type": "input",
+          "placeholder": "Enter ultralight weight wheelchair details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "ultralight_weight_wheelchair"
+          }
+        },
+        {
+          "name": "motorised_wheelchair_details",
+          "label": "Motorised Wheelchair Details",
+          "type": "input",
+          "placeholder": "Enter motorised wheelchair details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "motorised_wheelchair"
+          }
+        },
+        {
+          "name": "commode_chair_wheelchair_details",
+          "label": "Commode Chair / Commode Wheelchair Details",
+          "type": "input",
+          "placeholder": "Enter commode chair/wheelchair details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "commode_chair_wheelchair"
+          }
+        },
+        {
+          "name": "cushion_details",
+          "label": "Cushion Details (Air/Foam/Gel)",
+          "type": "input",
+          "placeholder": "Enter cushion details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "cushion"
+          }
+        },
+        {
+          "name": "transfer_board_details",
+          "label": "Transfer Board Details",
+          "type": "input",
+          "placeholder": "Enter transfer board details",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "transfer_board"
+          }
+        },
+        {
+          "name": "assistive_adaptive_devices_others",
+          "label": "Others (Specify)",
+          "type": "input",
+          "placeholder": "Enter other assistive and adaptive devices",
+          "showIf": {
+            "field": "assistive_adaptive_devices",
+            "includes": "others"
+          }
+        }
+      ]
+    }
+  ]
+}
+
+const ASSESSMENT = {
+  "sections": [
+    {
+      "fields": [
+        {
+          "name": "assessment_notes",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
+        {
+          "name": "client_progress",
+          "label": "Client Demonstrates",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Improvement",
+              "value": "improvement"
+            },
+            {
+              "label": "No Change",
+              "value": "no_change"
+            },
+            {
+              "label": "Decline",
+              "value": "decline"
+            }
+          ]
+        },
+        {
+          "name": "progress_adls",
+          "label": "ADLs",
+          "type": "input",
+          "placeholder": "Enter progress in activities of daily living",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "progress_iadls",
+          "label": "IADLs",
+          "type": "input",
+          "placeholder": "Enter progress in instrumental activities of daily living",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "progress_wheelchair_skills",
+          "label": "Wheelchair Skills",
+          "type": "input",
+          "placeholder": "Enter progress in wheelchair skills",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "progress_transfers",
+          "label": "Transfers",
+          "type": "input",
+          "placeholder": "Enter progress in transfer abilities",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "progress_driving",
+          "label": "Driving",
+          "type": "input",
+          "placeholder": "Enter progress in driving rehabilitation",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "progress_riding",
+          "label": "Riding",
+          "type": "input",
+          "placeholder": "Enter progress in riding rehabilitation",
+          "speechToText": true,
+          "ocr": true
+        }
+      ]
+    }
+  ]
+}
+
+const PLAN = {
+  "sections": [
+    {
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Short-Term Goals (2–4 weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
+        },
+        {
+          "type": "subheading",
+          "label": "Long-Term Goals (6–12 weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
+        },
+        {
+          "name": "continue_rehabilitation_targeting",
+          "label": "Continue Rehabilitation Targeting / Focus On",
+          "type": "input",
+          "placeholder": "Enter rehabilitation goals and target areas",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "home_exercise_program",
+          "label": "Home Exercise Program",
+          "type": "input",
+          "placeholder": "Enter prescribed home exercise program",
+          "speechToText": true,
+          "ocr": true
+        },
+        {
+          "name": "plan_others",
+          "label": "Others",
+          "type": "input",
+          "placeholder": "Enter any additional plan details",
+          "speechToText": true,
+          "ocr": true
+        }
+      ]
+    }
+  ]
+}
+
+export default {
+  PLAN,
+  OBJECTIVE,
+  SUBJECTIVE,
+  ASSESSMENT,
+};
