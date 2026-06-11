@@ -1974,26 +1974,55 @@ function renderField(
       );
     }
     case "enteral-feeding-table": {
-      const rows = values[`${field.name}_rows`] || [{ time: "", scoops: "", water: "", flushing: "" }];
+      const rows = values[`${field.name}_rows`] || [{ time: "", scoops1: "", water: "", flushing: "",onsType: "", onsOthers: "",scoops2: "",modular: "", }];
       const updateRow = (idx, col, val) => {
         const next = [...rows];
-        if (!next[idx]) next[idx] = { time: "", scoops: "", water: "", flushing: "" };
+        if (!next[idx]) next[idx] = { time: "", scoops1: "", water: "", flushing: "",  onsType: "", scoops2: "", modular: "",  onsOthers: ""};
         next[idx] = { ...next[idx], [col]: val };
         onChange(`${field.name}_rows`, next);
       };
       const addRow = () => {
         const last = rows.length > 0 ? rows[rows.length - 1] : { time: "", scoops: "", water: "", flushing: "" };
-        const newRow = { time: "", scoops: last.scoops || "", water: last.water || "", flushing: last.flushing || "" };
+        const newRow = { time: "", scoops: last.scoops || "", water: last.water || "", flushing: last.flushing || "",  onsType: "",scoops2: "", modular: "", onsOthers: ""};
         onChange(`${field.name}_rows`, [...rows, newRow]);
       };
       const removeRow = (idx) => onChange(`${field.name}_rows`, rows.filter((_, i) => i !== idx));
-      const template = "repeat(4, 1fr) 70px";
+      const template = "repeat(7, 1fr) 80px";
+      const onsOptions = [
+    "Nutren Optimum",
+    "Myotein",
+    "Nutren Glucobalance",
+    "Gucil",
+    "Nutren Fiber",
+    "Nutren Peptamen",
+    "Ensure Gold",
+    "Glucerna",
+    "Fontactiv Complete",
+    "Fontactiv Diabest",
+    "Resurge Gold",
+    "Resurge Optiblend DM",
+    "Optimaxe Lite",
+    "Supplement DM",
+    "Others"
+  ];
+
+  const modularOptions = [
+    "Modular Product",
+    "Protein Powder",
+    "Fiber Supplement",
+    "Others"
+  ];
+
       return (
         <div style={{ marginTop: 10 }}>
           {/* Header row */}
           <div style={{ ...styles.gridHeaderRow, gridTemplateColumns: template }}>
             <div style={styles.gridHeaderCell}>Time</div>
             <div style={styles.gridHeaderCell}>Scoops</div>
+             <div style={styles.gridHeaderCell}>Type of ONS</div>
+        <div style={styles.gridHeaderCell}>Scoops</div>
+        <div style={styles.gridHeaderCell}>Modular Product</div>
+
             <div style={styles.gridHeaderCell}>Water</div>
             <div style={styles.gridHeaderCell}>Flushing</div>
             <div style={styles.gridHeaderCell}></div>
@@ -2013,6 +2042,40 @@ function renderField(
                 onChange={e => updateRow(idx, "scoops", e.target.value)}
                 style={styles.gridInput}
               />
+                       <select
+            value={row.onsType || ""}
+            onChange={(e) => updateRow(idx, "onsType", e.target.value)}
+            style={styles.gridInput}
+          >
+            <option value="">Select</option>
+            {onsOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+
+          {/* Scoops 2 */}
+          <input
+            type="text"
+            value={row.scoops2 || ""}
+            onChange={(e) => updateRow(idx, "scoops2", e.target.value)}
+            style={styles.gridInput}
+          />
+
+          {/* ✅ Modular Dropdown */}
+          <select
+            value={row.modular || ""}
+            onChange={(e) => updateRow(idx, "modular", e.target.value)}
+            style={styles.gridInput}
+          >
+            <option value="">Select</option>
+            {modularOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
               <input
                 type="text"
                 value={row.water || ""}
@@ -2025,6 +2088,8 @@ function renderField(
                 onChange={e => updateRow(idx, "flushing", e.target.value)}
                 style={styles.gridInput}
               />
+      
+
               <button type="button" onClick={() => removeRow(idx)} style={{ padding: "6px 8px", fontSize: 12, background: "#ef4444", color: "white", border: "none", borderRadius: 4, cursor: "pointer" }}>Remove</button>
             </div>
           ))}
