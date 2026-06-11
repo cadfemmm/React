@@ -1,715 +1,711 @@
-const SUBJECTIVE = {
-  "sections": [
+const SUBJECTIEV = {
+  "fields": [
     {
+      "name": "chief_complaint",
+      "label": "Chief Complaint",
+      "type": "input"
+    },
+    {
+      "name": "hpi",
+      "label": "History of Presenting Illness (HPI)",
+      "type": "input"
+    },
+    {
+      "type": "subheading",
+      "label": "Nutrition Assessment"
+    },
+    {
+      "type": "subheading",
+      "label": "Initial Evaluation - Screening"
+    },
+    {
+      "name": "oral_intake",
+      "label": "Oral Intake",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Normal",
+          "value": "Yes"
+        },
+        {
+          "label": "Impaired",
+          "value": "No"
+        }
+      ]
+    },
+    {
+      "name": "tube_type",
+      "label": "NG / PEG / Others",
+      "type": "input",
+      "showIf": {
+        "field": "oral_intake",
+        "equals": "No"
+      }
+    },
+    {
+      "name": "swallowing_issue",
+      "label": "Swallowing",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Normal",
+          "value": "No"
+        },
+        {
+          "label": "Impaired",
+          "value": "Yes"
+        }
+      ]
+    },
+    {
+      "name": "chewing_issue",
+      "label": "Chewing",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Normal",
+          "value": "No"
+        },
+        {
+          "label": "Impaired",
+          "value": "Yes"
+        }
+      ]
+    },
+    {
+      "name": "dentition_issue",
+      "label": "Dentition",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Normal",
+          "value": "No"
+        },
+        {
+          "label": "Impaired",
+          "value": "Yes"
+        }
+      ]
+    },
+    {
+      "name": "appetite",
+      "label": "Appetite",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Good",
+          "value": "Good"
+        },
+        {
+          "label": "Poor",
+          "value": "Poor"
+        }
+      ]
+    },
+    {
+      "name": "nausea",
+      "label": "Nausea",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Yes",
+          "value": "Yes"
+        },
+        {
+          "label": "No",
+          "value": "No"
+        }
+      ]
+    },
+    {
+      "name": "vomiting",
+      "label": "Vomiting",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Yes",
+          "value": "Yes"
+        },
+        {
+          "label": "No",
+          "value": "No"
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "label": "Bowel Status"
+    },
+    {
+      "type": "row",
       "fields": [
         {
-          "type": "subheading",
-          "label": "Nutrition Assessment"
-        },
-        {
-          "name": "chief_complaint",
-          "label": "Chief Complaint",
-          "type": "textarea"
-        },
-        {
-          "name": "medical_history",
-          "label": "History of Presenting Illness (HPI)",
-          "type": "textarea"
-        },
-        {
-          "type": "subheading",
-          "label": "Initial Evaluation - Screening"
-        },
-        {
-          "name": "oral_intake",
-          "label": "Oral Intake",
+          "name": "bo",
+          "label": "Bowel Control",
           "type": "radio",
           "options": [
             {
-              "label": "Normal",
-              "value": "Yes"
+              "label": "Continent",
+              "value": "CONTINENT"
             },
             {
-              "label": "Impaired",
-              "value": "No"
+              "label": "Incontinent",
+              "value": "INCONTINENT"
             }
-          ]
-        },
-        {
-          "name": "tube_type",
-          "label": "NG / PEG / Others",
-          "type": "input",
-          "showIf": {
-            "field": "oral_intake",
-            "equals": "No"
-          }
-        },
-        {
-          "name": "swallowing_issue",
-          "label": "Swallowing",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Normal",
-              "value": "No"
-            },
-            {
-              "label": "Impaired",
-              "value": "Yes"
-            }
-          ]
-        },
-        {
-          "name": "chewing_issue",
-          "label": "Chewing",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Normal",
-              "value": "No"
-            },
-            {
-              "label": "Impaired",
-              "value": "Yes"
-            }
-          ]
-        },
-        {
-          "name": "dentition_issue",
-          "label": "Dentition",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Normal",
-              "value": "No"
-            },
-            {
-              "label": "Impaired",
-              "value": "Yes"
-            }
-          ]
-        },
-        {
-          "name": "appetite",
-          "label": "Appetite",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Good",
-              "value": "Good"
-            },
-            {
-              "label": "Poor",
-              "value": "Poor"
-            }
-          ]
-        },
-        {
-          "name": "nausea",
-          "label": "Nausea",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Yes",
-              "value": "Yes"
-            },
-            {
-              "label": "No",
-              "value": "No"
-            }
-          ]
-        },
-        {
-          "name": "vomiting",
-          "label": "Vomiting",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Yes",
-              "value": "Yes"
-            },
-            {
-              "label": "No",
-              "value": "No"
-            }
-          ]
-        },
-        {
-          "type": "subheading",
-          "label": "Bowel Status"
-        },
-        {
-          "type": "row",
-          "fields": [
-            {
-              "name": "bo",
-              "label": "Bowel Control",
-              "type": "radio",
-              "options": [
-                {
-                  "label": "Continent",
-                  "value": "CONTINENT"
-                },
-                {
-                  "label": "Incontinent",
-                  "value": "INCONTINENT"
-                }
-              ],
-              "readOnly": true
-            },
-            {
-              "name": "bo_details",
-              "label": "Bowel Pattern",
-              "type": "single-select",
-              "options": [
-                {
-                  "label": "Normal",
-                  "value": "NORMAL"
-                },
-                {
-                  "label": "Constipation",
-                  "value": "CONSTIPATION"
-                },
-                {
-                  "label": "Diarrhea",
-                  "value": "DIARRHEA"
-                },
-                {
-                  "label": "Others",
-                  "value": "OTHERS"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "bo_pattern_details",
-          "label": "Details",
-          "type": "textarea",
-          "showIf": {
-            "field": "bo_details",
-            "oneOf": [
-              "CONSTIPATION",
-              "DIARRHEA",
-              "OTHERS"
-            ]
-          }
-        },
-        {
-          "type": "subheading",
-          "label": "Bladder Status"
-        },
-        {
-          "type": "row",
-          "fields": [
-            {
-              "name": "pu",
-              "label": "Bladder Control",
-              "type": "radio",
-              "options": [
-                {
-                  "label": "Continent",
-                  "value": "CONTINENT"
-                },
-                {
-                  "label": "Incontinent",
-                  "value": "INCONTINENT"
-                }
-              ],
-              "readOnly": true
-            },
-            {
-              "name": "voiding_method",
-              "label": "Voiding Method",
-              "type": "single-select",
-              "options": [
-                {
-                  "label": "Spontaneous",
-                  "value": "Spontaneous"
-                },
-                {
-                  "label": "Condom catheter",
-                  "value": "Condom"
-                },
-                {
-                  "label": "CIC",
-                  "value": "CIC"
-                },
-                {
-                  "label": "CBD",
-                  "value": "CBD"
-                },
-                {
-                  "label": "Other",
-                  "value": "Other"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "voiding_method_other",
-          "label": "Specify other",
-          "type": "input",
-          "showIf": {
-            "field": "voiding_method",
-            "equals": "Other"
-          }
-        },
-        {
-          "name": "sleep",
-          "label": "Sleeping Pattern",
-          "type": "single-select",
-          "options": [
-            {
-              "label": "Good",
-              "value": "Good"
-            },
-            {
-              "label": "Difficulty in sleeping due to Pain",
-              "value": "PAIN"
-            },
-            {
-              "label": "Difficulty in sleeping due to other reason",
-              "value": "OTHER"
-            },
-            {
-              "label": "Difficulty in sleeping",
-              "value": "NOREASON"
-            }
-          ]
-        },
-        {
-          "name": "sleep_difficulty_reason",
-          "label": "Reason",
-          "type": "textarea",
-          "showIf": {
-            "field": "sleep",
-            "oneOf": [
-              "OTHER"
-            ]
-          }
-        },
-        {
-          "name": "hypoglycemic_episode",
-          "label": "Hypoglycemic Episode",
-          "type": "single-select",
-          "options": [
-            {
-              "label": "Never",
-              "value": "Never"
-            },
-            {
-              "label": "Occasional",
-              "value": "Occasional"
-            },
-            {
-              "label": "Frequent",
-              "value": "Frequent"
-            },
-            {
-              "label": "Unknown",
-              "value": "UNKNOWN"
-            },
-            {
-              "label": "Not Relevant",
-              "value": "NOT_RELEVANT"
-            }
-          ]
-        },
-        {
-          "name": "hypoglycemic_episode_details",
-          "label": "Hypoglycemic Episode Details",
-          "type": "textarea",
-          "placeholder": "Please specify...",
-          "showIf": {
-            "field": "hypoglycemic_episode",
-            "oneOf": [
-              "Occasional",
-              "Frequent",
-              "UNKNOWN"
-            ]
-          }
-        },
-        {
-          "name": "other_complaints",
-          "label": "Other Nutrition-Related Complaints",
-          "type": "textarea"
-        },
-        {
-          "type": "subheading",
-          "label": "Food / Nutrition Related History"
-        },
-        {
-          "name": "medications",
-          "label": "List of Medication",
-          "type": "textarea",
+          ],
           "readOnly": true
         },
         {
-          "name": "feeding_type",
-          "label": "Feeding Type",
-          "type": "radio",
+          "name": "bo_details",
+          "label": "Bowel Pattern",
+          "type": "single-select",
           "options": [
             {
-              "label": "Oral Feeding",
-              "value": "oral"
+              "label": "Normal",
+              "value": "NORMAL"
             },
             {
-              "label": "Enteral Feeding",
-              "value": "enteral"
+              "label": "Constipation",
+              "value": "CONSTIPATION"
             },
             {
-              "label": "Mixed Feeding",
-              "value": "mixed"
+              "label": "Diarrhea",
+              "value": "DIARRHEA"
+            },
+            {
+              "label": "Others",
+              "value": "OTHERS"
             }
           ]
-        },
-        {
-          "type": "row",
-          "fields": [
-            {
-              "name": "diet_breakfast",
-              "label": "Breakfast",
-              "type": "textarea"
-            },
-            {
-              "name": "diet_morning_tea",
-              "label": "Morning Tea",
-              "type": "textarea"
-            },
-            {
-              "name": "diet_lunch",
-              "label": "Lunch",
-              "type": "textarea"
-            },
-            {
-              "name": "diet_afternoon_tea",
-              "label": "Afternoon Tea",
-              "type": "textarea"
-            },
-            {
-              "name": "diet_supper",
-              "label": "Dinner",
-              "type": "textarea"
-            },
-            {
-              "name": "diet_dinner",
-              "label": "Supper",
-              "type": "textarea"
-            }
-          ],
-          "showIf": {
-            "field": "feeding_type",
-            "equals": "oral"
-          }
-        },
-        {
-          "name": "enteral_feeding_table",
-          "label": "Enteral Feeding",
-          "type": "enteral-feeding-table",
-          "showIf": {
-            "field": "feeding_type",
-            "equals": "enteral"
-          }
-        },
-        {
-          "name": "enteral_feeding_details",
-          "label": "Enteral Feeding Notes",
-          "type": "textarea",
-          "showIf": {
-            "field": "feeding_type",
-            "equals": "enteral"
-          }
-        },
-        {
-          "name": "mixed_feeding_table",
-          "label": "Mixed Feeding",
-          "type": "enteral-feeding-table",
-          "showIf": {
-            "field": "feeding_type",
-            "equals": "mixed"
-          }
-        },
-        {
-          "name": "mixed_feeding_details",
-          "label": "Mixed Feeding Notes",
-          "type": "textarea",
-          "showIf": {
-            "field": "feeding_type",
-            "equals": "mixed"
-          }
-        },
-        {
-          "type": "subheading",
-          "label": "Texture Modification @ IDDSI Level",
-          "showIf": {
-            "field": "feeding_type",
-            "oneOf": [
-              "oral",
-              "mixed"
-            ]
-          }
-        },
-        {
-          "name": "iddsi_food",
-          "label": "Food",
-          "type": "radio",
-          "labelAbove": true,
-          "showIf": {
-            "field": "feeding_type",
-            "oneOf": [
-              "oral",
-              "mixed"
-            ]
-          },
-          "options": [
-            {
-              "label": "7 – Regular",
-              "value": "7"
-            },
-            {
-              "label": "6 – Easy To Chew",
-              "value": "6"
-            },
-            {
-              "label": "5 – Soft & Bite-Sized",
-              "value": "5"
-            },
-            {
-              "label": "4 – Pureed",
-              "value": "4"
-            },
-            {
-              "label": "3 – Liquidised",
-              "value": "3"
-            }
-          ]
-        },
-        {
-          "name": "iddsi_drink",
-          "label": "Drink",
-          "type": "radio",
-          "labelAbove": true,
-          "showIf": {
-            "field": "feeding_type",
-            "oneOf": [
-              "oral",
-              "mixed"
-            ]
-          },
-          "options": [
-            {
-              "label": "0 – Thin",
-              "value": "0"
-            },
-            {
-              "label": "1 – Slightly Thick",
-              "value": "1"
-            },
-            {
-              "label": "2 – Mildly Thick",
-              "value": "2"
-            },
-            {
-              "label": "3 – Moderately Thick",
-              "value": "3"
-            },
-            {
-              "label": "4 – Extremely Thick",
-              "value": "4"
-            }
-          ]
-        },
-        {
-          "name": "fluid_intake_details",
-          "label": "Fluid Intake",
-          "type": "input",
-          "showIf": {
-            "field": "feeding_type",
-            "oneOf": [
-              "oral",
-              "enteral",
-              "mixed"
-            ]
-          }
-        },
-        {
-          "name": "cdi_frequency",
-          "label": "Frequency (times/day)",
-          "type": "input",
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "equals": "oral_enteral"
-          }
-        },
-        {
-          "name": "cdi_enteral_type",
-          "label": "Type",
-          "type": "radio",
-          "labelAbove": true,
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "equals": "enteral"
-          },
-          "options": [
-            {
-              "label": "OGT",
-              "value": "OGT"
-            },
-            {
-              "label": "NGT",
-              "value": "NGT"
-            },
-            {
-              "label": "NJT",
-              "value": "NJT"
-            },
-            {
-              "label": "G-tube",
-              "value": "G-tube"
-            },
-            {
-              "label": "J-tube",
-              "value": "J-tube"
-            }
-          ]
-        },
-        {
-          "type": "row",
-          "fields": [
-            {
-              "name": "cdi_enteral_scoops",
-              "label": "Regimen – Scoops",
-              "type": "input"
-            },
-            {
-              "name": "cdi_enteral_water_ml",
-              "label": "Water (ml)",
-              "type": "input"
-            }
-          ],
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "equals": "enteral"
-          }
-        },
-        {
-          "name": "cdi_enteral_schedule",
-          "label": "Feeding Schedule",
-          "type": "radio",
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "equals": "enteral"
-          },
-          "options": [
-            {
-              "label": "3-hourly",
-              "value": "3_hourly"
-            },
-            {
-              "label": "4-hourly",
-              "value": "4_hourly"
-            },
-            {
-              "label": "Continuous",
-              "value": "continuous"
-            }
-          ]
-        },
-        {
-          "name": "cdi_enteral_iddsi_level",
-          "label": "IDDSI Level",
-          "type": "radio",
-          "labelAbove": true,
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "equals": "enteral"
-          },
-          "options": [
-            {
-              "label": "Level 0 – Thin",
-              "value": "0"
-            },
-            {
-              "label": "Level 1 – Slightly Thick",
-              "value": "1"
-            },
-            {
-              "label": "Level 2 – Mildly Thick",
-              "value": "2"
-            },
-            {
-              "label": "Level 3 – Moderately Thick / Liquidised",
-              "value": "3"
-            },
-            {
-              "label": "Level 4 – Extremely Thick / Pureed",
-              "value": "4"
-            },
-            {
-              "label": "Level 5 – Minced & Moist",
-              "value": "5"
-            },
-            {
-              "label": "Level 6 – Soft & Bite-sized",
-              "value": "6"
-            },
-            {
-              "label": "Level 7EC – Easy to Chew",
-              "value": "7EC"
-            },
-            {
-              "label": "Level 7 – Regular",
-              "value": "7"
-            }
-          ]
-        },
-        {
-          "name": "cdi_enteral_fluids",
-          "label": "Fluids",
-          "type": "input",
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "equals": "enteral"
-          }
-        },
-        {
-          "name": "fluid_intake_details",
-          "label": "Fluid Intake",
-          "type": "input",
-          "showIf": {
-            "field": "current_diet_intake_type",
-            "oneOf": [
-              "oral_enteral",
-              "enteral"
-            ]
-          }
-        },
-        {
-          "name": "ffq_assessment",
-          "label": "Food Frequency Questionnaire (FFQ)",
-          "type": "assessment-launcher",
-          "autoOpen": true,
-          "options": [
-            {
-              "label": "Food Frequency Questionnaire (FFQ)",
-              "value": "FFQ"
-            }
-          ]
-        },
-        {
-          "name": "ons_regime",
-          "label": "Oral Nutrition Supplement Regime",
-          "type": "textarea"
         }
       ]
+    },
+    {
+      "name": "bo_pattern_details",
+      "label": "Details",
+      "type": "input",
+      "showIf": {
+        "field": "bo_details",
+        "oneOf": [
+          "CONSTIPATION",
+          "DIARRHEA",
+          "OTHERS"
+        ]
+      }
+    },
+    {
+      "type": "subheading",
+      "label": "Bladder Status"
+    },
+    {
+      "type": "row",
+      "fields": [
+        {
+          "name": "pu",
+          "label": "Bladder Control",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Continent",
+              "value": "CONTINENT"
+            },
+            {
+              "label": "Incontinent",
+              "value": "INCONTINENT"
+            }
+          ],
+          "readOnly": true
+        },
+        {
+          "name": "voiding_method",
+          "label": "Voiding Method",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "Spontaneous",
+              "value": "Spontaneous"
+            },
+            {
+              "label": "Condom catheter",
+              "value": "Condom"
+            },
+            {
+              "label": "CIC",
+              "value": "CIC"
+            },
+            {
+              "label": "CBD",
+              "value": "CBD"
+            },
+            {
+              "label": "Other",
+              "value": "Other"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "voiding_method_other",
+      "label": "Specify other",
+      "type": "input",
+      "showIf": {
+        "field": "voiding_method",
+        "equals": "Other"
+      }
+    },
+    {
+      "name": "sleep",
+      "label": "Sleeping Pattern",
+      "type": "single-select",
+      "options": [
+        {
+          "label": "Good",
+          "value": "Good"
+        },
+        {
+          "label": "Difficulty in sleeping due to Pain",
+          "value": "PAIN"
+        },
+        {
+          "label": "Difficulty in sleeping due to other reason",
+          "value": "OTHER"
+        },
+        {
+          "label": "Difficulty in sleeping",
+          "value": "NOREASON"
+        }
+      ]
+    },
+    {
+      "name": "sleep_difficulty_reason",
+      "label": "Reason",
+      "type": "input",
+      "showIf": {
+        "field": "sleep",
+        "oneOf": [
+          "OTHER"
+        ]
+      }
+    },
+    {
+      "name": "hypoglycemic_episode",
+      "label": "Hypoglycemic Episode",
+      "type": "single-select",
+      "options": [
+        {
+          "label": "Never",
+          "value": "Never"
+        },
+        {
+          "label": "Occasional",
+          "value": "Occasional"
+        },
+        {
+          "label": "Frequent",
+          "value": "Frequent"
+        },
+        {
+          "label": "Unknown",
+          "value": "UNKNOWN"
+        },
+        {
+          "label": "Not Relevant",
+          "value": "NOT_RELEVANT"
+        }
+      ]
+    },
+    {
+      "name": "hypoglycemic_episode_details",
+      "label": "Hypoglycemic Episode Details",
+      "type": "input",
+      "placeholder": "Please specify...",
+      "showIf": {
+        "field": "hypoglycemic_episode",
+        "oneOf": [
+          "Occasional",
+          "Frequent",
+          "UNKNOWN"
+        ]
+      }
+    },
+    {
+      "name": "other_complaints",
+      "label": "Other Nutrition-Related Complaints",
+      "type": "input"
+    },
+    {
+      "type": "subheading",
+      "label": "Food / Nutrition Related History"
+    },
+    {
+      "name": "medications",
+      "label": "List of Medication",
+      "type": "input",
+      "readOnly": true
+    },
+    {
+      "name": "feeding_type",
+      "label": "Feeding Type",
+      "type": "radio",
+      "options": [
+        {
+          "label": "Oral Feeding",
+          "value": "oral"
+        },
+        {
+          "label": "Enteral Feeding",
+          "value": "enteral"
+        },
+        {
+          "label": "Mixed Feeding",
+          "value": "mixed"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "fields": [
+        {
+          "name": "diet_breakfast",
+          "label": "Breakfast",
+          "type": "input"
+        },
+        {
+          "name": "diet_morning_tea",
+          "label": "Morning Tea",
+          "type": "input"
+        },
+        {
+          "name": "diet_lunch",
+          "label": "Lunch",
+          "type": "input"
+        },
+        {
+          "name": "diet_afternoon_tea",
+          "label": "Afternoon Tea",
+          "type": "input"
+        },
+        {
+          "name": "diet_supper",
+          "label": "Dinner",
+          "type": "input"
+        },
+        {
+          "name": "diet_dinner",
+          "label": "Supper",
+          "type": "input"
+        }
+      ],
+      "showIf": {
+        "field": "feeding_type",
+        "equals": "oral"
+      }
+    },
+    {
+      "name": "enteral_feeding_table",
+      "label": "Enteral Feeding",
+      "type": "enteral-feeding-table",
+      "showIf": {
+        "field": "feeding_type",
+        "equals": "enteral"
+      }
+    },
+    {
+      "name": "enteral_feeding_details",
+      "label": "Enteral Feeding Notes",
+      "type": "input",
+      "showIf": {
+        "field": "feeding_type",
+        "equals": "enteral"
+      }
+    },
+    {
+      "name": "mixed_feeding_table",
+      "label": "Mixed Feeding",
+      "type": "enteral-feeding-table",
+      "showIf": {
+        "field": "feeding_type",
+        "equals": "mixed"
+      }
+    },
+    {
+      "name": "mixed_feeding_details",
+      "label": "Mixed Feeding Notes",
+      "type": "input",
+      "showIf": {
+        "field": "feeding_type",
+        "equals": "mixed"
+      }
+    },
+    {
+      "type": "subheading",
+      "label": "Texture Modification @ IDDSI Level",
+      "showIf": {
+        "field": "feeding_type",
+        "oneOf": [
+          "oral",
+          "mixed"
+        ]
+      }
+    },
+    {
+      "name": "iddsi_food",
+      "label": "Food",
+      "type": "radio",
+      "labelAbove": true,
+      "showIf": {
+        "field": "feeding_type",
+        "oneOf": [
+          "oral",
+          "mixed"
+        ]
+      },
+      "options": [
+        {
+          "label": "7 – Regular / Easy To Chew",
+          "value": "7"
+        },
+        {
+          "label": "6 – Soft & Bite-Size",
+          "value": "6"
+        },
+        {
+          "label": "5 – Minced & Moist",
+          "value": "5"
+        },
+        {
+          "label": "4 – Pureed",
+          "value": "4"
+        },
+        {
+          "label": "3 – Liquidised",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "iddsi_drink",
+      "label": "Drink",
+      "type": "radio",
+      "labelAbove": true,
+      "showIf": {
+        "field": "feeding_type",
+        "oneOf": [
+          "oral",
+          "mixed"
+        ]
+      },
+      "options": [
+        {
+          "label": "0 – Thin",
+          "value": "0"
+        },
+        {
+          "label": "1 – Slightly Thick",
+          "value": "1"
+        },
+        {
+          "label": "2 – Mildly Thick",
+          "value": "2"
+        },
+        {
+          "label": "3 – Moderately Thick",
+          "value": "3"
+        },
+        {
+          "label": "4 – Extremely Thick",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "fluid_intake_details",
+      "label": "Fluid Intake",
+      "type": "input",
+      "showIf": {
+        "field": "feeding_type",
+        "oneOf": [
+          "oral",
+          "enteral",
+          "mixed"
+        ]
+      }
+    },
+    {
+      "name": "cdi_frequency",
+      "label": "Frequency (times/day)",
+      "type": "input",
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "equals": "oral_enteral"
+      }
+    },
+    {
+      "name": "cdi_enteral_type",
+      "label": "Type",
+      "type": "radio",
+      "labelAbove": true,
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "equals": "enteral"
+      },
+      "options": [
+        {
+          "label": "OGT",
+          "value": "OGT"
+        },
+        {
+          "label": "NGT",
+          "value": "NGT"
+        },
+        {
+          "label": "NJT",
+          "value": "NJT"
+        },
+        {
+          "label": "G-tube",
+          "value": "G-tube"
+        },
+        {
+          "label": "J-tube",
+          "value": "J-tube"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "fields": [
+        {
+          "name": "cdi_enteral_scoops",
+          "label": "Regimen – Scoops",
+          "type": "input"
+        },
+        {
+          "name": "cdi_enteral_water_ml",
+          "label": "Water (ml)",
+          "type": "input"
+        }
+      ],
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "equals": "enteral"
+      }
+    },
+    {
+      "name": "cdi_enteral_schedule",
+      "label": "Feeding Schedule",
+      "type": "radio",
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "equals": "enteral"
+      },
+      "options": [
+        {
+          "label": "3-hourly",
+          "value": "3_hourly"
+        },
+        {
+          "label": "4-hourly",
+          "value": "4_hourly"
+        },
+        {
+          "label": "Continuous",
+          "value": "continuous"
+        }
+      ]
+    },
+    {
+      "name": "cdi_enteral_iddsi_level",
+      "label": "IDDSI Level",
+      "type": "radio",
+      "labelAbove": true,
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "equals": "enteral"
+      },
+      "options": [
+        {
+          "label": "Level 0 – Thin",
+          "value": "0"
+        },
+        {
+          "label": "Level 1 – Slightly Thick",
+          "value": "1"
+        },
+        {
+          "label": "Level 2 – Mildly Thick",
+          "value": "2"
+        },
+        {
+          "label": "Level 3 – Moderately Thick / Liquidised",
+          "value": "3"
+        },
+        {
+          "label": "Level 4 – Extremely Thick / Pureed",
+          "value": "4"
+        },
+        {
+          "label": "Level 5 – Minced & Moist",
+          "value": "5"
+        },
+        {
+          "label": "Level 6 – Soft & Bite-sized",
+          "value": "6"
+        },
+        {
+          "label": "Level 7EC – Easy to Chew",
+          "value": "7EC"
+        },
+        {
+          "label": "Level 7 – Regular",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "cdi_enteral_fluids",
+      "label": "Fluids",
+      "type": "input",
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "equals": "enteral"
+      }
+    },
+    {
+      "name": "fluid_intake_details",
+      "label": "Fluid Intake",
+      "type": "input",
+      "showIf": {
+        "field": "current_diet_intake_type",
+        "oneOf": [
+          "oral_enteral",
+          "enteral"
+        ]
+      }
+    },
+    {
+      "name": "ffq_assessment",
+      "label": "Food Frequency Questionnaire (FFQ)",
+      "type": "assessment-launcher",
+      "options": [
+        {
+          "label": "Food Frequency Questionnaire (FFQ)",
+          "value": "FFQ"
+        }
+      ]
+    },
+    {
+      "name": "ons_regime",
+      "label": "Oral Nutrition Supplement Regime",
+      "type": "input"
     }
   ]
 }
 
+
 const OBJECTIVE = {
-  "sections": [
+  "section": [
     {
       "fields": [
         {
@@ -739,6 +735,10 @@ const OBJECTIVE = {
             {
               "label": "BIA",
               "value": "BIA"
+            },
+            {
+              "label": "NewSGA",
+              "value": "NewSGA"
             }
           ]
         },
@@ -836,7 +836,7 @@ const OBJECTIVE = {
         {
           "name": "anthro_remarks",
           "label": "Remarks",
-          "type": "textarea"
+          "type": "input"
         },
         {
           "type": "subheading",
@@ -886,6 +886,16 @@ const OBJECTIVE = {
               "label": "Pain Score",
               "type": "input",
               "readOnly": true
+            },
+            {
+              "name": "vital_others",
+              "label": "Others",
+              "type": "input"
+            },
+            {
+              "name": "vital_uplaod",
+              "label": "Upload",
+              "type": "attach-file"
             }
           ]
         },
@@ -922,7 +932,7 @@ const ASSESSMENT = {
     {
       "fields": [
         {
-          "type": "subheading",
+          "type": "input",
           "label": "Clinical Impression"
         }
       ]
@@ -931,22 +941,24 @@ const ASSESSMENT = {
 }
 
 const PLAN = {
-  "sections": [
+  "section": [
     {
       "fields": [
         {
           "type": "subheading",
-          "label": "Goals"
+          "label": "Short-Term Goals (2–4 weeks)"
         },
         {
-          "name": "plan_short_term_goals",
-          "label": "Short-Term Goals",
-          "type": "input"
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
         },
         {
-          "name": "plan_long_term_goals",
-          "label": "Long-Term Goals",
-          "type": "input"
+          "type": "subheading",
+          "label": "Long-Term Goals (6–12 weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
         },
         {
           "type": "heading",
@@ -1005,10 +1017,6 @@ const PLAN = {
               "value": "Low Protein"
             },
             {
-              "label": "RTF Regime",
-              "value": "RTF Regime"
-            },
-            {
               "label": "Addons (Supplements)",
               "value": "Addons (Supplements)"
             },
@@ -1060,7 +1068,7 @@ const PLAN = {
         {
           "name": "plan_enteral_feeding_details",
           "label": "Enteral Feeding Notes",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "meal_plan_mod_feeding_type",
             "equals": "enteral"
@@ -1087,7 +1095,7 @@ const PLAN = {
         {
           "name": "plan_mixed_feeding_details",
           "label": "Mixed Feeding Notes",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "meal_plan_mod_feeding_type",
             "equals": "mixed"
@@ -1236,7 +1244,7 @@ const PLAN = {
         {
           "name": "plan_referral_optometry_details",
           "label": "Optometry – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Optometry"
@@ -1245,7 +1253,7 @@ const PLAN = {
         {
           "name": "plan_referral_psychology_details",
           "label": "Psychology – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Psychology"
@@ -1254,7 +1262,7 @@ const PLAN = {
         {
           "name": "plan_referral_doctors_details",
           "label": "Doctors – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Doctors"
@@ -1263,7 +1271,7 @@ const PLAN = {
         {
           "name": "plan_referral_audiology_details",
           "label": "Audiology – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Audiology"
@@ -1272,7 +1280,7 @@ const PLAN = {
         {
           "name": "plan_referral_speech_details",
           "label": "Speech – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Speech"
@@ -1281,7 +1289,7 @@ const PLAN = {
         {
           "name": "plan_referral_others_details",
           "label": "Others – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Others"
