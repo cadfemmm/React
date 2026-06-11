@@ -33,10 +33,17 @@ const ET_OPTIONS = {
 }
 
 export default function DietProgressAssessmentForm({ patient, onSubmit, onBack }) {
+    const [submitted, setSubmitted] = useState(false);
+    const [values, setValues] = useState({});
   const DietGrowthChartAssessment = (props) => (
     <GrowthChartAssessment {...props} patient={patient} />
   );
 
+  const handleSubmit = () => {
+    setSubmitted(true);
+    console.log("Diet Progress Assessment Submited", values);
+    alert("Assessment submitted");
+  };
   const DIET_REGISTRY = {
     ...DIET_ASSESSMENT_REGISTRY,
     "Growth Chart": DietGrowthChartAssessment,
@@ -85,7 +92,7 @@ diet_supper: "",
 diet_dinner: "",
 feeding_type: "",
 enteral_feeding_details: "",
-    enteral_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }],
+    enteral_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" ,}],
 mixed_feeding_details: "",
     mixed_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }],
     iddsi_level: "",
@@ -630,15 +637,26 @@ const submitAndSave = () => {
     sections: [
         {
         fields: [
+          { name: "chief_complaint", label: "Chief Complaint", type: "input" },
+          { name: "hpi", label: "History of Presenting Illness (HPI)", type: "input" },
             {
             name: "session_for",
             label: "Session For",
             type: "radio",
             options: [
                 { label: "Dietetic Therapy", value: "therapy" },
-                { label: "Dietetic Rehabilitation", value: "rehabilitation" }
+                { label: "Specialised Programme", value: "specialized_programmes" }
             ]
             },
+{
+    name: "specialized_programme",
+    label: "Specify Specialized Programme",
+    type: "input",
+    showIf: {
+        field: "session_for",
+        equals: "specialized_programmes"
+    }
+},
 
             {
             name: "consent",
@@ -651,9 +669,48 @@ const submitAndSave = () => {
                 }
             ]
             },
+            {
+  name: "consent_document",
+  label: "Upload Consent Document",
+  type: "attach-file",
+  showIf: {
+    field: "consent",
+    includes: "yes"
+  }
+},
+            { name: "case_overview", label: "Case Overview", type: "input" },
 
-            { name: "new_complaints", label: "New Complaints", type: "textarea" },
-            { name: "sessions", label: "Sessions", type: "textarea" }
+
+            // { name: "new_complaints", label: "New Complaints", type: "input" },
+            {
+  name: "has_new_complaints",
+  label: "New Complaints",
+  type: "radio",
+  options: [
+    { label: "Yes", value: "yes" },
+    { label: "No", value: "no" }
+  ]
+},
+{
+  name: "new_complaints",
+  label: "Please Specify New Complaints",
+  type: "input",
+  showIf: {
+    field: "has_new_complaints",
+    equals: "yes"
+  }
+},
+            // { name: "sessions", label: "Sessions", type: "input" }
+//             {
+//   name: "session_type",
+//   label: "Session Type",
+//   type: "radio",
+//   options: [
+//     { label: "Center Based", value: "center_based" },
+//     { label: "Home Based", value: "home_based" },
+//     { label: "Tele Rehab", value: "tele_rehab" }
+//   ]
+// }
         ]
         }
     ]
@@ -665,23 +722,8 @@ const submitAndSave = () => {
     sections: [
         {
         fields: [
-            { name: "case_overview", label: "Case Overview", type: "textarea" },
-
-            {
-            name: "modalities",
-            label: "Modalities",
-            type: "checkbox-group",
-            options: [
-                { label: "Medical Nutrition Therapy", value: "mnt" },
-                { label: "Therapeutic Diet Preparation", value: "tdp" },
-                { label: "Nutrition Support", value: "nutrition_support" },
-                { label: "Dietary Education", value: "dietary_education" }
-            ]
-            },
-
-            { name: "strategies", label: "Strategies", type: "textarea" },
-
-           {
+           
+ {
             name: "objectives",
             label: "Objective(s)",
             type: "dynamic-section",
@@ -692,7 +734,95 @@ const submitAndSave = () => {
                 type: "input"
               }
             ]
-          }
+          },
+           { name: "case_overview", label: "Case Overview", type: "input" },
+           {
+  type: "radio",
+  name: "modalities",
+  label: "Modalities",
+  options: [
+    { label: "Weighing scale", value: "weighing_scale" },
+    { label: "Body Composition Analysis", value: "body_composition_analysis" },
+    { label: "Others", value: "others" },
+    { label: "Not relevant", value: "not_relevant" }
+  ]
+},
+{
+  type: "input",
+  name: "modalities_other",
+  label: "Specify Other Modality",
+  showIf: {
+    field: "modalities",
+    equals: "others"
+  }
+},
+            {
+            name: "therapeutic_exercise",
+            label: "Therapeutic Exercise/Intervention",
+            type: "checkbox-group",
+            options: [
+                { label: "Medical Nutrition Therapy", value: "mnt" },
+                { label: "Therapeutic Diet Preparation", value: "tdp" },
+                { label: "Nutrition Support", value: "nutrition_support" },
+                { label: "Dietary Education", value: "dietary_education" },
+                { label: "Others", value: "others" }
+            ]
+            },
+
+
+            {
+  name: "therapeutic_exercise_others",
+  label: "Others - Please Specify",
+  type: "input",
+  showIf: {
+    field: "therapeutic_exercise",
+    includes: "others"
+  }
+},
+{
+            name: "strateggies_activities",
+            label: "Strateggies/Activities",
+            type: "checkbox-group",
+            options: [
+                { label: "Medical Nutrition Therapy", value: "mnt" },
+                { label: "Therapeutic Diet Preparation", value: "tdp" },
+                { label: "Nutrition Support", value: "nutrition_support" },
+                { label: "Dietary Education", value: "dietary_education" },
+                
+            ]
+            },
+            
+{
+  name: "adverse_reaction",
+  label: "Adverse Reaction",
+  type: "radio",
+  options: [
+    { label: "Yes", value: "yes" },
+    { label: "No", value: "no" }
+  ]
+},
+{
+  name: "adverse_reaction_details",
+  label: "Details of Adverse Reaction",
+  type: "input",
+  showIf: {
+    field: "adverse_reaction",
+    equals: "yes"
+  }
+},
+{
+  name: "adverse_reaction_document",
+  label: "Upload Supporting Document",
+  type: "file-upload",
+  showIf: {
+    field: "adverse_reaction",
+    equals: "yes"
+  }
+},
+
+            // { name: "strategies", label: "Strategies", type: "input" },
+
+          
         ]
         }
     ]
@@ -703,6 +833,7 @@ const DIET_ASSESSMENT_SCHEMA = {
   sections: [
     {
       fields: [
+        { type: "input", label: "Clinical Impression" },
         {
           type: "subheading",
           label: "A – ANALYSIS / ASSESSMENT / ACTION"
@@ -733,7 +864,8 @@ const DIET_ASSESSMENT_SCHEMA = {
               name: "comment",
               label: "Comment / Remark",
               type: "input"
-            }
+            },
+
           ]
         },
       ]
@@ -746,9 +878,18 @@ const DIET_ASSESSMENT_SCHEMA = {
     sections: [
         {
         fields: [
-            { name: "plan", label: "Plan", type: "textarea" },
-            { name: "comment", label: "Comment", type: "textarea" },
-            { name: "remark", label: "Remark", type: "textarea" }
+          { type: "subheading", label: "Short-Term Goals (2–4 weeks)" },
+        {
+            type: "dynamic-goals",
+            name: "short_term_goals"
+          },
+          { type: "subheading", label: "Long-Term Goals (6–12 weeks)" },
+          {
+            type: "dynamic-goals",
+            name: "long_term_goals"
+          },
+            { name: "plan", label: "Plan", type: "input" },
+            { name: "comment", label: "Comment", type: "input" },
         ]
         }
     ]
@@ -807,6 +948,8 @@ const DIET_ASSESSMENT_SCHEMA = {
     if (readonly.includes(name)) return;
     setField(name, value);
   };
+const tabOrder = ["subjective", "objective", "assessment", "plan"];
+const activeTabIdx = tabOrder.indexOf(activeTab);
 
   const diagnosisComputedValues = (problems) => {
     var data = {}
@@ -830,150 +973,19 @@ const DIET_ASSESSMENT_SCHEMA = {
   }                 
 
 
- const [patientHistory, setPatientHistory] = useState({
-          past_medical_history: patient?.medical_history || "",
-          past_family_history: patient?.family_medical_history || "",
-          alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-        });
-        function PatientInformationBlock({ patient, patientHistory, setPatientHistory }) {
-          if (!patient) return null;
-        
-          const formatDate = (dateStr) => {
-            if (!dateStr) return "-";
-            try {
-              return new Date(dateStr).toLocaleDateString();
-            } catch {
-              return "-";
-            }
-          };
-        
-          return (
-            <div style={{ marginBottom: 24 }}>
-                      
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 12,
-                fontSize: 14
-              }}>
-                <div><b>Name:</b> {patient.name}</div>
-                <div><b>IC:</b> {patient.id}</div>
-                <div><b>DOB:</b> {formatDate(patient.dob)}</div>
-        
-                <div><b>Age / Gender:</b> {patient.age} / {patient.sex}</div>
-                <div><b>ICD:</b> {patient.icd}</div>
-                <div><b>Date of Assessment:</b> {new Date().toLocaleDateString()}</div>
-        
-                <div><b>Date of Onset:</b> {formatDate(patient.date_of_onset)}</div>
-                <div><b>Duration of Diagnosis:</b> -</div>
-                <div><b>Primary Diagnosis:</b> {patient.diagnosis_history || "-"}</div>
-        
-                <div><b>Secondary Diagnosis:</b> {patient.medical_history || "-"}</div>
-                <div><b>Dominant Side:</b> {patient.dominant_side || "-"}</div>
-                <div><b>Language Preference:</b> {patient.language_preference || "-"}</div>
-        
-                <div><b>Education Level:</b> {patient.education_background || "-"}</div>
-                <div><b>Occupation:</b> {patient.occupation || "-"}</div>
-                <div><b>Work Status:</b> {patient.employment_status || "-"}</div>
-        
-                <div><b>Driving Status:</b> {patient.driving_status || "-"}</div>
-                <div><b>PP/OB:</b> {patient.pp_ob || "-"}</div>
-                <div><b>Weight:</b> {patient.weight ? `${patient.weight} kg` : "-"}</div>
-        
-                {/* ===== HISTORY ===== */}
-                <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
-                  <h3>Patient History</h3>
-        
-                  <div>
-                    <b>Past Medical History</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.past_medical_history}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          past_medical_history: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-        
-                  <div>
-                    <b>Family History</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.past_family_history}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          past_family_history: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-        
-                  <div>
-                    <b>Allergies</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.alerts_and_allergies}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          alerts_and_allergies: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-        
-                  <button style={alertBtn}>🚨 Alerts</button>
-                </div>
-              </div>
-            </div>
-          );
-        }
-        const textarea = {
-          width: "100%",
-          minHeight: 90,
-          marginTop: 6,
-          marginBottom: 12,
-          padding: "10px 12px",
-          borderRadius: 6,
-          border: "1px solid #d1d5db",
-          fontSize: 14,
-          resize: "vertical"
-        };
-        
-        const alertBtn = {
-          marginTop: 10,
-          padding: "10px 20px",
-          borderRadius: 6,
-          border: "1.5px solid #007bff",
-          background: "#007bff",
-          color: "#fff",
-          fontWeight: 600,
-          cursor: "pointer"
-        };
+
 return (
   <div style={dietOuterWrap}>
     <div style={dietFormBox}>
 
       {/* PATIENT INFO */}
-      <CommonFormBuilder
-        schema={{ title: "Patient Information", sections: [] }}
-        values={{}}
-        onChange={() => {}}
-      >
-        <PatientInformationBlock
+      
+        <PatientCard
           patient={patient}
-          patientHistory={patientHistory}
-          setPatientHistory={setPatientHistory}
+          
         />
 
-        <button style={doctorsReportBtn}>
-          Doctors Reports
-        </button>
-      </CommonFormBuilder>
+        
 
       {/* TABS */}
       <div style={dietTabBar}>
@@ -994,7 +1006,20 @@ return (
         values={dietValues}
         onChange={dietOnChange}
         onAction={handleAction}
+
       />
+      <div style={submitRow}>
+            {activeTab !== "plan" ? (
+              <button style={submitBtn} onClick={() => setActiveTab(tabOrder[activeTabIdx + 1])}>
+                Next
+              </button>
+            ) : (
+              <button style={submitBtn} onClick={handleSubmit}>
+                Submit
+              </button>
+            )}
+          </div>
+
 
     </div>
   </div>
@@ -1018,7 +1043,7 @@ const styles = {
     background: "#eee",
     color: "#333",
   },
-  textarea: {
+  input: {
     width: "100%",
     padding: "7px 12px",
     borderRadius: 6,
@@ -1179,4 +1204,19 @@ const doctorsReportBtn = {
   fontWeight: 600,
   cursor: "pointer",
   marginTop: 8
+};
+const submitRow = {
+  display: "flex",
+  justifyContent: "flex-end",
+  marginTop: 20
+};
+
+const submitBtn = {
+  padding: "12px 32px",
+  background: "#2563EB",
+  color: "#fff",
+  border: "none",
+  borderRadius: 10,
+  fontSize: 15,
+  fontWeight: 700
 };

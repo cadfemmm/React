@@ -5,6 +5,8 @@ import { DIET_ASSESSMENT_REGISTRY } from "./DietAssessmentWrapper";
 import FFQAssessment from "./FFQAssessment";
 import GrowthChartAssessment from "./GrowthChart";
 import dietImage from "../../../assets/diet_image.png";
+import NewSGAForm from "./NewSGAForm";
+
 
 
 const ET_OPTIONS = {
@@ -43,6 +45,7 @@ export default function DietFollowupAssessmentForm({ patient, onSubmit, onBack }
     ...DIET_ASSESSMENT_REGISTRY,
     "Growth Chart": DietGrowthChartAssessment,
     FFQ: FFQAssessment,
+    NewSGA: NewSGAForm,
   };
 
   const [form, setForm] = useState({
@@ -87,9 +90,46 @@ diet_supper: "",
 diet_dinner: "",
 feeding_type: "",
 enteral_feeding_details: "",
-    enteral_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }],
+enteral_feeding_table_rows: [
+  {
+    time: "",
+    scoops: "",
+    ons_type: "",
+    ons_scoops: "",
+    modular_product: "",
+    modular_scoops: "",
+    water: "",
+    flushing: ""
+  }
+],
+
+mixed_feeding_table_rows: [
+  {
+    time: "",
+    scoops: "",
+    ons_type: "",
+    ons_scoops: "",
+    modular_product: "",
+    modular_scoops: "",
+    water: "",
+    flushing: ""
+  }
+],
+    // enteral_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }],
 mixed_feeding_details: "",
-    mixed_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }],
+    // mixed_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }],
+    mixed_feeding_table_rows: [
+  {
+    time: "",
+    scoops: "",
+    ons_type: "",
+    ons_scoops: "",
+    modular_product: "",
+    modular_scoops: "",
+    water: "",
+    flushing: ""
+  }
+],
     iddsi_level: "",
     iddsi_food_level: "6",
     iddsi_drink_level: "3",
@@ -537,7 +577,15 @@ const submitAndSave = () => {
           diagnosis_problems: [],
           diet_breakfast: "", diet_morning_tea: "", diet_lunch: "", diet_afternoon_tea: "",
           diet_supper: "", diet_dinner: "", feeding_type: "",
-          enteral_feeding_details: "", enteral_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }], mixed_feeding_details: "", mixed_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "" }], iddsi_level: "", iddsi_food_level: "6", iddsi_drink_level: "3", fluid_intake_details: "",
+          enteral_feeding_details: "", enteral_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "",  ons_type: "",
+    ons_scoops: "",
+    modular_product: "",
+    modular_scoops: "" }], 
+          mixed_feeding_details: "", mixed_feeding_table_rows: [{ time: "", scoops: "", water: "", flushing: "",  ons_type: "",
+    ons_scoops: "",
+    modular_product: "",
+    modular_scoops: "" }], 
+          iddsi_level: "", iddsi_food_level: "6", iddsi_drink_level: "3", fluid_intake_details: "",
           ons_regime: "", weight_record_date: "",
           wheelchair_weight: patient?.wheelchair_weight || "30",
           wheelchair_type: patient?.wheelchair_type || "",
@@ -648,6 +696,8 @@ const submitAndSave = () => {
     sections: [
         {
         fields: [
+          { name: "chief_complaint", label: "Chief Complaint", type: "input" },
+          { name: "hpi", label: "History of Presenting Illness (HPI)", type: "input" },
             {
             name: "current_nutrition_intake",
             label: "Current Nutrition Intake",
@@ -658,17 +708,7 @@ const submitAndSave = () => {
                  { label: "Mixed Feeding", value: "mixed" }
             ]
             },
-            {
-            name: "current_nutrition_intake_remarks",
-            label: "Remarks",
-            type: "textarea",
-            showIf: {
-                or: [
-                    { field: "current_nutrition_intake", equals: "oral" },
-                    { field: "current_nutrition_intake", equals: "mixed" }
-                ]
-            }
-            },
+            
 
             // ── ENTERAL sub-fields (visible only when Enteral Feeding selected) ──
             {
@@ -677,6 +717,78 @@ const submitAndSave = () => {
               showIf: { field: "current_nutrition_intake", equals: "enteral" }
             },
             // Toleration
+            {
+  name: "enteral_intake_vs_requirement",
+  label: "Intake vs Requirement",
+  type: "radio",
+  options: [
+    { label: "Adequate", value: "adequate" },
+    { label: "Inadequate", value: "inadequate" },
+    { label: "Excessive", value: "excessive" },
+    { label: "Not Relevant", value: "not_relevant" }
+  ],
+  showIf: { field: "current_nutrition_intake", equals: "enteral" }
+},
+{
+  name: "enteral_intake_vs_requirement_remarks",
+  label: "Remarks",
+  type: "input",
+  showIf: {
+    or: [
+      { field: "enteral_intake_vs_requirement", equals: "inadequate" },
+      { field: "enteral_intake_vs_requirement", equals: "excessive" }
+    ]
+  }
+},
+{
+  name: "enteral_bowel_pattern",
+  label: "Bowel Pattern",
+  type: "radio",
+  options: [
+    { label: "Normal", value: "normal" },
+    { label: "Constipation", value: "constipation" },
+    { label: "Diarrhea", value: "diarrhea" },
+    { label: "Others", value: "others" }
+  ],
+  showIf: { field: "current_nutrition_intake", equals: "enteral" }
+},
+{
+  name: "enteral_constipation_details",
+  label: "Constipation Details",
+  type: "input",
+  showIf: { field: "enteral_bowel_pattern", equals: "constipation" }
+},
+{
+  name: "enteral_diarrhea_details",
+  label: "Diarrhea Details",
+  type: "input",
+  showIf: { field: "enteral_bowel_pattern", equals: "diarrhea" }
+},
+{
+  name: "enteral_recent_hypoglycemic_episodes",
+  label: "Recent Hypoglycemic Episodes",
+  type: "radio",
+  options: [
+    { label: "Never", value: "never" },
+    { label: "Occasional", value: "occasional" },
+    { label: "Frequent", value: "frequent" },
+    { label: "Unknown", value: "unknown" },
+    { label: "Not Relevant", value: "not_relevant" }
+  ],
+  showIf: { field: "current_nutrition_intake", equals: "enteral" }
+},
+{
+  name: "enteral_recent_hypoglycemic_remarks",
+  label: "Remarks",
+  type: "input",
+  showIf: {
+    or: [
+      { field: "enteral_recent_hypoglycemic_episodes", equals: "occasional" },
+      { field: "enteral_recent_hypoglycemic_episodes", equals: "frequent" },
+      { field: "enteral_recent_hypoglycemic_episodes", equals: "unknown" }
+    ]
+  }
+},
             {
               name: "enteral_toleration",
               label: "Toleration",
@@ -690,7 +802,7 @@ const submitAndSave = () => {
             {
               name: "enteral_toleration_remarks",
               label: "Remarks",
-              type: "textarea",
+              type: "input",
               showIf: { field: "enteral_toleration", equals: "not_tolerating_well" }
             },
             // Aspiration
@@ -707,7 +819,7 @@ const submitAndSave = () => {
             {
               name: "enteral_aspiration_details",
               label: "If Yes – Please specify",
-              type: "textarea",
+              type: "input",
               showIf: { field: "enteral_aspiration", equals: "yes" }
             },
             // Vomiting
@@ -724,8 +836,28 @@ const submitAndSave = () => {
             {
               name: "enteral_vomiting_details",
               label: "If Yes – Please specify",
-              type: "textarea",
+              type: "input",
               showIf: { field: "enteral_vomiting", equals: "yes" }
+            },
+            {
+            name: "nutrition_related_complaints",
+            label: "Oral Nutritional-Related Complaints",
+            type: "input",
+            showIf: {
+                or: [
+                    { field: "current_nutrition_intake", equals: "enteral" },
+                ]
+            }
+            },
+            {
+            name: "ons_regime",
+            label: "Oral Nutrition Supplement Regime",
+            type: "input",
+            showIf: {
+                or: [
+                    { field: "current_nutrition_intake", equals: "enteral" },
+                ]
+            }
             },
 
             // ── ORAL / MIXED sub-fields ──
@@ -750,9 +882,9 @@ const submitAndSave = () => {
             type: "radio",
             labelAbove: true,
             options: [
-                { label: "7 – Regular", value: "7" },
-                { label: "6 – Easy To Chew", value: "6" },
-                { label: "5 – Soft & Bite-Sized", value: "5" },
+                { label: "7 – Regular/Easy To Chew", value: "7" },
+                { label: "6 – Soft & Bite-Sized", value: "6" },
+                { label: "5 – Minced & Moist", value: "5" },
                 { label: "4 – Pureed", value: "4" },
                 { label: "3 – Liquidised", value: "3" }
             ],
@@ -827,12 +959,24 @@ const submitAndSave = () => {
                 ]
             }
             },
+            // {
+            // name: "bowel_pattern_others",
+            // label: "Specify Others",
+            // type: "input",
+            // showIf: { field: "bowel_pattern", equals: "others" }
+            // },
             {
-            name: "bowel_pattern_others",
-            label: "Specify Others",
-            type: "input",
-            showIf: { field: "bowel_pattern", equals: "others" }
-            },
+    name: "constipation_details",
+    label: "Constipation Details",
+    type: "input",
+    showIf: { field: "bowel_pattern", equals: "constipation" }
+},
+{
+    name: "diarrhea_details",
+    label: "Diarrhea Details",
+    type: "input",
+    showIf: { field: "bowel_pattern", equals: "diarrhea" }
+},
             {
             name: "recent_hypoglycemic_episodes",
             label: "Recent Hypoglycemic Episodes",
@@ -863,21 +1007,10 @@ const submitAndSave = () => {
                 ]
             }
             },
-            // {
-            // name: "other_nutrition_related_complaints",
-            // label: "Other Nutritional-Related Complaints",
-            // type: "textarea",
-            // showIf: {
-            //     or: [
-            //         { field: "current_nutrition_intake", equals: "oral" },
-            //         { field: "current_nutrition_intake", equals: "mixed" }
-            //     ]
-            // }
-            // },
             {
-            name: "ons_regime",
-            label: "Oral Nutrition Supplement Regime",
-            type: "textarea",
+            name: "nutrition_related_complaints",
+            label: "Oral Nutritional-Related Complaints",
+            type: "input",
             showIf: {
                 or: [
                     { field: "current_nutrition_intake", equals: "oral" },
@@ -885,6 +1018,18 @@ const submitAndSave = () => {
                 ]
             }
             },
+            {
+            name: "ons_regime",
+            label: "Oral Nutrition Supplement Regime",
+            type: "input",
+            showIf: {
+                or: [
+                    { field: "current_nutrition_intake", equals: "oral" },
+                    { field: "current_nutrition_intake", equals: "mixed" }
+                ]
+            }
+            },
+
             {
             name: "ffq_followup",
             label: "Food Frequency Questionnaire (FFQ)",
@@ -919,7 +1064,8 @@ const submitAndSave = () => {
               { label: "PG-SGA", value: "PG-SGA-Metric-version" },
               { label: "SGA", value: "SGA" },
               { label: "MST", value: "MST" },
-              { label: "BIA", value: "BIA" }
+              { label: "BIA", value: "BIA" },
+              { label: "NewSGA", value: "NewSGA" },
             ]
           },
           { type: "subheading", label: "Anthropometric Measurement" },
@@ -943,7 +1089,7 @@ const submitAndSave = () => {
               { label: "Heavy Duty Extra Wide Manual Wheelchair", value: "heavy_duty_extra_wide" }
             ]}
           ]},
-          { name: "anthro_remarks", label: "Remarks", type: "textarea" },
+          { name: "anthro_remarks", label: "Remarks", type: "input" },
           
           { 
             type: "accordion", 
@@ -958,7 +1104,11 @@ const submitAndSave = () => {
                 { name: "temp", label: "Temperature", type: "input", readOnly: true },
                 { name: "spo2", label: "SpO₂", type: "input", readOnly: true },
                 { name: "rbs", label: "Random Blood Sugar", type: "input", readOnly: true },
-                { name: "pain", label: "Pain Score", type: "input", readOnly: true }
+                { name: "pain", label: "Pain Score", type: "input", readOnly: true },
+               
+                {name:"vital_signs_others",label:"Others",type:"input"},
+                {name:"vital_signs_upload",label:"upload",type:"attach-file"}
+                
               ]}
             ]
           },
@@ -977,23 +1127,8 @@ const submitAndSave = () => {
     actions: DIET_ACTIONS,
     sections: [{ fields: [
 
-      {
-        type: "radio",
-        name: "diagnosis_status",
-        label: "Previous Nutritional Diagnosis Status",
-        options: [
-          { label: "In Progress", value: "in_progress" },
-          { label: "Resolved", value: "resolved" }
-        ]
-      },
-      {
-        name: "diagnosis_status_inprogress_notes",
-        label: "In Progress – Notes",
-        type: "textarea",
-        showIf: { field: "diagnosis_status", equals: "in_progress" }
-      },
-
-      { type: "subheading", label: "Clinical Impression" }
+    
+      { type: "input", label: "Clinical Impression" }
     ] }]
   };
 
@@ -1004,7 +1139,7 @@ const submitAndSave = () => {
     { label: "Low Purine", value: "Low Purine" },
     { label: "High Protein", value: "High Protein" },
     { label: "Low Protein", value: "Low Protein" },
-    { label: "RTF Regime", value: "RTF Regime" },
+    // { label: "RTF Regime", value: "RTF Regime" },
     { label: "Addons (Supplements)", value: "Addons (Supplements)" },
     { label: "Others", value: "Others" },
     { label: "Special Diet", value: "Special Diet" },
@@ -1016,9 +1151,16 @@ const submitAndSave = () => {
       sections: [
         {
           fields: [
-          { type: "subheading", label: "Goals" },
-          { name: "plan_short_term_goals", label: "Short-Term Goals", type: "input" },
-          { name: "plan_long_term_goals", label: "Long-Term Goals", type: "input" },
+          { type: "subheading", label: "Short-Term Goals (2–4 weeks)" },
+        {
+            type: "dynamic-goals",
+            name: "short_term_goals"
+          },
+          { type: "subheading", label: "Long-Term Goals (6–12 weeks)" },
+          {
+            type: "dynamic-goals",
+            name: "long_term_goals"
+          },
           { type: "heading", label: "Plan" },
           { type: "subheading", label: "Diet Type" },
           { name: "meal_plan_mod_feeding_type", label: "Feeding Type", type: "radio", options: [{ label: "Oral Feeding", value: "oral" }, { label: "Enteral Feeding", value: "enteral" }, { label: "Mixed Feeding", value: "mixed" }] },
@@ -1046,10 +1188,10 @@ const submitAndSave = () => {
           { name: "meal_plan_mod_oral_others", label: "Others – Please specify", type: "input", showIf: { field: "meal_plan_mod_oral", includes: "Others" } },
           { name: "plan_oral_fluid_intake", label: "Fluid Intake", type: "input", showIf: { field: "meal_plan_mod_feeding_type", equals: "oral" } },
           { name: "plan_enteral_feeding_table", label: "Enteral Feeding", type: "enteral-feeding-table", showIf: { field: "meal_plan_mod_feeding_type", equals: "enteral" } },
-          { name: "plan_enteral_feeding_details", label: "Enteral Feeding Notes", type: "textarea", showIf: { field: "meal_plan_mod_feeding_type", equals: "enteral" } },
+          { name: "plan_enteral_feeding_details", label: "Enteral Feeding Notes", type: "input", showIf: { field: "meal_plan_mod_feeding_type", equals: "enteral" } },
           { name: "plan_enteral_fluid_intake", label: "Fluid Intake", type: "input", showIf: { field: "meal_plan_mod_feeding_type", equals: "enteral" } },
           { name: "plan_mixed_feeding_table", label: "Mixed Feeding", type: "enteral-feeding-table", showIf: { field: "meal_plan_mod_feeding_type", equals: "mixed" } },
-          { name: "plan_mixed_feeding_details", label: "Mixed Feeding Notes", type: "textarea", showIf: { field: "meal_plan_mod_feeding_type", equals: "mixed" } },
+          { name: "plan_mixed_feeding_details", label: "Mixed Feeding Notes", type: "input", showIf: { field: "meal_plan_mod_feeding_type", equals: "mixed" } },
           { name: "plan_mixed_fluid_intake", label: "Fluid Intake", type: "input", showIf: { field: "meal_plan_mod_feeding_type", equals: "mixed" } },
             {
             name: "diet_intervention",
@@ -1072,12 +1214,12 @@ const submitAndSave = () => {
           { name: "plan_review_date", label: "Review in (select date)", type: "date" },
           { name: "plan_referral_type", label: "Referral", type: "radio", options: [{ label: "Internal", value: "internal" }, { label: "External", value: "external" }] },
           { name: "plan_referral_internal", label: "Internal Referral", type: "multi-select-dropdown", options: [{ label: "Optometry", value: "Optometry" }, { label: "Psychology", value: "Psychology" }, { label: "Doctors", value: "Doctors" }, { label: "Audiology", value: "Audiology" }, { label: "Speech", value: "Speech" }, { label: "Others", value: "Others" }], showIf: { field: "plan_referral_type", equals: "internal" } },
-          { name: "plan_referral_optometry_details", label: "Optometry – Please specify", type: "textarea", showIf: { field: "plan_referral_internal", includes: "Optometry" } },
-          { name: "plan_referral_psychology_details", label: "Psychology – Please specify", type: "textarea", showIf: { field: "plan_referral_internal", includes: "Psychology" } },
-          { name: "plan_referral_doctors_details", label: "Doctors – Please specify", type: "textarea", showIf: { field: "plan_referral_internal", includes: "Doctors" } },
-          { name: "plan_referral_audiology_details", label: "Audiology – Please specify", type: "textarea", showIf: { field: "plan_referral_internal", includes: "Audiology" } },
-          { name: "plan_referral_speech_details", label: "Speech – Please specify", type: "textarea", showIf: { field: "plan_referral_internal", includes: "Speech" } },
-          { name: "plan_referral_others_details", label: "Others – Please specify", type: "textarea", showIf: { field: "plan_referral_internal", includes: "Others" } },
+          { name: "plan_referral_optometry_details", label: "Optometry – Please specify", type: "input", showIf: { field: "plan_referral_internal", includes: "Optometry" } },
+          { name: "plan_referral_psychology_details", label: "Psychology – Please specify", type: "input", showIf: { field: "plan_referral_internal", includes: "Psychology" } },
+          { name: "plan_referral_doctors_details", label: "Doctors – Please specify", type: "input", showIf: { field: "plan_referral_internal", includes: "Doctors" } },
+          { name: "plan_referral_audiology_details", label: "Audiology – Please specify", type: "input", showIf: { field: "plan_referral_internal", includes: "Audiology" } },
+          { name: "plan_referral_speech_details", label: "Speech – Please specify", type: "input", showIf: { field: "plan_referral_internal", includes: "Speech" } },
+          { name: "plan_referral_others_details", label: "Others – Please specify", type: "input", showIf: { field: "plan_referral_internal", includes: "Others" } },
           { name: "plan_referral_external_memo", label: "Upload Memo", type: "file-upload", showIf: { field: "plan_referral_type", equals: "external" } }
         ]
       }
@@ -1162,139 +1304,15 @@ const submitAndSave = () => {
   const diagnosisValues = {
       ...diagnosisComputedValues(form.diagnosis_problems)
   }
- const [patientHistory, setPatientHistory] = useState({
-          past_medical_history: patient?.medical_history || "",
-          past_family_history: patient?.family_medical_history || "",
-          alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-        });
-        function PatientInformationBlock({ patient, patientHistory, setPatientHistory }) {
-          if (!patient) return null;
+
+     
         
-          const formatDate = (dateStr) => {
-            if (!dateStr) return "-";
-            try {
-              return new Date(dateStr).toLocaleDateString();
-            } catch {
-              return "-";
-            }
-          };
-        
-          return (
-            <div style={{ marginBottom: 24 }}>
-                      
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 12,
-                fontSize: 14
-              }}>
-                <div><b>Name:</b> {patient.name}</div>
-                <div><b>IC:</b> {patient.id}</div>
-                <div><b>DOB:</b> {formatDate(patient.dob)}</div>
-        
-                <div><b>Age / Gender:</b> {patient.age} / {patient.sex}</div>
-                <div><b>ICD:</b> {patient.icd}</div>
-                <div><b>Date of Assessment:</b> {new Date().toLocaleDateString()}</div>
-        
-                <div><b>Date of Onset:</b> {formatDate(patient.date_of_onset)}</div>
-                <div><b>Duration of Diagnosis:</b> -</div>
-                <div><b>Primary Diagnosis:</b> {patient.diagnosis_history || "-"}</div>
-        
-                <div><b>Secondary Diagnosis:</b> {patient.medical_history || "-"}</div>
-                <div><b>Dominant Side:</b> {patient.dominant_side || "-"}</div>
-                <div><b>Language Preference:</b> {patient.language_preference || "-"}</div>
-        
-                <div><b>Education Level:</b> {patient.education_background || "-"}</div>
-                <div><b>Occupation:</b> {patient.occupation || "-"}</div>
-                <div><b>Work Status:</b> {patient.employment_status || "-"}</div>
-        
-                <div><b>Driving Status:</b> {patient.driving_status || "-"}</div>
-                <div><b>PP/OB:</b> {patient.pp_ob || "-"}</div>
-                <div><b>Weight:</b> {patient.weight ? `${patient.weight} kg` : "-"}</div>
-        
-                {/* ===== HISTORY ===== */}
-                <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
-                  <h3>Patient History</h3>
-        
-                  <div>
-                    <b>Past Medical History</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.past_medical_history}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          past_medical_history: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-        
-                  <div>
-                    <b>Family History</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.past_family_history}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          past_family_history: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-        
-                  <div>
-                    <b>Allergies</b>
-                    <textarea
-                      style={textarea}
-                      value={patientHistory.alerts_and_allergies}
-                      onChange={(e) =>
-                        setPatientHistory(prev => ({
-                          ...prev,
-                          alerts_and_allergies: e.target.value
-                        }))
-                      }
-                    />
-                  </div>
-        
-                  <button style={alertBtn}>🚨 Alerts</button>
-                </div>
-              </div>
-            </div>
-          );
-        }
-        const textarea = {
-          width: "100%",
-          minHeight: 90,
-          marginTop: 6,
-          marginBottom: 12,
-          padding: "10px 12px",
-          borderRadius: 6,
-          border: "1px solid #d1d5db",
-          fontSize: 14,
-          resize: "vertical"
-        };
-        
-        const alertBtn = {
-          marginTop: 10,
-          padding: "10px 20px",
-          borderRadius: 6,
-          border: "1.5px solid #007bff",
-          background: "#007bff",
-          color: "#fff",
-          fontWeight: 600,
-          cursor: "pointer"
-        };
   return (
     <div style={dietOuterWrap}>
       <div style={dietFormBox}>
-        <CommonFormBuilder
-          schema={{title: "Patient Information", sections: []}}
-          values={{}}
-          onChange={() => {}}
-        >
-          <PatientInformationBlock patient={patient} patientHistory={patientHistory} setPatientHistory={setPatientHistory}/>
+       
+          <PatientCard patient={patient} 
+         />
           {/* <label>Allergic History</label>
           <input
             type="text"
@@ -1303,10 +1321,7 @@ const submitAndSave = () => {
             value={dietValues.allergic_history}
             onChange={(e) => dietOnChange("allergic_history", e.target.value)}
           /> */}
-          <button style={doctorsReportBtn}>
-            Doctors Reports
-          </button>
-        </CommonFormBuilder>
+        
         {/* ===== TABS - middle (Psychology style) ===== */}
         <div style={dietTabBar}>
           {["subjective", "objective", "assessment", "plan"].map(tab => (
@@ -1357,8 +1372,8 @@ const submitAndSave = () => {
                       schema={{ title: `Nutrition Diagnosis ${index + 1}`, sections: [{ fields: [
                         { name: `diagnosis_problem_${index}`, label: "Problem", type: "input", readOnly: true },
                         { name: `diagnosis_etiology_${index}`, label: "Etiology", type: "multi-select-dropdown", options: ET_OPTIONS[diagnosis.problem.toLowerCase().replaceAll(' ', '_')] || [] },
-                        { name: `diagnosis_signs_${index}`, label: "Signs & Symptoms", type: "textarea" },
-                        { name: `nutrition_diagnosis_${index}`, label: "Nutrition Diagnosis", type: "textarea" }
+                        { name: `diagnosis_signs_${index}`, label: "Signs & Symptoms", type: "input" },
+                        { name: `nutrition_diagnosis_${index}`, label: "Nutrition Diagnosis", type: "input" }
                       ]}]}}
           values={diagnosisValues}
           onChange={(name, value) => {
@@ -1394,10 +1409,6 @@ const submitAndSave = () => {
                   Send alert to kitchen
         </button>
 </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 20 }}>
-                <button style={btnSave} onClick={saveOnly}>Save →</button>
-                <button style={btnSubmit} onClick={submitAndSave}>Submit →</button>
-    </div>
               {submittedRows.length > 0 && (
                 <div className="card" style={{ marginTop: 30 }}>
                   <h3>Generated ICF / ICHI Recommendations</h3>
@@ -1428,6 +1439,27 @@ const submitAndSave = () => {
             </>
           )}
         </CommonFormBuilder>
+
+        {/* ── Next / Submit navigation (Psychology style) ── */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, padding: "16px 0" }}>
+          {activeTab !== "plan" ? (
+            <button
+              style={btnNext}
+              onClick={() => {
+                const order = ["subjective", "objective", "assessment", "plan"];
+                const idx = order.indexOf(activeTab);
+                if (idx < order.length - 1) setActiveTab(order[idx + 1]);
+              }}
+            >
+              Next →
+            </button>
+          ) : (
+            <>
+              <button style={btnSave}   onClick={saveOnly}>Save</button>
+              <button style={btnSubmit} onClick={submitAndSave}>Submit Assessment</button>
+            </>
+          )}
+        </div>
 
 {showProblemChart && (
   <div style={modalOverlay}>
@@ -1589,8 +1621,8 @@ const submitAndSave = () => {
           </label>
         </div> */}
 {/* 
-          <textarea
-            style={styles.textarea}
+          <input
+            style={styles.input}
             value={form.diagnosis_signs}
             onChange={(e) => setField("diagnosis_signs", e.target.value)}
           />
@@ -1639,15 +1671,15 @@ const submitAndSave = () => {
         </div> */}
 
 
-          {/* <textarea
-            style={styles.textarea}
+          {/* <input
+            style={styles.input}
             value={form.diagnosis_signs}
             onChange={(e) => setField("diagnosis_signs", e.target.value)}
           /> */}
 
            {/* <p style={{paddingTop:40}}>Any Additions</p>
-          <textarea
-            style={styles.textarea}
+          <input
+            style={styles.input}
             value={form.diagnosis_signs}
             onChange={(e) => setField("diagnosis_signs", e.target.value)}
           /> */}
@@ -1702,7 +1734,7 @@ const styles = {
     background: "#eee",
     color: "#333",
   },
-  textarea: {
+  input: {
     width: "100%",
     padding: "7px 12px",
     borderRadius: 6,
@@ -1722,6 +1754,17 @@ const btnBack = {
   color: "white",
   borderRadius: 6,
   border: "none",
+  cursor: "pointer",
+};
+
+const btnNext = {
+  padding: "12px 32px",
+  background: "#2563EB",
+  color: "#fff",
+  border: "none",
+  borderRadius: 8,
+  fontWeight: 700,
+  fontSize: 15,
   cursor: "pointer",
 };
 

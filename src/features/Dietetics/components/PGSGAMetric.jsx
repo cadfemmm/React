@@ -432,7 +432,7 @@ const box3Score = useMemo(() => {
       normal: 0,
       not_normal: 1,
       not_feeling_up: 2,
-      little_activity: 2,
+      little_activity: 3,
       bedridden: 3,
     };
     return activityScores[form.activityLevel] || 0;
@@ -447,6 +447,7 @@ const box3Score = useMemo(() => {
       cancer: 1,
       aids: 1,
       pulmonary_cachexia: 1,
+      renal_insufficiency:1,
       cardiac_cachexia: 1,
       open_wound: 1,
       pressure_ulcer: 1,
