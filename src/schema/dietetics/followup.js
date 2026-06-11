@@ -1,7 +1,17 @@
 const SUBJECTIVE = {
-  "sections": [
+  "Section": [
     {
       "fields": [
+        {
+          "name": "chief_complaint",
+          "label": "Chief Complaint",
+          "type": "input"
+        },
+        {
+          "name": "hpi",
+          "label": "History of Presenting Illness (HPI)",
+          "type": "input"
+        },
         {
           "name": "current_nutrition_intake",
           "label": "Current Nutrition Intake",
@@ -22,28 +32,152 @@ const SUBJECTIVE = {
           ]
         },
         {
-          "name": "current_nutrition_intake_remarks",
-          "label": "Remarks",
-          "type": "textarea",
-          "showIf": {
-            "or": [
-              {
-                "field": "current_nutrition_intake",
-                "equals": "oral"
-              },
-              {
-                "field": "current_nutrition_intake",
-                "equals": "mixed"
-              }
-            ]
-          }
-        },
-        {
           "type": "subheading",
           "label": "Enteral Feeding Assessment",
           "showIf": {
             "field": "current_nutrition_intake",
             "equals": "enteral"
+          }
+        },
+        {
+          "name": "enteral_intake_vs_requirement",
+          "label": "Intake vs Requirement",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Adequate",
+              "value": "adequate"
+            },
+            {
+              "label": "Inadequate",
+              "value": "inadequate"
+            },
+            {
+              "label": "Excessive",
+              "value": "excessive"
+            },
+            {
+              "label": "Not Relevant",
+              "value": "not_relevant"
+            }
+          ],
+          "showIf": {
+            "field": "current_nutrition_intake",
+            "equals": "enteral"
+          }
+        },
+        {
+          "name": "enteral_intake_vs_requirement_remarks",
+          "label": "Remarks",
+          "type": "input",
+          "showIf": {
+            "or": [
+              {
+                "field": "enteral_intake_vs_requirement",
+                "equals": "inadequate"
+              },
+              {
+                "field": "enteral_intake_vs_requirement",
+                "equals": "excessive"
+              }
+            ]
+          }
+        },
+        {
+          "name": "enteral_bowel_pattern",
+          "label": "Bowel Pattern",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Normal",
+              "value": "normal"
+            },
+            {
+              "label": "Constipation",
+              "value": "constipation"
+            },
+            {
+              "label": "Diarrhea",
+              "value": "diarrhea"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ],
+          "showIf": {
+            "field": "current_nutrition_intake",
+            "equals": "enteral"
+          }
+        },
+        {
+          "name": "enteral_constipation_details",
+          "label": "Constipation Details",
+          "type": "input",
+          "showIf": {
+            "field": "enteral_bowel_pattern",
+            "equals": "constipation"
+          }
+        },
+        {
+          "name": "enteral_diarrhea_details",
+          "label": "Diarrhea Details",
+          "type": "input",
+          "showIf": {
+            "field": "enteral_bowel_pattern",
+            "equals": "diarrhea"
+          }
+        },
+        {
+          "name": "enteral_recent_hypoglycemic_episodes",
+          "label": "Recent Hypoglycemic Episodes",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Never",
+              "value": "never"
+            },
+            {
+              "label": "Occasional",
+              "value": "occasional"
+            },
+            {
+              "label": "Frequent",
+              "value": "frequent"
+            },
+            {
+              "label": "Unknown",
+              "value": "unknown"
+            },
+            {
+              "label": "Not Relevant",
+              "value": "not_relevant"
+            }
+          ],
+          "showIf": {
+            "field": "current_nutrition_intake",
+            "equals": "enteral"
+          }
+        },
+        {
+          "name": "enteral_recent_hypoglycemic_remarks",
+          "label": "Remarks",
+          "type": "input",
+          "showIf": {
+            "or": [
+              {
+                "field": "enteral_recent_hypoglycemic_episodes",
+                "equals": "occasional"
+              },
+              {
+                "field": "enteral_recent_hypoglycemic_episodes",
+                "equals": "frequent"
+              },
+              {
+                "field": "enteral_recent_hypoglycemic_episodes",
+                "equals": "unknown"
+              }
+            ]
           }
         },
         {
@@ -68,7 +202,7 @@ const SUBJECTIVE = {
         {
           "name": "enteral_toleration_remarks",
           "label": "Remarks",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "enteral_toleration",
             "equals": "not_tolerating_well"
@@ -96,7 +230,7 @@ const SUBJECTIVE = {
         {
           "name": "enteral_aspiration_details",
           "label": "If Yes – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "enteral_aspiration",
             "equals": "yes"
@@ -124,10 +258,36 @@ const SUBJECTIVE = {
         {
           "name": "enteral_vomiting_details",
           "label": "If Yes – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "enteral_vomiting",
             "equals": "yes"
+          }
+        },
+        {
+          "name": "nutrition_related_complaints",
+          "label": "Oral Nutritional-Related Complaints",
+          "type": "input",
+          "showIf": {
+            "or": [
+              {
+                "field": "current_nutrition_intake",
+                "equals": "enteral"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ons_regime",
+          "label": "Oral Nutrition Supplement Regime",
+          "type": "input",
+          "showIf": {
+            "or": [
+              {
+                "field": "current_nutrition_intake",
+                "equals": "enteral"
+              }
+            ]
           }
         },
         {
@@ -135,7 +295,7 @@ const SUBJECTIVE = {
           "label": "Texture Modification @ IDDSI Level",
           "info": {
             "type": "image",
-            "src": "dietImage",
+            "src": "/static/media/diet_image.b70cd13c6fdb1400a706.png",
             "alt": "IDDSI Reference Chart"
           },
           "showIf": {
@@ -158,15 +318,15 @@ const SUBJECTIVE = {
           "labelAbove": true,
           "options": [
             {
-              "label": "7 – Regular",
+              "label": "7 – Regular/Easy To Chew",
               "value": "7"
             },
             {
-              "label": "6 – Easy To Chew",
+              "label": "6 – Soft & Bite-Sized",
               "value": "6"
             },
             {
-              "label": "5 – Soft & Bite-Sized",
+              "label": "5 – Minced & Moist",
               "value": "5"
             },
             {
@@ -319,12 +479,21 @@ const SUBJECTIVE = {
           }
         },
         {
-          "name": "bowel_pattern_others",
-          "label": "Specify Others",
+          "name": "constipation_details",
+          "label": "Constipation Details",
           "type": "input",
           "showIf": {
             "field": "bowel_pattern",
-            "equals": "others"
+            "equals": "constipation"
+          }
+        },
+        {
+          "name": "diarrhea_details",
+          "label": "Diarrhea Details",
+          "type": "input",
+          "showIf": {
+            "field": "bowel_pattern",
+            "equals": "diarrhea"
           }
         },
         {
@@ -388,9 +557,26 @@ const SUBJECTIVE = {
           }
         },
         {
+          "name": "nutrition_related_complaints",
+          "label": "Oral Nutritional-Related Complaints",
+          "type": "input",
+          "showIf": {
+            "or": [
+              {
+                "field": "current_nutrition_intake",
+                "equals": "oral"
+              },
+              {
+                "field": "current_nutrition_intake",
+                "equals": "mixed"
+              }
+            ]
+          }
+        },
+        {
           "name": "ons_regime",
           "label": "Oral Nutrition Supplement Regime",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "or": [
               {
@@ -431,9 +617,8 @@ const SUBJECTIVE = {
     }
   ]
 }
-
 const OBJECTIVE = {
-  "sections": [
+  "SECTION": [
     {
       "fields": [
         {
@@ -463,6 +648,10 @@ const OBJECTIVE = {
             {
               "label": "BIA",
               "value": "BIA"
+            },
+            {
+              "label": "NewSGA",
+              "value": "NewSGA"
             }
           ]
         },
@@ -566,7 +755,7 @@ const OBJECTIVE = {
         {
           "name": "anthro_remarks",
           "label": "Remarks",
-          "type": "textarea"
+          "type": "input"
         },
         {
           "type": "accordion",
@@ -618,6 +807,16 @@ const OBJECTIVE = {
                   "label": "Pain Score",
                   "type": "input",
                   "readOnly": true
+                },
+                {
+                  "name": "vital_signs_others",
+                  "label": "Others",
+                  "type": "input"
+                },
+                {
+                  "name": "vital_signs_upload",
+                  "label": "upload",
+                  "type": "attach-file"
                 }
               ]
             }
@@ -651,36 +850,13 @@ const OBJECTIVE = {
   ]
 }
 
+
 const ASSESSMENT = {
   "sections": [
     {
       "fields": [
         {
-          "type": "radio",
-          "name": "diagnosis_status",
-          "label": "Previous Nutritional Diagnosis Status",
-          "options": [
-            {
-              "label": "In Progress",
-              "value": "in_progress"
-            },
-            {
-              "label": "Resolved",
-              "value": "resolved"
-            }
-          ]
-        },
-        {
-          "name": "diagnosis_status_inprogress_notes",
-          "label": "In Progress – Notes",
-          "type": "textarea",
-          "showIf": {
-            "field": "diagnosis_status",
-            "equals": "in_progress"
-          }
-        },
-        {
-          "type": "subheading",
+          "type": "input",
           "label": "Clinical Impression"
         }
       ]
@@ -694,17 +870,19 @@ const PLAN = {
       "fields": [
         {
           "type": "subheading",
-          "label": "Goals"
+          "label": "Short-Term Goals (2–4 weeks)"
         },
         {
-          "name": "plan_short_term_goals",
-          "label": "Short-Term Goals",
-          "type": "input"
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
         },
         {
-          "name": "plan_long_term_goals",
-          "label": "Long-Term Goals",
-          "type": "input"
+          "type": "subheading",
+          "label": "Long-Term Goals (6–12 weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
         },
         {
           "type": "heading",
@@ -761,10 +939,6 @@ const PLAN = {
             {
               "label": "Low Protein",
               "value": "Low Protein"
-            },
-            {
-              "label": "RTF Regime",
-              "value": "RTF Regime"
             },
             {
               "label": "Addons (Supplements)",
@@ -865,7 +1039,7 @@ const PLAN = {
         {
           "name": "plan_enteral_feeding_details",
           "label": "Enteral Feeding Notes",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "meal_plan_mod_feeding_type",
             "equals": "enteral"
@@ -892,7 +1066,7 @@ const PLAN = {
         {
           "name": "plan_mixed_feeding_details",
           "label": "Mixed Feeding Notes",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "meal_plan_mod_feeding_type",
             "equals": "mixed"
@@ -1041,7 +1215,7 @@ const PLAN = {
         {
           "name": "plan_referral_optometry_details",
           "label": "Optometry – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Optometry"
@@ -1050,7 +1224,7 @@ const PLAN = {
         {
           "name": "plan_referral_psychology_details",
           "label": "Psychology – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Psychology"
@@ -1059,7 +1233,7 @@ const PLAN = {
         {
           "name": "plan_referral_doctors_details",
           "label": "Doctors – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Doctors"
@@ -1068,7 +1242,7 @@ const PLAN = {
         {
           "name": "plan_referral_audiology_details",
           "label": "Audiology – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Audiology"
@@ -1077,7 +1251,7 @@ const PLAN = {
         {
           "name": "plan_referral_speech_details",
           "label": "Speech – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Speech"
@@ -1086,7 +1260,7 @@ const PLAN = {
         {
           "name": "plan_referral_others_details",
           "label": "Others – Please specify",
-          "type": "textarea",
+          "type": "input",
           "showIf": {
             "field": "plan_referral_internal",
             "includes": "Others"
