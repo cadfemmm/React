@@ -628,7 +628,10 @@ export default function NeuromodulationAssessment({patient, onSubmit, onBack}) {
     if (saved) setValues(JSON.parse(saved).values || {});
   }, [storageKey]);
 
-
+console.log (SUBJECTIVE_SCHEMA);
+console.log (OBJECTIVE_SCHEMA);
+console.log (ASSESSMENT_SCHEMA);
+console.log (PLAN_SCHEMA);
 
 
   return (

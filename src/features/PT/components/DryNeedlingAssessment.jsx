@@ -212,6 +212,45 @@ const PLAN_SCHEMA = {
   type: "dynamic-goals",
   name: "longterm_blocks"
 },
+        {
+          type: "dynamic-table",
+          name: "intervention_rows",
+          label: "I — Intervention (Dry Needling Details)",
+          minRows: 4,
+          columns: [
+            { key: "muscle", label: "Muscle", type: "input", placeholder: "Muscle name" },
+            {
+              key: "side",
+              label: "Side (L/R)",
+              type: "single-select",
+              options: [
+                { label: "L", value: "L" },
+                { label: "R", value: "R" },
+                { label: "Both", value: "both" },
+              ],
+            },
+            { key: "no_trps", label: "No. of TrPs", type: "number", placeholder: "—" },
+            { key: "needle_length", label: "Needle Length (mm)", type: "number", placeholder: "—" },
+            {
+              key: "technique",
+              label: "Technique",
+              type: "single-select",
+              options: [
+                { label: "Static", value: "static" },
+                { label: "Pistoning", value: "pistoning" },
+              ],
+            },
+            {
+              key: "twitch_response",
+              label: "Twitch Response",
+              type: "single-select",
+              options: [
+                { label: "Yes", value: "yes" },
+                { label: "No", value: "no" },
+              ],
+            },
+          ],
+        },
         { type: "subheading", label: "Plan" },
         {
           name: "treatment_plan",
@@ -235,6 +274,19 @@ const PLAN_SCHEMA = {
         },
         
         { type: "subheading", label: "Evaluation" },
+        {
+          name: "pain_score",
+          label: "Pain Score(Visual Analog Scale)",
+          type: "scale-slider",
+          min: 0,
+          max: 10,
+          ranges: [
+            { min: 0, max: 1, label: "Mild", color: "#22c55e" },
+            { min: 1, max: 5, label: "Moderate", color: "#facc15" },
+            { min: 5, max: 10, label: "Severe", color: "#ef4444" }
+          ],
+          showValue: true
+        },
         {
           name: "immediate_response",
           label: "Immediate Response",
@@ -268,35 +320,6 @@ const PLAN_SCHEMA = {
   placeholder: "Enter other advice...",
   showIf: { field: "post_treatment_advice", includes: "other" }
 },
-{
-        name: "pain_score",
-        label: "Pain Score(Visual Analog Scale)",
-        type: "scale-slider",
-
-        min: 0,
-        max: 10,
-        ranges: [
-          {
-            min: 0,
-            max: 1,
-            label: "Mild",
-            color: "#22c55e"   // green
-          },
-          {
-            min: 1,
-            max: 5,
-            label: "Moderate",
-            color: "#facc15"   // yellow
-          },
-          {
-            min: 5,
-            max: 10,
-            label: "Severe",
-            color: "#ef4444"   // red
-          }
-        ],
-        showValue: true
-      },
       ]
     }
   ]
@@ -360,7 +383,7 @@ const handleAction = (type) => {
   };
 
   const dryNeedlingSaved = !!values.dry_needling_consent?.saved;
-
+console.log (PLAN_SCHEMA);
   return (
     <div>
       {/* ===== PATIENT INFORMATION CARD ===== */}
@@ -387,14 +410,7 @@ const handleAction = (type) => {
         values={values}
         onChange={onChange}
         onAction={handleAction}
-      >
-        {activeTab === "plan" && (
-          <InterventionTable
-            rows={values.intervention_rows || defaultRows()}
-            onChange={(rows) => onChange("intervention_rows", rows)}
-          />
-        )}
-      </CommonFormBuilder>
+      />
 
       {/* Consent status badges */}
       {activeTab === "subjective" && (dryNeedlingSaved || sharedAtvSubmitted) && (
@@ -524,251 +540,6 @@ const doctorsReportBtn = {
   padding: "10px 20px", background: "#2563EB", color: "#fff",
   border: "none", borderRadius: 6, fontSize: 14,
   fontWeight: 600, cursor: "pointer", marginTop: 8,
-};
-
-/* ── Default empty rows ── */
-function defaultRows() {
-  return Array.from({ length: 4 }, () => ({
-    muscle: "",
-    side: [],
-    no_trps: "",
-    needle_length: "",
-    technique: [],
-    twitch_response: ""
-  }));
-}
-
-/* ── Intervention Table ── */
-function InterventionTable({ rows, onChange }) {
-  const update = (idx, field, value) => {
-    const next = rows.map((r, i) => i === idx ? { ...r, [field]: value } : r);
-    onChange(next);
-  };
-
-  const toggleCheck = (idx, field, val) => {
-    const current = Array.isArray(rows[idx][field]) ? rows[idx][field] : [];
-    const next = current.includes(val)
-      ? current.filter(v => v !== val)
-      : [...current, val];
-    update(idx, field, next);
-  };
-
-  const addRow = () => onChange([...rows, { muscle: "", side: [], no_trps: "", needle_length: "", technique: [], twitch_response: "" }]);
-  const removeRow = (idx) => onChange(rows.filter((_, i) => i !== idx));
-
-  return (
-    <div style={{ marginTop: 24, marginBottom: 16 }}>
-      <div style={interventionTitle}>I — Intervention (Dry Needling Details)</div>
-
-      <div style={{ overflowX: "auto" }}>
-        <table style={tbl}>
-          <thead>
-            <tr style={tblHead}>
-              <th style={th}>Muscle</th>
-              <th style={th}>Side (L/R)</th>
-              <th style={th}>No. of TrPs</th>
-              <th style={th}>Needle Length</th>
-              <th style={th}>Technique (✓)</th>
-              <th style={th}>Twitch Response (✓)</th>
-              <th style={th}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, idx) => (
-              <tr key={idx} style={idx % 2 === 0 ? tblRowEven : tblRowOdd}>
-                {/* Muscle */}
-                <td style={td}>
-                  <input
-                    type="text"
-                    value={row.muscle}
-                    onChange={e => update(idx, "muscle", e.target.value)}
-                    style={cellInput}
-                    placeholder="Muscle name"
-                  />
-                </td>
-
-                {/* Side L/R */}
-                <td style={td}>
-                  <div style={checkGroup}>
-                    {["L", "R"].map(s => (
-                      <label key={s} style={checkLabel}>
-                        <input
-                          type="checkbox"
-                          checked={Array.isArray(row.side) && row.side.includes(s)}
-                          onChange={() => toggleCheck(idx, "side", s)}
-                        />
-                        {s}
-                      </label>
-                    ))}
-                  </div>
-                </td>
-
-                {/* No. of TrPs */}
-                <td style={td}>
-                  <input
-                    type="number"
-                    min="0"
-                    value={row.no_trps}
-                    onChange={e => update(idx, "no_trps", e.target.value)}
-                    style={{ ...cellInput, width: 60 }}
-                    placeholder="—"
-                  />
-                </td>
-
-                {/* Needle Length */}
-                <td style={td}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input
-                      type="number"
-                      min="0"
-                      value={row.needle_length}
-                      onChange={e => update(idx, "needle_length", e.target.value)}
-                      style={{ ...cellInput, width: 70 }}
-                      placeholder="—"
-                    />
-                    <span style={{ fontSize: 13, color: "#6b7280" }}>mm</span>
-                  </div>
-                </td>
-
-                {/* Technique */}
-                <td style={td}>
-                  <div style={checkGroup}>
-                    {["Static", "Pistoning"].map(t => (
-                      <label key={t} style={checkLabel}>
-                        <input
-                          type="checkbox"
-                          checked={Array.isArray(row.technique) && row.technique.includes(t)}
-                          onChange={() => toggleCheck(idx, "technique", t)}
-                        />
-                        {t}
-                      </label>
-                    ))}
-                  </div>
-                </td>
-
-                {/* Twitch Response */}
-                <td style={td}>
-                  <div style={checkGroup}>
-                    {["Yes", "No"].map(v => (
-                      <label key={v} style={checkLabel}>
-                        <input
-                          type="radio"
-                          name={`twitch_${idx}`}
-                          value={v}
-                          checked={row.twitch_response === v}
-                          onChange={() => update(idx, "twitch_response", v)}
-                        />
-                        {v}
-                      </label>
-                    ))}
-                  </div>
-                </td>
-
-                {/* Remove */}
-                <td style={td}>
-                  <button
-                    type="button"
-                    onClick={() => removeRow(idx)}
-                    style={removeBtn}
-                    title="Remove row"
-                  >
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <button type="button" onClick={addRow} style={addRowBtn}>
-        + Add Row
-      </button>
-    </div>
-  );
-}
-
-/* ── Intervention table styles ── */
-const interventionTitle = {
-  fontWeight: 700,
-  fontSize: 15,
-  marginBottom: 12,
-  color: "#111827"
-};
-
-const tbl = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: 14,
-  minWidth: 700,
-
-};
-
-const tblHead = {
-  // background: "#fff"
-};
-
-const th = {
-  padding: "10px 12px",
-  textAlign: "left",
-  fontWeight: 700,
-  borderBottom: "2px solid #d1d5db",
-  color: "#111827",        // dark text
-  whiteSpace: "nowrap",
-  background: "#f1f5f9",   // light bg
-};
-
-const td = {
-  padding: "8px 10px",
-  verticalAlign: "middle",
-  borderBottom: "1px solid #e5e7eb"
-};
-
-const tblRowEven = { background: "#fff" };
-const tblRowOdd  = { background: "#fff" };
-
-const cellInput = {
-  padding: "5px 8px",
-  borderRadius: 4,
-  border: "1px solid #d1d5db",
-  fontSize: 14,
-  width: "100%",
-  minWidth: 100
-};
-
-const checkGroup = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 4
-};
-
-const checkLabel = {
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  fontSize: 13,
-  cursor: "pointer"
-};
-
-const removeBtn = {
-  background: "none",
-  border: "none",
-  color: "#ef4444",
-  fontSize: 16,
-  cursor: "pointer",
-  padding: "2px 6px"
-};
-
-const addRowBtn = {
-  marginTop: 10,
-  padding: "8px 18px",
-  background: "#2563EB",
-  color: "#fff",
-  border: "none",
-  borderRadius: 6,
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer"
 };
 
 /* ── Pain Location Marker styles ── */
