@@ -4,7 +4,7 @@ import PatientCard from "../../../shared/cards/PatientCard";
 
 // Schema
 import OPTO_PRO_SCHEMA from "../../../schema/optometry/progress"
-import { ACTIONS_BUTTON, ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
+import { ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
 
 /* ── Main component ── */
 export default function OptometryProgressAssessment({ patient, onSubmit, onBack }) {

@@ -15,7 +15,7 @@ import PatientCard from "../../../shared/cards/PatientCard";
 // Schema
 import OPTO_FLWP_SCHEMA from "../../../schema/optometry/followup"
 import { SCHEMA } from "../../../schema/optometry/binocular_vision_questionnaire";
-import { ACTIONS_BUTTON, ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
+import { ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
 
 
 // ── Lazy-loaded assessment components ──────────────────────────────────────
