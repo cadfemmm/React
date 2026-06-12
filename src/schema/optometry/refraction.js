@@ -102,7 +102,7 @@ export const SCHEMA = {
             "includes": "subjective_refraction"
           }
         },
-          {
+        {
           "type": "refraction-col",
           "name": "subjective_refraction",
           "rows": [
@@ -149,46 +149,11 @@ export const SCHEMA = {
               ]
             }
           ],
-          showIf: {
-            field: "refraction_sections",
-            includes: "subjective_refraction"
+          "showIf": {
+            "field": "refraction_sections",
+            "includes": "subjective_refraction"
           }
-
         },
-        // {
-        //   "type": "refraction-col",
-        //   "name": "subjective_refraction",
-        //   "columns": [
-        //     "Sphere",
-        //     "Cylinder",
-        //     "Axis",
-        //     "Prism",
-        //     "Visual Acuity"
-        //   ],
-        //   "extraColumns": [
-        //     "Pupil Distance",
-        //     "Pupil Height"
-        //   ],
-        //   "rows": [
-        //     {
-        //       "label": "Distance",
-        //       "value": "distance"
-        //     },
-        //     {
-        //       "label": "ADD",
-        //       "value": "add",
-        //       "merge": 4
-        //     },
-        //     {
-        //       "label": "Near",
-        //       "value": "near"
-        //     }
-        //   ],
-        //   "showIf": {
-        //     "field": "refraction_sections",
-        //     "includes": "subjective_refraction"
-        //   }
-        // },
         {
           "type": "subheading",
           "label": "Final Prescription",
@@ -244,11 +209,10 @@ export const SCHEMA = {
               ]
             }
           ],
-          showIf: {
-            field: "refraction_sections",
-            includes: "final_prescription"
+          "showIf": {
+            "field": "refraction_sections",
+            "includes": "final_prescription"
           }
-
         },
         {
           "type": "input",

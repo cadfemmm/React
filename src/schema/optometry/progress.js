@@ -1,187 +1,187 @@
 import { ACTIONS_BUTTON } from "../actions";
 
 const SUBJECTIVE = {
-  title: "",
-  actions: ACTIONS_BUTTON,
-  sections: [
+  "title": "",
+  "actions": ACTIONS_BUTTON,
+  "sections": [
     {
-      fields: [
+      "fields": [
         {
-          name: "session_for",
-          label: "Session For",
-          type: "radio",
-          options: [
+          "name": "session_for",
+          "label": "Session For",
+          "type": "radio",
+          "options": [
             {
-              label: "Vision Therapy",
-              value: "vision_therapy",
+              "label": "Vision Therapy",
+              "value": "vision_therapy"
             },
             {
-              label: "Visual Rehabilitation",
-              value: "visual_rehabilitation",
+              "label": "Visual Rehabilitation",
+              "value": "visual_rehabilitation"
             },
             {
-              label: "Low Vision-Blind Rehabilitation",
-              value: "low_vision_blind_rehab",
-            },
-          ],
+              "label": "Low Vision-Blind Rehabilitation",
+              "value": "low_vision_blind_rehab"
+            }
+          ]
         },
         {
-          name: "consent",
-          label: "Consent",
-          type: "checkbox-group",
-          options: [
+          "name": "consent",
+          "label": "Consent",
+          "type": "checkbox-group",
+          "options": [
             {
-              label:
-                "Consultation has been given based on findings. Client was in his/her best interest.",
-              value: "yes",
-            },
-          ],
+              "label": "Consultation has been given based on findings. Client was in his/her best interest.",
+              "value": "yes"
+            }
+          ]
         },
         {
-          name: "new_complaints",
-          label: "New Complaint(s)",
-          type: "textarea",
+          "name": "new_complaints",
+          "label": "New Complaint(s)",
+          "type": "textarea"
         },
         {
-          name: "session",
-          label: "Session(s)",
-          type: "input-number-range",
-          min: 1,
-          max: 1000
+          "name": "session",
+          "label": "Session(s)",
+          "type": "input-number-range",
+          "min": 1,
+          "max": 1000
         }
       ]
     }
   ]
-};
+}
 
 const OBJECTIVE = {
-  title: "",
-  actions: ACTIONS_BUTTON,
-  sections: [
+  "title": "",
+  "actions": ACTIONS_BUTTON,
+  "sections": [
     {
-      fields: [
+      "fields": [
         {
-          name: "case_overview",
-          label: "Case Overview",
-          type: "textarea",
+          "name": "case_overview",
+          "label": "Case Overview",
+          "type": "textarea"
         },
         {
-          name: "modalities",
-          label: "Modalities",
-          type: "checkbox-group",
-          options: [
+          "name": "modalities",
+          "label": "Modalities",
+          "type": "checkbox-group",
+          "options": [
             {
-              label: "Home Exercise",
-              value: "home_exercise",
+              "label": "Home Exercise",
+              "value": "home_exercise"
             },
             {
-              label: "In Office Training",
-              value: "in_office_training",
+              "label": "In Office Training",
+              "value": "in_office_training"
             },
             {
-              label: "Both",
-              value: "both",
-            },
-          ],
+              "label": "Both",
+              "value": "both"
+            }
+          ]
         },
         {
-          name: "strategies",
-          label: "Strategies",
-          type: "textarea",
+          "name": "strategies",
+          "label": "Strategies",
+          "type": "textarea"
         },
         {
-          name: "objectives",
-          label: "Objectives",
-          type: "dynamic-section",
-          fields: [
+          "name": "objectives",
+          "label": "Objectives",
+          "type": "dynamic-section",
+          "fields": [
             {
-              name: "objective_text",
-              label: "Objective",
-              type: "input",
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+              "name": "objective_text",
+              "label": "Objective",
+              "type": "input"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 
 const ASSESSMENT = {
-  title: "",
-  actions: ACTIONS_BUTTON,
-  sections: [
+  "title": "",
+  "actions": ACTIONS_BUTTON,
+  "sections": [
     {
-      fields: [
+      "fields": [
         {
-          name: "tasks",
-          label: "Tasks",
-          type: "dynamic-section",
-          fields: [
+          "name": "tasks",
+          "label": "Tasks",
+          "type": "dynamic-section",
+          "fields": [
             {
-              name: "task",
-              label: "Task",
-              type: "input",
+              "name": "task",
+              "label": "Task",
+              "type": "input"
             },
             {
-              name: "achievement",
-              label: "Achievement",
-              type: "radio",
-              options: [
+              "name": "achievement",
+              "label": "Achievement",
+              "type": "radio",
+              "options": [
                 {
-                  label: "Excellent",
-                  value: "excellent",
+                  "label": "Excellent",
+                  "value": "excellent"
                 },
                 {
-                  label: "Good",
-                  value: "good",
+                  "label": "Good",
+                  "value": "good"
                 },
                 {
-                  label: "Fair",
-                  value: "fair",
+                  "label": "Fair",
+                  "value": "fair"
                 },
                 {
-                  label: "Poor",
-                  value: "poor",
-                },
-              ],
+                  "label": "Poor",
+                  "value": "poor"
+                }
+              ]
             },
             {
-              name: "comment",
-              label: "Comment / Remark",
-              type: "input",
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+              "name": "comment",
+              "label": "Comment / Remark",
+              "type": "input"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
 
 const PLAN = {
-  title: "",
-  actions: ACTIONS_BUTTON,
-  sections: [
+  "title": "",
+  "actions": ACTIONS_BUTTON,
+  "sections": [
     {
-      fields: [
+      "fields": [
         {
-          name: "plan_text",
-          label: "Plan",
-          type: "textarea",
+          "name": "plan_text",
+          "label": "Plan",
+          "type": "textarea"
         },
         {
-          name: "comment_text",
-          label: "Comment",
-          type: "textarea",
+          "name": "comment_text",
+          "label": "Comment",
+          "type": "textarea"
         },
         {
-          name: "remark_text",
-          label: "Remark",
-          type: "textarea",
-        },
-      ],
-    },
-  ],
-};
+          "name": "remark_text",
+          "label": "Remark",
+          "type": "textarea"
+        }
+      ]
+    }
+  ]
+}
 
 export default {
   PLAN,
