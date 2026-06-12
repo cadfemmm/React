@@ -1,29 +1,17 @@
-import React, { useState, useMemo, memo } from "react";
+import { useState } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
-import { localDateTimeString } from "../../../shared/utils/dateFormatter";
 import PatientCard from "../../../shared/cards/PatientCard";
 
-const ACTIONS_WITH_NEXT = [
-  { type: "back",  label: "Back"  },
-  { type: "clear", label: "Clear" },
-  { type: "save",  label: "Save"  },
-];
-
-const TAB_ORDER = ["subjective", "objective", "assessment", "plan"];
-
-const TAB_META = {
-  subjective: { label: "Subjective"  },
-  objective:  { label: "Objective"   },
-  assessment: { label: "Assessment"  },
-  plan:       { label: "Plan"        },
-};
+// Schema
+import OPTO_PRO_SCHEMA from "../../../schema/optometry/progress"
+import { ACTIONS_BUTTON, ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
 
 /* ── Main component ── */
 export default function OptometryProgressAssessment({ patient, onSubmit, onBack }) {
   const [values,    setValues]    = useState({});
   const [activeTab, setActiveTab] = useState("subjective");
 
-  const activeTabIdx = TAB_ORDER.indexOf(activeTab);
+  const activeTabIdx = ASSESSMENT_TABS.indexOf(activeTab);
 
   const handleChange = (name, value) => setValues(prev => ({ ...prev, [name]: value }));
 
@@ -32,133 +20,16 @@ export default function OptometryProgressAssessment({ patient, onSubmit, onBack 
     if (type === "clear") { setValues({}); return; }
     if (type === "save")  { onSubmit?.(values); return; }
     if (type === "next") {
-      const idx = TAB_ORDER.indexOf(activeTab);
-      if (idx < TAB_ORDER.length - 1) setActiveTab(TAB_ORDER[idx + 1]);
+      const idx = ASSESSMENT_TABS.indexOf(activeTab);
+      if (idx < ASSESSMENT_TABS.length - 1) setActiveTab(ASSESSMENT_TABS[idx + 1]);
     }
   };
-
-  const schemaMap = useMemo(() => ({
-    subjective: {
-      title: "",
-      actions: ACTIONS_WITH_NEXT,
-      sections: [{
-        fields: [
-          {
-            name: "session_for",
-            label: "Session For",
-            type: "radio",
-            options: [
-              { label: "Vision Therapy",                  value: "vision_therapy" },
-              { label: "Visual Rehabilitation",           value: "visual_rehabilitation" },
-              { label: "Low Vision-Blind Rehabilitation", value: "low_vision_blind_rehab" }
-            ]
-          },
-          {
-            name: "consent",
-            label: "Consent",
-            type: "checkbox-group",
-            options: [
-                {
-                label: "Consultation has been given based on findings. Client was in his/her best interest.",
-                value: "yes"
-                }
-            ]
-            },
-          { name: "new_complaints", label: "New Complaint(s)", type: "textarea" },
-           {
-            name: "session",
-            label: "Session(s)",
-            type: "custom",
-            render: ({ values, onChange }) => (
-                <input
-                min="1"
-                max="1000"
-                type="number"
-                name="session"
-                value={values.session || "1"}
-                onChange={(e) => onChange("session", e.target.value)}
-                style={{
-                    width: "100%",
-                    padding: "10px 12px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: 8
-                }}
-                />
-            )
-            }
-        ]
-      }]
-    },
-
-    objective: {
-      title: "",
-      actions: ACTIONS_WITH_NEXT,
-      sections: [{
-        fields: [
-          { name: "case_overview", label: "Case Overview", type: "textarea" },
-          {
-            name: "modalities",
-            label: "Modalities",
-            type: "checkbox-group",
-            options: [
-              { label: "Home Exercise",      value: "home_exercise"      },
-              { label: "In Office Training", value: "in_office_training" },
-              { label: "Both",               value: "both"               },
-              {label:"Robotics", value:'robotics'},
-              {label:'Others', value:'others'}
-            ]
-          },
-          { name: "strategies", label: "Strategies", type: "textarea" },
-          {
-            name: "objectives",
-            label: "Objectives",
-            type: "dynamic-section",
-            fields: [{ name: "objective_text", label: "Objective", type: "input" }]
-          }
-        ]
-      }]
-    },
-
-    assessment: {
-      title: "",
-      actions: ACTIONS_WITH_NEXT,
-      sections: [{
-        fields: [{
-          name: "tasks",
-          label: "Tasks",
-          type: "dynamic-section",
-          fields: [
-            { name: "task",        label: "Task",              type: "input"    },
-            {
-              name: "achievement",
-              label: "Achievement",
-              type: "radio",
-              options: [
-                { label: "Excellent", value: "excellent" },
-                { label: "Good",      value: "good"      },
-                { label: "Fair",      value: "fair"      },
-                { label: "Poor",      value: "poor"      }
-              ]
-            },
-            { name: "comment", label: "Comment / Remark", type: "input" }
-          ]
-        }]
-      }]
-    },
-
-    plan: {
-      title: "",
-      actions: ACTIONS_WITH_NEXT,
-      sections: [{
-        fields: [
-          { name: "plan_text",    label: "Plan",    type: "textarea" },
-          { name: "comment_text", label: "Comment", type: "textarea" },
-          { name: "remark_text",  label: "Remark",  type: "textarea" }
-        ]
-      }]
-    }
-  }), []);
-
+  const schemaMap = {
+    subjective: OPTO_PRO_SCHEMA.SUBJECTIVE,
+    objective: OPTO_PRO_SCHEMA.OBJECTIVE,
+    assessment: OPTO_PRO_SCHEMA.ASSESSMENT,
+    plan: OPTO_PRO_SCHEMA.PLAN
+  }
   return (
     <div style={S.page}>
       {/* Patient header */}
@@ -170,7 +41,7 @@ export default function OptometryProgressAssessment({ patient, onSubmit, onBack 
       <div style={S.soapShell}>
         {/* Tab bar */}
         <div style={S.tabBar}>
-          {TAB_ORDER.map((tab, idx) => {
+          {ASSESSMENT_TABS.map((tab, idx) => {
             const isActive = activeTab === tab;
             const isDone   = idx < activeTabIdx;
             return (
@@ -201,7 +72,7 @@ export default function OptometryProgressAssessment({ patient, onSubmit, onBack 
                   onMouseLeave={e => e.currentTarget.style.background = "#2563eb"}
                   onClick={() => handleAction("next")}
                 >
-                  Next: {TAB_META[TAB_ORDER[activeTabIdx + 1]]?.label} →
+                  Next: {TAB_META[ASSESSMENT_TABS[activeTabIdx + 1]]?.label} →
                 </button>
               </div>
             )}
