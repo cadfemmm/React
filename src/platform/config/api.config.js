@@ -2,6 +2,13 @@ const BASE_API = (process.env.REACT_APP_API_DJANGO || 'https://backend.tps-ind.c
 const RMS_API = 'https://api.dev.rehab-software.com/api/v1/'
 const TYMPANOGRAM_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/tympanogram";
 const OTOSCOPIC_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/otoscopic";
+// Browser calls same-origin path; dev proxy (setupProxy.js) forwards to AI service.
+const STT_API_BASE =
+    process.env.REACT_APP_STT_API_BASE || "/new-stt";
+const STT_SESSION_START_URL =
+    process.env.REACT_APP_STT_SESSION_START_URL || `${STT_API_BASE}/session/start`;
+const sttWebspeechUrl = (sessionId) =>
+    `${STT_API_BASE}/session/${encodeURIComponent(sessionId)}/webspeech`;
 
 const API_URL = {
     // Users apis
@@ -68,5 +75,8 @@ export {
     BASE_API,
     RMS_API,
     TYMPANOGRAM_EXTRACT_URL,
-    OTOSCOPIC_EXTRACT_URL
+    OTOSCOPIC_EXTRACT_URL,
+    STT_SESSION_START_URL,
+    STT_API_BASE,
+    sttWebspeechUrl,
 }

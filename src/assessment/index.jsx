@@ -30,6 +30,7 @@ import session from "./session.js";
 
 // ICD Components
 import AudiologyICDSection from "../features/Audiology/components/AudiologyICDSection";
+import AudiologySttFloatingMic from "../features/Audiology/components/AudiologySttFloatingMic";
 import OptometryICDSection from "../features/Optometry/components/OptometryICDSection";
 
 // ── Context ────────────────────────────────────────────────────────────────
@@ -971,6 +972,9 @@ useEffect(() => {
           setEquipmentBookingOpen(false);
         }}
       />
+      {department === "Audiology" && (
+        <AudiologySttFloatingMic onToast={setToast} />
+      )}
       <BookAppointmentModal
         open={appointmentModalOpen}
         row={{
