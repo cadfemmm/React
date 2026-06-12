@@ -19,7 +19,7 @@ import PediatricPsychologyAssessment from "./PediatricPsychologyAssessment";
 import PsychologyProgress from "./PsychologyProgress";
 
 // Schema
-import PSYCHO_SCHEMA from "../../../schema/psychology"
+import PSYCHO_SCHEMA from "../../../schema/Psychology/index"
 import { ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
 
 // Create context to pass patient to assessment components
