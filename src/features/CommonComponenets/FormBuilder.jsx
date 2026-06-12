@@ -522,7 +522,7 @@ export default function CommonFormBuilder({
                                   <div style={{ marginBottom: 16 }}>
 
                                     <>
-                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion"].includes(field.type)
+                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion", "dynamic-table", "custom"].includes(field.type)
                                         && field.type !== "checkbox-group"
                                         && (
                                           <label
@@ -1973,6 +1973,154 @@ function renderField(
         </div>
       );
     }
+    case "dynamic-table": {
+      const columns = field.columns || [];
+      const makeEmptyRow = () => {
+        const row = {};
+        columns.forEach((col) => {
+          row[col.key] = col.defaultValue ?? "";
+        });
+        return row;
+      };
+      const minRows = field.minRows || 1;
+      const rawRows = values[field.name];
+      const rows =
+        Array.isArray(rawRows) && rawRows.length > 0
+          ? rawRows
+          : Array.from({ length: minRows }, makeEmptyRow);
+
+      const updateCell = (rowIdx, key, val) => {
+        const next = rows.map((r, i) => (i === rowIdx ? { ...r, [key]: val } : r));
+        onChange(field.name, next);
+      };
+
+      const addRow = () => onChange(field.name, [...rows, makeEmptyRow()]);
+
+      const removeRow = (rowIdx) => {
+        const next = rows.filter((_, i) => i !== rowIdx);
+        onChange(field.name, next.length > 0 ? next : [makeEmptyRow()]);
+      };
+
+      const showRemove = field.allowRemove !== false;
+      const template = `repeat(${columns.length}, minmax(110px, 1fr))${showRemove ? " 44px" : ""}`;
+
+      const renderCell = (col, row, rowIdx) => {
+        const cellValue = row[col.key] ?? "";
+
+        if (col.type === "single-select") {
+          return (
+            <select
+              style={styles.gridInput}
+              value={cellValue}
+              disabled={readOnly}
+              onChange={(e) => !readOnly && updateCell(rowIdx, col.key, e.target.value)}
+            >
+              <option value="">{col.placeholder || "Select"}</option>
+              {(col.options || []).map((opt, i) => {
+                const val = typeof opt === "object" && opt !== null && "value" in opt ? opt.value : opt;
+                const label = typeof opt === "object" && opt !== null && "label" in opt ? opt.label : opt;
+                return (
+                  <option key={val ?? i} value={val}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          );
+        }
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <input
+              type={col.type === "number" ? "number" : "text"}
+              min={col.type === "number" ? col.min ?? 0 : undefined}
+              value={cellValue}
+              readOnly={readOnly}
+              placeholder={col.placeholder || ""}
+              onChange={(e) => !readOnly && updateCell(rowIdx, col.key, e.target.value)}
+              style={{ ...styles.gridInput, width: "100%" }}
+            />
+            {col.suffix && (
+              <span style={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>{col.suffix}</span>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div style={{ marginTop: field.label ? 4 : 10, marginBottom: 8 }}>
+          {field.label && (
+            <div className="fb-subheading" style={{ marginBottom: 12 }}>
+              {t(field.label, languageConfig?.enabled ? languageConfig.lang : "en")}
+            </div>
+          )}
+          <div style={{ overflowX: "auto" }}>
+            <div style={{ ...styles.gridHeaderRow, gridTemplateColumns: template, background: "#f1f5f9", borderRadius: "8px 8px 0 0", padding: "10px 12px" }}>
+              {columns.map((col) => (
+                <div key={col.key} style={styles.gridHeaderCell}>
+                  {col.label}
+                </div>
+              ))}
+              {showRemove && <div />}
+            </div>
+            {rows.map((row, rowIdx) => (
+              <div
+                key={rowIdx}
+                style={{
+                  ...styles.gridRow,
+                  gridTemplateColumns: template,
+                  background: rowIdx % 2 === 0 ? "#fff" : "#fafbfc",
+                  padding: "8px 12px",
+                  marginBottom: 0,
+                }}
+              >
+                {columns.map((col) => (
+                  <div key={col.key}>{renderCell(col, row, rowIdx)}</div>
+                ))}
+                {showRemove && (
+                  <button
+                    type="button"
+                    onClick={() => !readOnly && removeRow(rowIdx)}
+                    disabled={readOnly}
+                    title="Remove row"
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#ef4444",
+                      fontSize: 16,
+                      cursor: readOnly ? "default" : "pointer",
+                      padding: "2px 6px",
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={addRow}
+              style={{
+                marginTop: 10,
+                padding: "8px 18px",
+                background: "#2563EB",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              + Add Row
+            </button>
+          )}
+        </div>
+      );
+    }
+
     case "enteral-feeding-table": {
       const rows = values[`${field.name}_rows`] || [{ time: "", scoops1: "", water: "", flushing: "",onsType: "", onsOthers: "",scoops2: "",modular: "", }];
       const updateRow = (idx, col, val) => {
@@ -2618,7 +2766,7 @@ case "grid-table-advanced": {
                     {/* Render outer label for field types that don't self-label */}
                     {c?.label && !["subheading","radio-matrix","checkbox-group","button",
                       "optional-section-toggle","score-box","accordion","custom","row",
-                      "grid-header","grid-row","scale-slider","dynamic-goals","dynamic-section",
+                      "grid-header","grid-row","scale-slider","dynamic-goals","dynamic-section","dynamic-table",
                       "dynamic-simple-goals","assessment-launcher","refraction-12col"].includes(c?.type) && (
                       <label className="form-label">
                         {c.label}
@@ -2716,6 +2864,8 @@ case "grid-table-advanced": {
       const infoText = field.info
         ? t(field.info, languageConfig?.enabled ? languageConfig.lang : "en")
         : null;
+      const displayValue =
+        typeof field.compute === "function" ? field.compute(values) : (value ?? 0);
 
       const renderedLabel = infoText ? (
         <InfoTooltip
@@ -2734,7 +2884,7 @@ case "grid-table-advanced": {
             {renderedLabel}
           </div>
           <div className="fb-score-value">
-            {value ?? 0}
+            {displayValue ?? 0}
           </div>
         </div>
       );
@@ -2854,6 +3004,27 @@ if (typeof col === "object" && col.type === "radio") {
               );
             }
 
+            if (typeof col === "object" && col.type === "computed") {
+              const display =
+                typeof col.compute === "function" ? col.compute(values) : "";
+              return (
+                <div
+                  key={fieldKey}
+                  style={{
+                    ...styles.gridInput,
+                    backgroundColor: col.plain ? "transparent" : "#f8fafc",
+                    fontWeight: col.plain ? 500 : 700,
+                    color: col.plain ? "#6b7280" : "#2563eb",
+                    pointerEvents: "none",
+                    cursor: "default",
+                    textAlign: "center",
+                  }}
+                >
+                  {col.prefix || ""}{display}
+                </div>
+              );
+            }
+
             // Handle static (read-only) text column – e.g. Normal values in ROM tables
             if (typeof col === "object" && col.type === "static") {
               return (
@@ -2864,10 +3035,11 @@ if (typeof col === "object" && col.type === "radio") {
                     backgroundColor: "#f8fafc",
                     fontWeight: 600,
                     pointerEvents: "none",
-                    cursor: "default"
+                    cursor: "default",
+                    ...(col.textAlign && { textAlign: col.textAlign }),
                   }}
                 >
-                  {values[col.name] ?? 0}
+                  {col.text ?? values[col.name] ?? 0}
                 </div>
               );
             }
@@ -2943,6 +3115,11 @@ if (typeof col === "object" && col.type === "radio") {
                   ...(col.width && { width: col.width })
                 }}
                 value={values[fieldKey] || ""}
+                placeholder={
+                  typeof col === "object" && col.placeholder
+                    ? t(col.placeholder, languageConfig?.enabled ? languageConfig.lang : "en") || col.placeholder
+                    : ""
+                }
                 onChange={e => onChange(fieldKey, e.target.value)}
               />
             );

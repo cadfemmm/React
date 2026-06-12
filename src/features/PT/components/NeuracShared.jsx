@@ -5,7 +5,10 @@ import React from "react";
 ══════════════════════════════════════════════════════════ */
 
 /* ── Dropdown options ── */
-export const OPTS_01   = [{ label: "—", value: "" }, { label: "0 – Not satisfactory", value: "0" }, { label: "1 – Satisfactory", value: "1" }];
+export const OPTS_01 = [
+  { label: "0 - Not Satisfactory", value: "0" },
+  { label: "1 - Satisfactory", value: "1" },
+];
 export const OPTS_0123 = [{ label: "—", value: "" }, { label: "0", value: "0" }, { label: "1", value: "1" }, { label: "2", value: "2" }, { label: "3", value: "3" }];
 export const OPTS_PDF  = [{ label: "—", value: "" }, { label: "P – Pain", value: "P" }, { label: "D – Dysfunctional Move", value: "D" }, { label: "F – Functional Move", value: "F" }];
 
@@ -14,8 +17,284 @@ export function k(str) {
   return (str || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 }
 
+export const PERFORM_POS_NEG = [
+  { label: "Positive", value: "Positive" },
+  { label: "Negative", value: "Negative" },
+];
+
+export const YES_NO_OPTS = [
+  { label: "Yes", value: "Yes" },
+  { label: "No", value: "No" },
+];
+
+/** FormBuilder radio rows for Perform+ Test (merged into Outcome Measures card). */
+export function buildPerformTestFields(prefix, rows) {
+  return [
+    { type: "subheading", label: "Perform+ Test" },
+    ...rows.map((test) => ({
+      type: "radio",
+      name: `${prefix}_perform_${k(test)}_result`,
+      label: test,
+      options: PERFORM_POS_NEG,
+    })),
+  ];
+}
+
+export function neuracMovementRowTotal(values, prefix, test) {
+  return ["rom", "mc", "pfm"].reduce(
+    (sum, col) => sum + (Number(values[`${prefix}_${k(test)}_${col}`]) || 0),
+    0
+  );
+}
+
+export function neuracMovementColTotal(values, movements, prefix, col) {
+  return movements.reduce(
+    (sum, test) => sum + (Number(values[`${prefix}_${k(test)}_${col}`]) || 0),
+    0
+  );
+}
+
+export function neuracMovementOverallTotal(values, movements, prefix) {
+  return movements.reduce(
+    (sum, test) => sum + neuracMovementRowTotal(values, prefix, test),
+    0
+  );
+}
+
+const NEURAC_MOVEMENT_TOOLTIP = [
+  "0 = Not satisfactory (Neurac treatment indicated)",
+  "1 = Satisfactory",
+];
+
+const NEURAC_PROXIMAL_TOOLTIP = [
+  "0 = Weak Link (Neurac treatment indicated)",
+  "Decide:",
+  "P = Pain",
+  "D = Dysfunctional Movement",
+  "F = Functional Movement",
+];
+
+const OPTS_0123_SCORE = OPTS_0123.filter((o) => o.value !== "");
+const OPTS_PDF_VALUES = OPTS_PDF.filter((o) => o.value !== "");
+
+export function neuracProximalRowTotal(values, prefix, test) {
+  const bk = `${prefix}_${k(test)}`;
+  return (Number(values[`${bk}_l_score`]) || 0) + (Number(values[`${bk}_r_score`]) || 0);
+}
+
+export function neuracProximalGrandTotal(values, groups, prefix) {
+  return groups
+    .flatMap(({ tests }) => tests.filter(Boolean))
+    .reduce((sum, test) => sum + neuracProximalRowTotal(values, prefix, test), 0);
+}
+
+/** FormBuilder grid for Neurac movement protocol tables (ROM / MC / PFM). */
+export function buildNeuracMovementProtocolFields({
+  title,
+  movements,
+  prefix = "cm",
+  tooltipLines = NEURAC_MOVEMENT_TOOLTIP,
+}) {
+  const template =
+    "minmax(150px, 1.3fr) repeat(3, minmax(100px, 1fr)) minmax(120px, 1.2fr) 64px";
+
+  return [
+    { type: "subheading", label: title },
+    {
+      type: "grid-header",
+      label: "Tests",
+      template,
+      cols: ["ROM", "Movement Control", "Pain Free Movement", "Comments", "Total"],
+      info: { title, content: tooltipLines },
+    },
+    ...movements.map((test) => ({
+      type: "grid-row",
+      name: `${prefix}_${k(test)}`,
+      label: test,
+      template,
+      cols: [
+        { type: "single-select", name: `${prefix}_${k(test)}_rom`, options: OPTS_01 },
+        { type: "single-select", name: `${prefix}_${k(test)}_mc`, options: OPTS_01 },
+        { type: "single-select", name: `${prefix}_${k(test)}_pfm`, options: OPTS_01 },
+        { type: "input", name: `${prefix}_${k(test)}_comment`, placeholder: "" },
+        {
+          type: "computed",
+          name: `${prefix}_${k(test)}_total`,
+          prefix: "/",
+          compute: (values) => neuracMovementRowTotal(values, prefix, test),
+        },
+      ],
+    })),
+    {
+      type: "grid-row",
+      name: `${prefix}_totals`,
+      label: "Total Scores",
+      template,
+      cols: [
+        {
+          type: "computed",
+          name: `${prefix}_total_rom`,
+          prefix: "/",
+          compute: (values) => neuracMovementColTotal(values, movements, prefix, "rom"),
+        },
+        {
+          type: "computed",
+          name: `${prefix}_total_mc`,
+          prefix: "/",
+          compute: (values) => neuracMovementColTotal(values, movements, prefix, "mc"),
+        },
+        {
+          type: "computed",
+          name: `${prefix}_total_pfm`,
+          prefix: "/",
+          compute: (values) => neuracMovementColTotal(values, movements, prefix, "pfm"),
+        },
+        { type: "static", name: `${prefix}_overall_label`, text: "Overall Score", textAlign: "left" },
+        {
+          type: "computed",
+          name: `${prefix}_overall_total`,
+          prefix: "/",
+          compute: (values) => neuracMovementOverallTotal(values, movements, prefix),
+        },
+      ],
+    },
+    {
+      type: "custom",
+      name: `${prefix}_movements_legend`,
+      render: () => <Legend text={legend01} />,
+    },
+  ];
+}
+
+/** FormBuilder grid for Neurac settings tables (Global Comp / Position / etc.). */
+export function buildNeuracSettingsProtocolFields({
+  title,
+  rows,
+  prefix = "cs",
+  tooltipLines = NEURAC_MOVEMENT_TOOLTIP,
+}) {
+  const template =
+    "minmax(150px, 1.3fr) repeat(4, minmax(95px, 1fr)) minmax(95px, 1fr) minmax(95px, 1fr) minmax(120px, 1.2fr)";
+
+  return [
+    { type: "subheading", label: title },
+    {
+      type: "grid-header",
+      label: "Tests",
+      template,
+      cols: [
+        "Global Comp.",
+        "Position",
+        "Pain Free",
+        "Abdominal Respiration",
+        "Fatigue Occurs",
+        "Total Hold Time",
+        "Comments",
+      ],
+      info: { title, content: tooltipLines },
+    },
+    ...rows.map((test) => ({
+      type: "grid-row",
+      name: `${prefix}_${k(test)}`,
+      label: test,
+      template,
+      cols: [
+        { type: "single-select", name: `${prefix}_${k(test)}_gc`, options: OPTS_01 },
+        { type: "single-select", name: `${prefix}_${k(test)}_pos`, options: OPTS_01 },
+        { type: "single-select", name: `${prefix}_${k(test)}_pf`, options: OPTS_01 },
+        { type: "single-select", name: `${prefix}_${k(test)}_ar`, options: OPTS_01 },
+        { type: "single-select", name: `${prefix}_${k(test)}_fatigue`, options: YES_NO_OPTS },
+        { type: "input", name: `${prefix}_${k(test)}_hold`, placeholder: "sec" },
+        { type: "input", name: `${prefix}_${k(test)}_comment`, placeholder: "" },
+      ],
+    })),
+    {
+      type: "custom",
+      name: `${prefix}_settings_legend`,
+      render: () => <Legend text={legend01} />,
+    },
+  ];
+}
+
+/** FormBuilder grid for myofascial chain / proximal tests (L/R score + P/D/F). */
+export function buildNeuracProximalProtocolFields({
+  title,
+  groups,
+  prefix = "cx_px",
+  tooltipLines = NEURAC_PROXIMAL_TOOLTIP,
+}) {
+  const template =
+    "minmax(150px, 1.3fr) repeat(2, minmax(90px, 1fr)) repeat(2, minmax(100px, 1fr)) minmax(120px, 1.2fr) 64px";
+
+  const fields = [
+    { type: "subheading", label: title },
+    {
+      type: "grid-header",
+      label: "Tests",
+      template,
+      cols: [
+        "L Score (0–3)",
+        "L P / D / F",
+        "R Score (0–3)",
+        "R P / D / F",
+        "Comments",
+        "Total",
+      ],
+      info: { title, content: tooltipLines },
+    },
+  ];
+
+  groups.forEach(({ group, tests }) => {
+    if (group) {
+      fields.push({ type: "subheading", label: group });
+    }
+    tests.filter(Boolean).forEach((test) => {
+      const bk = `${prefix}_${k(test)}`;
+      fields.push({
+        type: "grid-row",
+        name: bk,
+        label: test,
+        template,
+        cols: [
+          { type: "single-select", name: `${bk}_l_score`, options: OPTS_0123_SCORE },
+          { type: "single-select", name: `${bk}_l_pdf`, options: OPTS_PDF_VALUES },
+          { type: "single-select", name: `${bk}_r_score`, options: OPTS_0123_SCORE },
+          { type: "single-select", name: `${bk}_r_pdf`, options: OPTS_PDF_VALUES },
+          { type: "input", name: `${bk}_comment`, placeholder: "" },
+          {
+            type: "computed",
+            name: `${bk}_total`,
+            compute: (values) => neuracProximalRowTotal(values, prefix, test),
+          },
+        ],
+      });
+    });
+  });
+
+  fields.push(
+    {
+      type: "score-box",
+      name: `${prefix}_overall_total`,
+      label: "Total Score",
+      compute: (values) => neuracProximalGrandTotal(values, groups, prefix),
+    },
+    {
+      type: "custom",
+      name: `${prefix}_proximal_legend`,
+      render: () => <Legend text={legendPDF} />,
+    }
+  );
+
+  return fields;
+}
+
 /* ── Reusable select ── */
 export function Sel({ options, value, onChange, width = 110 }) {
+  const hasPlaceholder = options.some((o) => o.value === "");
+  const opts = hasPlaceholder
+    ? options
+    : [{ label: "Select", value: "" }, ...options];
+
   return (
     <select
       value={value || ""}
@@ -26,7 +305,7 @@ export function Sel({ options, value, onChange, width = 110 }) {
         fontSize: 12, background: "#fff", color: "#111827", cursor: "pointer",
       }}
     >
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      {opts.map(o => <option key={o.value || "select"} value={o.value}>{o.label}</option>)}
     </select>
   );
 }
@@ -96,7 +375,7 @@ export const tdN  = { padding: "7px 10px", border: "1px solid #e5e7eb", vertical
 export const groupHeader = { padding: "7px 10px", border: "1px solid #e5e7eb", fontWeight: 800, fontSize: 13, color: "#111827", background: "#f9fafb" };
 
 /* ── Legend ── */
-export const legend01  = "0 = not satisfactory (Neurac treatment indicated)     1 = satisfactory";
+export const legend01  = "0 = Not Satisfactory (Neurac treatment indicated)     1 = Satisfactory";
 export const legendPDF = "0 = Weak Link (Neurac treatment indicated)\nDecide: P = Pain, D = Dysfunctional Movement, F = Functional Movement";
 
 export function Legend({ text }) {

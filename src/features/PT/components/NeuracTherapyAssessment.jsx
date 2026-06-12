@@ -11,12 +11,25 @@ import SixMWTForm from "./SixMWTForm";
 import SixMWPTForm from "./SixMWPTForm";
 import TenMWTForm from "./TenMWTForm";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
-import CervicalNeuracAssessment from "./CervicalNeuracAssessment";
-import ElbowNeuracAssessment from "./ElbowNeuracAssessment";
-import ShoulderNeuracAssessment from "./ShoulderNeuracAssessment";
-import KneeNeuracAssessment from "./KneeNeuracAssessment";
-import HipNeuracAssessment from "./HipNeuracAssessment";
-import LumbarNeuracAssessment from "./LumbarNeuracAssessment";
+import CervicalNeuracAssessment, {
+  CERVICAL_MOVEMENTS,
+  CERVICAL_SETTINGS,
+  CERVICAL_PROXIMAL_GROUPS,
+} from "./CervicalNeuracAssessment";
+import {
+  buildPerformTestFields,
+  buildNeuracMovementProtocolFields,
+  buildNeuracSettingsProtocolFields,
+  buildNeuracProximalProtocolFields,
+} from "./NeuracShared";
+import ElbowNeuracAssessment, { ELBOW_PROXIMAL_GROUPS } from "./ElbowNeuracAssessment";
+import ShoulderNeuracAssessment, { SHOULDER_PROXIMAL_GROUPS } from "./ShoulderNeuracAssessment";
+import KneeNeuracAssessment, { KNEE_PROXIMAL_GROUPS } from "./KneeNeuracAssessment";
+import HipNeuracAssessment, { HIP_PROXIMAL_GROUPS } from "./HipNeuracAssessment";
+import LumbarNeuracAssessment, {
+  LUMBAR_SETTINGS,
+  LUMBAR_PROXIMAL_GROUPS,
+} from "./LumbarNeuracAssessment";
 import IsometricTestForm from "./IsometricTestForm";
 import PatientCard from "../../../shared/cards/PatientCard";
 const POS_NEG_OPTIONS = [
@@ -106,6 +119,112 @@ const SCHEMA_MAP = {
   assessment: ASSESSMENT_SCHEMA,
   plan:       PLAN_SCHEMA,
 };
+
+const NEURAC_PERFORM_ROWS = {
+  cervical: [
+    "Core Brace", "Abduction", "Heel Raise", "Adduction",
+    "Scapula Assist", "Scapula Retraction", "Scapula Stabilization",
+  ],
+  shoulder: [
+    "Core Brace", "Abduction", "Heel Raise", "Adduction",
+    "Scapula Assist", "Scapula Retraction", "Scapula Stabilization",
+  ],
+  elbow: [
+    "Core Brace", "Abduction", "Heel Raise", "Adduction",
+    "Scapula Assist", "Scapula Retraction", "Scapula Stabilization",
+  ],
+  lumbar: ["Core Brace", "Abduction", "Heel Raise", "Scapula Assist"],
+  knee:   ["Core Brace", "Abduction", "Heel Raise", "Scapula Assist"],
+  hip:    ["Core Brace", "Abduction", "Heel Raise", "Scapula Assist"],
+};
+
+function getObjectiveSchema(region) {
+  const baseFields = OBJECTIVE_SCHEMA.sections[0].fields;
+  const performRows = NEURAC_PERFORM_ROWS[region];
+  if (!performRows) return OBJECTIVE_SCHEMA;
+
+  const fields = [...baseFields, ...buildPerformTestFields(region, performRows)];
+
+  if (region === "cervical") {
+    fields.push(
+      ...buildNeuracMovementProtocolFields({
+        title: "Neurac Test Protocol — Cervical Movements",
+        movements: CERVICAL_MOVEMENTS,
+        prefix: "cm",
+      }),
+      ...buildNeuracSettingsProtocolFields({
+        title: "Cervical Settings",
+        rows: CERVICAL_SETTINGS,
+        prefix: "cs",
+      }),
+      ...buildNeuracProximalProtocolFields({
+        title: "Additional Myofascial Chain Tests for Neck Examination",
+        groups: CERVICAL_PROXIMAL_GROUPS,
+        prefix: "cx_px",
+      })
+    );
+  }
+
+  if (region === "shoulder") {
+    fields.push(
+      ...buildNeuracProximalProtocolFields({
+        title: "Myofascial Chain Tests for Shoulder Examination",
+        groups: SHOULDER_PROXIMAL_GROUPS,
+        prefix: "shoulder_px",
+      })
+    );
+  }
+
+  if (region === "elbow") {
+    fields.push(
+      ...buildNeuracProximalProtocolFields({
+        title: "Myofascial Chain Tests for Elbow Examination",
+        groups: ELBOW_PROXIMAL_GROUPS,
+        prefix: "elbow_px",
+      })
+    );
+  }
+
+  if (region === "lumbar") {
+    fields.push(
+      ...buildNeuracSettingsProtocolFields({
+        title: "Lumbar Settings",
+        rows: LUMBAR_SETTINGS,
+        prefix: "ls",
+      }),
+      ...buildNeuracProximalProtocolFields({
+        title: "Myofascial Chain Tests",
+        groups: LUMBAR_PROXIMAL_GROUPS,
+        prefix: "lumbar_px",
+      })
+    );
+  }
+
+  if (region === "knee") {
+    fields.push(
+      ...buildNeuracProximalProtocolFields({
+        title: "Myofascial Chain Tests for Knee Examination",
+        groups: KNEE_PROXIMAL_GROUPS,
+        prefix: "knee_px",
+      })
+    );
+  }
+
+  if (region === "hip") {
+    fields.push(
+      ...buildNeuracProximalProtocolFields({
+        title: "Myofascial Chain Tests for Hip Examination",
+        groups: HIP_PROXIMAL_GROUPS,
+        prefix: "hip_px",
+      })
+    );
+  }
+
+  return {
+    ...OBJECTIVE_SCHEMA,
+    sections: [{ fields }],
+  };
+}
 
 const SPINAL_ASSESSMENT_REGISTRY = {
   tug:     TUG,
@@ -249,7 +368,7 @@ function NeuracSoapWrapper({ patient, region, onSubmit, onBack }) {
         <>
           {/* Outcome Measures assessment-launcher */}
           <CommonFormBuilder
-            schema={OBJECTIVE_SCHEMA}
+            schema={getObjectiveSchema(region)}
             values={values}
             onChange={onChange}
             onAction={handleAction}
