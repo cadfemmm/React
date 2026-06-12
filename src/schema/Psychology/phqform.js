@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Patient Health Questionnaire (PHQ-9)",
   "enableScoreToggle": true,
   "actions": [

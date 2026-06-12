@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
+import { SCHEMA } from "../../../schema/psychology/pssform";
 
 export default function PSSFormBuilder({ patient, onSubmit, onBack, layout }) {
   const [values, setValues] = useState({});
@@ -10,62 +11,6 @@ export default function PSSFormBuilder({ patient, onSubmit, onBack, layout }) {
   const storageKey = patient?.id
     ? `psychology::${patient.id}::PSS`
     : null;
-
-  /* ---------------- SCHEMA ---------------- */
-  const PSS_SCHEMA = useMemo(() => {
-    const optionsWithScores = [
-      { label: "Never (0)", value: 0 },
-      { label: "Almost never (1)", value: 1 },
-      { label: "Sometimes (2)", value: 2 },
-      { label: "Fairly often (3)", value: 3 },
-      { label: "Very often (4)", value: 4 }
-    ];
-    const optionsWithoutScores = [
-      { label: "Never", value: 0 },
-      { label: "Almost never", value: 1 },
-      { label: "Sometimes", value: 2 },
-      { label: "Fairly often", value: 3 },
-      { label: "Very often", value: 4 }
-    ];
-
-    return {
-      title: "Perceived Stress Scale (PSS)",
-      enableScoreToggle: true,
-      actions: [{ type: "toggle-show-scores" }],
-      sections: [
-        {
-          fields: [
-            { name: "q1", label: "1. In the last month, how often have you been upset because of something that happened unexpectedly?" },
-            { name: "q2", label: "2. In the last month, how often have you felt that you were unable to control the important things in your life?" },
-            { name: "q3", label: "3. In the last month, how often have you felt nervous and stressed?" },
-            { name: "q4", label: "4. In the last month, how often have you felt confident about your ability to handle your personal problems?" },
-            { name: "q5", label: "5. In the last month, how often have you felt that things were going your way?" },
-            { name: "q6", label: "6. In the last month, how often have you found that you could not cope with all the things that you had to do?" },
-            { name: "q7", label: "7. In the last month, how often have you been able to control irritations in your life?" },
-            { name: "q8", label: "8. In the last month, how often have you felt that you were on top of things?" },
-            { name: "q9", label: "9. In the last month, how often have you been angered because of things that were outside of your control?" },
-            { name: "q10", label: "10. In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?" }
-          ].map((f, i) => ({
-            ...f,
-            type: "radio-matrix",
-            validation: { required: true, message: "This question is required" },
-            info: i === 0 && scoresVisible ? {
-              title: "PSS Scale",
-              content: [
-                "0 – Never",
-                "1 – Almost never",
-                "2 – Sometimes",
-                "3 – Fairly often",
-                "4 – Very often"
-              ]
-            } : undefined,
-            showInfoInRow: false,
-            options: scoresVisible ? optionsWithScores : optionsWithoutScores
-          }))
-        }
-      ]
-    };
-  }, [scoresVisible]);
 
   /* Reverse scored questions */
   const REVERSED = ["q4", "q5", "q7", "q8"];
@@ -88,7 +33,7 @@ export default function PSSFormBuilder({ patient, onSubmit, onBack, layout }) {
   };
 
   const allRequiredFilled = useMemo(() => {
-    return PSS_SCHEMA.sections[0].fields.every(f => values[f.name] !== undefined);
+    return SCHEMA.sections[0].fields.every(f => values[f.name] !== undefined);
   }, [values]);
 
   /* ---------------- SCORE ---------------- */
@@ -176,7 +121,7 @@ export default function PSSFormBuilder({ patient, onSubmit, onBack, layout }) {
   return (
     <div style={mainContent}>
       <CommonFormBuilder
-        schema={PSS_SCHEMA}
+        schema={SCHEMA}
         values={values}
         onChange={onChange}
         layout="nested"

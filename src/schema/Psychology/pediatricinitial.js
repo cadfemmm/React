@@ -1,4 +1,7 @@
+import { ACTIONS_BUTTON } from "../actions";
+
 const SUBJECTIVE = {
+  "actions": ACTIONS_BUTTON,
     "fields": [
       {
         "name": "chief_complaint",
@@ -665,6 +668,7 @@ const SUBJECTIVE = {
   }
 
   const OBJECTIVE =   {
+    "actions": ACTIONS_BUTTON,
     "fields": [
       {
         "type": "subheading",
@@ -1908,6 +1912,7 @@ const SUBJECTIVE = {
   }
 
   const ASSESSMENT =   {
+    "actions": ACTIONS_BUTTON,
     "fields": [
       {
         "type": "subheading",
@@ -1975,6 +1980,7 @@ const SUBJECTIVE = {
   }
 
   const PLAN =   {
+    "actions": ACTIONS_BUTTON,
     "fields": [
       {
         "type": "subheading",

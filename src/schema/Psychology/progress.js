@@ -1,4 +1,7 @@
+import { ACTIONS_BUTTON } from "../actions";
+
 const SESSION = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -60,6 +63,7 @@ const SESSION = {
 }
 
 const SUBJECTIVE = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -746,6 +750,7 @@ const SUBJECTIVE = {
 }
 
 const OBJECTIVE = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -942,6 +947,7 @@ const OBJECTIVE = {
 }
 
 const ASSESSMENT = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -961,6 +967,7 @@ const ASSESSMENT = {
 }
 
 const PLAN = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
