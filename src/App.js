@@ -16,7 +16,7 @@ import Signup from "./pages/Signup";
 import SpinalInjury from "./pages/SpinalInjury";
 import stroke from "./pages/stroke";
 import latest from "./pages/Carddisplay.js";
-import PatientDetails from "./features/Psychology/components/PatientDetails.jsx";
+// import PatientDetails from "./features/Psychology/components/PatientDetails.jsx";
 import DeptEntry from "./pages/DeptEntry";
 import TokenHandler from "./shared/auth/TokenHandler";
 
@@ -81,7 +81,7 @@ function App() {
             <PrivateRoute path="/Doctor"         exact component={stroke} />
             <PrivateRoute path="/Spinalinjury"   exact component={SpinalInjury} />
             <PrivateRoute path="/Output"         exact component={Output} />
-            <PrivateRoute path="/psychology/patient/:id" exact component={PatientDetails} />
+            {/* <PrivateRoute path="/psychology/patient/:id" exact component={PatientDetails} /> */}
             <PrivateRoute path="/Modalities"     exact component={latest} />
           </Switch>
         </Router>
