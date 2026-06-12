@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
 import OptometryFollowUpAssessment from "./components/OptometryFollowUpAssessment";
-import OptometryFollowUpDashboard from "./components/OptometryFollowUpDashboard";
 import OptometryProgressAssessment from "./components/OptometryProgressAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
