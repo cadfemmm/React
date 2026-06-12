@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Vision for Driving",
   "fields": [
     {

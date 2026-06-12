@@ -1,4 +1,4 @@
- const SCHEMA = {
+export const SCHEMA = {
   "enableLanguageToggle": true,
   "title": {
     "en": "Low Vision Quality of Life Questionnaire (LVQoL)",
