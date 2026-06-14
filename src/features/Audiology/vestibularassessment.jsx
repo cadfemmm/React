@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import CommonFormBuilder from "../CommonComponenets/FormBuilder";
-import { mainSchema, schema } from '../../schema/Audiology/vestibular_profile';
+import { mainSchema, schema } from '../../schema/audiology/vestibular_profile';
 
 export function VestibularAdvancedForm({ onBack, mode }) {
   const [values, setValues] = useState({});
