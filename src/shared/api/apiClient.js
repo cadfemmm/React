@@ -22,12 +22,11 @@ const api = axios.create({
 
 // Set access token and expire at
 export const setAccessToken = (data) => {
-  accessToken = data.access.token;
-  expireAt = data.access.expire_at;
+  accessToken = data.access_token;
   // Persist so the token survives a page refresh
-  localStorage.setItem("access_token", data.access.token);
-  localStorage.setItem("access_token_expiry", data.access.expire_at);
-  startTokenRefresh(expireAt);
+  localStorage.setItem("access_token", data.access_token);
+  localStorage.setItem("refresh_token", data.refresh_token)
+  // startTokenRefresh(expireAt);
 };
 
 // Clear access token and expire at
@@ -49,6 +48,7 @@ const refreshAccessToken = () => {
   try{
     api.post(
       API_URL.REFRESH,
+      { refresh_token: localStorage.getItem('refresh_token')},
       { withCredentials: true }
     ).then(res => {
         setAccessToken(res.data);

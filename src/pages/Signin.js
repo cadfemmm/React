@@ -7,68 +7,33 @@ import PizzaLeft from "../assets/hero.webp";
 import { API_URL } from "../platform/config/api.config";
 import api, { setAccessToken } from "../shared/api/apiClient";
 
-
-const fetchUserProfile = async () => {
-  try {
-    const response = await api.get(API_URL.ME);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch user profile:", error);
-    return null;
-  }
-}
-
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
 
 const handleLogin = async() => {
+  let response
   try {
-    const response = await api.post(API_URL.LOGIN, { username, password }, { withCredentials: true });
+    response = await api.post(API_URL.LOGIN, { 
+      email_or_username: username, 
+      password: password }, { withCredentials: true });
     setAccessToken(response.data);
   } catch (error) {
     alert(error.response?.data?.message?.[0]);
     return;
   }
-  
-  const user = await fetchUserProfile();
 
   let redirectPath = "/Home"; // default path
   let userRole = "";
-
-  userRole = "DOCTOR";
   redirectPath = "/Doctor";
 
-  // if (username.trim() === "AdTherapist" && password === "cadcad") {
-  //   userRole = "THERAPIST";
-  //   redirectPath = "/AdminTherapist";
-  // } else if (username.trim() === "CMO" && password === "cadcad") {
-  //   userRole = "CMO";
-  //   redirectPath = "/CMO";
-  // } else if (username.trim() === "Patient1D" && password === "cadcad") {
-  //   userRole = "PATIENT";
-  //   redirectPath = "/Patients";
-  // } else if (username.trim() === "HOD" && password === "cadcad") {
-  //   userRole = "HOD";
-  //   redirectPath = "/HOD";
-  // } else if (username.trim() === "D01Neurophysics" && password === "cadcad") {
-  //   userRole = "DOCTOR";
-  //   redirectPath = "/Doctor";
-  // } 
-  // else if (username.trim() === "SystemAdmin" && password === "cadcad") {
-  //   userRole = "DOCTOR";
-  //   redirectPath = "/Doctor";
-  // } else {
-  //   alert("Username or password is incorrect.");
-  //   return;
-  // }
-
+  const user = response.data.user
+  userRole = user?.user_role?.name;
   // Store login info for later use
-  localStorage.setItem("user", JSON.stringify(user));
-  localStorage.setItem("username", user.username.trim());
-  localStorage.setItem("userRole", user.user_type);
-  localStorage.setItem("user_id", user.id)
+  localStorage.setItem("username", user.user_name);
+  localStorage.setItem("userRole", user?.user_role?.name);
+  localStorage.setItem("user_id", user.user_id)
   history.push(redirectPath);
 };
 

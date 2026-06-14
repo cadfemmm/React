@@ -14,13 +14,13 @@ const API_URL = {
     // Users apis
     USER: BASE_API + 'user/',
     ME: BASE_API + 'user/me/',
-    LOGIN: BASE_API + 'user/login/',
-    LOGOUT: BASE_API + 'user/logout/',
+    LOGIN: RMS_API + 'auth/login/',
+    LOGOUT: RMS_API + 'auth/logout/',
 
     // Tokens apis
     TOKEN: BASE_API + 'token/',
     VERIFY: BASE_API + 'token/verify/',
-    REFRESH: BASE_API + 'token/refresh/',
+    REFRESH: RMS_API + 'auth/refresh/',
 
     // Assessment apis
     ASSESSMENT: BASE_API + 'assessment/',
