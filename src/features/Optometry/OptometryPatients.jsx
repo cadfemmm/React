@@ -191,13 +191,12 @@ export default function OptometryPatients({ onBack, loading = false }) {
             <button style={S.headerBackBtn} onClick={handleBackToPatients}>← Back</button>
             <div style={S.patientAvatar}>{initials}</div>
             <div>
-              <div style={S.patientName}>{selectedPatient.name || selectedPatient.email}</div>
+              <div style={S.patientName}>{selectedPatient.name || selectedPatient.email || "—"}</div>
               <div style={S.patientMeta}>
                 {[
                   selectedPatient.mrn && `MRN: ${selectedPatient.mrn}`,
                   selectedPatient.age && `${selectedPatient.age} yrs`,
                   selectedPatient.gender,
-                  selectedPatient.icd && `ICD: ${selectedPatient.icd}`,
                 ].filter(Boolean).join("  ·  ")}
               </div>
             </div>
@@ -347,7 +346,7 @@ function PatientRow({ patient: p, idx, onStart }) {
           {initial}
         </div>
         <div>
-          <div style={S.tdName}>{p.name || p.email}</div>
+          <div style={S.tdName}>{p.name || p.email || "—"}</div>
           {(p.age || p.gender) && (
             <div style={S.tdSub}>{[p.age && `${p.age} yrs`, p.gender].filter(Boolean).join(" · ")}</div>
           )}

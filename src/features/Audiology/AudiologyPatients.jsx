@@ -251,7 +251,7 @@ export default function AudiologyPatients({ onBack }) {
                     background: AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length]
                   }}>{initial}</div>
                   <div>
-                    <div style={S.tdName}>{p.name || p.email}</div>
+                    <div style={S.tdName}>{p.name || p.email || "—"}</div>
                     {p.gender && <div style={S.tdSub}>{p.gender}</div>}
                   </div>
                 </div>
