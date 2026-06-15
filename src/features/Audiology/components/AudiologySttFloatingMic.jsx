@@ -18,10 +18,35 @@ import {
 } from "../../../platform/config/api.config";
 
 const DEFAULT_HISTORY_KEY = "audiology_stt_history";
+const SILENCE_COMMIT_MS = 3000;
+
 const SpeechRecognition =
   typeof window !== "undefined"
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : null;
+
+function stripTrailingPunctuation(text) {
+  return String(text || "").replace(/[\s.!?]+$/g, "").trimEnd();
+}
+
+function getDisplayText(transcript, pendingText, interimText) {
+  const tail = [pendingText, interimText].filter(Boolean).join(" ").trim();
+  if (!transcript) return tail;
+  if (!tail) return transcript;
+  return `${transcript}${tail}`;
+}
+
+function isDuplicateFinalSegment(cleaned, pending, transcript) {
+  if (!cleaned) return true;
+  const pendingTrim = pending.trim();
+  if (pendingTrim === cleaned || pendingTrim.endsWith(` ${cleaned}`)) return true;
+
+  const lines = transcript.split("\n").map((l) => stripTrailingPunctuation(l)).filter(Boolean);
+  const lastLine = lines[lines.length - 1] || "";
+  if (lastLine === cleaned || lastLine.endsWith(` ${cleaned}`)) return true;
+
+  return false;
+}
 
 function formatTimer(seconds) {
   const m = Math.floor(seconds / 60);
@@ -164,6 +189,7 @@ export default function AudiologySttFloatingMic({
   const [listening, setListening] = useState(false);
   const [recordingState, setRecordingState] = useState("idle"); // idle | recording | paused | stopped
   const [transcript, setTranscript] = useState("");
+  const [pendingText, setPendingText] = useState("");
   const [interimText, setInterimText] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const [history, setHistory] = useState(() => loadHistory(historyKey));
@@ -173,10 +199,13 @@ export default function AudiologySttFloatingMic({
   const sessionIdRef = useRef(null);
   const timerRef = useRef(null);
   const transcriptRef = useRef("");
+  const pendingSegmentRef = useRef("");
   const interimRef = useRef("");
+  const silenceFlushTimerRef = useRef(null);
   const lastFinalSyncRef = useRef("");
   const lastFieldRef = useRef(null);
   const pausingRef = useRef(false);
+  const suppressResultsRef = useRef(false);
   const recordingStateRef = useRef("idle");
   const [targetHint, setTargetHint] = useState("");
 
@@ -203,6 +232,59 @@ export default function AudiologySttFloatingMic({
       document.removeEventListener("touchstart", onPointerDown, true);
     };
   }, [rememberField]);
+
+  const clearSilenceCommit = useCallback(() => {
+    if (silenceFlushTimerRef.current) {
+      clearTimeout(silenceFlushTimerRef.current);
+      silenceFlushTimerRef.current = null;
+    }
+  }, []);
+
+  const commitPendingSegment = useCallback(({ addSentenceEnd = true } = {}) => {
+    clearSilenceCommit();
+
+    let chunk = pendingSegmentRef.current.trim();
+    if (interimRef.current.trim()) {
+      chunk = chunk
+        ? `${chunk} ${interimRef.current.trim()}`
+        : interimRef.current.trim();
+    }
+    if (!chunk) {
+      pendingSegmentRef.current = "";
+      setPendingText("");
+      return;
+    }
+
+    chunk = stripTrailingPunctuation(chunk);
+    if (!chunk) {
+      pendingSegmentRef.current = "";
+      setPendingText("");
+      interimRef.current = "";
+      setInterimText("");
+      return;
+    }
+
+    if (addSentenceEnd) {
+      transcriptRef.current = `${transcriptRef.current}${chunk}.\n`;
+    } else {
+      transcriptRef.current = `${transcriptRef.current}${chunk}`;
+    }
+
+    pendingSegmentRef.current = "";
+    interimRef.current = "";
+    setPendingText("");
+    setInterimText("");
+    setTranscript(transcriptRef.current);
+  }, [clearSilenceCommit]);
+
+  const scheduleSilenceCommit = useCallback(() => {
+    clearSilenceCommit();
+    silenceFlushTimerRef.current = setTimeout(() => {
+      commitPendingSegment({ addSentenceEnd: true });
+    }, SILENCE_COMMIT_MS);
+  }, [clearSilenceCommit, commitPendingSegment]);
+
+  useEffect(() => () => clearSilenceCommit(), [clearSilenceCommit]);
 
   const flushTranscriptToServer = useCallback(async () => {
     const id = sessionIdRef.current;
@@ -252,6 +334,16 @@ export default function AudiologySttFloatingMic({
       return;
     }
 
+    clearSilenceCommit();
+    suppressResultsRef.current = false;
+
+    if (resume) {
+      pendingSegmentRef.current = "";
+      interimRef.current = "";
+      setPendingText("");
+      setInterimText("");
+    }
+
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -276,14 +368,32 @@ export default function AudiologySttFloatingMic({
     };
 
     recognition.onresult = (event) => {
+      if (suppressResultsRef.current) return;
+
       let interim = "";
+      let hadSpeech = false;
 
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
         const text = result[0]?.transcript || "";
+        if (!text.trim()) continue;
+        hadSpeech = true;
+
         if (result.isFinal) {
-          transcriptRef.current += text;
-          setTranscript(transcriptRef.current);
+          const cleaned = stripTrailingPunctuation(text);
+          if (
+            cleaned &&
+            !isDuplicateFinalSegment(
+              cleaned,
+              pendingSegmentRef.current,
+              transcriptRef.current,
+            )
+          ) {
+            pendingSegmentRef.current = pendingSegmentRef.current
+              ? `${pendingSegmentRef.current} ${cleaned}`
+              : cleaned;
+            setPendingText(pendingSegmentRef.current);
+          }
         } else {
           interim += text;
         }
@@ -291,6 +401,10 @@ export default function AudiologySttFloatingMic({
 
       interimRef.current = interim;
       setInterimText(interim);
+
+      if (hadSpeech) {
+        scheduleSilenceCommit();
+      }
     };
 
     recognition.onerror = (event) => {
@@ -316,6 +430,11 @@ export default function AudiologySttFloatingMic({
 
       if (pausingRef.current) {
         pausingRef.current = false;
+        pendingSegmentRef.current = "";
+        interimRef.current = "";
+        setPendingText("");
+        setInterimText("");
+        suppressResultsRef.current = false;
         setRecordingState("paused");
         return;
       }
@@ -329,7 +448,7 @@ export default function AudiologySttFloatingMic({
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [onToast, stopListening, useTransportControls]);
+  }, [onToast, stopListening, useTransportControls, scheduleSilenceCommit, clearSilenceCommit]);
 
   const startSession = useCallback(async () => {
     setLoading(true);
@@ -358,11 +477,15 @@ export default function AudiologySttFloatingMic({
       setSessionId(id);
       setOpen(true);
       setTranscript("");
+      setPendingText("");
       setInterimText("");
       setElapsed(0);
       transcriptRef.current = "";
+      pendingSegmentRef.current = "";
       interimRef.current = "";
+      suppressResultsRef.current = false;
       lastFinalSyncRef.current = "";
+      clearSilenceCommit();
       setRecordingState("idle");
       if (!useTransportControls) {
         startListening();
@@ -381,7 +504,7 @@ export default function AudiologySttFloatingMic({
     } finally {
       setLoading(false);
     }
-  }, [onToast, startListening, useTransportControls]);
+  }, [onToast, startListening, useTransportControls, clearSilenceCommit]);
 
   const handlePlay = useCallback(() => {
     if (listening) return;
@@ -395,50 +518,42 @@ export default function AudiologySttFloatingMic({
 
   const handlePause = useCallback(() => {
     if (!listening) return;
-    if (interimRef.current.trim()) {
-      transcriptRef.current = `${transcriptRef.current}${interimRef.current}`.trim();
-      setTranscript(transcriptRef.current);
-      interimRef.current = "";
-      setInterimText("");
-    }
+    suppressResultsRef.current = true;
+    clearSilenceCommit();
+    commitPendingSegment({ addSentenceEnd: true });
     stopListening({ pause: true });
-  }, [listening, stopListening]);
+  }, [listening, stopListening, commitPendingSegment, clearSilenceCommit]);
 
   const handleStopRecording = useCallback(() => {
-    if (interimRef.current.trim()) {
-      transcriptRef.current = `${transcriptRef.current}${interimRef.current}`.trim();
-      setTranscript(transcriptRef.current);
-      interimRef.current = "";
-      setInterimText("");
-    }
+    commitPendingSegment({ addSentenceEnd: true });
     pausingRef.current = false;
     stopListening();
     setRecordingState("stopped");
     flushTranscriptToServer();
-  }, [stopListening, flushTranscriptToServer]);
+  }, [stopListening, flushTranscriptToServer, commitPendingSegment]);
+
+  const handlePlayPauseToggle = useCallback(() => {
+    if (listening) {
+      handlePause();
+    } else {
+      handlePlay();
+    }
+  }, [listening, handlePlay, handlePause]);
 
   const handleFabClick = useCallback(() => {
     if (open) return;
     startSession();
   }, [open, startSession]);
 
-  const mergeInterimIntoTranscript = useCallback(() => {
-    if (!interimRef.current.trim()) return;
-    transcriptRef.current = `${transcriptRef.current}${interimRef.current}`.trim();
-    setTranscript(transcriptRef.current);
-    interimRef.current = "";
-    setInterimText("");
-  }, []);
-
   const handleClose = useCallback(() => {
     pausingRef.current = false;
     stopListening();
-    mergeInterimIntoTranscript();
+    commitPendingSegment({ addSentenceEnd: true });
     flushTranscriptToServer();
     setRecordingState("idle");
     setOpen(false);
     setShowHistory(false);
-  }, [stopListening, mergeInterimIntoTranscript, flushTranscriptToServer]);
+  }, [stopListening, commitPendingSegment, flushTranscriptToServer]);
 
   const handleStop = useCallback(() => {
     if (useTransportControls) {
@@ -446,12 +561,12 @@ export default function AudiologySttFloatingMic({
       return;
     }
     stopListening();
-    mergeInterimIntoTranscript();
+    commitPendingSegment({ addSentenceEnd: true });
     flushTranscriptToServer();
-  }, [useTransportControls, handleStopRecording, stopListening, mergeInterimIntoTranscript, flushTranscriptToServer]);
+  }, [useTransportControls, handleStopRecording, stopListening, commitPendingSegment, flushTranscriptToServer]);
 
   const handleCopy = useCallback(async () => {
-    const text = `${transcript}${interimText ? ` ${interimText}` : ""}`.trim();
+    const text = getDisplayText(transcript, pendingText, interimText).trim();
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -459,15 +574,18 @@ export default function AudiologySttFloatingMic({
     } catch {
       onToast?.({ message: "Could not copy text", variant: "error" });
     }
-  }, [transcript, interimText, onToast]);
+  }, [transcript, pendingText, interimText, onToast]);
 
   const clearTranscript = useCallback(() => {
+    clearSilenceCommit();
     setTranscript("");
+    setPendingText("");
     setInterimText("");
     transcriptRef.current = "";
+    pendingSegmentRef.current = "";
     interimRef.current = "";
     lastFinalSyncRef.current = "";
-  }, []);
+  }, [clearSilenceCommit]);
 
   const handleNextField = useCallback(() => {
     const current = resolveInsertTarget(lastFieldRef);
@@ -488,7 +606,7 @@ export default function AudiologySttFloatingMic({
   }, [rememberField, onToast, clearTranscript]);
 
   const handleInsert = useCallback(() => {
-    const text = `${transcript}${interimText ? ` ${interimText}` : ""}`.trim();
+    const text = getDisplayText(transcript, pendingText, interimText).trim();
     if (!text) return;
 
     const target = resolveInsertTarget(lastFieldRef);
@@ -504,6 +622,7 @@ export default function AudiologySttFloatingMic({
     if (inserted) {
       saveHistoryEntry(historyKey, text);
       setHistory(loadHistory(historyKey));
+      clearTranscript();
       onToast?.({ message: "Inserted into active field", variant: "success" });
     } else {
       onToast?.({
@@ -511,14 +630,13 @@ export default function AudiologySttFloatingMic({
         variant: "error",
       });
     }
-  }, [transcript, interimText, onToast, historyKey]);
+  }, [transcript, pendingText, interimText, onToast, historyKey, clearTranscript]);
 
   const handleClear = clearTranscript;
 
   useEffect(() => () => stopListening(), [stopListening]);
 
-  const displayText =
-    transcript + (interimText ? (transcript ? " " : "") + interimText : "");
+  const displayText = getDisplayText(transcript, pendingText, interimText);
 
   return (
     <>
@@ -545,23 +663,13 @@ export default function AudiologySttFloatingMic({
                 <>
                   <button
                     type="button"
-                    onClick={handlePlay}
-                    style={S.playBtn}
-                    disabled={listening || loading}
-                    aria-label="Play recording"
+                    onClick={handlePlayPauseToggle}
+                    style={listening ? S.pauseBtn : S.playBtn}
+                    disabled={loading}
+                    aria-label={listening ? "Pause recording" : "Play recording"}
                   >
-                    <FaPlay size={11} />
-                    <span>Play</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handlePause}
-                    style={S.pauseBtn}
-                    disabled={!listening}
-                    aria-label="Pause recording"
-                  >
-                    <FaPause size={11} />
-                    <span>Pause</span>
+                    {listening ? <FaPause size={11} /> : <FaPlay size={11} />}
+                    <span>{listening ? "Pause" : "Play"}</span>
                   </button>
                   <button
                     type="button"

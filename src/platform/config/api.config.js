@@ -1,10 +1,15 @@
 const BASE_API = (process.env.REACT_APP_API_DJANGO || 'https://backend.tps-ind.com') + '/api/'
 const RMS_API = 'https://api.dev.rehab-software.com/api/v1/'
-const TYMPANOGRAM_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/tympanogram";
-const OTOSCOPIC_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/otoscopic";
-// Browser calls same-origin path; dev proxy (setupProxy.js) forwards to AI service.
+const AI_SERVICE_TARGET =
+    process.env.REACT_APP_AI_SERVICE_TARGET || "https://ai.dev.rehab-software.com";
+const TYMPANOGRAM_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/tympanogram`;
+const OTOSCOPIC_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/otoscopic`;
+// Dev: same-origin /new-stt via setupProxy.js. Prod: call AI service directly (or override via env).
 const STT_API_BASE =
-    process.env.REACT_APP_STT_API_BASE || "/new-stt";
+    process.env.REACT_APP_STT_API_BASE ||
+    (process.env.NODE_ENV === "production"
+        ? `${AI_SERVICE_TARGET}/new-stt`
+        : "/new-stt");
 const STT_SESSION_START_URL =
     process.env.REACT_APP_STT_SESSION_START_URL || `${STT_API_BASE}/session/start`;
 const sttWebspeechUrl = (sessionId) =>
