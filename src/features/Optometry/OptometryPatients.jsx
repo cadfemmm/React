@@ -4,9 +4,8 @@ import OptometryFollowUpDashboard from "./components/OptometryFollowUpDashboard"
 import OptometryProgressAssessment from "./components/OptometryProgressAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
-import api from "../../shared/api/apiClient";
+import { fetchPatientsList } from "../../shared/api/patientsList";
 import { filterApprovedPatients } from "../../shared/utils/patientFilters";
-import { API_URL } from "../../platform/config/api.config";
 
 // Assessment Loader
 import AssessmentLoader from "../../assessment";
@@ -66,7 +65,6 @@ const OPTION_CARDS = [
 ];
 
 export default function OptometryPatients({ onBack, loading = false }) {
-  const userRole = localStorage.getItem("userRole") || "";
   const [selectedPatient,      setSelectedPatient]      = useState(null);
   const [assessmentView,       setAssessmentView]       = useState(null);
   const [submittedAssessments, setSubmittedAssessments] = useState({});
@@ -83,10 +81,8 @@ export default function OptometryPatients({ onBack, loading = false }) {
   React.useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const res = await api.get(
-          API_URL.PATIENT + (['Admin', 'Staff'].includes(userRole) ? `?department=Optometry` : '')
-        );
-        setPatients(res.data.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch (e) {
         setPatients([]);
       }

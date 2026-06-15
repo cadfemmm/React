@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import SOAPSession from "./session";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import { fetchPatientsList } from "../../shared/api/patientsList";
 
 // const NAV_ITEMS = [
 //   { id: "overview", label: "Overview", icon: "⊞" },
@@ -270,8 +269,8 @@ function PatientsTab({ onPatientSelect, currentPatient }) {
     const fetchPatients = async () => {
       setLoading(true);
       try {
-        const response = await api.get(API_URL.PATIENT + "all");
-        setPatients(response?.data?.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch (e) {
         setPatients([]);
       } finally {

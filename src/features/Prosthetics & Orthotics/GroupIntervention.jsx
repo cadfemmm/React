@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import { fetchPatientsList } from "../../shared/api/patientsList";
 import CommonFormBuilder from "../CommonComponenets/FormBuilder";
 
 /* =========================================================
@@ -210,17 +209,14 @@ export default function GroupIntervention({
 
     try {
 
-      const res = await api.get(
-        `${API_URL.PATIENT}?department=Prosthetics%20%26%20Orthotics`
+      const list = await fetchPatientsList();
+      const data = list.filter(
+        (p) =>
+          !Array.isArray(p.departments) ||
+          p.departments.includes("Prosthetics & Orthotics")
       );
 
-      const data =
-        res?.data?.results ||
-        res?.data?.data ||
-        res?.data ||
-        [];
-
-      setAllPatients(Array.isArray(data) ? data : []);
+      setAllPatients(data);
 
     } catch (err) {
 

@@ -5,6 +5,8 @@ import {
   FaCopy,
   FaHistory,
   FaStop,
+  FaPlay,
+  FaPause,
   FaWaveSquare,
   FaEraser,
   FaInfoCircle,
@@ -15,7 +17,7 @@ import {
   sttWebspeechUrl,
 } from "../../../platform/config/api.config";
 
-const HISTORY_KEY = "audiology_stt_history";
+const DEFAULT_HISTORY_KEY = "audiology_stt_history";
 const SpeechRecognition =
   typeof window !== "undefined"
     ? window.SpeechRecognition || window.webkitSpeechRecognition
@@ -131,35 +133,40 @@ function findNextField(current) {
   return fields[(idx + 1) % fields.length];
 }
 
-function loadHistory() {
+function loadHistory(historyKey) {
   try {
-    const raw = localStorage.getItem(HISTORY_KEY);
+    const raw = localStorage.getItem(historyKey);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 }
 
-function saveHistoryEntry(text) {
+function saveHistoryEntry(historyKey, text) {
   if (!text?.trim()) return;
   const entry = { text: text.trim(), at: new Date().toISOString() };
-  const next = [entry, ...loadHistory().filter((h) => h.text !== entry.text)].slice(
+  const next = [entry, ...loadHistory(historyKey).filter((h) => h.text !== entry.text)].slice(
     0,
     20,
   );
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+  localStorage.setItem(historyKey, JSON.stringify(next));
   return next;
 }
 
-export default function AudiologySttFloatingMic({ onToast }) {
+export default function AudiologySttFloatingMic({
+  onToast,
+  historyKey = DEFAULT_HISTORY_KEY,
+  useTransportControls = false,
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [listening, setListening] = useState(false);
+  const [recordingState, setRecordingState] = useState("idle"); // idle | recording | paused | stopped
   const [transcript, setTranscript] = useState("");
   const [interimText, setInterimText] = useState("");
   const [elapsed, setElapsed] = useState(0);
-  const [history, setHistory] = useState(loadHistory);
+  const [history, setHistory] = useState(() => loadHistory(historyKey));
   const [showHistory, setShowHistory] = useState(false);
 
   const recognitionRef = useRef(null);
@@ -169,9 +176,12 @@ export default function AudiologySttFloatingMic({ onToast }) {
   const interimRef = useRef("");
   const lastFinalSyncRef = useRef("");
   const lastFieldRef = useRef(null);
+  const pausingRef = useRef(false);
+  const recordingStateRef = useRef("idle");
   const [targetHint, setTargetHint] = useState("");
 
   sessionIdRef.current = sessionId;
+  recordingStateRef.current = recordingState;
 
   const rememberField = useCallback((el) => {
     if (!isFormField(el)) return;
@@ -220,9 +230,12 @@ export default function AudiologySttFloatingMic({ onToast }) {
     }
   }, []);
 
-  const stopListening = useCallback(() => {
+  const stopListening = useCallback(({ pause = false } = {}) => {
+    if (pause) pausingRef.current = true;
     recognitionRef.current?.stop();
-    recognitionRef.current = null;
+    if (!pause) {
+      recognitionRef.current = null;
+    }
     setListening(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -230,7 +243,7 @@ export default function AudiologySttFloatingMic({ onToast }) {
     }
   }, []);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(({ resume = false } = {}) => {
     if (!SpeechRecognition) {
       onToast?.({
         message: "Speech recognition is not supported in this browser.",
@@ -239,7 +252,10 @@ export default function AudiologySttFloatingMic({ onToast }) {
       return;
     }
 
-    stopListening();
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
@@ -248,16 +264,20 @@ export default function AudiologySttFloatingMic({ onToast }) {
 
     recognition.onstart = () => {
       setListening(true);
-      setElapsed(0);
-      timerRef.current = setInterval(() => {
-        setElapsed((t) => t + 1);
-      }, 1000);
+      setRecordingState("recording");
+      if (!resume && !useTransportControls) {
+        setElapsed(0);
+      }
+      if (!timerRef.current) {
+        timerRef.current = setInterval(() => {
+          setElapsed((t) => t + 1);
+        }, 1000);
+      }
     };
 
     recognition.onresult = (event) => {
       let interim = "";
 
-      // Only process NEW results since last event — avoids repeating earlier words.
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
         const text = result[0]?.transcript || "";
@@ -280,20 +300,36 @@ export default function AudiologySttFloatingMic({ onToast }) {
           variant: "error",
         });
       }
+      if (!pausingRef.current) {
+        setRecordingState((prev) => (prev === "recording" ? "stopped" : prev));
+      }
       stopListening();
     };
 
     recognition.onend = () => {
+      recognitionRef.current = null;
       setListening(false);
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
+
+      if (pausingRef.current) {
+        pausingRef.current = false;
+        setRecordingState("paused");
+        return;
+      }
+
+      if (recordingStateRef.current === "recording" && !useTransportControls) {
+        setRecordingState("stopped");
+      } else if (recordingStateRef.current === "recording" && useTransportControls) {
+        setRecordingState("stopped");
+      }
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [onToast, stopListening]);
+  }, [onToast, stopListening, useTransportControls]);
 
   const startSession = useCallback(async () => {
     setLoading(true);
@@ -323,10 +359,14 @@ export default function AudiologySttFloatingMic({ onToast }) {
       setOpen(true);
       setTranscript("");
       setInterimText("");
+      setElapsed(0);
       transcriptRef.current = "";
       interimRef.current = "";
       lastFinalSyncRef.current = "";
-      startListening();
+      setRecordingState("idle");
+      if (!useTransportControls) {
+        startListening();
+      }
     } catch (e) {
       const isNetworkError =
         e?.name === "TypeError" &&
@@ -341,7 +381,41 @@ export default function AudiologySttFloatingMic({ onToast }) {
     } finally {
       setLoading(false);
     }
-  }, [onToast, startListening]);
+  }, [onToast, startListening, useTransportControls]);
+
+  const handlePlay = useCallback(() => {
+    if (listening) return;
+    const resume =
+      recordingState === "paused" ||
+      recordingState === "stopped" ||
+      transcriptRef.current.length > 0 ||
+      elapsed > 0;
+    startListening({ resume });
+  }, [listening, recordingState, elapsed, startListening]);
+
+  const handlePause = useCallback(() => {
+    if (!listening) return;
+    if (interimRef.current.trim()) {
+      transcriptRef.current = `${transcriptRef.current}${interimRef.current}`.trim();
+      setTranscript(transcriptRef.current);
+      interimRef.current = "";
+      setInterimText("");
+    }
+    stopListening({ pause: true });
+  }, [listening, stopListening]);
+
+  const handleStopRecording = useCallback(() => {
+    if (interimRef.current.trim()) {
+      transcriptRef.current = `${transcriptRef.current}${interimRef.current}`.trim();
+      setTranscript(transcriptRef.current);
+      interimRef.current = "";
+      setInterimText("");
+    }
+    pausingRef.current = false;
+    stopListening();
+    setRecordingState("stopped");
+    flushTranscriptToServer();
+  }, [stopListening, flushTranscriptToServer]);
 
   const handleFabClick = useCallback(() => {
     if (open) return;
@@ -357,18 +431,24 @@ export default function AudiologySttFloatingMic({ onToast }) {
   }, []);
 
   const handleClose = useCallback(() => {
+    pausingRef.current = false;
     stopListening();
     mergeInterimIntoTranscript();
     flushTranscriptToServer();
+    setRecordingState("idle");
     setOpen(false);
     setShowHistory(false);
   }, [stopListening, mergeInterimIntoTranscript, flushTranscriptToServer]);
 
   const handleStop = useCallback(() => {
+    if (useTransportControls) {
+      handleStopRecording();
+      return;
+    }
     stopListening();
     mergeInterimIntoTranscript();
     flushTranscriptToServer();
-  }, [stopListening, mergeInterimIntoTranscript, flushTranscriptToServer]);
+  }, [useTransportControls, handleStopRecording, stopListening, mergeInterimIntoTranscript, flushTranscriptToServer]);
 
   const handleCopy = useCallback(async () => {
     const text = `${transcript}${interimText ? ` ${interimText}` : ""}`.trim();
@@ -422,8 +502,8 @@ export default function AudiologySttFloatingMic({ onToast }) {
 
     const inserted = insertIntoField(target, text);
     if (inserted) {
-      saveHistoryEntry(text);
-      setHistory(loadHistory());
+      saveHistoryEntry(historyKey, text);
+      setHistory(loadHistory(historyKey));
       onToast?.({ message: "Inserted into active field", variant: "success" });
     } else {
       onToast?.({
@@ -431,7 +511,7 @@ export default function AudiologySttFloatingMic({ onToast }) {
         variant: "error",
       });
     }
-  }, [transcript, interimText, onToast]);
+  }, [transcript, interimText, onToast, historyKey]);
 
   const handleClear = clearTranscript;
 
@@ -461,38 +541,106 @@ export default function AudiologySttFloatingMic({ onToast }) {
             </div>
 
             <div style={S.toolbar}>
-              <button
-                type="button"
-                onClick={handleStop}
-                style={S.stopBtn}
-                disabled={!listening}
-              >
-                <FaStop size={12} />
-                <span>Stop</span>
-              </button>
-              <span style={S.timer}>{formatTimer(elapsed)}</span>
-
-              <div style={S.liveBadge}>
-                <FaMicrophone
-                  size={12}
-                  color={listening ? "#16a34a" : "#94a3b8"}
-                />
-                <span>{listening ? "Live Listening..." : "Paused"}</span>
-                {listening && (
-                  <div style={S.waveform} aria-hidden>
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <span key={i} style={{ ...S.waveBar, animationDelay: `${i * 0.12}s` }} />
-                    ))}
+              {useTransportControls ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handlePlay}
+                    style={S.playBtn}
+                    disabled={listening || loading}
+                    aria-label="Play recording"
+                  >
+                    <FaPlay size={11} />
+                    <span>Play</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePause}
+                    style={S.pauseBtn}
+                    disabled={!listening}
+                    aria-label="Pause recording"
+                  >
+                    <FaPause size={11} />
+                    <span>Pause</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStopRecording}
+                    style={S.stopBtn}
+                    disabled={recordingState === "idle" && !transcript && !interimText}
+                    aria-label="Stop recording"
+                  >
+                    <FaStop size={11} />
+                    <span>Stop</span>
+                  </button>
+                  <span style={S.timer}>{formatTimer(elapsed)}</span>
+                  <div style={S.liveBadge}>
+                    <FaMicrophone
+                      size={12}
+                      color={listening ? "#16a34a" : recordingState === "paused" ? "#f59e0b" : "#94a3b8"}
+                    />
+                    <span>
+                      {listening
+                        ? "Recording…"
+                        : recordingState === "paused"
+                        ? "Paused"
+                        : recordingState === "stopped"
+                        ? "Stopped"
+                        : "Ready"}
+                    </span>
+                    {listening && (
+                      <div style={S.waveform} aria-hidden>
+                        {[0, 1, 2, 3, 4].map((i) => (
+                          <span key={i} style={{ ...S.waveBar, animationDelay: `${i * 0.12}s` }} />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleStop}
+                    style={S.stopBtn}
+                    disabled={!listening}
+                  >
+                    <FaStop size={12} />
+                    <span>Stop</span>
+                  </button>
+                  <span style={S.timer}>{formatTimer(elapsed)}</span>
+
+                  <div style={S.liveBadge}>
+                    <FaMicrophone
+                      size={12}
+                      color={listening ? "#16a34a" : "#94a3b8"}
+                    />
+                    <span>{listening ? "Live Listening..." : "Paused"}</span>
+                    {listening && (
+                      <div style={S.waveform} aria-hidden>
+                        {[0, 1, 2, 3, 4].map((i) => (
+                          <span key={i} style={{ ...S.waveBar, animationDelay: `${i * 0.12}s` }} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <textarea
               readOnly
               value={displayText}
               placeholder={
-                listening
+                useTransportControls
+                  ? listening
+                    ? "Speak now — your words will appear here..."
+                    : recordingState === "paused"
+                    ? "Recording paused — press Play to continue."
+                    : recordingState === "stopped"
+                    ? "Recording stopped — press Play to record more or Insert text."
+                    : "Press Play to start recording."
+                  : listening
                   ? "Speak now — your words will appear here..."
                   : "Press the mic button or Stop ended listening. Transcript appears here."
               }
@@ -695,6 +843,32 @@ const S = {
     border: "1px solid #fecaca",
     background: "#fef2f2",
     color: "#dc2626",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  playBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 12px",
+    borderRadius: 6,
+    border: "1px solid #bbf7d0",
+    background: "#f0fdf4",
+    color: "#16a34a",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  pauseBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 12px",
+    borderRadius: 6,
+    border: "1px solid #fde68a",
+    background: "#fffbeb",
+    color: "#d97706",
     fontSize: 12,
     fontWeight: 600,
     cursor: "pointer",

@@ -43,6 +43,9 @@ const API_URL = {
 
     // Patients apis
     PATIENT: BASE_API + 'patient/',
+    PATIENTS_LIST: RMS_API + 'patients/',
+    PATIENT_PARTIAL_UPDATE: (patientId) =>
+        `${RMS_API}patients/${encodeURIComponent(patientId)}/partial-update/`,
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
     EQUIPMENT_LIST: RMS_API + "rehab-equipment-lists/",

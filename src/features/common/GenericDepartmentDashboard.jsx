@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import { fetchInPendingPatients } from "../../shared/api/patientsList";
 import DepartmentDashboard from "./DepartmentDashboard";
 import DepartmentPatients from "./DepartmentPatients";
 import ApproveDenyAssessments from "../Doctors/components/ApproveDenyAssessments";
@@ -58,20 +57,15 @@ export default function GenericDepartmentDashboard({
   const [showApproveDeny, setShowApproveDeny] = useState(false);
   const [approveDenyPatient, setApproveDenyPatient] = useState(null); // selected patient for assessment view
 
+  const approveDenyInPendingCount = approveDenyPatients.length;
+
   const handleApproveDenyClick = () => {
     // Navigate immediately — data loads inside the patients page
     setShowApproveDeny(true);
 
     setApproveDenyLoading(true);
-    api.get(API_URL.REHAB_PATIENTS)
-      .then((res) => {
-        const list = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data?.results)
-          ? res.data.results
-          : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
+    fetchInPendingPatients()
+      .then((list) => {
         setApproveDenyPatients(list);
       })
       .catch((err) => console.error("Failed to fetch approve/deny patients:", err))
@@ -98,6 +92,13 @@ export default function GenericDepartmentDashboard({
       <ApproveDenyAssessments
         patient={approveDenyPatient}
         onBack={() => setApproveDenyPatient(null)}
+        onPatientUpdated={({ patientId }) => {
+          setApproveDenyPatients((prev) =>
+            prev.filter(
+              (p) => String(p?.id ?? p?.patient_id ?? p?.mrn) !== String(patientId),
+            ),
+          );
+        }}
       />
     );
   }
@@ -116,7 +117,6 @@ export default function GenericDepartmentDashboard({
         title="Approve / Deny Patients"
         actionLabel="View"
         patientStatusFilter="pending"
-        requireAssessments
         onRowAction={(patient) => setApproveDenyPatient(patient)}
       />
     );
@@ -176,8 +176,10 @@ export default function GenericDepartmentDashboard({
           ...(dept === "Doctor"
             ? [{
                 label: "Approve / Deny Patients",
-                value: approveDenyLoading ? "5" : approveDenyPatients.length > 0 ? String(approveDenyPatients.length) : "5",
-                sub: "2 ICU · 3 Observation",
+                value: approveDenyLoading
+                  ? "…"
+                  : String(approveDenyInPendingCount),
+                sub: "Awaiting approval",
                 icon: <FaUserMd size={16} />,
                 accent: "#dc2626",
                 trend: "up",

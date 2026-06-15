@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useHistory } from "react-router-dom";
 import api, { setAccessToken } from "../../../shared/api/apiClient";
 import { API_URL } from "../../../platform/config/api.config";
+import { fetchPatientsList } from "../../../shared/api/patientsList";
 import OptometryAssessment from "../components/OptometryAssessment";
 import OptometryFollowUpAssessment from "../components/OptometryFollowUpAssessment";
 import SidebarNav from "../../../components/SidebarNav";
@@ -78,8 +79,8 @@ export default function SessionAssessmentPage() {
         // Reflect patientId as query param — keeps URL short and clean
         history.replace(`/optometry/assessment/${sessionId}?patient_id=${patientId}`);
 
-        return api.get(API_URL.PATIENT + `?department=Optometry`).then(pr => {
-          const found = (pr.data.results || []).find(p => p.id === patientId);
+        return fetchPatientsList().then((list) => {
+          const found = list.find((p) => p.id === patientId);
           setPatient(found || { id: patientId });
         });
       })

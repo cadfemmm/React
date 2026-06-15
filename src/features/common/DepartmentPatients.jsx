@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import EmptyState from "../../shared/ui/EmptyState";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import { API_URL } from "../../platform/config/api.config";
+import { fetchPatientsList, normalizePatientList } from "../../shared/api/patientsList";
 import ProcedureAssessment from "../Doctors/components/ProcedureAssessment";
 import MedicationAssessment from "../Doctors/components/MedicationAssessment";
 import { DoctorsInitialAssessmentForm } from "../Doctors/components/DoctorsInitialAssessment";
@@ -19,7 +20,7 @@ import GroupIntervention from "../Nursing/components/GroupIntervention";
 import Intervention from "../Nursing/components/Intervention";
 import Procedures from "../Nursing/components/Procedures";
 import RAPPatientAssessmentsList from "../../components/RAPPatientAssessmentsList";
-import { isPatientPending } from "../../shared/utils/patientFilters";
+import { isPatientInPending } from "../../shared/utils/patientFilters";
 import MedicalAssistantPatientDetails from "../MedicalAssistant/components/PatientDetails";
 
 /* ── Assessment type cards ─────────────────────────────── */
@@ -246,14 +247,6 @@ function PatientRow({ patient: p, idx, onStart, listOnly, onPatientClick, select
  *   AssessmentComponent - the department's assessment component (receives { patient, mode, onBack })
  *   loading         - optional bool
  */
-function normalizePatientList(data) {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.data?.results)) return data.data.results;
-  return [];
-}
-
 /** Same departments as sidebar — used to load full registry for Admin/Staff */
 function patientBelongsToDepartment(p, department) {
   if (!Array.isArray(p.departments)) return true;
@@ -263,45 +256,8 @@ function patientBelongsToDepartment(p, department) {
   return p.departments.includes(department);
 }
 
-async function fetchAllPatientsRegistry(userRole) {
-  const isScopedUser = ["Admin", "Staff"].includes(userRole);
-
-  if (!isScopedUser) {
-    const res = await api.get(API_URL.PATIENT);
-    return normalizePatientList(res.data);
-  }
-
-  const allClinicalDepartments = [
-    "Nursing",
-    "Doctor",
-    "Physiotherapy",
-    "Integrated Rehab",
-    "Work & Vocational Rehab",
-    "Occupational Therapy",
-    "Optometry",
-    "Prosthetics & Orthotics",
-    "Audiology",
-    "Dietetics",
-    "Speech & Language Therapy",
-    "Psychology",
-  ];
-
-  const batches = await Promise.all(
-    allClinicalDepartments.map((dept) =>
-      api
-        .get(`${API_URL.PATIENT}?department=${encodeURIComponent(dept)}`)
-        .then((res) => normalizePatientList(res.data))
-        .catch(() => [])
-    )
-  );
-
-  const byKey = new Map();
-  for (const p of batches.flat()) {
-    const key = p?.id ?? p?.patient_id ?? p?.mrn;
-    if (key != null) byKey.set(String(key), p);
-    else if (p) byKey.set(`${p.name || p.patient_name}-${p.email}`, p);
-  }
-  return Array.from(byKey.values());
+async function fetchAllPatientsRegistry() {
+  return fetchPatientsList();
 }
 
 export default function DepartmentPatients({
@@ -314,6 +270,7 @@ export default function DepartmentPatients({
   listOnly = false,
   title,
   patientsFromApp,
+  patientsFromAppOnly = false,
   actionLabel,    // optional: overrides "Begin assessment" button text
   onRowAction,    // optional: overrides button click — receives the patient object
   updatePatientInMainList,
@@ -342,7 +299,7 @@ export default function DepartmentPatients({
           (p) => !department || patientBelongsToDepartment(p, department)
         );
     if (patientStatusFilter === "pending") {
-      list = list.filter(isPatientPending);
+      list = list.filter(isPatientInPending);
     }
     return list;
   }, [patients, department, showAllPatients, patientStatusFilter]);
@@ -354,35 +311,27 @@ export default function DepartmentPatients({
     : `Patient queue for ${departmentLabel}`;
 
   React.useEffect(() => {
-    if (!showAllPatients) return;
-    const fromApp = normalizePatientList(patientsFromApp);
-    if (fromApp.length > 0) setPatients(fromApp);
-  }, [showAllPatients, patientsFromApp]);
+    if (!showAllPatients && !patientsFromAppOnly) return;
+    setPatients(normalizePatientList(patientsFromApp));
+  }, [showAllPatients, patientsFromAppOnly, patientsFromApp]);
 
   /* Fetch patients */
   React.useEffect(() => {
+    if (patientsFromAppOnly) return;
+
     let cancelled = false;
 
     const fetchPatients = async () => {
       setFetchLoading(true);
       try {
-        if (patientStatusFilter === "pending") {
-          const res = await api.get(`${API_URL.PATIENT_ALL}?status=PENDING`);
-          if (!cancelled) setPatients(normalizePatientList(res.data));
-          return;
-        }
+        const list = await fetchAllPatientsRegistry();
+        if (cancelled) return;
         if (showAllPatients) {
-          const list = await fetchAllPatientsRegistry(userRole);
-          if (cancelled) return;
           const fallback = normalizePatientList(patientsFromApp);
           setPatients(list.length > 0 ? list : fallback);
           return;
         }
-        const url = ["Admin", "Staff"].includes(userRole)
-          ? API_URL.PATIENT + `?department=${encodeURIComponent(department)}`
-          : API_URL.PATIENT;
-        const res = await api.get(url);
-        if (!cancelled) setPatients(normalizePatientList(res.data));
+        if (!cancelled) setPatients(list);
       } catch (e) {
         if (!cancelled) {
           setPatients(
@@ -398,7 +347,7 @@ export default function DepartmentPatients({
     return () => {
       cancelled = true;
     };
-  }, [department, showAllPatients, userRole, patientsFromApp, patientStatusFilter]);
+  }, [department, showAllPatients, userRole, patientsFromApp, patientStatusFilter, patientsFromAppOnly]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
