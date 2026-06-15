@@ -160,6 +160,16 @@ const SUBJECTIVE_SCHEMA = {
               { label: "Accompanied", value: "accompanied" }
             ]
           },
+          {
+          "type": "input",
+          "name": "chief_complaints",
+          "label": "Chief Complaints"
+        },
+        {
+          "type": "input",
+          "name": "hpi",
+          "label": "History of Present Illness (HPI)"
+        },
 
           { type: "subheading", label: "Presenting Complaints" },
           /* ================= PRESENTING COMPLAINTS ================= */
@@ -524,6 +534,11 @@ const OBJECTIVE_SCHEMA = {
   sections: [
     {
       fields: [
+         {
+      "name": "clinical_impression",
+      "label": "Clinical Impression",
+      "type": "textarea"
+    },
         {
   name: "assessmentLauncher",
   type: "assessment-launcher",
@@ -554,6 +569,22 @@ const OBJECTIVE_SCHEMA = {
       {
         title: "",
         fields: [
+          {
+          "type": "subheading",
+          "label": "Short Term Goals (2–4 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
+        },
+        {
+          "type": "subheading",
+          "label": "Long Term Goals (6–12 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
+        },
          
           {
   name: "planLauncher",

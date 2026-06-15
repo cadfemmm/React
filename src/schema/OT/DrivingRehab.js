@@ -171,6 +171,16 @@ const SUBJECTIVE = {
     {
       "fields": [
         {
+          "type": "input",
+          "name": "chief_complaint",
+          "label": "Chief Complaint"
+        },
+        {
+          "type": "input",
+          "name": "history_present_illness",
+          "label": "History of Present Illness"
+        },
+        {
           "name": "dr_steering_control",
           "label": "Steering Control",
           "type": "radio",
@@ -844,6 +854,12 @@ const ASSESSMENT = {
     {
       "fields": [
         {
+          "name": "Clinical Impression",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
+        {
           "type": "subheading",
           "label": "On Road Driving Summary"
         },
@@ -1187,6 +1203,22 @@ const PLAN = {
   "sections": [
     {
       "fields": [
+        {
+          "type": "subheading",
+          "label": "Short Term Goals (2–4 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
+        },
+        {
+          "type": "subheading",
+          "label": "Long Term Goals (6–12 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
+        },
         {
           "type": "subheading",
           "label": "Therapeutic Intervention"

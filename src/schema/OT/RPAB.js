@@ -9,11 +9,26 @@ const SCHEMA = {
           "name": "picture_matching",
           "label": "Test no. 1. Picture matching",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -22,11 +37,26 @@ const SCHEMA = {
           "showIf": {
             "field": "picture_matching",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         },
@@ -35,11 +65,26 @@ const SCHEMA = {
           "name": "object_matching",
           "label": "Test no. 2. Object matching",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -48,11 +93,26 @@ const SCHEMA = {
           "showIf": {
             "field": "object_matching",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         },
@@ -61,11 +121,26 @@ const SCHEMA = {
           "name": "size_recognition",
           "label": "Test no. 4. Size recognition",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -74,11 +149,26 @@ const SCHEMA = {
           "showIf": {
             "field": "size_recognition",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         }
@@ -112,11 +202,26 @@ const SCHEMA = {
           "name": "sequencing_series",
           "label": "Test no. 5. Series",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -125,11 +230,26 @@ const SCHEMA = {
           "showIf": {
             "field": "sequencing_series",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         },
@@ -138,11 +258,26 @@ const SCHEMA = {
           "name": "sequencing_picture",
           "label": "Test no. 9. Sequencing - picture",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -151,11 +286,26 @@ const SCHEMA = {
           "showIf": {
             "field": "sequencing_picture",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         }
@@ -169,11 +319,26 @@ const SCHEMA = {
           "name": "animal_halves",
           "label": "Test no. 6. Animal halves",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -182,11 +347,26 @@ const SCHEMA = {
           "showIf": {
             "field": "animal_halves",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         },
@@ -195,11 +375,26 @@ const SCHEMA = {
           "name": "missing_article",
           "label": "Test no. 7. Missing article",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -208,11 +403,26 @@ const SCHEMA = {
           "showIf": {
             "field": "missing_article",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         }
@@ -226,11 +436,26 @@ const SCHEMA = {
           "name": "figure_ground_discrimination",
           "label": "Test no. 8. Figure ground discrimination",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -239,11 +464,26 @@ const SCHEMA = {
           "showIf": {
             "field": "figure_ground_discrimination",
             "oneOf": [
-              0,
-              1,
-              2,
-              3,
-              4
+              {
+                "label": "0",
+                "value": 0
+              },
+              {
+                "label": "1",
+                "value": 1
+              },
+              {
+                "label": "2",
+                "value": 2
+              },
+              {
+                "label": "3",
+                "value": 3
+              },
+              {
+                "label": "4",
+                "value": 4
+              }
             ]
           }
         }

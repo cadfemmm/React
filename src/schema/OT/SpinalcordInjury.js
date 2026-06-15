@@ -481,6 +481,12 @@ const ASSESSMENT = {
     {
       "fields": [
         {
+          "name": "clinical_impression",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
+        {
           "type": "subheading",
           "label": "Problem List"
         },

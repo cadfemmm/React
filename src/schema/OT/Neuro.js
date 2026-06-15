@@ -314,8 +314,14 @@ const SUBJECTIVE = {
           "name": "toilet_type",
           "label": "Type of Toilet",
           "options": [
-            "Sitting",
-            "Squatting"
+            {
+              "label": "Sitting",
+              "value": "Sitting"
+            },
+            {
+              "label": "Squatting",
+              "value": "Squatting"
+            }
           ]
         },
         {
@@ -419,8 +425,14 @@ const SUBJECTIVE = {
           "name": "returned_to_driving",
           "label": "Returned to Driving Post-Injury",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
           ]
         },
         {
@@ -429,7 +441,7 @@ const SUBJECTIVE = {
           "label": "Duration & Distance",
           "showIf": {
             "field": "returned_to_driving",
-            "equals": "Yes"
+            "equals": "yes"
           }
         },
         {
@@ -510,8 +522,14 @@ const OBJECTIVE = {
           "name": "dominant_hand",
           "label": "Dominant Hand",
           "options": [
-            "Right",
-            "Left"
+            {
+              "label": "Right",
+              "value": "Right"
+            },
+            {
+              "label": "Left",
+              "value": "Left"
+            }
           ]
         },
         {
@@ -704,8 +722,14 @@ const OBJECTIVE = {
           "name": "finger_to_nose",
           "label": "Finger-to-Nose",
           "options": [
-            "Intact",
-            "Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            }
           ]
         },
         {
@@ -713,8 +737,14 @@ const OBJECTIVE = {
           "name": "rapid_alt_movement",
           "label": "Rapid Alternating Movement",
           "options": [
-            "Intact",
-            "Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            }
           ]
         },
         {
@@ -736,8 +766,14 @@ const OBJECTIVE = {
           "name": "functional_grasp",
           "label": "Functional Grasp",
           "options": [
-            "Effective",
-            "Ineffective"
+            {
+              "label": "Effective",
+              "value": "Effective"
+            },
+            {
+              "label": "Ineffective",
+              "value": "Ineffective"
+            }
           ]
         },
         {
@@ -749,9 +785,18 @@ const OBJECTIVE = {
           "name": "sitting_balance",
           "label": "Sitting Balance",
           "options": [
-            "Static",
-            "Dynamic",
-            "Poor"
+            {
+              "label": "Static",
+              "value": "Static"
+            },
+            {
+              "label": "Dynamic",
+              "value": "Dynamic"
+            },
+            {
+              "label": "Poor",
+              "value": "Poor"
+            }
           ]
         },
         {
@@ -764,8 +809,14 @@ const OBJECTIVE = {
           "name": "loss_of_balance_adl",
           "label": "Loss of Balance During ADL",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
           ]
         },
         {
@@ -873,6 +924,12 @@ const ASSESSMENT =  {
           "label": "Clinical Impression"
         },
         {
+          "name": "assessment_notes",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
+        {
           "type": "textarea",
           "name": "functional_limitations",
           "label": "Functional Limitations"
@@ -891,10 +948,22 @@ const ASSESSMENT =  {
           "name": "rehab_potential",
           "label": "Select Potential Level",
           "options": [
-            "Excellent",
-            "Good",
-            "Fair",
-            "Poor"
+            {
+              "label": "Excellent",
+              "value": "Excellent"
+            },
+            {
+              "label": "Good",
+              "value": "Good"
+            },
+            {
+              "label": "Fair",
+              "value": "Fair"
+            },
+            {
+              "label": "Poor",
+              "value": "Poor"
+            }
           ]
         },
         {

@@ -171,10 +171,6 @@ const SUBJECTIVE = {
     {
       "fields": [
         {
-          "type": "subheading",
-          "label": "Subjective"
-        },
-        {
           "type": "input",
           "name": "chief_complaint",
           "label": "Chief Complaint"
@@ -641,8 +637,21 @@ const SUBJECTIVE = {
           "name": "driving_status",
           "label": "Driving",
           "options": [
-            "Yes",
-            "No"
+            {
+              "name": "response",
+              "label": "Response",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ]
+            }
           ]
         },
         {
@@ -650,8 +659,14 @@ const SUBJECTIVE = {
           "name": "community_mobility",
           "label": "Community Mobility",
           "options": [
-            "Independent",
-            "Assisted"
+            {
+              "label": "Independent",
+              "value": "independent"
+            },
+            {
+              "label": "Assisted",
+              "value": "assisted"
+            }
           ]
         },
         {
@@ -774,9 +789,18 @@ const OBJECTIVE = {
           "name": "med_initiation",
           "label": "Initiation",
           "options": [
-            "Intact",
-            "Requires Prompting",
-            "Unable"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Requires Prompting",
+              "value": "Requires Prompting"
+            },
+            {
+              "label": "Unable",
+              "value": "Unable"
+            }
           ]
         },
         {
@@ -784,9 +808,18 @@ const OBJECTIVE = {
           "name": "med_sequencing",
           "label": "Sequencing",
           "options": [
-            "Intact",
-            "Impaired",
-            "Severely Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            },
+            {
+              "label": "Severely Impaired",
+              "value": "Severely Impaired"
+            }
           ]
         },
         {
@@ -794,9 +827,18 @@ const OBJECTIVE = {
           "name": "med_safety",
           "label": "Safety Awareness",
           "options": [
-            "Intact",
-            "Reduced",
-            "Unsafe"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Reduced",
+              "value": "Reduced"
+            },
+            {
+              "label": "Unsafe",
+              "value": "Unsafe"
+            }
           ]
         },
         {
@@ -890,9 +932,18 @@ const OBJECTIVE = {
           "name": "meal_initiation",
           "label": "Initiation",
           "options": [
-            "Intact",
-            "Delayed",
-            "Unable"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Delayed",
+              "value": "Delayed"
+            },
+            {
+              "label": "Unable",
+              "value": "Unable"
+            }
           ]
         },
         {
@@ -900,9 +951,18 @@ const OBJECTIVE = {
           "name": "meal_sequencing",
           "label": "Sequencing",
           "options": [
-            "Intact",
-            "Impaired",
-            "Severely Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            },
+            {
+              "label": "Severely Impaired",
+              "value": "Severely Impaired"
+            }
           ]
         },
         {
@@ -910,9 +970,18 @@ const OBJECTIVE = {
           "name": "meal_safety",
           "label": "Safety Awareness",
           "options": [
-            "Intact",
-            "Reduced",
-            "Unsafe"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Reduced",
+              "value": "Reduced"
+            },
+            {
+              "label": "Unsafe",
+              "value": "Unsafe"
+            }
           ]
         },
         {
@@ -1008,9 +1077,18 @@ const OBJECTIVE = {
           "name": "calendar_initiation",
           "label": "Initiation",
           "options": [
-            "Independent",
-            "Requires Prompting",
-            "Unable"
+            {
+              "label": "Independent",
+              "value": "Independent"
+            },
+            {
+              "label": "Requires Prompting",
+              "value": "Requires Prompting"
+            },
+            {
+              "label": "Unable",
+              "value": "Unable"
+            }
           ]
         },
         {
@@ -1018,9 +1096,18 @@ const OBJECTIVE = {
           "name": "calendar_consistency",
           "label": "Consistency",
           "options": [
-            "Consistent",
-            "Inconsistent",
-            "Unable"
+            {
+              "label": "Consistent",
+              "value": "Consistent"
+            },
+            {
+              "label": "Inconsistent",
+              "value": "Inconsistent"
+            },
+            {
+              "label": "Unable",
+              "value": "Unable"
+            }
           ]
         },
         {
@@ -1028,9 +1115,18 @@ const OBJECTIVE = {
           "name": "calendar_cueing",
           "label": "Cueing Required",
           "options": [
-            "Verbal",
-            "Visual",
-            "None"
+            {
+              "label": "Verbal",
+              "value": "Verbal"
+            },
+            {
+              "label": "Visual",
+              "value": "Visual"
+            },
+            {
+              "label": "None",
+              "value": "None"
+            }
           ]
         },
         {
@@ -1038,9 +1134,18 @@ const OBJECTIVE = {
           "name": "calendar_carryover",
           "label": "Carryover",
           "options": [
-            "Good",
-            "Limited",
-            "Poor"
+            {
+              "label": "Good",
+              "value": "Good"
+            },
+            {
+              "label": "Limited",
+              "value": "Limited"
+            },
+            {
+              "label": "Poor",
+              "value": "Poor"
+            }
           ]
         },
         {
@@ -1048,8 +1153,14 @@ const OBJECTIVE = {
           "name": "calendar_time_awareness",
           "label": "Time Awareness",
           "options": [
-            "Intact",
-            "Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            }
           ]
         },
         {
@@ -1061,10 +1172,22 @@ const OBJECTIVE = {
           "name": "problem_solving",
           "label": "Problem Solving",
           "options": [
-            "Intact",
-            "Mild",
-            "Moderate",
-            "Severe"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Mild",
+              "value": "Mild"
+            },
+            {
+              "label": "Moderate",
+              "value": "Moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "Severe"
+            }
           ]
         },
         {
@@ -1072,9 +1195,18 @@ const OBJECTIVE = {
           "name": "task_initiation",
           "label": "Task Initiation",
           "options": [
-            "Independent",
-            "Requires Prompting",
-            "Unable"
+            {
+              "label": "Independent",
+              "value": "Independent"
+            },
+            {
+              "label": "Requires Prompting",
+              "value": "Requires Prompting"
+            },
+            {
+              "label": "Unable",
+              "value": "Unable"
+            }
           ]
         },
         {
@@ -1082,9 +1214,18 @@ const OBJECTIVE = {
           "name": "mental_flexibility",
           "label": "Mental Flexibility",
           "options": [
-            "Intact",
-            "Decreased",
-            "Severely Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Decreased",
+              "value": "Decreased"
+            },
+            {
+              "label": "Severely Impaired",
+              "value": "Severely Impaired"
+            }
           ]
         },
         {
@@ -1092,9 +1233,18 @@ const OBJECTIVE = {
           "name": "organization",
           "label": "Organization",
           "options": [
-            "Intact",
-            "Impaired",
-            "Severely Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            },
+            {
+              "label": "Severely Impaired",
+              "value": "Severely Impaired"
+            }
           ]
         },
         {
@@ -1106,10 +1256,22 @@ const OBJECTIVE = {
           "name": "sustained_attention",
           "label": "Sustained Attention",
           "options": [
-            "Intact",
-            "Variable",
-            "Impaired",
-            "Severely Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Variable",
+              "value": "Variable"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            },
+            {
+              "label": "Severely Impaired",
+              "value": "Severely Impaired"
+            }
           ]
         },
         {
@@ -1117,10 +1279,22 @@ const OBJECTIVE = {
           "name": "selective_attention",
           "label": "Selective Attention",
           "options": [
-            "Intact",
-            "Variable",
-            "Impaired",
-            "Severely Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Variable",
+              "value": "Variable"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            },
+            {
+              "label": "Severely Impaired",
+              "value": "Severely Impaired"
+            }
           ]
         },
         {
@@ -1128,8 +1302,14 @@ const OBJECTIVE = {
           "name": "distractibility",
           "label": "Distractibility",
           "options": [
-            "Present",
-            "Absent"
+            {
+              "label": "Present",
+              "value": "Present"
+            },
+            {
+              "label": "Absent",
+              "value": "Absent"
+            }
           ]
         },
         {
@@ -1261,9 +1441,18 @@ const OBJECTIVE = {
           "name": "insight",
           "label": "Insight",
           "options": [
-            "Good",
-            "Partial",
-            "Poor"
+            {
+              "label": "Good",
+              "value": "Good"
+            },
+            {
+              "label": "Partial",
+              "value": "Partial"
+            },
+            {
+              "label": "Poor",
+              "value": "Poor"
+            }
           ]
         },
         {
@@ -1271,8 +1460,14 @@ const OBJECTIVE = {
           "name": "communication",
           "label": "Communication",
           "options": [
-            "Intact",
-            "Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            }
           ]
         },
         {
@@ -1280,8 +1475,14 @@ const OBJECTIVE = {
           "name": "endurance",
           "label": "Endurance",
           "options": [
-            "Adequate",
-            "Reduced"
+            {
+              "label": "Adequate",
+              "value": "Adequate"
+            },
+            {
+              "label": "Reduced",
+              "value": "Reduced"
+            }
           ]
         },
         {
@@ -1300,8 +1501,10 @@ const ASSESSMENT = {
     {
       "fields": [
         {
-          "type": "subheading",
-          "label": "Assessment"
+          "name": "Clinical Impression",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
         },
         {
           "type": "textarea",
@@ -1354,10 +1557,22 @@ const ASSESSMENT = {
           "name": "rehabilitation_prognosis",
           "label": "Rehabilitation Prognosis",
           "options": [
-            "Good",
-            "Fair",
-            "Guarded",
-            "Poor"
+            {
+              "label": "Good",
+              "value": "Good"
+            },
+            {
+              "label": "Fair",
+              "value": "Fair"
+            },
+            {
+              "label": "Guarded",
+              "value": "Guarded"
+            },
+            {
+              "label": "Poor",
+              "value": "Poor"
+            }
           ]
         },
         {

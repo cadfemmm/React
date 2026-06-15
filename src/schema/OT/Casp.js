@@ -14,10 +14,22 @@ const SCHEMA = {
           "name": "education_level_naming",
           "label": "Naming",
           "options": [
-            0,
-            1,
-            2,
-            3
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            }
           ]
         },
         {
@@ -25,10 +37,22 @@ const SCHEMA = {
           "name": "comprehension",
           "label": "Comprehension",
           "options": [
-            0,
-            1,
-            2,
-            3
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            }
           ]
         },
         {
@@ -36,11 +60,26 @@ const SCHEMA = {
           "name": "reproducing_copy_cube",
           "label": "Reproducing a Copy of a Cube",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -48,9 +87,18 @@ const SCHEMA = {
           "name": "graphic_series",
           "label": "Graphic Series",
           "options": [
-            0,
-            1,
-            2
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            }
           ]
         },
         {
@@ -58,11 +106,26 @@ const SCHEMA = {
           "name": "inhibition_flexibility",
           "label": "Inhibition/Flexibility",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            }
           ]
         },
         {
@@ -70,9 +133,18 @@ const SCHEMA = {
           "name": "bisection_horizontal_line",
           "label": "Bisection of a Horizontal Line",
           "options": [
-            0,
-            1,
-            2
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            }
           ]
         },
         {
@@ -80,13 +152,34 @@ const SCHEMA = {
           "name": "image_recall",
           "label": "Image Recall",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            },
+            {
+              "label": "5",
+              "value": 5
+            },
+            {
+              "label": "6",
+              "value": 6
+            }
           ]
         },
         {
@@ -94,13 +187,34 @@ const SCHEMA = {
           "name": "calendar",
           "label": "Calendar",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            },
+            {
+              "label": "5",
+              "value": 5
+            },
+            {
+              "label": "6",
+              "value": 6
+            }
           ]
         },
         {
@@ -108,13 +222,34 @@ const SCHEMA = {
           "name": "praxis",
           "label": "Praxis",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            },
+            {
+              "label": "5",
+              "value": 5
+            },
+            {
+              "label": "6",
+              "value": 6
+            }
           ]
         },
         {
@@ -127,8 +262,14 @@ const SCHEMA = {
           "label": "Classification of Score",
           "type": "radio",
           "options": [
-            "Normal",
-            "Impaired"
+            {
+              "label": "Normal",
+              "value": "normal"
+            },
+            {
+              "label": "Impaired",
+              "value": "impaired"
+            }
           ]
         },
         {

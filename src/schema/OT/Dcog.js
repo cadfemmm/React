@@ -152,9 +152,18 @@ const SCHEMA = {
           "name": "level",
           "label": "Level",
           "options": [
-            "Easy",
-            "Medium",
-            "Hard"
+            {
+              "label": "Easy",
+              "value": "Easy"
+            },
+            {
+              "label": "Medium",
+              "value": "Medium"
+            },
+            {
+              "label": "Hard",
+              "value": "Hard"
+            }
           ]
         },
         {
