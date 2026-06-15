@@ -4,7 +4,7 @@ const SUBJECTIVE = {
       "fields": [
         {
           "name": "complaint",
-          "label": "Cheif Complaint",
+          "label": "Cheif Complaints",
           "type": "input",
           "placeholder": "Therapist assessment..."
         },
@@ -69,7 +69,6 @@ const SUBJECTIVE = {
     }
   ]
 }
-
 const OBJECTIVE = {
   "sections": [
     {
@@ -654,6 +653,6 @@ const PLAN = {
       ]
     }
   ]
-} 
+}
 
 export { SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN }

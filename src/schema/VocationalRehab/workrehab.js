@@ -171,6 +171,16 @@ const SUBJECTIVE = {
     {
       "fields": [
         {
+          "type": "input",
+          "name": "chief_complaints",
+          "label": "Chief Complaints"
+        },
+        {
+          "type": "input",
+          "name": "hpi",
+          "label": "History of Present Illness (HPI)"
+        },
+        {
           "type": "",
           "label": "Which best describes your current work status, or if currently not working your last work status"
         },
