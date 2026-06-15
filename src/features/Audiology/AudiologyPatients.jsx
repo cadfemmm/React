@@ -4,8 +4,7 @@ import AudiologyDepartmentPediatricPage from "./components/AudiologyPediatricIA"
 import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
 import AudiologyGroupAssessmentForm from "./components/AudiologyGroup";
 import AssessmentLoader from "../../assessment";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import { fetchPatientsList } from "../../shared/api/patientsList";
 
 /* ── Assessment type cards ── */
 const OPTION_CARDS = [
@@ -27,8 +26,6 @@ function getAssessmentComponent(patient) {
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
 
 export default function AudiologyPatients({ onBack }) {
-  const userRole = localStorage.getItem("userRole") || "";
-
   const [patients,         setPatients]         = useState([]);
   const [loading,          setLoading]          = useState(true);
   const [search,           setSearch]           = useState("");
@@ -40,12 +37,8 @@ export default function AudiologyPatients({ onBack }) {
     const fetch = async () => {
       setLoading(true);
       try {
-        const url = API_URL.PATIENT +
-          (['Admin', 'Staff'].includes(userRole)
-            ? `?department=${encodeURIComponent(DEPARTMENT)}`
-            : '');
-        const res = await api.get(url);
-        setPatients(res.data.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch {
         setPatients([]);
       } finally {

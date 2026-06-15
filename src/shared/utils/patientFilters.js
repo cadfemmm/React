@@ -25,6 +25,13 @@ export function isPatientPending(patient) {
   return s === "pending" || s === "awaiting approval" || s === "awaiting_approval";
 }
 
+/** Approve/Deny queue — RMS patients with approval_status IN_PENDING only */
+export function isPatientInPending(patient) {
+  if (!patient) return false;
+  const raw = patient.approval_status ?? patient.patient_approval_status ?? "";
+  return String(raw).trim().toUpperCase() === "IN_PENDING";
+}
+
 export function filterApprovedPatients(patients) {
   return (patients || []).filter(isPatientApproved);
 }

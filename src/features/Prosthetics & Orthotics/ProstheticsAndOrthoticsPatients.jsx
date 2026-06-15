@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
-import api from "../../shared/api/apiClient";
+import { fetchPatientsList } from "../../shared/api/patientsList";
 import { filterApprovedPatients } from "../../shared/utils/patientFilters";
-import { API_URL } from "../../platform/config/api.config";
 import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
 import ProgressIntervention from "./ProgressIntervention";
@@ -90,19 +89,13 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
   const [loading, setLoading]                 = useState(true);
   const [search, setSearch]                   = useState("");
 
-  const userRole = localStorage.getItem("userRole") || "";
-
   /* ── Fetch patients from API ── */
   useEffect(() => {
     const fetchPatients = async () => {
       setLoading(true);
       try {
-        const url = API_URL.PATIENT +
-          (['Admin', 'Staff'].includes(userRole)
-            ? `?department=${encodeURIComponent(DEPARTMENT)}`
-            : '');
-        const res = await api.get(url);
-        setPatients(res.data.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch {
         setPatients([]);
       } finally {
