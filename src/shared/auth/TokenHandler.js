@@ -42,20 +42,20 @@ export default function TokenHandler() {
     history.replace({ pathname: location.pathname, search: cleanSearch });
 
     // 3. Fetch user profile to populate localStorage
-    // api.get(API_URL.ME)
-    //   .then(res => {
-    //     const user = res.data;
-    //     localStorage.setItem("user",     JSON.stringify(user));
-    //     localStorage.setItem("username", user.username?.trim() || "");
-    //     localStorage.setItem("userRole", user.user_type || "DOCTOR");
-    //     localStorage.setItem("user_id", user.id)
-    //   })
-    //   .catch(() => {
-    //     // Token invalid — clear it
-    //     localStorage.removeItem("access_token");
-    //     localStorage.removeItem("access_token_expiry");
-    //     history.replace("/");  // back to login
-    //   });
+    api.get(API_URL.ME)
+      .then(res => {
+        const user = res.data;
+        localStorage.setItem("user",     JSON.stringify(user));
+        localStorage.setItem("username", user.username?.trim() || "");
+        localStorage.setItem("userRole", user.user_type || "DOCTOR");
+        localStorage.setItem("user_id", user.id)
+      })
+      .catch(() => {
+        // Token invalid — clear it
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("access_token_expiry");
+        history.replace("/");  // back to login
+      });
 
   }, [location.search]);  // re-run if query string changes
 

@@ -62,22 +62,22 @@ export default function DeptEntry() {
     });
 
     /* Fetch user profile to get role + username */
-    // api.get(API_URL.ME)
-    //   .then(res => {
-    //     const user = res.data;
-    //     localStorage.setItem("user",     JSON.stringify(user));
-    //     localStorage.setItem("username", user.username?.trim() || "");
-    //     localStorage.setItem("userRole", user.user_type || "");
-    //     localStorage.setItem("user_id", user.id)
-    //     const tab = SLUG_TO_TAB[department?.toLowerCase()] || "";
+    api.get(API_URL.ME)
+      .then(res => {
+        const user = res.data;
+        localStorage.setItem("user",     JSON.stringify(user));
+        localStorage.setItem("username", user.username?.trim() || "");
+        localStorage.setItem("userRole", user.user_type || "");
+        localStorage.setItem("user_id", user.id)
+        const tab = SLUG_TO_TAB[department?.toLowerCase()] || "";
 
-    //     /* Push to /menu and pass the department tab via location state */
-    //     history.replace("/menu", { initialTab: tab });
-    //   })
-    //   .catch(() => {
-    //     /* Token invalid / expired — back to login */
-    //     history.replace("/");
-    //   });
+        /* Push to /menu and pass the department tab via location state */
+        history.replace("/menu", { initialTab: tab });
+      })
+      .catch(() => {
+        /* Token invalid / expired — back to login */
+        history.replace("/");
+      });
   }, []);   // run once on mount
 
   return null; // renders nothing — pure redirect logic

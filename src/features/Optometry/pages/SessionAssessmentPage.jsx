@@ -56,14 +56,14 @@ export default function SessionAssessmentPage() {
             }
           });
           // Fetch profile to populate localStorage
-          // return api.get(API_URL.ME).then(res => {
-          //   const user = res.data;
-          //   localStorage.setItem("user",     JSON.stringify(user));
-          //   localStorage.setItem("username", user.username?.trim() || "");
-          //   localStorage.setItem("userRole", user.user_type || "");
-          //   localStorage.setItem("user_id", user.id)
-          //   setUsername(user.username?.trim() || "");
-          // });
+          return api.get(API_URL.ME).then(res => {
+            const user = res.data;
+            localStorage.setItem("user",     JSON.stringify(user));
+            localStorage.setItem("username", user.username?.trim() || "");
+            localStorage.setItem("userRole", user.user_type || "");
+            localStorage.setItem("user_id", user.id)
+            setUsername(user.username?.trim() || "");
+          });
         })()
       : Promise.resolve();   // already authenticated — skip
 
