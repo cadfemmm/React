@@ -171,6 +171,16 @@ const SUBJECTIVE = {
     {
       "fields": [
         {
+          "type": "input",
+          "name": "chief_complaints",
+          "label": "Chief Complaints"
+        },
+        {
+          "type": "input",
+          "name": "hpi",
+          "label": "History of Present Illness (HPI)"
+        },
+        {
           "name": "History of Present",
           "label": "History of Present Illnes",
           "type": "input"
@@ -476,7 +486,7 @@ const ASSESSMENT = {
   ]
 }
 
-const PLAN =  {
+const PLAN = {
   "title": "",
   "sections": [
     {

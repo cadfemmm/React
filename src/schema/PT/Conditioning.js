@@ -330,8 +330,8 @@ const SUBJECTIVE = {
           "name": "falls_history",
           "label": "Falls History",
           "options": [
-            "Yes",
-            "No"
+            {"label":"Yes", "value":"yes"},
+            {"label":"No", "value":"no"}
           ]
         },
         {

@@ -18,7 +18,7 @@ const SUBJECTIVE = {
   ]
 }
 
-const OBJECTIVE =  {
+const OBJECTIVE = {
   "title": "Activies and Participation",
   "titleInfo": {
     "title": "Pain Score (P/C)",
@@ -1977,7 +1977,7 @@ const ASSESSMENT = {
   ]
 } 
 
-const PLAN =  {
+const PLAN = {
   "sections": [
     {
       "fields": [
