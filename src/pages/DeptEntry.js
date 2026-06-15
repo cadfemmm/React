@@ -55,6 +55,7 @@ export default function DeptEntry() {
        here we only have the raw access token string, so we construct
        a minimal object that matches setAccessToken's expected shape. */
     setAccessToken({
+      access_token: token,
       access: {
         token,
         expire_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() // assume 1h if unknown

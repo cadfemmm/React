@@ -30,6 +30,7 @@ export default function TokenHandler() {
 
     // 1. Set the token immediately so all subsequent API calls are authenticated
     setAccessToken({
+      access_token: token,
       access: {
         token,
         expire_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()  // assume 24h

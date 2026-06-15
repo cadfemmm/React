@@ -50,6 +50,7 @@ export default function SessionAssessmentPage() {
     const authReady = token
       ? (() => {
           setAccessToken({
+            access_token: token,
             access: {
               token,
               expire_at: new Date(Date.now() + 60 * 60 * 1000).toISOString()
