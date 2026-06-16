@@ -9,8 +9,14 @@ const SCHEMA = {
           "name": "executive_function",
           "label": "Executive Function",
           "options": [
-            0,
-            1
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            }
           ]
         },
         {
@@ -18,8 +24,14 @@ const SCHEMA = {
           "name": "cube_copying",
           "label": "Cube Copying",
           "options": [
-            0,
-            1
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            }
           ]
         },
         {
@@ -27,10 +39,22 @@ const SCHEMA = {
           "name": "clock_drawing",
           "label": "Clock Drawing",
           "options": [
-            0,
-            1,
-            2,
-            3
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            }
           ]
         }
       ]
@@ -43,10 +67,22 @@ const SCHEMA = {
           "name": "naming",
           "label": "Naming",
           "options": [
-            0,
-            1,
-            2,
-            3
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            }
           ]
         }
       ]
@@ -59,9 +95,18 @@ const SCHEMA = {
           "name": "number_repetition",
           "label": "Number Repetition",
           "options": [
-            0,
-            1,
-            2
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            }
           ]
         },
         {
@@ -69,8 +114,14 @@ const SCHEMA = {
           "name": "vigilance",
           "label": "Vigilance",
           "options": [
-            0,
-            1
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            }
           ]
         },
         {
@@ -78,10 +129,22 @@ const SCHEMA = {
           "name": "serial_7_calculation",
           "label": "Serial 7 Calculation",
           "options": [
-            0,
-            1,
-            2,
-            3
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            }
           ]
         }
       ]
@@ -94,9 +157,18 @@ const SCHEMA = {
           "name": "sentence_repetition",
           "label": "Sentence Repetition",
           "options": [
-            0,
-            1,
-            2
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            }
           ]
         },
         {
@@ -104,8 +176,14 @@ const SCHEMA = {
           "name": "animal_naming",
           "label": "Animal Naming",
           "options": [
-            0,
-            1
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            }
           ]
         }
       ]
@@ -118,9 +196,18 @@ const SCHEMA = {
           "name": "abstraction",
           "label": "Abstraction",
           "options": [
-            0,
-            1,
-            2
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            }
           ]
         }
       ]
@@ -133,12 +220,30 @@ const SCHEMA = {
           "name": "delayed_recall",
           "label": "Delayed Recall",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            },
+            {
+              "label": "5",
+              "value": "5"
+            }
           ]
         },
         {
@@ -158,13 +263,34 @@ const SCHEMA = {
           "name": "orientation",
           "label": "Orientation",
           "options": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
+            {
+              "label": "0",
+              "value": 0
+            },
+            {
+              "label": "1",
+              "value": 1
+            },
+            {
+              "label": "2",
+              "value": 2
+            },
+            {
+              "label": "3",
+              "value": 3
+            },
+            {
+              "label": "4",
+              "value": 4
+            },
+            {
+              "label": "5",
+              "value": "5"
+            },
+            {
+              "label": "6",
+              "value": "6"
+            }
           ]
         }
       ]
@@ -182,10 +308,22 @@ const SCHEMA = {
           "name": "classification_score",
           "label": "Classification of Score",
           "options": [
-            "Normal",
-            "Mild",
-            "Moderate",
-            "Severe"
+            {
+              "label": "Normal",
+              "value": "Normal"
+            },
+            {
+              "label": "Mild",
+              "value": "Mild"
+            },
+            {
+              "label": "Moderate",
+              "value": "Moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "Severe"
+            }
           ]
         },
         {

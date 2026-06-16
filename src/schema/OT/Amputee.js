@@ -256,8 +256,14 @@ const SUBJECTIVE = {
           "name": "returned_to_driving",
           "label": "Returned to Drive Post Injury?",
           "options": [
-            "Yes",
-            "No"
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
           ]
         },
         {
@@ -266,7 +272,7 @@ const SUBJECTIVE = {
           "label": "If Yes – Duration & Distance",
           "showIf": {
             "field": "returned_to_driving",
-            "equals": "Yes"
+            "equals": "yes"
           }
         }
       ]
@@ -314,8 +320,14 @@ const OBJECTIVE = {
           "name": "dominant_side",
           "label": "Dominant",
           "options": [
-            "Right",
-            "Left"
+            {
+              "label": "Right",
+              "value": "Right"
+            },
+            {
+              "label": "Left",
+              "value": "Left"
+            }
           ]
         },
         {
@@ -351,8 +363,14 @@ const OBJECTIVE = {
           "name": "wound_status",
           "label": "Wound",
           "options": [
-            "Nil",
-            "Present"
+            {
+              "label": "Nil",
+              "value": "Nil"
+            },
+            {
+              "label": "Present",
+              "value": "Present"
+            }
           ]
         },
         {
@@ -404,8 +422,14 @@ const OBJECTIVE = {
           "name": "edema",
           "label": "Edema",
           "options": [
-            "Nil",
-            "Present"
+            {
+              "label": "Nil",
+              "value": "Nil"
+            },
+            {
+              "label": "Present",
+              "value": "Present"
+            }
           ]
         },
         {
@@ -494,10 +518,22 @@ const OBJECTIVE = {
           "name": "phantom_sensation",
           "label": "Phantom Sensation",
           "options": [
-            "Nil",
-            "Sometimes",
-            "Present",
-            "Absent"
+            {
+              "label": "Nil",
+              "value": "Nil"
+            },
+            {
+              "label": "Sometimes",
+              "value": "Sometimes"
+            },
+            {
+              "label": "Present",
+              "value": "Present"
+            },
+            {
+              "label": "Absent",
+              "value": "Absent"
+            }
           ]
         },
         {
@@ -505,10 +541,22 @@ const OBJECTIVE = {
           "name": "phantom_pain",
           "label": "Phantom Pain",
           "options": [
-            "Nil",
-            "Sometimes",
-            "Present",
-            "Absent"
+            {
+              "label": "Nil",
+              "value": "Nil"
+            },
+            {
+              "label": "Sometimes",
+              "value": "Sometimes"
+            },
+            {
+              "label": "Present",
+              "value": "Present"
+            },
+            {
+              "label": "Absent",
+              "value": "Absent"
+            }
           ]
         },
         {
@@ -545,10 +593,22 @@ const OBJECTIVE = {
           "name": "stump_pain",
           "label": "Stump Pain",
           "options": [
-            "Nil",
-            "Sometimes",
-            "Present",
-            "Absent"
+            {
+              "label": "Nil",
+              "value": "Nil"
+            },
+            {
+              "label": "Sometimes",
+              "value": "Sometimes"
+            },
+            {
+              "label": "Present",
+              "value": "Present"
+            },
+            {
+              "label": "Absent",
+              "value": "Absent"
+            }
           ]
         },
         {
@@ -585,8 +645,14 @@ const OBJECTIVE = {
           "name": "hypersensitivity",
           "label": "Hypersensitivity",
           "options": [
-            "Nil",
-            "Yes"
+            {
+              "label": "Nil",
+              "value": "Nil"
+            },
+            {
+              "label": "Yes",
+              "value": "Yes"
+            }
           ]
         },
         {
@@ -594,8 +660,14 @@ const OBJECTIVE = {
           "name": "light_touch",
           "label": "Light Touch",
           "options": [
-            "Intact",
-            "Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            }
           ]
         },
         {
@@ -603,8 +675,14 @@ const OBJECTIVE = {
           "name": "deep_touch",
           "label": "Deep Touch",
           "options": [
-            "Intact",
-            "Impaired"
+            {
+              "label": "Intact",
+              "value": "Intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "Impaired"
+            }
           ]
         },
         {
@@ -778,9 +856,18 @@ const OBJECTIVE = {
           "name": "standing_status",
           "label": "Standing Status",
           "options": [
-            "Independent",
-            "Requires Support",
-            "Unable"
+            {
+              "label": "Independent",
+              "value": "Independent"
+            },
+            {
+              "label": "Requires Support",
+              "value": "Requires Support"
+            },
+            {
+              "label": "Unable",
+              "value": "Unable"
+            }
           ]
         },
         {
@@ -858,6 +945,12 @@ const ASSESSMENT =  {
   "sections": [
     {
       "fields": [
+        {
+          "name": "assessment_notes",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
         {
           "type": "subheading",
           "label": "Problem List"
@@ -973,10 +1066,22 @@ const ASSESSMENT =  {
           "name": "rehab_prognosis",
           "label": "Select Prognosis",
           "options": [
-            "Excellent",
-            "Good",
-            "Fair",
-            "Poor"
+            {
+              "label": "Excellent",
+              "value": "Excellent"
+            },
+            {
+              "label": "Good",
+              "value": "Good"
+            },
+            {
+              "label": "Fair",
+              "value": "Fair"
+            },
+            {
+              "label": "Poor",
+              "value": "Poor"
+            }
           ]
         }
       ]

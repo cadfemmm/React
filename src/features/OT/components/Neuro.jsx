@@ -765,6 +765,12 @@ const ASSESSMENT_SCHEMA = {
         { type: "textarea", name: "problem_list", label: "Problem List" },
 
         { type: "subheading", label: "Clinical Impression" },
+         {
+          "name": "assessment_notes",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
         { type: "textarea", name: "functional_limitations", label: "Functional Limitations" },
         { type: "textarea", name: "clinical_diagnosis", label: "Diagnosis" },
 

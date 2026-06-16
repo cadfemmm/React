@@ -63,6 +63,17 @@ const SUBJECTIVE_SCHEMA = {
   sections: [{
     fields: [
       {
+          "type": "input",
+          "name": "chief_complaint",
+          "label": "Chief Complaint"
+        },
+        {
+          "type": "input",
+          "name": "history_present_illness",
+          "label": "History of Present Illness"
+        },
+
+      {
         name: "dr_steering_control",
         label: "Steering Control",
         type: "radio",
@@ -294,6 +305,12 @@ const ASSESSMENT_SCHEMA = {
   actions: ACTIONS,
   sections: [{
     fields: [
+      {
+          "name": "Clinical Impression",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
       { type: "subheading", label: "On Road Driving Summary" },
 
       /* ── Hand Control ── */
@@ -346,7 +363,22 @@ const PLAN_SCHEMA = {
   actions: ACTIONS,
   sections: [{
     fields: [
-
+ {
+          "type": "subheading",
+          "label": "Short Term Goals (2–4 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
+        },
+        {
+          "type": "subheading",
+          "label": "Long Term Goals (6–12 Weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
+        },
 
       /* ── Therapeutic Intervention ── */
       { type: "subheading", label: "Therapeutic Intervention" },
