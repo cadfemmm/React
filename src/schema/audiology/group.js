@@ -12,46 +12,71 @@ const SUBJECTIVE = {
           "label": "History of Present Illness",
           "type": "input"
         },
-         {
-            "name": "session_for",
-            "label": "Session For",
-            "type": "radio",
-            "options": [
-              { "label": "Education Program ",    "value": "education_program"    },
-              { "label": "Leisure Activities",    "value": "leisure_activities"    },
-              { "label": "Group Support", "value": "group_support" },
-            ],
-          },
-          {
-            "name": "consent",
-            "label": "Consent",
-            "type": "checkbox-group",
-            "options": [{
+        {
+          "name": "session_for",
+          "label": "Session For",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Education Program ",
+              "value": "education_program"
+            },
+            {
+              "label": "Leisure Activities",
+              "value": "leisure_activities"
+            },
+            {
+              "label": "Group Support",
+              "value": "group_support"
+            }
+          ]
+        },
+        {
+          "name": "consent",
+          "label": "Consent",
+          "type": "checkbox-group",
+          "options": [
+            {
               "label": "Client was in his/her best interest.",
-              "value": "yes",
-            }],
-          },
+              "value": "yes"
+            }
+          ]
+        }
       ]
     }
   ]
 }
 
 const OBJECTIVE = {
-  "sections": [
-    {
-      "fields": [
-        { "name": "topics", "label": "Topics", "type": "input" },
-          { "name": "strategies", "label": "Strategies", "type": "input" },
-          {
-            "name": "objectives",
-            "label": "Objective(s)",
-            "type": "dynamic-section",
-            "fields": [{ "name": "objective", "label": "Objective", "type": "input" }],
-          },
-      ]
-    }
-  ]
-};
+   "sections":[
+      {
+         "fields":[
+            {
+               "name":"topics",
+               "label":"Topics",
+               "type":"input"
+            },
+            {
+               "name":"strategies",
+               "label":"Strategies",
+               "type":"input"
+            },
+            {
+               "name":"objectives",
+               "label":"Objective(s)",
+               "type":"dynamic-section",
+               "fields":[
+                  {
+                     "name":"objective",
+                     "label":"Objective",
+                     "type":"input"
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
 
 const ASSESSMENT = {
   "sections": [
@@ -62,7 +87,7 @@ const ASSESSMENT = {
           "name": "clinical_impression",
           "label": "Clinical Impression"
         },
-       {
+        {
           "name": "activities",
           "label": "",
           "type": "dynamic-section",
@@ -70,19 +95,19 @@ const ASSESSMENT = {
             {
               "name": "activity",
               "label": "Activity",
-              "type": "input",
+              "type": "input"
             },
             {
               "name": "remark",
               "label": "Comment / Remark",
-              "type": "input",
-            },
-          ],
-        },
+              "type": "input"
+            }
+          ]
+        }
       ]
     }
   ]
-};
+}
 
 const PLAN = {
   "sections": [
@@ -104,9 +129,21 @@ const PLAN = {
           "type": "dynamic-goals",
           "name": "long_term_goals"
         },
-       { "name": "plan", "label": "Plan", "type": "input" },
-        { "name": "comment", "label": "Comment", "type": "input" },
-        { "name": "remark", "label": "Remark", "type": "input" },
+        {
+          "name": "plan",
+          "label": "Plan",
+          "type": "input"
+        },
+        {
+          "name": "comment",
+          "label": "Comment",
+          "type": "input"
+        },
+        {
+          "name": "remark",
+          "label": "Remark",
+          "type": "input"
+        },
         {
           "name": "participants",
           "label": "Participants",
@@ -116,24 +153,24 @@ const PLAN = {
             {
               "name": "clientName",
               "label": "Client’s Name",
-              "type": "input",
+              "type": "input"
             },
             {
               "name": "idNo",
               "label": "ID No",
-              "type": "input",
+              "type": "input"
             },
             {
               "name": "mrnNo",
               "label": "MRN No",
-              "type": "input",
-            },
-          ],
-        },
+              "type": "input"
+            }
+          ]
+        }
       ]
     }
   ]
-};
+}
 
 export default {
   PLAN,

@@ -9,18 +9,9 @@ const SCHEMA = {
           "name": "alertness_visual",
           "label": "Alertness, Visual",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -30,18 +21,9 @@ const SCHEMA = {
           "showIf": {
             "field": "alertness_visual",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -50,18 +32,9 @@ const SCHEMA = {
           "name": "divided_attention",
           "label": "Divided attention",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -71,18 +44,9 @@ const SCHEMA = {
           "showIf": {
             "field": "divided_attention",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         }
@@ -96,18 +60,9 @@ const SCHEMA = {
           "name": "working_memory",
           "label": "Working memory, Verbal",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -117,18 +72,9 @@ const SCHEMA = {
           "showIf": {
             "field": "working_memory",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -137,18 +83,9 @@ const SCHEMA = {
           "name": "figural_learning_ability",
           "label": "Long-term memory, Figural - Learning ability",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -158,18 +95,9 @@ const SCHEMA = {
           "showIf": {
             "field": "figural_learning_ability",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -178,18 +106,9 @@ const SCHEMA = {
           "name": "figural_short_term",
           "label": "Long-term memory, Figural - Short term",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -199,18 +118,9 @@ const SCHEMA = {
           "showIf": {
             "field": "figural_short_term",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -219,18 +129,9 @@ const SCHEMA = {
           "name": "figural_long_term",
           "label": "Long-term memory, Figural - Long term",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -240,18 +141,9 @@ const SCHEMA = {
           "showIf": {
             "field": "figural_long_term",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -260,18 +152,9 @@ const SCHEMA = {
           "name": "figural_recognition",
           "label": "Long-term memory, Figural - Recognition",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -281,18 +164,9 @@ const SCHEMA = {
           "showIf": {
             "field": "figural_recognition",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         }
@@ -306,18 +180,9 @@ const SCHEMA = {
           "name": "cognitive_flexibility",
           "label": "Cognitive flexibility",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -327,18 +192,9 @@ const SCHEMA = {
           "showIf": {
             "field": "cognitive_flexibility",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -347,18 +203,9 @@ const SCHEMA = {
           "name": "planing_ability",
           "label": "Planing ability, Visual-spatial",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -368,18 +215,9 @@ const SCHEMA = {
           "showIf": {
             "field": "planing_ability",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -388,18 +226,9 @@ const SCHEMA = {
           "name": "response_inhibition",
           "label": "Response inhibition",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -409,18 +238,9 @@ const SCHEMA = {
           "showIf": {
             "field": "response_inhibition",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         }
@@ -434,18 +254,9 @@ const SCHEMA = {
           "name": "information_processing_speed",
           "label": "Information processing speed",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -455,18 +266,9 @@ const SCHEMA = {
           "showIf": {
             "field": "information_processing_speed",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         }
@@ -480,18 +282,9 @@ const SCHEMA = {
           "name": "unilateral_left",
           "label": "Neglect unilateral left",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -501,18 +294,9 @@ const SCHEMA = {
           "showIf": {
             "field": "unilateral_left",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         },
@@ -521,18 +305,9 @@ const SCHEMA = {
           "name": "unilateral_right",
           "label": "Neglect unilateral right",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -542,18 +317,9 @@ const SCHEMA = {
           "showIf": {
             "field": "unilateral_right",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         }
@@ -567,18 +333,9 @@ const SCHEMA = {
           "name": "mouse_use",
           "label": "Mouse use",
           "options": [
-            {
-              "label": "Below average",
-              "value": "below_average"
-            },
-            {
-              "label": "Average",
-              "value": "average"
-            },
-            {
-              "label": "Above average",
-              "value": "above_average"
-            }
+            "Below average",
+            "Average",
+            "Above average"
           ]
         },
         {
@@ -588,18 +345,9 @@ const SCHEMA = {
           "showIf": {
             "field": "mouse_use",
             "oneOf": [
-              {
-                "label": "Below average",
-                "value": "below_average"
-              },
-              {
-                "label": "Average",
-                "value": "average"
-              },
-              {
-                "label": "Above average",
-                "value": "above_average"
-              }
+              "Below average",
+              "Average",
+              "Above average"
             ]
           }
         }

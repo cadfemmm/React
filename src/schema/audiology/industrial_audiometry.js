@@ -404,8 +404,14 @@
               "label": "1. Ear discharge",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -413,8 +419,14 @@
               "label": "4. ENT problems",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -422,8 +434,14 @@
               "label": "7. Exposure to noise",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -437,8 +455,14 @@
               "label": "2. Ear ache",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -446,8 +470,14 @@
               "label": "5. ENT operations",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -455,8 +485,14 @@
               "label": "8. Exposure to loud explosion",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -470,8 +506,14 @@
               "label": "3. Ear infection",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -479,8 +521,14 @@
               "label": "6. Hobby",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -488,8 +536,14 @@
               "label": "9. Family history",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -507,8 +561,14 @@
               "label": "1. Exposure to loud noise last 14 hours",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -516,8 +576,14 @@
               "label": "3. Upper respiratory infection",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -531,8 +597,14 @@
               "label": "2. Current medication for major illness",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -540,8 +612,14 @@
               "label": "4. Ear infection",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -696,8 +774,14 @@
               "label": "1. Normal audiogram",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -705,8 +789,14 @@
               "label": "2. Hearing Impairment",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -720,8 +810,14 @@
               "label": "3. Standard threshold shift",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             },
             {
@@ -729,8 +825,14 @@
               "label": "4. Must retest within 3 months",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]
@@ -743,8 +845,14 @@
               "label": "5. Must retest annually & wear hearing protector",
               "type": "radio",
               "options": [
-                "Yes",
-                "No"
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
               ]
             }
           ]

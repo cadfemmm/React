@@ -25,11 +25,11 @@ const SUBJECTIEV = {
       "options": [
         {
           "label": "Normal",
-          "value": "Yes"
+          "value": "yes"
         },
         {
           "label": "Impaired",
-          "value": "No"
+          "value": "no"
         }
       ]
     },
@@ -39,7 +39,7 @@ const SUBJECTIEV = {
       "type": "input",
       "showIf": {
         "field": "oral_intake",
-        "equals": "No"
+        "equals": "no"
       }
     },
     {
@@ -49,11 +49,11 @@ const SUBJECTIEV = {
       "options": [
         {
           "label": "Normal",
-          "value": "No"
+          "value": "no"
         },
         {
           "label": "Impaired",
-          "value": "Yes"
+          "value": "yes"
         }
       ]
     },
@@ -64,11 +64,11 @@ const SUBJECTIEV = {
       "options": [
         {
           "label": "Normal",
-          "value": "No"
+          "value": "no"
         },
         {
           "label": "Impaired",
-          "value": "Yes"
+          "value": "yes"
         }
       ]
     },
@@ -79,11 +79,11 @@ const SUBJECTIEV = {
       "options": [
         {
           "label": "Normal",
-          "value": "No"
+          "value": "no"
         },
         {
           "label": "Impaired",
-          "value": "Yes"
+          "value": "yes"
         }
       ]
     },
@@ -109,11 +109,11 @@ const SUBJECTIEV = {
       "options": [
         {
           "label": "Yes",
-          "value": "Yes"
+          "value": "yes"
         },
         {
           "label": "No",
-          "value": "No"
+          "value": "no"
         }
       ]
     },
@@ -124,11 +124,11 @@ const SUBJECTIEV = {
       "options": [
         {
           "label": "Yes",
-          "value": "Yes"
+          "value": "yes"
         },
         {
           "label": "No",
-          "value": "No"
+          "value": "no"
         }
       ]
     },
