@@ -696,11 +696,11 @@ const OBJECTIVE = {
           "options": [
             {
               "label": "Yes",
-              "value": "Yes"
+              "value": "yes"
             },
             {
               "label": "No",
-              "value": "No"
+              "value": "no"
             }
           ]
         },
@@ -714,7 +714,7 @@ const OBJECTIVE = {
               "type": "input",
               "showIf": {
                 "field": "weight_change",
-                "equals": "Yes"
+                "equals": "yes"
               }
             }
           ]

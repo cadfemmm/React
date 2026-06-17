@@ -2632,133 +2632,25 @@ const mainSchema = {
               "label": "Degree of Change",
               "type": "radio",
               "options": [
-                "Much better",
-                "Better",
-                "Slightly better",
-                "No change",
-                "Worse"
-              ]
-            }
-          ]
-        },
-        {
-          "sections": [
-            {
-              "title": null,
-              "fields": [
                 {
-                  "type": "info-text",
-                  "label": "Step-2: Post-Intervention - Degree of Change",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
+                  "label": "Much better",
+                  "value": "much_better"
                 },
                 {
-                  "type": "dynamic-section",
-                  "name": "cosi_change",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  },
-                  "fields": [
-                    {
-                      "name": "goal",
-                      "label": "Goal",
-                      "type": "input"
-                    },
-                    {
-                      "name": "change",
-                      "label": "Degree of Change",
-                      "type": "radio",
-                      "options": [
-                        "Much better",
-                        "Better",
-                        "Slightly better",
-                        "No change",
-                        "Worse"
-                      ]
-                    }
-                  ]
+                  "label": "Better",
+                  "value": "better"
                 },
                 {
-                  "type": "info-text",
-                  "label": "Step 3: Post-Intervention - Final Ability Rating",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
+                  "label": "Slightly better",
+                  "value": "slight_better"
                 },
                 {
-                  "type": "dynamic-section",
-                  "name": "cosi_final",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  },
-                  "fields": [
-                    {
-                      "name": "goal",
-                      "label": "Goal",
-                      "type": "input"
-                    },
-                    {
-                      "name": "final",
-                      "label": "Final Ability Rating",
-                      "type": "radio",
-                      "options": [
-                        "Hardly ever",
-                        "Occasionally",
-                        "Half the time",
-                        "Most of the time",
-                        "Almost always"
-                      ]
-                    }
-                  ]
+                  "label": "No change",
+                  "value": "no_change"
                 },
                 {
-                  "type": "subheading",
-                  "label": "Counseling Summary",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "understanding",
-                  "label": "Patient's understanding of hearing loss",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "goals",
-                  "label": "Expectations / goals",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "education",
-                  "label": "Education provided",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
-                },
-                {
-                  "name": "next_steps",
-                  "label": "Recommended next steps",
-                  "type": "input",
-                  "showIf": {
-                    "field": "mode",
-                    "equals": "followup"
-                  }
+                  "label": "Worse",
+                  "value": "worse"
                 }
               ]
             }
@@ -2790,11 +2682,26 @@ const mainSchema = {
               "label": "Final Ability Rating",
               "type": "radio",
               "options": [
-                "Hardly ever",
-                "Occasionally",
-                "Half the time",
-                "Most of the time",
-                "Almost always"
+                {
+                  "label": "Hardly ever",
+                  "value": "hardly_ever"
+                },
+                {
+                  "label": "Occasionally",
+                  "value": "occasionally"
+                },
+                {
+                  "label": "Half the time",
+                  "value": "half_of_the_time"
+                },
+                {
+                  "label": "Most of the time",
+                  "value": "most_of_the_time"
+                },
+                {
+                  "label": "Almost always",
+                  "value": "almost_always"
+                }
               ]
             }
           ]

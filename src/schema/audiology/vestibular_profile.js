@@ -2288,8 +2288,14 @@ export const mainSchema = {
           "label": "26.b Have you changed your work because of vertigo?",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "Yes",
+              "value": "YES"
+            },
+            {
+              "label": "No",
+              "value": "NO"
+            }
           ],
           "showIf": {
             "field": "vhq_work",
@@ -2301,8 +2307,14 @@ export const mainSchema = {
           "label": "26.c Does vertigo cause difficulty at work?",
           "type": "radio",
           "options": [
-            "No",
-            "Yes"
+            {
+              "label": "Yes",
+              "value": "YES"
+            },
+            {
+              "label": "No",
+              "value": "NO"
+            }
           ],
           "showIf": {
             "field": "vhq_work",

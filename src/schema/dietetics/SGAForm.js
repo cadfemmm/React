@@ -1,4 +1,4 @@
-const sgaSchema ={
+const sgaSchema = {
   "title": "Subjective Global Assessment (SGA)",
   "subtitle": "Nutritional status assessment",
   "sections": [

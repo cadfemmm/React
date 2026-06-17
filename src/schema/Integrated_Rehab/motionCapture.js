@@ -1,114 +1,115 @@
+
 const footScanSchema = {
-    "actions": [
+  "actions": [
+    {
+      "type": "back",
+      "label": "Back"
+    },
+    {
+      "type": "clear",
+      "label": "Clear"
+    },
+    {
+      "type": "save",
+      "label": "Save"
+    }
+  ],
+  "sections": [
+    {
+      "fields": [
         {
-            "type": "back",
-            "label": "Back"
+          "name": "mc_gait_report",
+          "label": "Upload Gait Report",
+          "type": "attach-file"
         },
         {
-            "type": "clear",
-            "label": "Clear"
+          "name": "mc_chief_complaint_obj",
+          "label": "Chief Complaint",
+          "type": "input"
         },
         {
-            "type": "save",
-            "label": "Save"
+          "name": "hpi",
+          "label": "History of Presenting Illness (HPI)",
+          "type": "input"
         }
-    ],
-    "sections": [
-        {
-            "fields": [
-                {
-                    "name": "mc_gait_report",
-                    "label": "Upload Gait Report",
-                    "type": "attach-file"
-                },
-                {
-                    "name": "mc_chief_complaint_obj",
-                    "label": "Chief Complaint",
-                    "type": "input"
-                },
-                {
-                    "name": "hpi",
-                    "label": "History of Presenting Illness (HPI)",
-                    "type": "input"
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
 
 const GaitAnalysisSchema = {
-    "actions": [
+  "actions": [
+    {
+      "type": "back",
+      "label": "Back"
+    },
+    {
+      "type": "clear",
+      "label": "Clear"
+    },
+    {
+      "type": "save",
+      "label": "Save"
+    }
+  ],
+  "sections": [
+    {
+      "fields": [
         {
-            "type": "back",
-            "label": "Back"
+          "name": "mc_gait_report",
+          "label": "Upload Gait Report",
+          "type": "attach-file"
         },
         {
-            "type": "clear",
-            "label": "Clear"
+          "name": "mc_chief_complaint_obj",
+          "label": "Chief Complaint",
+          "type": "input"
         },
         {
-            "type": "save",
-            "label": "Save"
+          "name": "hpi",
+          "label": "History of Presenting Illness (HPI)",
+          "type": "input"
         }
-    ],
-    "sections": [
-        {
-            "fields": [
-                {
-                    "name": "mc_gait_report",
-                    "label": "Upload Gait Report",
-                    "type": "attach-file"
-                },
-                {
-                    "name": "mc_chief_complaint_obj",
-                    "label": "Chief Complaint",
-                    "type": "input"
-                },
-                {
-                    "name": "hpi",
-                    "label": "History of Presenting Illness (HPI)",
-                    "type": "input"
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
 
 
 const Electromyography = {
-    "actions": [
+  "actions": [
+    {
+      "type": "back",
+      "label": "Back"
+    },
+    {
+      "type": "clear",
+      "label": "Clear"
+    },
+    {
+      "type": "save",
+      "label": "Save"
+    }
+  ],
+  "sections": [
+    {
+      "fields": [
         {
-            "type": "back",
-            "label": "Back"
+          "name": "mc_gait_report",
+          "label": "Upload Gait Report",
+          "type": "attach-file"
         },
         {
-            "type": "clear",
-            "label": "Clear"
+          "name": "mc_chief_complaint_obj",
+          "label": "Chief Complaint",
+          "type": "input"
         },
         {
-            "type": "save",
-            "label": "Save"
+          "name": "hpi",
+          "label": "History of Presenting Illness (HPI)",
+          "type": "input"
         }
-    ],
-    "sections": [
-        {
-            "fields": [
-                {
-                    "name": "mc_gait_report",
-                    "label": "Upload Gait Report",
-                    "type": "attach-file"
-                },
-                {
-                    "name": "mc_chief_complaint_obj",
-                    "label": "Chief Complaint",
-                    "type": "input"
-                },
-                {
-                    "name": "hpi",
-                    "label": "History of Presenting Illness (HPI)",
-                    "type": "input"
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
