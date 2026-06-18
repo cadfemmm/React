@@ -9,7 +9,7 @@ import SARAForm from "./SARAForm";
 import BergBalanceScale from "./BBS";
 import FimAssessment from "./Fim";
 import TISAssessment from "./TsiAssessment";
-import ROMForm from "./RomForm";
+import ROMForm from "../../PT/components/ROMForm";
 import IADLAssessment from "./IADL";
 import MoCAAssessment from "./MocA";
 import PatientCard from "../../../shared/cards/PatientCard";
