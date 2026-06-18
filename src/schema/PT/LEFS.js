@@ -762,9 +762,9 @@ const SCHEMA = {
       },
       "showInfoInRow": false
     },
-    {
-      "name": "_lefs_total",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_lefs_total",
+    //   "type": "custom"
+    // }
   ]
 }

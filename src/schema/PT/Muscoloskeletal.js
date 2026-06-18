@@ -198,10 +198,10 @@ const SUBJECTIVE = {
             }
           ]
         },
-        {
-          "name": "_body_chart",
-          "type": "custom"
-        },
+        // {
+        //   "name": "_body_chart",
+        //   "type": "custom"
+        // },
         {
           "name": "msk_functional_limitation",
           "label": "Functional Limitation",

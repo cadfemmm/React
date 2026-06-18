@@ -24,9 +24,9 @@ const SCHEMA = {
         }
       ]
     },
-    {
-      "name": "_ce_interp",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_ce_interp",
+    //   "type": "custom"
+    // }
   ]
 }

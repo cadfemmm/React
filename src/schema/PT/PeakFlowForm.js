@@ -7,9 +7,9 @@ const SCHEMA = {
       "type": "input",
       "placeholder": "e.g. 420"
     },
-    {
-      "name": "_pfm_interp",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_pfm_interp",
+    //   "type": "custom"
+    // }
   ]
 }

@@ -56,10 +56,10 @@ const GRIP_STRENGTH_FORM = {
         }
       ]
     },
-    {
-      "name": "_grip_avg",
-      "type": "custom"
-    },
+    // {
+    //   "name": "_grip_avg",
+    //   "type": "custom"
+    // },
     {
       "type": "subheading",
       "label": "Pinch Strength (kgF)"
@@ -115,10 +115,10 @@ const GRIP_STRENGTH_FORM = {
         }
       ]
     },
-    {
-      "name": "_pinch_avg",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_pinch_avg",
+    //   "type": "custom"
+    // }
   ]
 }
 
@@ -180,9 +180,9 @@ const PINCH_ONLY_FORM = {
         }
       ]
     },
-    {
-      "name": "_pinch_avg",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_pinch_avg",
+    //   "type": "custom"
+    // }
   ]
 }

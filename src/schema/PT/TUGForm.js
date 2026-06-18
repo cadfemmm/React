@@ -36,10 +36,10 @@ const SCHEMA = {
             }
           ]
         },
-        {
-          "type": "custom",
-          "name": "tug_score_display"
-        }
+        // {
+        //   "type": "custom",
+        //   "name": "tug_score_display"
+        // }
       ]
     }
   ]

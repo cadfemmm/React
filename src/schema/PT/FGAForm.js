@@ -241,9 +241,9 @@ const SCHEMA = {
       ],
       "showInfoInRow": false
     },
-    {
-      "name": "_fga_total",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_fga_total",
+    //   "type": "custom"
+    // }
   ]
 }

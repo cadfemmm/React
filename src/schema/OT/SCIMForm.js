@@ -159,10 +159,10 @@ const SCHEMA = {
             }
           ]
         },
-        {
-          "name": "_sc1",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_sc1",
+        //   "type": "custom"
+        // }
       ]
     },
     {
@@ -291,10 +291,10 @@ const SCHEMA = {
             }
           ]
         },
-        {
-          "name": "_sc2",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_sc2",
+        //   "type": "custom"
+        // }
       ]
     },
     {
@@ -367,10 +367,10 @@ const SCHEMA = {
             }
           ]
         },
-        {
-          "name": "_sc3",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_sc3",
+        //   "type": "custom"
+        // }
       ]
     },
     {
@@ -571,15 +571,15 @@ const SCHEMA = {
             }
           ]
         },
-        {
-          "name": "_sc4",
-          "type": "custom"
-        }
+      //   {
+      //     "name": "_sc4",
+      //     "type": "custom"
+      //   }
       ]
     },
-    {
-      "name": "_scim_total",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_scim_total",
+    //   "type": "custom"
+    // }
   ]
 }

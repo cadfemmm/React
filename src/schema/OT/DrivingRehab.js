@@ -23,10 +23,10 @@ const CONSENT = {
             }
           ]
         },
-        {
-          "type": "custom",
-          "name": "_open_saved_consent"
-        },
+        // {
+        //   "type": "custom",
+        //   "name": "_open_saved_consent"
+        // },
         {
           "name": "hep_reviewed",
           "type": "checkbox-group",

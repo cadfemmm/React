@@ -836,10 +836,10 @@ const SCHEMA = {
         }
       ]
     },
-    {
-      "name": "_brat_totals",
-      "type": "custom"
-    },
+    // {
+    //   "name": "_brat_totals",
+    //   "type": "custom"
+    // },
     {
       "type": "accordion",
       "name": "brat_writing",

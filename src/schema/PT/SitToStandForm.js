@@ -61,9 +61,9 @@ const SCHEMA = {
       "label": "Score",
       "type": "score-box"
     },
-    {
-      "name": "_sts_interp",
-      "type": "custom"
-    }
+    // {
+    //   "name": "_sts_interp",
+    //   "type": "custom"
+    // }
   ]
 }
