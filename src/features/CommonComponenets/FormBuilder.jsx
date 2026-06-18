@@ -1020,6 +1020,88 @@ function MultiSelectDropdown({ field, value, onChange, languageConfig }) {
   );
 }
 
+function DevelopmentMilestones({ field, values, onChange }) {
+  const selected = Array.isArray(values.dev_age_group)
+    ? values.dev_age_group
+    : values.dev_age_group
+      ? [values.dev_age_group]
+      : [];
+
+  if (!selected.length) return null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {selected.map((key) => {
+        const ageGroup = field.data?.[key];
+        if (!ageGroup) return null;
+
+        return (
+          <div
+            key={key}
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: 10,
+              overflow: "hidden"
+            }}
+          >
+            <div
+              style={{
+                padding: "8px 14px",
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
+              {ageGroup.label} — Developmental Milestones
+            </div>
+
+            {ageGroup.sections?.[0]?.fields?.map((f) => (
+              <div
+                key={f.name}
+                style={{
+                  padding: "10px 14px",
+                  borderTop: "1px solid #f1f5f9"
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8
+                  }}
+                >
+                  {f.label}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 16
+                  }}
+                >
+                  {f.options.map((opt) => (
+                    <label key={opt.value}>
+                      <input
+                        type="radio"
+                        name={f.name}
+                        checked={values[f.name] === opt.value}
+                        onChange={() =>
+                          onChange(f.name, opt.value)
+                        }
+                      />
+                      {" "}
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function FileUploadModal({ field, value, onChange }) {
   const [showModal, setShowModal] = React.useState(false);
   const inputRef = React.useRef();
@@ -3635,6 +3717,14 @@ if (typeof col === "object" && col.type === "radio") {
           value={value || []}
           onChange={onChange}
           languageConfig={languageConfig}
+        />
+      );
+    case "development-milestones":
+      return (
+        <DevelopmentMilestones
+          field={field}
+          values={values}
+          onChange={onChange}
         />
       );
     case "inline-input":
