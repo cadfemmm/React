@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Low Vision Rehabilitation",
   "sections": [
     {

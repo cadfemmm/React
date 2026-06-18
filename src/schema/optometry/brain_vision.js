@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "enableLanguageToggle": true,
   "title": {
     "en": "Brain Injury Vision Symptoms Survey (BIVSS)",

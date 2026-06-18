@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
    "title":"Depression Anxiety Stress Scale (DASS-21)",
    "enableScoreToggle":true,
    "actions":[

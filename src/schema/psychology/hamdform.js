@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Hamilton Depression Rating Scale - (HAM-D)",
   "fields": [
     {

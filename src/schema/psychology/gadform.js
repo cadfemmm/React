@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Generalized Anxiety Disorder (GAD-7)",
   "enableScoreToggle": true,
   "actions": [

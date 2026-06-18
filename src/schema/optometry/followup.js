@@ -1,4 +1,6 @@
+import { ACTIONS_BUTTON } from "../actions";
 const SUBJECTIVE = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -13,12 +15,42 @@ const SUBJECTIVE = {
           "type": "input"
         },
         {
+          "name": "general_questions",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Patient Vision & Case History",
+              "value": "patient_vision_case"
+            },
+            {
+              "label": "External Eye Symptoms",
+              "value": "external_eye_symptoms"
+            },
+            {
+              "label": "Ocular History & Eye Conditions",
+              "value": "ocular_history"
+            },
+            {
+              "label": "Binocular Vision",
+              "value": "binocular_vision"
+            },
+            {
+              "label": "Questionnaires",
+              "value": "questionnaires"
+            }
+          ]
+        },
+        {
           "type": "subheading",
           "label": "Presenting Symptoms"
         },
         {
           "type": "subheading",
-          "label": "External Eye Symptoms"
+          "label": "External Eye Symptoms",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "external_eye_symptoms"
+          }
         },
         {
           "name": "external_eye_symptoms_checkboxes",
@@ -52,13 +84,19 @@ const SUBJECTIVE = {
               "label": "Others",
               "value": "other_external_eye_symptoms"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "external_eye_symptoms"
+          }
         },
         {
           "type": "input",
           "name": "external_eye_symptoms_specify",
           "label": "Specify",
           "showIf": {
+            "field": "general_questions",
+            "includes": "external_eye_symptoms",
             "and": {
               "field": "external_eye_symptoms_checkboxes",
               "includes": "other_external_eye_symptoms"
@@ -67,7 +105,11 @@ const SUBJECTIVE = {
         },
         {
           "type": "subheading",
-          "label": "Visual Symptoms"
+          "label": "Visual Symptoms",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "external_eye_symptoms"
+          }
         },
         {
           "name": "visual_ocular_symptoms",
@@ -117,13 +159,19 @@ const SUBJECTIVE = {
               "label": "Others",
               "value": "other_visual_ocular_symptoms"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "external_eye_symptoms"
+          }
         },
         {
           "type": "input",
           "name": "refraction_questions_specify",
           "label": "Specify",
           "showIf": {
+            "field": "general_questions",
+            "includes": "external_eye_symptoms",
             "and": {
               "field": "visual_ocular_symptoms",
               "includes": "other_visual_ocular_symptoms"
@@ -132,7 +180,11 @@ const SUBJECTIVE = {
         },
         {
           "type": "subheading",
-          "label": "Ocular Symptoms"
+          "label": "Ocular Symptoms",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
         },
         {
           "name": "ocular_symptoms",
@@ -170,13 +222,19 @@ const SUBJECTIVE = {
               "label": "Others",
               "value": "other_ocular_symptoms"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
         },
         {
           "type": "input",
           "name": "ocular_symptoms_specify",
           "label": "Specify",
           "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history",
             "and": {
               "field": "ocular_symptoms",
               "includes": "other_ocular_symptoms"
@@ -185,12 +243,20 @@ const SUBJECTIVE = {
         },
         {
           "type": "subheading",
-          "label": "Patient Vision & Case History"
+          "label": "Patient Vision & Case History",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "type": "date",
           "name": "last_eye_exam",
-          "label": "Date of last eye examination"
+          "label": "Date of last eye examination",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "type": "radio",
@@ -205,15 +271,23 @@ const SUBJECTIVE = {
               "label": "No",
               "value": "no"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "type": "input",
           "name": "spectacle_prescription",
           "label": "Prescription",
           "showIf": {
-            "field": "spectacles_use",
-            "equals": "yes"
+            "field": "general_questions",
+            "includes": "patient_vision_case",
+            "and": {
+              "field": "spectacles_use",
+              "equals": "yes"
+            }
           }
         },
         {
@@ -229,7 +303,11 @@ const SUBJECTIVE = {
               "label": "No",
               "value": "no"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "type": "row",
@@ -252,7 +330,15 @@ const SUBJECTIVE = {
                 "equals": "yes"
               }
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case",
+            "and": {
+              "field": "contact_lens_use",
+              "equals": "yes"
+            }
+          }
         },
         {
           "type": "row",
@@ -275,38 +361,253 @@ const SUBJECTIVE = {
                 "equals": "yes"
               }
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case",
+            "and": {
+              "field": "contact_lens_use",
+              "equals": "yes"
+            }
+          }
         },
         {
           "type": "input",
           "name": "others_specify",
-          "label": "Specify"
+          "label": "Specify",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "name": "pmh_from_registration",
           "label": "Medical History",
           "type": "input",
-          "readOnly": true
+          "readOnly": true,
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "name": "family_history_from_registration",
           "label": "Family History",
           "type": "input",
-          "readOnly": true
+          "readOnly": true,
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "name": "allergies_from_registration",
           "label": "Allergies",
           "type": "input",
-          "readOnly": true
+          "readOnly": true,
+          "showIf": {
+            "field": "general_questions",
+            "includes": "patient_vision_case"
+          }
         },
         {
           "type": "subheading",
-          "label": "Ocular History & Eye Conditions"
+          "label": "Binocular Vision",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "radio",
+          "name": "bv_onset",
+          "label": "Onset",
+          "options": [
+            {
+              "label": "Sudden",
+              "value": "sudden"
+            },
+            {
+              "label": "Gradual",
+              "value": "gradual"
+            }
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "radio",
+          "name": "bv_frequency",
+          "label": "Frequency",
+          "options": [
+            {
+              "label": "Constant",
+              "value": "constant"
+            },
+            {
+              "label": "Intermittent",
+              "value": "intermittent"
+            },
+            {
+              "label": "Alternating",
+              "value": "alternating"
+            }
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "radio",
+          "name": "bv_was_he_been",
+          "label": "Neurological disease",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "input",
+          "name": "bv_was_he_been_specify",
+          "label": "Neurological – specify",
+          "showIf": {
+            "field": "bv_was_he_been",
+            "equals": "yes"
+          }
+        },
+        {
+          "type": "row",
+          "fields": [
+            {
+              "type": "input",
+              "name": "bv_type_of_birth",
+              "label": "Type of Birth"
+            },
+            {
+              "type": "input",
+              "name": "bv_birth_term",
+              "label": "Birth Term"
+            }
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "input",
+          "name": "bv_previous_treatment",
+          "label": "Previous Treatment",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "input",
+          "name": "bv_subjective_Remarks",
+          "label": "Remarks",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "multi-select-dropdown",
+          "name": "bv_ocular_signs",
+          "label": "Ocular Signs",
+          "options": [
+            {
+              "label": "Squint / turn of eyes",
+              "value": "Squint"
+            },
+            {
+              "label": "Defective eye movement",
+              "value": "Defective eye movement"
+            },
+            {
+              "label": "Nystagmus (wobbling eyes)",
+              "value": "Nystagmus"
+            },
+            {
+              "label": "Visual inattention / neglect",
+              "value": "Visual inattention"
+            },
+            {
+              "label": "Closing one eye",
+              "value": "Closing one eye"
+            },
+            {
+              "label": "Suspected visual problem",
+              "value": "Suspected visual problem"
+            },
+            {
+              "label": "Ptosis (lid drop)",
+              "value": "Ptosis"
+            },
+            {
+              "label": "Abnormal pupils",
+              "value": "Abnormal pupils"
+            },
+            {
+              "label": "Head turn",
+              "value": "Head turn"
+            },
+            {
+              "label": "Family concern",
+              "value": "Family concern"
+            },
+            {
+              "label": "Misjudging distance",
+              "value": "Misjudging distance"
+            },
+            {
+              "label": "Other (Specify)",
+              "value": "Other"
+            }
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "binocular_vision"
+          }
+        },
+        {
+          "type": "input",
+          "name": "bv_ocular_signs_other",
+          "label": "Other – Specify",
+          "showIf": {
+            "field": "bv_ocular_signs",
+            "includes": "Other"
+          }
         },
         {
           "type": "subheading",
-          "label": "Past Ocular History"
+          "label": "Ocular History & Eye Conditions",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Past Ocular History",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
         },
         {
           "name": "past_ocular_history",
@@ -360,13 +661,19 @@ const SUBJECTIVE = {
               "label": "Others",
               "value": "other_eye_disease"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
         },
         {
           "type": "input",
           "name": "past_ocular_history_specify",
           "label": "Specify",
           "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history",
             "and": {
               "field": "past_ocular_history",
               "includes": "other_eye_disease"
@@ -375,7 +682,11 @@ const SUBJECTIVE = {
         },
         {
           "type": "subheading",
-          "label": "Family Ocular History"
+          "label": "Family Ocular History",
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
         },
         {
           "name": "family_ocular_history",
@@ -421,13 +732,19 @@ const SUBJECTIVE = {
               "label": "Others",
               "value": "other_family_eye_disease"
             }
-          ]
+          ],
+          "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history"
+          }
         },
         {
           "type": "input",
           "name": "family_ocular_history_specify",
           "label": "Specify",
           "showIf": {
+            "field": "general_questions",
+            "includes": "ocular_history",
             "and": {
               "field": "family_ocular_history",
               "includes": "other_family_eye_disease"
@@ -435,17 +752,11 @@ const SUBJECTIVE = {
           }
         },
         {
-          "type": "button",
-          "label": "Questionnaires",
-          "name": "show_questionnaires",
-          "toggleValue": true
-        },
-        {
           "type": "assessment-launcher",
           "name": "subjective_questionnaires",
           "showIf": {
-            "field": "show_questionnaires",
-            "equals": true
+            "field": "general_questions",
+            "includes": "questionnaires"
           },
           "options": [
             {
@@ -476,6 +787,7 @@ const SUBJECTIVE = {
 }
 
 const OBJECTIVE = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -1469,6 +1781,7 @@ const OBJECTIVE = {
 }
 
 const ASSESSMENT = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -1550,6 +1863,7 @@ const ASSESSMENT = {
 }
 
 const PLAN = {
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -1600,67 +1914,67 @@ const PLAN = {
           "options": [
             {
               "label": "Refraction",
-              "value": "refraction"
+              "value": "Refraction"
             },
             {
               "label": "Ocular Health Assessment",
-              "value": "ocular_health_ssessment"
+              "value": "Ocular Health Assessment"
             },
             {
               "label": "Ocular Coherence Tomography",
-              "value": "ocular_Coherence_tomography"
+              "value": "Ocular Coherence Tomography"
             },
             {
               "label": "Hess Chart",
-              "value": "hess_chart"
+              "value": "Hess Chart"
             },
             {
               "label": "Visual Evoked Potential / Electroretinogram",
-              "value": "visual_evoked_potential_electroretinogram"
+              "value": "Visual Evoked Potential / Electroretinogram"
             },
             {
               "label": "Right Eye Vision System",
-              "value": "right_eye_vision_system"
+              "value": "Right Eye Vision System"
             },
             {
               "label": "Corneal Topography",
-              "value": "corneal_topography"
+              "value": "Corneal Topography"
             },
             {
               "label": "Ocular Efficiency Test",
-              "value": "ocular_efficiency_test"
+              "value": "Ocular Efficiency Test"
             },
             {
               "label": "DEM Test",
-              "value": "dem_test"
+              "value": "DEM Test"
             },
             {
               "label": "Visual Field Assessment",
-              "value": "visual_field_assessment"
+              "value": "Visual Field Assessment"
             },
             {
               "label": "Microperimeter",
-              "value": "microperimeter"
+              "value": "Microperimeter"
             },
             {
               "label": "Neuroptix Pupillometer",
-              "value": "neuroptix_pupillometer"
+              "value": "Neuroptix Pupillometer"
             },
             {
               "label": "Color Vision Test",
-              "value": "color_vision_test"
+              "value": "Color Vision Test"
             },
             {
               "label": "Binocular Vision Assessment",
-              "value": "binocular_vision_assessment"
+              "value": "Binocular Vision Assessment"
             },
             {
               "label": "Low Vision Assessment",
-              "value": "low_vision_assessment"
+              "value": "Low Vision Assessment"
             },
             {
               "label": "Others",
-              "value": "others"
+              "value": "Others"
             }
           ]
         },

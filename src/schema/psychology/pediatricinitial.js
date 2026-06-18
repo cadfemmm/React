@@ -1,43 +1,12 @@
-const SUBJECTIVE =   {
+import { ACTIONS_BUTTON } from "../actions";
+
+const SUBJECTIVE = {
+  "actions": ACTIONS_BUTTON,
     "fields": [
-      {
-        "name": "chief_complaint_status",
-        "label": "Chief Complaint Status",
-        "type": "radio",
-        "options": [
-          {
-            "label": "No Change",
-            "value": "no_change"
-          },
-          {
-            "label": "Modified",
-            "value": "modified"
-          }
-        ]
-      },
-      {
-        "name": "chief_complaint_readonly",
-        "label": "Chief Complaint",
-        "type": "input",
-        "placeholder": "No previous complaint available",
-        "disabled": true,
-        "showIf": {
-          "field": "chief_complaint_status",
-          "equals": "no_change"
-        }
-      },
       {
         "name": "chief_complaint",
         "label": "Chief Complaint",
-        "required": true,
-        "type": "input",
-        "showIf": {
-          "field": "chief_complaint_status",
-          "oneOf": [
-            "modified",
-            "new_complaint"
-          ]
-        }
+        "type": "input"
       },
       {
         "name": "hpi",
@@ -45,76 +14,661 @@ const SUBJECTIVE =   {
         "type": "input"
       },
       {
-        "name": "interventions_provided",
-        "label": "Interventions Provided",
-        "type": "checkbox-group",
+        "name": "informant",
+        "label": "Informant",
+        "type": "radio",
         "options": [
           {
-            "label": "Cognitive-behavioral therapy",
-            "value": "cbt"
+            "label": "Mother",
+            "value": "mother"
           },
           {
-            "label": "Behavioral therapy",
-            "value": "behavioral_therapy"
+            "label": "Father",
+            "value": "father"
           },
           {
-            "label": "Social skills training",
-            "value": "social_skills_training"
+            "label": "Caregiver",
+            "value": "caregiver"
           },
           {
-            "label": "Interpersonal therapy",
-            "value": "interpersonal_therapy"
+            "label": "Teacher",
+            "value": "teacher"
           },
           {
-            "label": "Play therapy",
-            "value": "play_therapy"
-          },
-          {
-            "label": "Family-based intervention",
-            "value": "family_based_intervention"
-          },
-          {
-            "label": "Expressive art therapy",
-            "value": "expressive_art_therapy"
-          },
-          {
-            "label": "Psychoeducation",
-            "value": "psychoeducation"
-          },
-          {
-            "label": "Parent management training",
-            "value": "parent_management_training"
-          },
-          {
-            "label": "Parent-child interaction therapy",
-            "value": "parent_child_interaction_therapy"
-          },
-          {
-            "label": "Others",
-            "value": "others"
+            "label": "Other",
+            "value": "other"
           }
         ]
       },
       {
-        "name": "interventions_other",
-        "label": "Others (Specify)",
+        "name": "informant_other",
+        "label": "Specify Other",
         "type": "input",
-        "placeholder": "Enter other interventions...",
+        "placeholder": "Enter informant",
         "showIf": {
-          "field": "interventions_provided",
-          "includes": "others"
+          "field": "informant",
+          "equals": "other"
         }
       },
       {
-        "name": "session_summary",
-        "label": "Session Summary",
+        "type": "subheading",
+        "label": "Developmental history   CORE PEDIATRIC COMPONENT"
+      },
+      {
+        "type": "custom",
+        "name": "dev_age_group"
+      },
+      {
+        "type": "custom"
+      },
+      {
+        "type": "subheading",
+        "label": "Birth History"
+      },
+      {
+        "name": "antenatal_complications",
+        "label": "Antenatal complications",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "antenatal_details",
+        "label": "Antenatal complications – details",
         "type": "input",
-        "placeholder": "Enter summary of the session..."
+        "showIf": {
+          "field": "antenatal_complications",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "birth_type_value",
+        "label": "Birth type",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Normal",
+            "value": "normal"
+          },
+          {
+            "label": "C-section",
+            "value": "c_section"
+          },
+          {
+            "label": "Assisted",
+            "value": "assisted"
+          }
+        ]
+      },
+      {
+        "name": "birth_info_available",
+        "label": "Birth/NICU information?",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "nicu_stay",
+        "label": "NICU stay",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ],
+        "showIf": {
+          "field": "birth_info_available",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "nicu_duration",
+        "label": "NICU stay – duration",
+        "type": "input",
+        "placeholder": "e.g. 5 days",
+        "showIf": {
+          "field": "nicu_stay",
+          "equals": "yes",
+          "and": {
+            "field": "birth_info_available",
+            "equals": "yes"
+          }
+        }
+      },
+      {
+        "name": "birth_weight",
+        "label": "Birth weight",
+        "type": "input",
+        "placeholder": "e.g. 2.5 kg"
+      },
+      {
+        "name": "neonatal_complications",
+        "label": "Neonatal complications",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "neonatal_details",
+        "label": "Neonatal complications – details",
+        "type": "input",
+        "showIf": {
+          "field": "neonatal_complications",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "trauma_ace",
+        "label": "Trauma & ACE screening",
+        "type": "input",
+        "placeholder": "Document trauma history, adverse childhood experiences, caregiver report, and relevant details"
+      },
+      {
+        "type": "subheading",
+        "label": "Medical, Psychiatric & Family History"
+      },
+      {
+        "name": "past_illness",
+        "label": "Past illnesses / hospitalizations",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "past_illness_details",
+        "label": "Past illnesses – details",
+        "type": "input",
+        "showIf": {
+          "field": "past_illness",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "current_medications",
+        "label": "Current medications (auto-populated)",
+        "type": "input",
+        "readOnly": true
+      },
+      {
+        "name": "previous_therapy",
+        "label": "Previous therapy",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "previous_therapy_details",
+        "label": "Previous therapy – type, duration, response",
+        "type": "input",
+        "showIf": {
+          "field": "previous_therapy",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "family_psych_history",
+        "label": "Psychiatric disorders in family",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "family_psych_details",
+        "label": "Family psychiatric history – details",
+        "type": "input",
+        "showIf": {
+          "field": "family_psych_history",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "genetic_conditions",
+        "label": "Genetic conditions",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "genetic_conditions_details",
+        "label": "Genetic conditions – details",
+        "type": "input",
+        "showIf": {
+          "field": "genetic_conditions",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "family_dynamics",
+        "label": "Family dynamics (parenting style, conflict, SES)",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Stable",
+            "value": "stable"
+          },
+          {
+            "label": "Mild concerns",
+            "value": "mild"
+          },
+          {
+            "label": "Significant concerns",
+            "value": "significant"
+          }
+        ]
+      },
+      {
+        "name": "family_dynamics_details",
+        "label": "Family dynamics – details",
+        "type": "input",
+        "showIf": {
+          "field": "family_dynamics",
+          "equals": "significant"
+        }
+      },
+      {
+        "type": "subheading",
+        "label": "Education History"
+      },
+      {
+        "name": "school_type",
+        "label": "School type / grade",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Mainstream",
+            "value": "mainstream"
+          },
+          {
+            "label": "Special education",
+            "value": "special_ed"
+          },
+          {
+            "label": "Home-schooled",
+            "value": "home_schooled"
+          },
+          {
+            "label": "Not yet in school",
+            "value": "not_in_school"
+          }
+        ]
+      },
+      {
+        "name": "academic_performance",
+        "label": "Academic performance",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Above average",
+            "value": "above_average"
+          },
+          {
+            "label": "Average",
+            "value": "average"
+          },
+          {
+            "label": "Below average",
+            "value": "below_average"
+          },
+          {
+            "label": "Not applicable",
+            "value": "na"
+          }
+        ]
+      },
+      {
+        "name": "teacher_complaints",
+        "label": "Teacher complaints / IEP in place",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "teacher_complaints_details",
+        "label": "Teacher complaints – details",
+        "type": "input",
+        "showIf": {
+          "field": "teacher_complaints",
+          "equals": "yes"
+        }
+      },
+      {
+        "name": "learning_difficulties",
+        "label": "Learning difficulties identified",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Yes",
+            "value": "yes"
+          },
+          {
+            "label": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "name": "learning_difficulties_details",
+        "label": "Learning difficulties – details",
+        "type": "input",
+        "showIf": {
+          "field": "learning_difficulties",
+          "equals": "yes"
+        }
+      },
+      {
+        "type": "subheading",
+        "label": "Behavioral Concerns — Caregiver Report"
+      },
+      {
+        "name": "hyperactivity",
+        "label": "Hyperactivity / Impulsivity",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "aggression",
+        "label": "Aggression (toward self / others)",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "social_withdrawal",
+        "label": "Social Withdrawal",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "emotional_dysregulation",
+        "label": "Emotional Dysregulation",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "sleep_difficulties",
+        "label": "Sleep Difficulties",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "eating_difficulties",
+        "label": "Eating Difficulties",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "behavioral_concerns_description",
+        "label": "Description",
+        "type": "input",
+        "showIf": {
+          "or": [
+            {
+              "field": "hyperactivity",
+              "equals": "present"
+            },
+            {
+              "field": "aggression",
+              "equals": "present"
+            },
+            {
+              "field": "social_withdrawal",
+              "equals": "present"
+            },
+            {
+              "field": "emotional_dysregulation",
+              "equals": "present"
+            },
+            {
+              "field": "sleep_difficulties",
+              "equals": "present"
+            },
+            {
+              "field": "eating_difficulties",
+              "equals": "present"
+            }
+          ]
+        }
+      },
+      {
+        "name": "screen_time",
+        "label": "Screen time (hours/day)",
+        "type": "radio",
+        "options": [
+          {
+            "label": "< 1 hr",
+            "value": "less_1"
+          },
+          {
+            "label": "1–2 hrs",
+            "value": "one_two"
+          },
+          {
+            "label": "2–4 hrs",
+            "value": "two_four"
+          },
+          {
+            "label": "> 4 hrs",
+            "value": "more_4"
+          }
+        ]
+      },
+      {
+        "type": "subheading",
+        "label": "Child Self-Report (Age ≥ 6, adapt language)"
+      },
+      {
+        "name": "child_mood",
+        "label": "Mood — how do you feel most days?",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Happy",
+            "value": "happy"
+          },
+          {
+            "label": "Sad",
+            "value": "sad"
+          },
+          {
+            "label": "Worried",
+            "value": "worried"
+          },
+          {
+            "label": "Angry",
+            "value": "angry"
+          },
+          {
+            "label": "Mixed",
+            "value": "mixed"
+          }
+        ]
+      },
+      {
+        "name": "child_fears",
+        "label": "Fears / worries",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Present",
+            "value": "present"
+          },
+          {
+            "label": "Absent",
+            "value": "absent"
+          }
+        ]
+      },
+      {
+        "name": "child_fears_details",
+        "label": "Fears / worries – describe",
+        "type": "input",
+        "showIf": {
+          "field": "child_fears",
+          "equals": "present"
+        }
+      },
+      {
+        "name": "child_friendships",
+        "label": "Friendships / peer relationships",
+        "type": "radio",
+        "options": [
+          {
+            "label": "Good",
+            "value": "good"
+          },
+          {
+            "label": "Fair",
+            "value": "fair"
+          },
+          {
+            "label": "Poor",
+            "value": "poor"
+          },
+          {
+            "label": "Isolated",
+            "value": "isolated"
+          }
+        ]
+      },
+      {
+        "name": "child_enjoyment",
+        "label": "What do you enjoy?",
+        "type": "input",
+        "placeholder": "e.g. drawing, football, games"
+      },
+      {
+        "name": "additional_comments",
+        "label": "Additional comments",
+        "type": "input",
+        "placeholder": "Enter any overall observations, notes, or summary..."
       }
     ]
   }
 
   const OBJECTIVE =   {
+    "actions": ACTIONS_BUTTON,
     "fields": [
       {
         "type": "subheading",
@@ -1358,16 +1912,75 @@ const SUBJECTIVE =   {
   }
 
   const ASSESSMENT =   {
+    "actions": ACTIONS_BUTTON,
     "fields": [
       {
-        "name": "clinicalImpression",
+        "type": "subheading",
+        "label": "Clinical Impression"
+      },
+      {
+        "name": "provisional_diagnosis",
         "label": "Clinical Impression",
-        "type": "input"
+        "type": "input",
+        "placeholder": "Document 2–3 possibilities with reasoning — do not leave blank"
+      },
+      {
+        "name": "problem_listing",
+        "label": "Problem Listing",
+        "type": "input",
+        "placeholder": "Document 2–3 possibilities with reasoning — do not leave blank"
+      },
+      {
+        "type": "custom",
+        "label": "Functional impact  ⚠ CRITICAL IN PAEDS"
+      },
+      {
+        "name": "risk_assessment",
+        "label": "Risk assessment",
+        "type": "checkbox-group",
+        "options": [
+          {
+            "label": "Self-harm / suicidal ideation (rare — assess carefully)",
+            "value": "self_harm"
+          },
+          {
+            "label": "Aggression / harm to others",
+            "value": "aggression"
+          },
+          {
+            "label": "Neglect / abuse concerns",
+            "value": "neglect_abuse"
+          }
+        ]
+      },
+      {
+        "name": "strengths",
+        "label": "Strengths & protective factors",
+        "type": "checkbox-group",
+        "options": [
+          {
+            "label": "Family support",
+            "value": "family_support"
+          },
+          {
+            "label": "School support",
+            "value": "school_support"
+          },
+          {
+            "label": "Cognitive strengths",
+            "value": "cognitive_strengths"
+          },
+          {
+            "label": "Child's interests / engagement",
+            "value": "child_interests"
+          }
+        ]
       }
     ]
   }
 
   const PLAN =   {
+    "actions": ACTIONS_BUTTON,
     "fields": [
       {
         "type": "subheading",
@@ -1386,9 +1999,130 @@ const SUBJECTIVE =   {
         "name": "long_term_goals"
       },
       {
-        "type": "input",
+        "name": "intervention",
         "label": "Intervention",
-        "name": "intervention"
+        "type": "checkbox-group",
+        "options": [
+          {
+            "label": "Cognitive-behavioral therapy",
+            "value": "cbt"
+          },
+          {
+            "label": "Behavioral therapy",
+            "value": "behavioral_therapy"
+          },
+          {
+            "label": "Social skills training",
+            "value": "social_skills_training"
+          },
+          {
+            "label": "Interpersonal therapy",
+            "value": "interpersonal_therapy"
+          },
+          {
+            "label": "Play therapy",
+            "value": "play_therapy"
+          },
+          {
+            "label": "Family-based intervention",
+            "value": "family_based_intervention"
+          },
+          {
+            "label": "Expressive art therapy",
+            "value": "expressive_art_therapy"
+          },
+          {
+            "label": "Psychoeducation",
+            "value": "psychoeducation"
+          },
+          {
+            "label": "Parent management training",
+            "value": "parent_management_training"
+          },
+          {
+            "label": "Parent-child interaction therapy",
+            "value": "parent_child_interaction_therapy"
+          },
+          {
+            "label": "Others",
+            "value": "others"
+          }
+        ]
+      },
+      {
+        "name": "intervention_other",
+        "label": "Specify Other Intervention",
+        "type": "input",
+        "placeholder": "Enter intervention...",
+        "showIf": {
+          "field": "intervention",
+          "includes": "others"
+        }
+      },
+      {
+        "name": "bt_sessions_per_week",
+        "label": "Behavioural therapy — sessions/week",
+        "type": "input",
+        "placeholder": "e.g. 2",
+        "showIf": {
+          "field": "intervention",
+          "includes": "behavioral_therapy"
+        }
+      },
+      {
+        "name": "bt_duration_weeks",
+        "label": "Behavioural therapy — duration (weeks)",
+        "type": "input",
+        "placeholder": "e.g. 12",
+        "showIf": {
+          "field": "intervention",
+          "includes": "behavioral_therapy"
+        }
+      },
+      {
+        "name": "parent_training_type",
+        "label": "Parent training (type)",
+        "type": "input",
+        "placeholder": "Specify",
+        "showIf": {
+          "field": "intervention",
+          "includes": "parent_training"
+        }
+      },
+      {
+        "name": "school_recommendations",
+        "label": "School recommendation",
+        "type": "checkbox-group",
+        "options": [
+          {
+            "label": "IEP / accommodation letter",
+            "value": "iep"
+          },
+          {
+            "label": "Teacher consultation",
+            "value": "teacher_consultation"
+          },
+          {
+            "label": "Resource room / shadow teacher",
+            "value": "resource_room"
+          }
+        ]
+      },
+      {
+        "type": "row",
+        "label": "Follow-up plan",
+        "fields": [
+          {
+            "name": "next_appointment",
+            "label": "Next appointment",
+            "type": "date"
+          },
+          {
+            "name": "review_date",
+            "label": "Review date",
+            "type": "date"
+          }
+        ]
       }
     ]
   }

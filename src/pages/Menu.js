@@ -47,7 +47,6 @@ import { sx } from "../components/RowCard";
 import InvestigationsChecklist from "../components/InvestigationsChecklist";
 import BookAppointmentTab from "../components/BookAppointmentTab";
 import GasGoalsTab from "../components/GasGoalsTab";
-import PsychologyPatients from "../features/Psychology/components/PsychologyPatients";
 import SpeechPatients from "../features/SpeechandLanguage/SpeechandlanguagePatients";
 import GlobalVitalsOverlay from "../components/GlobalVitalsOverlay";
 import SpeechAndLanguage from "../features/SpeechandLanguage/SpeechandlanguageDashboard"

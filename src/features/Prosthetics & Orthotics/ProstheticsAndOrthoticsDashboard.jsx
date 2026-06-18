@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import { useHistory } from "react-router-dom";
-// import OptometryPatients from "../Optometry/OptometryPatients";
 import ProstheticsAndOrthoticsPatients from "./ProstheticsAndOrthoticsPatients";
 import { Line } from "react-chartjs-2";
 import {

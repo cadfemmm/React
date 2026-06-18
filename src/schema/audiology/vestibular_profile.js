@@ -5983,6 +5983,3 @@ export const mainSchema = {
     }
   ]
 }
-
-
-

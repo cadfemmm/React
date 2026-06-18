@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Hamilton Anxiety Rating Scale (HAM-A)",
   "enableScoreToggle": true,
   "actions": [

@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Perceived Stress Scale (PSS)",
   "enableScoreToggle": true,
   "actions": [
