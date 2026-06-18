@@ -54,13 +54,13 @@ const SUBJECTIVE = {
         "type": "subheading",
         "label": "Developmental history   CORE PEDIATRIC COMPONENT"
       },
-      {
-        "type": "custom",
-        "name": "dev_age_group"
-      },
-      {
-        "type": "custom"
-      },
+      // {
+      //   "type": "custom",
+      //   "name": "dev_age_group"
+      // },
+      // {
+      //   "type": "custom"
+      // },
       {
         "type": "subheading",
         "label": "Birth History"
@@ -1930,10 +1930,10 @@ const SUBJECTIVE = {
         "type": "input",
         "placeholder": "Document 2–3 possibilities with reasoning — do not leave blank"
       },
-      {
-        "type": "custom",
-        "label": "Functional impact  ⚠ CRITICAL IN PAEDS"
-      },
+      // {
+      //   "type": "custom",
+      //   "label": "Functional impact  ⚠ CRITICAL IN PAEDS"
+      // },
       {
         "name": "risk_assessment",
         "label": "Risk assessment",
