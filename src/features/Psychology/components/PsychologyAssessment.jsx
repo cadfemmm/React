@@ -17,6 +17,7 @@ import PatientCard from "../../../shared/cards/PatientCard";
 import PediatricPsychologyProgress from "./PediatricPsychologyProgress";
 import PediatricPsychologyAssessment from "./PediatricPsychologyAssessment";
 import PsychologyProgress from "./PsychologyProgress";
+import AssessmentLoader from "../../../assessment";
 
 // Schema
 import PSYCHO_SCHEMA from "../../../schema/psychology/index"
@@ -172,10 +173,15 @@ export const PSYCHOLOGY_ASSESSMENT_REGISTRY = {
 
 /* ===================== OPTIONS ===================== */
 
-const YES_NO = [
-  { label: "Yes", value: "yes" },
-  { label: "No", value: "no" },
-];
+const ADULT_AGE_THRESHOLD = 20;
+
+function getPatientAge(patient) {
+  return Number(patient?.age ?? 99);
+}
+
+function isPediatricPatient(patient) {
+  return getPatientAge(patient) < ADULT_AGE_THRESHOLD;
+}
 
 /* ===================== COMPONENT ===================== */
 
@@ -248,10 +254,7 @@ export default function PsychologyAssessment({
   }, [storageKey]);
 
   if (mode === "followup") {
-    const age = Number(patient?.age || 0);
-
-    // Age below 20 → Pediatric Progress
-    if (age < 20) {
+    if (isPediatricPatient(patient)) {
       return (
         <PediatricPsychologyAssessment
           patient={patient}
@@ -272,10 +275,7 @@ export default function PsychologyAssessment({
   }
 
   if (mode === "progress") {
-    const age = Number(patient?.age || 0);
-
-    // Age below 20 → Pediatric Progress
-    if (age < 20) {
+    if (isPediatricPatient(patient)) {
       return (
         <PediatricPsychologyProgress
           patient={patient}
@@ -392,12 +392,6 @@ export default function PsychologyAssessment({
     assessment: PSYCHO_SCHEMA.ASSESSMENT,
     plan: PSYCHO_SCHEMA.PLAN,
   };
-
-  const numAge = Number(patient?.age || 0);
-
-  const today = new Date();
-
-  const formatDate = (d) => (d ? new Date(d).toLocaleDateString() : "-");
 
   function PatientInformationBlock({
     patient,
@@ -531,7 +525,7 @@ export default function PsychologyAssessment({
       </div>
     );
   }
-  if (numAge < 20) {
+  if (isPediatricPatient(patient)) {
     return (
       <PediatricPsychologyAssessment
         patient={patient}
