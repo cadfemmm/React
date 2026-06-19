@@ -9,6 +9,32 @@ function extractPatientArray(data) {
   return [];
 }
 
+function calculateAgeFromDob(dob) {
+  if (!dob) return null;
+  const birthDate = new Date(dob);
+  if (Number.isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
+}
+
+function resolvePatientAge(patient) {
+  const parsed = Number(patient.age ?? patient.patient_age);
+  if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+
+  const dob =
+    patient.dob ||
+    patient.date_of_birth ||
+    patient.birth_date ||
+    patient.dateOfBirth;
+  return calculateAgeFromDob(dob);
+}
+
 function normalizePatientRecord(patient) {
   if (!patient || typeof patient !== "object") return patient;
 
@@ -27,6 +53,13 @@ function normalizePatientRecord(patient) {
     patient.icd ||
     patient.patient_id ||
     "";
+  const dob =
+    patient.dob ||
+    patient.date_of_birth ||
+    patient.birth_date ||
+    patient.dateOfBirth ||
+    null;
+  const age = resolvePatientAge({ ...patient, dob });
 
   return {
     ...patient,
@@ -34,6 +67,10 @@ function normalizePatientRecord(patient) {
     name: name || patient.name,
     patient_name: patient.patient_name || name,
     mrn: mrn || patient.mrn,
+    dob: dob || patient.dob,
+    age: age ?? patient.age,
+    gender: patient.gender || patient.sex || patient.gender,
+    sex: patient.sex || patient.gender || patient.sex,
   };
 }
 
