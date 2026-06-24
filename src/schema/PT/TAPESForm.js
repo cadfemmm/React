@@ -435,10 +435,10 @@ const SCHEMA = {
           ],
           "showInfoInRow": false
         },
-        {
-          "name": "_tp_score",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_tp_score",
+        //   "type": "custom"
+        // }
       ]
     },
     {
@@ -691,10 +691,10 @@ const SCHEMA = {
           ],
           "showInfoInRow": false
         },
-        {
-          "name": "_ta_score",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_ta_score",
+        //   "type": "custom"
+        // }
       ]
     },
     {
@@ -867,10 +867,10 @@ const SCHEMA = {
           ],
           "showInfoInRow": false
         },
-        {
-          "name": "_ts_score",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_ts_score",
+        //   "type": "custom"
+        // }
       ]
     },
     {
@@ -1327,10 +1327,10 @@ const SCHEMA = {
             }
           ]
         },
-        {
-          "name": "_p2_date",
-          "type": "custom"
-        }
+        // {
+        //   "name": "_p2_date",
+        //   "type": "custom"
+        // }
       ]
     }
   ]

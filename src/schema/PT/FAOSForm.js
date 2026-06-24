@@ -217,10 +217,10 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "faos_sym_score"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "faos_sym_score"
+            // }
           ]
         },
         {
@@ -485,10 +485,10 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "faos_pain_score"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "faos_pain_score"
+            // }
           ]
         },
         {
@@ -977,10 +977,10 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "faos_adl_score"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "faos_adl_score"
+            // }
           ]
         },
         {
@@ -1133,10 +1133,10 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "faos_sp_score"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "faos_sp_score"
+            // }
           ]
         },
         {
@@ -1257,16 +1257,16 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "faos_qol_score"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "faos_qol_score"
+            // }
           ]
         },
-        {
-          "type": "custom",
-          "name": "faos_total"
-        }
+        // {
+        //   "type": "custom",
+        //   "name": "faos_total"
+        // }
       ]
     }
   ]

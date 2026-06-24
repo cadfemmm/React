@@ -11,7 +11,7 @@ import SARAForm from "./SARAForm";
 import BergBalanceScale from "./BBS";
 import UpperExtremityAssessment from "./Flug";
 import TISAssessment from "./TsiAssessment";
-import ROMForm from "./RomForm";
+import ROMForm from "../../PT/components/ROMForm";
 import FIMAssessment from "./Fim";
 import ARATAssessment from "./Arat";
 import JHFTAssessment from "./Jfht";

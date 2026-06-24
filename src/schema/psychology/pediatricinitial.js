@@ -2,7 +2,7 @@ import { ACTIONS_BUTTON } from "../actions";
 
 const SUBJECTIVE = {
   "actions": ACTIONS_BUTTON,
-    "fields": [
+  "fields": [
       {
         "name": "chief_complaint",
         "label": "Chief Complaint",
@@ -54,584 +54,823 @@ const SUBJECTIVE = {
         "type": "subheading",
         "label": "Developmental history   CORE PEDIATRIC COMPONENT"
       },
-        {
-  type: "multi-select-dropdown",
-  name: "dev_age_group",
-  label: "Developmental Age Group",
-  options: [
-    {
-      label: "2–5 Months",
-      value: "2-5_months"
-    },
-    {
-      label: "6–9 Months",
-      value: "6-9_months"
-    },
-    {
-      label: "12–18 Months",
-      value: "12-18_months"
-    },
-    {
-      label: "2 Years",
-      value: "2_years"
-    },
-    {
-      label: "3 Years",
-      value: "3_years"
-    },
-    {
-      label: "4 Years",
-      value: "4_years"
-    },
-    {
-      label: "5 Years",
-      value: "5_years"
-    }
-  ]
-},
-  {
-        type: "development-milestones",
-        dependsOn: "dev_age_group",
-        data: {
-  "2-5_months": {
-     label: "2–5 Months",
-    sections: [
       {
-        fields: [
+        "type": "multi-select-dropdown",
+        "name": "dev_age_group",
+        "label": "Developmental Age Group",
+        "options": [
           {
-            name: "milestone_2_5m_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              { label: "Head when held", value: "head_when_held" },
-              { label: "Sit with support", value: "sit_with_support" },
-              { label: "Arms out", value: "arms_out" },
-            ],
+            "label": "2–5 Months",
+            "value": "2-5_months"
           },
           {
-            name: "milestone_2_5m_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
-              { label: "Ability to open hand", value: "open_hand" },
-              { label: "Batting objects", value: "batting_objects" },
-              { label: "Palmar grasp", value: "palmar_grasp" },
-              {
-                label: "Reaching and obtaining objects",
-                value: "reaching_objects",
-              },
-            ],
+            "label": "6–9 Months",
+            "value": "6-9_months"
           },
           {
-            name: "milestone_2_5m_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
-              { label: "Turns to voice / sound", value: "turns_to_voice" },
-              { label: "Cooing", value: "cooing" },
-              { label: "Laughing", value: "laughing" },
-              { label: "Squealing", value: "squealing" },
-            ],
+            "label": "12–18 Months",
+            "value": "12-18_months"
           },
           {
-            name: "milestone_2_5m_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              { label: "Prefers usual caregiver", value: "prefers_caregiver" },
-              {
-                label: "Responds to new objects / situation",
-                value: "responds_new_objects",
-              },
-              { label: "Eyes can follow object", value: "eyes_follow" },
-              { label: "Anticipating routine", value: "anticipating_routine" },
-              {
-                label: "Explores object with senses (eyes, hands, mouth)",
-                value: "explores_senses",
-              },
-            ],
+            "label": "2 Years",
+            "value": "2_years"
           },
           {
-            name: "milestone_2_5m_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
-              {
-                label: "Develop child-parent attachment",
-                value: "parent_attachment",
-              },
-              { label: "Social smile", value: "social_smile" },
-              { label: "Taking turns in conversations", value: "turn_taking" },
-              { label: "Exploring parent's face", value: "exploring_face" },
-            ],
+            "label": "3 Years",
+            "value": "3_years"
           },
-        ],
+          {
+            "label": "4 Years",
+            "value": "4_years"
+          },
+          {
+            "label": "5 Years",
+            "value": "5_years"
+          }
+        ]
       },
-    ],
-  },
-  "6-9_months": {
-    label: "6–9 Months",
-    sections: [
       {
-        fields: [
-          {
-            name: "milestone_6_9m_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              { label: "Sits tripod", value: "sits_tripod" },
-              { label: "Creeps", value: "creeps" },
-              { label: "Pulls to stand", value: "pulls_to_stand" },
-              { label: "Sits well", value: "sits_well" },
-              { label: "Postural reflex", value: "postural_reflex" },
-            ],
-          },
-          {
-            name: "milestone_6_9m_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
+        "type": "development-milestones",
+        "dependsOn": "dev_age_group",
+        "data": {
+          "2-5_months": {
+            "label": "2–5 Months",
+            "sections": [
               {
-                label: "Raking and / or inferior pincer grasp",
-                value: "raking_grasp",
-              },
-              { label: "Pokes at objects", value: "pokes_objects" },
-              {
-                label: "Transferring items from hand to hand",
-                value: "transfers_hand",
-              },
-            ],
+                "fields": [
+                  {
+                    "name": "milestone_2_5m_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Head when held",
+                        "value": "head_when_held"
+                      },
+                      {
+                        "label": "Sit with support",
+                        "value": "sit_with_support"
+                      },
+                      {
+                        "label": "Arms out",
+                        "value": "arms_out"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2_5m_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Ability to open hand",
+                        "value": "open_hand"
+                      },
+                      {
+                        "label": "Batting objects",
+                        "value": "batting_objects"
+                      },
+                      {
+                        "label": "Palmar grasp",
+                        "value": "palmar_grasp"
+                      },
+                      {
+                        "label": "Reaching and obtaining objects",
+                        "value": "reaching_objects"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2_5m_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Turns to voice / sound",
+                        "value": "turns_to_voice"
+                      },
+                      {
+                        "label": "Cooing",
+                        "value": "cooing"
+                      },
+                      {
+                        "label": "Laughing",
+                        "value": "laughing"
+                      },
+                      {
+                        "label": "Squealing",
+                        "value": "squealing"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2_5m_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Prefers usual caregiver",
+                        "value": "prefers_caregiver"
+                      },
+                      {
+                        "label": "Responds to new objects / situation",
+                        "value": "responds_new_objects"
+                      },
+                      {
+                        "label": "Eyes can follow object",
+                        "value": "eyes_follow"
+                      },
+                      {
+                        "label": "Anticipating routine",
+                        "value": "anticipating_routine"
+                      },
+                      {
+                        "label": "Explores object with senses (eyes, hands, mouth)",
+                        "value": "explores_senses"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2_5m_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Develop child-parent attachment",
+                        "value": "parent_attachment"
+                      },
+                      {
+                        "label": "Social smile",
+                        "value": "social_smile"
+                      },
+                      {
+                        "label": "Taking turns in conversations",
+                        "value": "turn_taking"
+                      },
+                      {
+                        "label": "Exploring parent's face",
+                        "value": "exploring_face"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
-          {
-            name: "milestone_6_9m_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
+          "6-9_months": {
+            "label": "6–9 Months",
+            "sections": [
               {
-                label: "Specific babbling (mama, dada)",
-                value: "specific_babbling",
-              },
-              { label: "Gestures (bye-bye)", value: "gestures" },
-              { label: "Nonspecific babbling", value: "nonspecific_babbling" },
-            ],
+                "fields": [
+                  {
+                    "name": "milestone_6_9m_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Sits tripod",
+                        "value": "sits_tripod"
+                      },
+                      {
+                        "label": "Creeps",
+                        "value": "creeps"
+                      },
+                      {
+                        "label": "Pulls to stand",
+                        "value": "pulls_to_stand"
+                      },
+                      {
+                        "label": "Sits well",
+                        "value": "sits_well"
+                      },
+                      {
+                        "label": "Postural reflex",
+                        "value": "postural_reflex"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_6_9m_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Raking and / or inferior pincer grasp",
+                        "value": "raking_grasp"
+                      },
+                      {
+                        "label": "Pokes at objects",
+                        "value": "pokes_objects"
+                      },
+                      {
+                        "label": "Transferring items from hand to hand",
+                        "value": "transfers_hand"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_6_9m_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Specific babbling (mama, dada)",
+                        "value": "specific_babbling"
+                      },
+                      {
+                        "label": "Gestures (bye-bye)",
+                        "value": "gestures"
+                      },
+                      {
+                        "label": "Nonspecific babbling",
+                        "value": "nonspecific_babbling"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_6_9m_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Object permanence",
+                        "value": "object_permanence"
+                      },
+                      {
+                        "label": "Searches for dropped / partially hidden object",
+                        "value": "searches_hidden"
+                      },
+                      {
+                        "label": "Worry to stranger",
+                        "value": "stranger_anxiety"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_6_9m_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Showing separation anxiety",
+                        "value": "separation_anxiety"
+                      },
+                      {
+                        "label": "Expressing basic emotions",
+                        "value": "basic_emotions"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
-          {
-            name: "milestone_6_9m_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              { label: "Object permanence", value: "object_permanence" },
+          "12-18_months": {
+            "label": "12–18 Months",
+            "sections": [
               {
-                label: "Searches for dropped / partially hidden object",
-                value: "searches_hidden",
-              },
-              { label: "Worry to stranger", value: "stranger_anxiety" },
-            ],
+                "fields": [
+                  {
+                    "name": "milestone_12_18m_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Starts to walk",
+                        "value": "starts_walk"
+                      },
+                      {
+                        "label": "Starts to run",
+                        "value": "starts_run"
+                      },
+                      {
+                        "label": "Stops and stands up",
+                        "value": "stops_stands"
+                      },
+                      {
+                        "label": "Run",
+                        "value": "run"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_12_18m_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Fine pincer",
+                        "value": "fine_pincer"
+                      },
+                      {
+                        "label": "Releasing object voluntarily",
+                        "value": "releasing_object"
+                      },
+                      {
+                        "label": "Scribbles",
+                        "value": "scribbles"
+                      },
+                      {
+                        "label": "Throwing object",
+                        "value": "throwing"
+                      },
+                      {
+                        "label": "Starts to feed self (finger, spoon)",
+                        "value": "self_feed"
+                      },
+                      {
+                        "label": "Drink from open-top cup",
+                        "value": "open_cup"
+                      },
+                      {
+                        "label": "Carrying toys while walking",
+                        "value": "carry_toys"
+                      },
+                      {
+                        "label": "Removing clothes",
+                        "value": "removing_clothes"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_12_18m_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Additional new meaning words",
+                        "value": "new_words"
+                      },
+                      {
+                        "label": "Points to body parts",
+                        "value": "points_body"
+                      },
+                      {
+                        "label": "Labelling common objects",
+                        "value": "labelling_objects"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_12_18m_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Able to try or experiment things",
+                        "value": "experimenting"
+                      },
+                      {
+                        "label": "Imitating",
+                        "value": "imitating"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_12_18m_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Parallel play",
+                        "value": "parallel_play"
+                      },
+                      {
+                        "label": "Points at desired object",
+                        "value": "points_desired"
+                      },
+                      {
+                        "label": "Explore from secure base",
+                        "value": "secure_base"
+                      },
+                      {
+                        "label": "Shared attention",
+                        "value": "shared_attention"
+                      },
+                      {
+                        "label": "Brings toys to parent",
+                        "value": "brings_toys"
+                      },
+                      {
+                        "label": "Increased independence",
+                        "value": "independence"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
-          {
-            name: "milestone_6_9m_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
+          "2_years": {
+            "label": "2 Years",
+            "sections": [
               {
-                label: "Showing separation anxiety",
-                value: "separation_anxiety",
-              },
-              { label: "Expressing basic emotions", value: "basic_emotions" },
-            ],
+                "fields": [
+                  {
+                    "name": "milestone_2y_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Jumps on two feet",
+                        "value": "jumps_two_feet"
+                      },
+                      {
+                        "label": "Starts to climb stairs up and down",
+                        "value": "climbs_stairs"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2y_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Establishment of apparent handedness",
+                        "value": "handedness"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2y_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "2-word phrases",
+                        "value": "two_word_phrases"
+                      },
+                      {
+                        "label": "Following 2-step command",
+                        "value": "two_step_command"
+                      },
+                      {
+                        "label": "Vocabulary 50+ words / 50% comprehensible",
+                        "value": "vocab_50"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2y_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Trying new problem solving approach without rehearsing",
+                        "value": "new_problem_solving"
+                      },
+                      {
+                        "label": "Searching for hidden object after numerous displacements",
+                        "value": "hidden_object_search"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_2y_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Starts to throw tantrums",
+                        "value": "tantrums"
+                      },
+                      {
+                        "label": "Resisting by saying 'No'",
+                        "value": "resisting_no"
+                      },
+                      {
+                        "label": "Being possessive by saying 'Mine!'",
+                        "value": "possessive_mine"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
-        ],
+          "3_years": {
+            "label": "3 Years",
+            "sections": [
+              {
+                "fields": [
+                  {
+                    "name": "milestone_3y_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Pedals tricycle",
+                        "value": "pedals_tricycle"
+                      },
+                      {
+                        "label": "Starts to climb up stairs with alternating feet",
+                        "value": "alternating_feet_up"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_3y_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Draws simple shapes",
+                        "value": "draws_shapes"
+                      },
+                      {
+                        "label": "Flipping pages",
+                        "value": "flipping_pages"
+                      },
+                      {
+                        "label": "Toilet-trained",
+                        "value": "toilet_trained"
+                      },
+                      {
+                        "label": "Undress self",
+                        "value": "undress_self"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_3y_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "3-4 word phrases",
+                        "value": "three_four_word_phrases"
+                      },
+                      {
+                        "label": "Following 3-step command",
+                        "value": "three_step_command"
+                      },
+                      {
+                        "label": "Vocabulary 200+ words; 75% comprehensible",
+                        "value": "vocab_200"
+                      },
+                      {
+                        "label": "Says their name and gender",
+                        "value": "name_gender"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_3y_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Able to identify shapes",
+                        "value": "identify_shapes"
+                      },
+                      {
+                        "label": "Understanding simple time concept",
+                        "value": "time_concept"
+                      },
+                      {
+                        "label": "Comparing 2 items (size)",
+                        "value": "comparing_size"
+                      },
+                      {
+                        "label": "Starts to count",
+                        "value": "starts_count"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_3y_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Play cooperatively",
+                        "value": "cooperative_play"
+                      },
+                      {
+                        "label": "Pretend play",
+                        "value": "pretend_play"
+                      },
+                      {
+                        "label": "Easy to separate",
+                        "value": "easy_separate"
+                      },
+                      {
+                        "label": "Able to share and empathize",
+                        "value": "share_empathize"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "4_years": {
+            "label": "4 Years",
+            "sections": [
+              {
+                "fields": [
+                  {
+                    "name": "milestone_4y_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Hops on one foot",
+                        "value": "hops_one_foot"
+                      },
+                      {
+                        "label": "Starts to climb down stairs with alternating feet",
+                        "value": "alternating_feet_down"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_4y_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Uses scissors",
+                        "value": "uses_scissors"
+                      },
+                      {
+                        "label": "Button self",
+                        "value": "button_self"
+                      },
+                      {
+                        "label": "Draws cross, square, diagonal shape",
+                        "value": "draws_cross_square"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_4y_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Tells a simple story",
+                        "value": "tells_story"
+                      },
+                      {
+                        "label": "Talks about things they have done",
+                        "value": "talks_past"
+                      },
+                      {
+                        "label": "Forming sentences — 100% intelligible",
+                        "value": "sentences_intelligible"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_4y_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Counting",
+                        "value": "counting"
+                      },
+                      {
+                        "label": "Identify differences (big vs small; boys vs girls)",
+                        "value": "identify_differences"
+                      },
+                      {
+                        "label": "Identify colours",
+                        "value": "identify_colours"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_4y_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Has best friend",
+                        "value": "best_friend"
+                      },
+                      {
+                        "label": "Elaborating fantasy play",
+                        "value": "fantasy_play"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "5_years": {
+            "label": "5 Years",
+            "sections": [
+              {
+                "fields": [
+                  {
+                    "name": "milestone_5y_gross_motor",
+                    "label": "Gross Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Able to balance on one foot",
+                        "value": "balance_one_foot"
+                      },
+                      {
+                        "label": "Starts learning to ride bicycle",
+                        "value": "ride_bicycle"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_5y_fine_motor",
+                    "label": "Fine Motor",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Writes name",
+                        "value": "writes_name"
+                      },
+                      {
+                        "label": "Draws person with 10 basic body parts",
+                        "value": "draws_person"
+                      },
+                      {
+                        "label": "Tripod pencil grip",
+                        "value": "tripod_grip"
+                      },
+                      {
+                        "label": "Copies letters and numbers",
+                        "value": "copies_letters"
+                      },
+                      {
+                        "label": "Starts independent ADL",
+                        "value": "independent_adl"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_5y_speech",
+                    "label": "Speech & Language",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Vocabulary 4000-5000 words",
+                        "value": "vocab_5000"
+                      },
+                      {
+                        "label": "Talks about things they want to do",
+                        "value": "talks_future"
+                      },
+                      {
+                        "label": "Understands or makes jokes",
+                        "value": "understands_jokes"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_5y_cognitive",
+                    "label": "Cognitive / Problem Solving",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Counts accurately 1-10",
+                        "value": "counts_1_10"
+                      },
+                      {
+                        "label": "Recites the alphabet",
+                        "value": "recites_alphabet"
+                      },
+                      {
+                        "label": "Recognizes some alphabet",
+                        "value": "recognizes_alphabet"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "milestone_5y_social",
+                    "label": "Social / Emotional",
+                    "type": "radio-group",
+                    "options": [
+                      {
+                        "label": "Has a group of friends",
+                        "value": "group_friends"
+                      },
+                      {
+                        "label": "Able to follow group rules",
+                        "value": "follow_group_rules"
+                      },
+                      {
+                        "label": "Able to follow rules in games",
+                        "value": "follow_game_rules"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
       },
-    ],
-  },
-  "12-18_months": {
-    label: "12–18 Months",
-    sections: [
-      {
-        fields: [
-          {
-            name: "milestone_12_18m_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              { label: "Starts to walk", value: "starts_walk" },
-              { label: "Starts to run", value: "starts_run" },
-              { label: "Stops and stands up", value: "stops_stands" },
-              { label: "Run", value: "run" },
-            ],
-          },
-          {
-            name: "milestone_12_18m_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
-              { label: "Fine pincer", value: "fine_pincer" },
-              {
-                label: "Releasing object voluntarily",
-                value: "releasing_object",
-              },
-              { label: "Scribbles", value: "scribbles" },
-              { label: "Throwing object", value: "throwing" },
-              {
-                label: "Starts to feed self (finger, spoon)",
-                value: "self_feed",
-              },
-              { label: "Drink from open-top cup", value: "open_cup" },
-              { label: "Carrying toys while walking", value: "carry_toys" },
-              { label: "Removing clothes", value: "removing_clothes" },
-            ],
-          },
-          {
-            name: "milestone_12_18m_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
-              { label: "Additional new meaning words", value: "new_words" },
-              { label: "Points to body parts", value: "points_body" },
-              { label: "Labelling common objects", value: "labelling_objects" },
-            ],
-          },
-          {
-            name: "milestone_12_18m_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              {
-                label: "Able to try or experiment things",
-                value: "experimenting",
-              },
-              { label: "Imitating", value: "imitating" },
-            ],
-          },
-          {
-            name: "milestone_12_18m_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
-              { label: "Parallel play", value: "parallel_play" },
-              { label: "Points at desired object", value: "points_desired" },
-              { label: "Explore from secure base", value: "secure_base" },
-              { label: "Shared attention", value: "shared_attention" },
-              { label: "Brings toys to parent", value: "brings_toys" },
-              { label: "Increased independence", value: "independence" },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  "2_years": {
-    label: "2 Years",
-    sections: [
-      {
-        fields: [
-          {
-            name: "milestone_2y_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              { label: "Jumps on two feet", value: "jumps_two_feet" },
-              {
-                label: "Starts to climb stairs up and down",
-                value: "climbs_stairs",
-              },
-            ],
-          },
-          {
-            name: "milestone_2y_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
-              {
-                label: "Establishment of apparent handedness",
-                value: "handedness",
-              },
-            ],
-          },
-          {
-            name: "milestone_2y_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
-              { label: "2-word phrases", value: "two_word_phrases" },
-              { label: "Following 2-step command", value: "two_step_command" },
-              {
-                label: "Vocabulary 50+ words / 50% comprehensible",
-                value: "vocab_50",
-              },
-            ],
-          },
-          {
-            name: "milestone_2y_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              {
-                label: "Trying new problem solving approach without rehearsing",
-                value: "new_problem_solving",
-              },
-              {
-                label:
-                  "Searching for hidden object after numerous displacements",
-                value: "hidden_object_search",
-              },
-            ],
-          },
-          {
-            name: "milestone_2y_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
-              { label: "Starts to throw tantrums", value: "tantrums" },
-              { label: 'Resisting by saying "No"', value: "resisting_no" },
-              {
-                label: 'Being possessive by saying "Mine!"',
-                value: "possessive_mine",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  "3_years": {
-    label: "3 Years",
-    sections: [
-      {
-        fields: [
-          {
-            name: "milestone_3y_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              { label: "Pedals tricycle", value: "pedals_tricycle" },
-              {
-                label: "Starts to climb up stairs with alternating feet",
-                value: "alternating_feet_up",
-              },
-            ],
-          },
-          {
-            name: "milestone_3y_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
-              { label: "Draws simple shapes", value: "draws_shapes" },
-              { label: "Flipping pages", value: "flipping_pages" },
-              { label: "Toilet-trained", value: "toilet_trained" },
-              { label: "Undress self", value: "undress_self" },
-            ],
-          },
-          {
-            name: "milestone_3y_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
-              { label: "3-4 word phrases", value: "three_four_word_phrases" },
-              {
-                label: "Following 3-step command",
-                value: "three_step_command",
-              },
-              {
-                label: "Vocabulary 200+ words; 75% comprehensible",
-                value: "vocab_200",
-              },
-              { label: "Says their name and gender", value: "name_gender" },
-            ],
-          },
-          {
-            name: "milestone_3y_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              { label: "Able to identify shapes", value: "identify_shapes" },
-              {
-                label: "Understanding simple time concept",
-                value: "time_concept",
-              },
-              { label: "Comparing 2 items (size)", value: "comparing_size" },
-              { label: "Starts to count", value: "starts_count" },
-            ],
-          },
-          {
-            name: "milestone_3y_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
-              { label: "Play cooperatively", value: "cooperative_play" },
-              { label: "Pretend play", value: "pretend_play" },
-              { label: "Easy to separate", value: "easy_separate" },
-              {
-                label: "Able to share and empathize",
-                value: "share_empathize",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  "4_years": {
-    label: "4 Years",
-    sections: [
-      {
-        fields: [
-          {
-            name: "milestone_4y_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              { label: "Hops on one foot", value: "hops_one_foot" },
-              {
-                label: "Starts to climb down stairs with alternating feet",
-                value: "alternating_feet_down",
-              },
-            ],
-          },
-          {
-            name: "milestone_4y_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
-              { label: "Uses scissors", value: "uses_scissors" },
-              { label: "Button self", value: "button_self" },
-              {
-                label: "Draws cross, square, diagonal shape",
-                value: "draws_cross_square",
-              },
-            ],
-          },
-          {
-            name: "milestone_4y_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
-              { label: "Tells a simple story", value: "tells_story" },
-              {
-                label: "Talks about things they have done",
-                value: "talks_past",
-              },
-              {
-                label: "Forming sentences — 100% intelligible",
-                value: "sentences_intelligible",
-              },
-            ],
-          },
-          {
-            name: "milestone_4y_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              { label: "Counting", value: "counting" },
-              {
-                label: "Identify differences (big vs small; boys vs girls)",
-                value: "identify_differences",
-              },
-              { label: "Identify colours", value: "identify_colours" },
-            ],
-          },
-          {
-            name: "milestone_4y_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
-              { label: "Has best friend", value: "best_friend" },
-              { label: "Elaborating fantasy play", value: "fantasy_play" },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  "5_years": {
-    label: "5 Years",
-    sections: [
-      {
-        fields: [
-          {
-            name: "milestone_5y_gross_motor",
-            label: "Gross Motor",
-            type: "radio-group",
-            options: [
-              {
-                label: "Able to balance on one foot",
-                value: "balance_one_foot",
-              },
-              {
-                label: "Starts learning to ride bicycle",
-                value: "ride_bicycle",
-              },
-            ],
-          },
-          {
-            name: "milestone_5y_fine_motor",
-            label: "Fine Motor",
-            type: "radio-group",
-            options: [
-              { label: "Writes name", value: "writes_name" },
-              {
-                label: "Draws person with 10 basic body parts",
-                value: "draws_person",
-              },
-              { label: "Tripod pencil grip", value: "tripod_grip" },
-              { label: "Copies letters and numbers", value: "copies_letters" },
-              { label: "Starts independent ADL", value: "independent_adl" },
-            ],
-          },
-          {
-            name: "milestone_5y_speech",
-            label: "Speech & Language",
-            type: "radio-group",
-            options: [
-              { label: "Vocabulary 4000-5000 words", value: "vocab_5000" },
-              {
-                label: "Talks about things they want to do",
-                value: "talks_future",
-              },
-              {
-                label: "Understands or makes jokes",
-                value: "understands_jokes",
-              },
-            ],
-          },
-          {
-            name: "milestone_5y_cognitive",
-            label: "Cognitive / Problem Solving",
-            type: "radio-group",
-            options: [
-              { label: "Counts accurately 1-10", value: "counts_1_10" },
-              { label: "Recites the alphabet", value: "recites_alphabet" },
-              {
-                label: "Recognizes some alphabet",
-                value: "recognizes_alphabet",
-              },
-            ],
-          },
-          {
-            name: "milestone_5y_social",
-            label: "Social / Emotional",
-            type: "radio-group",
-            options: [
-              { label: "Has a group of friends", value: "group_friends" },
-              {
-                label: "Able to follow group rules",
-                value: "follow_group_rules",
-              },
-              {
-                label: "Able to follow rules in games",
-                value: "follow_game_rules",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-}
-      },
-      // {
-      //   "type": "custom"
-      // },
       {
         "type": "subheading",
         "label": "Birth History"

@@ -130,10 +130,10 @@ const SCHEMA = {
               ],
               "showInfoInRow": false
             },
-            {
-              "type": "custom",
-              "name": "hoos_pain_score_box"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "hoos_pain_score_box"
+            // }
           ]
         },
         {
@@ -371,16 +371,16 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "hoos_func_score_box"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "hoos_func_score_box"
+            // }
           ]
         },
-        {
-          "type": "custom",
-          "name": "hoos_total_box"
-        },
+        // {
+        //   "type": "custom",
+        //   "name": "hoos_total_box"
+        // },
         {
           "type": "label",
           "label": "The HOOS-12 contains 12 questions scored 0–4. The summary score is converted to a 0–100 scale where 100 is the best possible outcome."

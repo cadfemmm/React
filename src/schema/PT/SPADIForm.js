@@ -188,10 +188,10 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "pain_total_display"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "pain_total_display"
+            // }
           ]
         },
         {
@@ -484,16 +484,16 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "dis_total_display"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "dis_total_display"
+            // }
           ]
         },
-        {
-          "type": "custom",
-          "name": "spadi_total_display"
-        }
+        // {
+        //   "type": "custom",
+        //   "name": "spadi_total_display"
+        // }
       ]
     }
   ]

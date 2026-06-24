@@ -130,10 +130,10 @@ const SCHEMA = {
               ],
               "showInfoInRow": false
             },
-            {
-              "type": "custom",
-              "name": "koos_pain_score_box"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "koos_pain_score_box"
+            // }
           ]
         },
         {
@@ -371,16 +371,16 @@ const SCHEMA = {
                 }
               ]
             },
-            {
-              "type": "custom",
-              "name": "koos_func_score_box"
-            }
+            // {
+            //   "type": "custom",
+            //   "name": "koos_func_score_box"
+            // }
           ]
         },
-        {
-          "type": "custom",
-          "name": "koos_total_box"
-        },
+        // {
+        //   "type": "custom",
+        //   "name": "koos_total_box"
+        // },
         {
           "type": "label",
           "label": "The KOOS-12 contains 12 questions scored 0–4. The summary score is converted to a 0–100 scale where 100 is the best possible outcome."

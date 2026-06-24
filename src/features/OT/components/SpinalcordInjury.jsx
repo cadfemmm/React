@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import DryNeedling from "./DryNeedling";
 import WallClimbing from "./WallClimbing";
-import ROMForm from "./RomForm";
+import ROMForm from "../../PT/components/ROMForm"
 import FIMAssessment from "./Fim";
 import IADLAssessment from "./IADL";
 import SCIMaleSexualFunctionAssessment from "./SciMaleSexualAssessment"

@@ -3015,12 +3015,12 @@ const SCHEMA = {
           "name": "grand_total",
           "label": "TOTAL PROFILE SCORE"
         },
-        {
-          "type": "custom"
-        },
-        {
-          "type": "custom"
-        }
+        // {
+        //   "type": "custom"
+        // },
+        // {
+        //   "type": "custom"
+        // }
       ]
     }
   ]
