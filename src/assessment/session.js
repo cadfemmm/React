@@ -14,8 +14,8 @@ const start = async (
     const response = await api.post(
         API_URL.ASSESSMENT + `${department}/start`,
         {
-            doctor: doctorId,
-            patient: patientId,
+            doctor_id: doctorId,
+            patient_id: patientId,
             visit_type: visitType,
             total_score: totalScore,
             is_completed: isCompleted,
