@@ -1,16 +1,39 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import { localDateTimeString } from "../../../shared/utils/dateFormatter";
 import PatientCard from "../../../shared/cards/PatientCard";
 
 const TAB_ORDER = ["subjective", "objective", "assessment", "plan"];
 
-export default function AudiologyGroupAssessmentForm({ patient, onSubmit, onBack }) {
+export default function AudiologyGroupAssessmentForm({
+  patient,
+  selectedPatients = [],
+  onSubmit,
+  onBack,
+}) {
   const [form,      setForm]      = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
 
-  const storageKey = patient ? `audiology_progress_draft_${patient.id}` : null;
+  const primaryPatient = patient || selectedPatients[0] || null;
+  const storageKey = primaryPatient
+    ? `audiology_progress_draft_${primaryPatient.id}`
+    : null;
+
+  useEffect(() => {
+    if (!selectedPatients.length) return;
+    setForm((prev) => {
+      if (prev.participants?.length) return prev;
+      return {
+        ...prev,
+        participants: selectedPatients.map((p) => ({
+          clientName: p.name || p.patient_name || "",
+          idNo: p.mrn || p.icd || p.ic_number || "",
+          mrnNo: p.mrn || p.patient_id || "",
+        })),
+      };
+    });
+  }, [selectedPatients]);
 
   const setField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -152,8 +175,42 @@ export default function AudiologyGroupAssessmentForm({ patient, onSubmit, onBack
   /* ── Render ── */
   return (
     <div style={mainContent}>
-      {/* Patient Information Card */}
-      <PatientCard patient={patient} />
+      {selectedPatients.length > 0 ? (
+        <div
+          style={{
+            marginBottom: 20,
+            padding: "14px 18px",
+            borderRadius: 12,
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#1e40af", marginBottom: 8 }}>
+            Group session — {selectedPatients.length} participant
+            {selectedPatients.length !== 1 ? "s" : ""}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {selectedPatients.map((p) => (
+              <span
+                key={p.id ?? p.patient_id ?? p.mrn}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "4px 10px",
+                  borderRadius: 999,
+                  background: "#fff",
+                  color: "#1d4ed8",
+                  border: "1px solid #bfdbfe",
+                }}
+              >
+                {p.name || p.patient_name || p.mrn || "Patient"}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        primaryPatient && <PatientCard patient={primaryPatient} />
+      )}
 
       {/* SOAP Tabs */}
       <div style={tabBar}>

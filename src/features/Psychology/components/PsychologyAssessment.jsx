@@ -5,6 +5,7 @@ import {
 } from "../../../shared/utils/dateFormatter";
 
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
+import SectionPreviewButton from "../../../shared/ui/SectionPreviewButton";
 // Import original assessment components
 import DASSFormBuilder from "./DassForm";
 import PSSFormBuilder from "./PssForm";
@@ -295,6 +296,15 @@ export default function PsychologyAssessment({
     );
   }
 
+  if (mode === "initial") {
+    return (
+      <AssessmentLoader
+        department="Psychology"
+        patient={patient}
+      />
+    );
+  }
+
   const onChange = (name, value) => {
     setValues((prev) => {
       let updatedValue = value;
@@ -574,8 +584,15 @@ export default function PsychologyAssessment({
           submitted={submitted}
           onAction={handleAction}
           assessmentRegistry={PSYCHOLOGY_ASSESSMENT_REGISTRY}
+          enableSectionPreview
         >
           <div style={submitRow}>
+            <SectionPreviewButton
+              title={`Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
+              schema={schemaMap[activeTab]}
+              values={computedValues}
+              assessmentRegistry={PSYCHOLOGY_ASSESSMENT_REGISTRY}
+            />
             {activeTab !== "plan" ? (
               <button
                 style={submitBtn}
@@ -623,6 +640,8 @@ const tabActive = {
 const submitRow = {
   display: "flex",
   justifyContent: "flex-end",
+  alignItems: "center",
+  gap: 10,
   marginTop: 20,
 };
 

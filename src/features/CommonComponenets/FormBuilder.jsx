@@ -5,6 +5,11 @@ import WoundLocationMarker from "../Nursing/components/WoundLocationMarker";
 import forms from "../../assessment/forms";
 import api from "../../shared/api/apiClient";
 import { API_URL } from "../../platform/config/api.config";
+import AssessmentSectionPreviewModal from "../../shared/ui/AssessmentSectionPreviewModal";
+import {
+  resolveSubFormPreviewSchema,
+  shouldUseValuePrefix,
+} from "../../shared/utils/assessmentPreviewUtils";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -233,7 +238,9 @@ export default function CommonFormBuilder({
   layout = "root",
   language,
   readOnly: formReadOnly = false,
-  showScores
+  showScores,
+  enableSectionPreview = false,
+  parentSections = [],
 }) {
   if (!schema) {
     return null;
@@ -242,6 +249,13 @@ export default function CommonFormBuilder({
     { title: null, fields: schema.fields }
   ];
   const supportsLanguage = schema?.enableLanguageToggle;
+  const renderFieldConfig = {
+    enabled: supportsLanguage === true,
+    lang: language,
+    showScores,
+    enableSectionPreview,
+    parentSections,
+  };
 
   return (
     <div className="fb-page">
@@ -459,11 +473,7 @@ export default function CommonFormBuilder({
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
-                                        {
-                                          enabled: schema?.enableLanguageToggle === true,
-                                          lang: language,
-                                          showScores
-                                        }
+                                        renderFieldConfig
                                       )}
                                     </div>
                                   </div>
@@ -484,11 +494,7 @@ export default function CommonFormBuilder({
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
-                                        {
-                                          enabled: schema?.enableLanguageToggle === true,
-                                          lang: language,
-                                          showScores
-                                        }
+                                        renderFieldConfig
                                       )}
                                     </div>
                                   </div>
@@ -496,11 +502,7 @@ export default function CommonFormBuilder({
 
                                 ) : field.type === "subheading" || field.type === "optional-section-toggle" ? (
 
-                                  renderField(field, value, values, onChange, onAction, assessmentRegistry, formReadOnly, {
-                                    enabled: schema?.enableLanguageToggle === true,
-                                    lang: language,
-                                    showScores
-                                  })
+                                  renderField(field, value, values, onChange, onAction, assessmentRegistry, formReadOnly, renderFieldConfig)
                                 ) : field.type === "row" ? (
                                   /* ✅ ROW FIELDS → Render directly without extra wrapper */
                                   renderField(
@@ -512,11 +514,9 @@ export default function CommonFormBuilder({
                                     assessmentRegistry,
                                     formReadOnly,
                                     {
-                                      enabled: schema?.enableLanguageToggle === true,
-                                      lang: language,
-                                      showScores
+                                      ...renderFieldConfig,
+                                      matrixColumnWidth,
                                     }
-
                                   )
                                 ) : (
                                   <div style={{ marginBottom: 16 }}>
@@ -544,10 +544,8 @@ export default function CommonFormBuilder({
                                         assessmentRegistry,
                                         formReadOnly,
                                         {
-                                          enabled: schema?.enableLanguageToggle === true,
-                                          lang: language,
+                                          ...renderFieldConfig,
                                           matrixColumnWidth,
-                                          showScores
                                         }
                                       )}
                                     </>
@@ -1226,14 +1224,42 @@ function FileUploadModal({ field, value, onChange }) {
 }
 
 
+function normalizeSubAssessmentSchema(assessment) {
+  if (!assessment) return null;
+
+  const source =
+    assessment.sections || assessment.fields
+      ? assessment
+      : assessment.body && typeof assessment.body === "object"
+        ? assessment.body
+        : assessment;
+
+  const sections =
+    source.sections ||
+    (Array.isArray(source.fields) && source.fields.length
+      ? [{ title: null, fields: source.fields }]
+      : null);
+
+  if (!sections) return null;
+
+  return {
+    ...assessment,
+    ...source,
+    title: source.title || assessment.title || assessment.name,
+    sections,
+  };
+}
+
 function AssessmentLauncher({
   field,
   values,
   onChange,
   assessmentRegistry,
   languageConfig,
-  parentSections
+  parentSections,
+  enableSectionPreview = false,
 }) {
+  const [subPreviewOpen, setSubPreviewOpen] = useState(false);
 
   const registryIsArray = Array.isArray(assessmentRegistry);
   const registryIsObject =
@@ -1376,6 +1402,18 @@ function AssessmentLauncher({
           selectedAssessment.Component ||
           selectedAssessment.component;
 
+        const normalizedSchema = normalizeSubAssessmentSchema(selectedAssessment);
+        const previewSchema = resolveSubFormPreviewSchema(
+          selectedAssessment,
+          normalizedSchema,
+        );
+        const previewValuePrefix = shouldUseValuePrefix(active);
+        const previewTitle = `Preview: ${
+          selectedAssessment.name ||
+          selectedAssessment.label ||
+          "Sub Assessment"
+        }`;
+
         if (SelectedComponent) {
           return (
             <div style={{ marginTop: 20 }}>
@@ -1386,11 +1424,41 @@ function AssessmentLauncher({
                 field={field}
                 assessmentKey={active}
               />
+
+              {enableSectionPreview && previewSchema && (
+                <div
+                  style={{
+                    marginTop: 16,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="fb-btn-ghost"
+                    onClick={() => setSubPreviewOpen(true)}
+                  >
+                    Preview
+                  </button>
+                </div>
+              )}
+
+              {enableSectionPreview && subPreviewOpen && previewSchema && (
+                <AssessmentSectionPreviewModal
+                  title={previewTitle}
+                  schema={previewSchema}
+                  values={values}
+                  valuePrefix={previewValuePrefix}
+                  assessmentRegistry={assessmentRegistry}
+                  onClose={() => setSubPreviewOpen(false)}
+                />
+              )}
             </div>
           );
         }
 
-        if (!selectedAssessment.sections) {
+        if (!normalizedSchema) {
           return null;
         }
 
@@ -1400,7 +1468,7 @@ function AssessmentLauncher({
             {/* FORM */}
             <CommonFormBuilder
               schema={{
-                ...selectedAssessment,
+                ...normalizedSchema,
 
                 // REMOVE INTERNAL ACTION BUTTONS
                 actions: []
@@ -1412,7 +1480,17 @@ function AssessmentLauncher({
             />
 
             {/* CUSTOM SAVE BUTTON */}
-            <div style={{ marginTop: 16 }}>
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+
+              {enableSectionPreview && previewSchema && (
+                <button
+                  type="button"
+                  className="fb-btn-ghost"
+                  onClick={() => setSubPreviewOpen(true)}
+                >
+                  Preview
+                </button>
+              )}
 
               <button
                 type="button"
@@ -1464,7 +1542,7 @@ const parentFieldNames = [];
 const subPrefixes = [];
 
 // DETECT PREFIXES FROM SUBASSESSMENT
-(selectedAssessment.sections || []).forEach(section => {
+(normalizedSchema.sections || []).forEach(section => {
 
   (section.fields || []).forEach(field => {
 
@@ -1527,6 +1605,17 @@ const subAssessmentData = Object.fromEntries(
               </button>
 
             </div>
+
+            {enableSectionPreview && subPreviewOpen && previewSchema && (
+              <AssessmentSectionPreviewModal
+                title={previewTitle}
+                schema={previewSchema}
+                values={values}
+                valuePrefix={previewValuePrefix}
+                assessmentRegistry={assessmentRegistry}
+                onClose={() => setSubPreviewOpen(false)}
+              />
+            )}
 
           </div>
         );
@@ -3544,7 +3633,8 @@ if (typeof col === "object" && col.type === "radio") {
           onChange={onChange}
           assessmentRegistry={assessmentRegistry} // ✅ FIX
           languageConfig={languageConfig}
-          parentSections={field.sections || []}
+          parentSections={languageConfig?.parentSections || field.sections || []}
+          enableSectionPreview={languageConfig?.enableSectionPreview}
         />
       );
 

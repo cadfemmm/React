@@ -65,11 +65,13 @@ const NURSING_CARDS = [
   { id: "neuro",     title: "Neuro & Cardio",        desc: "EEG, PSG, NCS/EMG, evoke potential, EST and Holter", icon: "🧠", accent: "#6366F1", tag: "Neuro / Cardio", tagBg: "#e0e7ff", tagColor: "#4338ca" },
 ];
 
-// Returns the correct card set for a given department
+// Returns the correct card set for a given department (group is on the dashboard)
 function getCardsForDept(department) {
-  if (department === "Nursing") return NURSING_CARDS;
+  if (department === "Nursing") return NURSING_CARDS.filter((c) => c.id !== "group");
   if (department === "Doctor") return DOCTOR_CARDS;
-  const cards = ASSESSMENT_CARDS.filter(c => !c.depts || c.depts.includes(department));
+  const cards = ASSESSMENT_CARDS.filter(
+    (c) => c.id !== "group" && (!c.depts || c.depts.includes(department)),
+  );
   if (!DEPTS_FOLLOWUP_AS_REASSESSMENT.has(department)) return cards;
   return cards.map(c =>
     c.id === "followup"
