@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import AudiologyDepartmentAdultPage    from "./components/AudiologyAdultIA";
 import AudiologyDepartmentPediatricPage from "./components/AudiologyPediatricIA";
 import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
-import AudiologyGroupAssessmentForm from "./components/AudiologyGroup";
 import AssessmentLoader from "../../assessment";
 import { fetchPatientsList } from "../../shared/api/patientsList";
 
@@ -11,7 +10,6 @@ const OPTION_CARDS = [
   { id: "initial",  title: "Initial Assessment",    desc: "Full SOAP assessment for new patient",      icon: "📋", color: "#2563EB" },
   { id: "followup", title: "Follow-up Visit",        desc: "Follow-up visit documentation",             icon: "🔄", color: "#059669" },
   { id: "progress", title: "Progress Intervention",  desc: "Track progress and interventions",          icon: "📈", color: "#7C3AED" },
-  { id: "group",    title: "Group Intervention",     desc: "Group session documentation",               icon: "👥", color: "#EA580C" },
 ];
 
 const DEPARTMENT = "Audiology";
@@ -30,7 +28,7 @@ export default function AudiologyPatients({ onBack }) {
   const [loading,          setLoading]          = useState(true);
   const [search,           setSearch]           = useState("");
   const [selectedPatient,  setSelectedPatient]  = useState(null);
-  const [assessmentView,   setAssessmentView]   = useState(null); // "initial" | "followup" | "progress" | "group"
+  const [assessmentView,   setAssessmentView]   = useState(null); // "initial" | "followup" | "progress"
 
   /* ── Fetch patients from API ── */
   useEffect(() => {
@@ -85,19 +83,7 @@ export default function AudiologyPatients({ onBack }) {
       );
     }
 
-    // group — dedicated form
-    if (assessmentView === "group") {
-      return (
-        <AudiologyGroupAssessmentForm
-          patient={selectedPatient}
-          onSubmit={() => setAssessmentView(null)}
-          onBack={() => setAssessmentView(null)}
-        />
-      );
-    }
-
     // initial and followup use age-based components
-   
     return (
       <Component
         patient={selectedPatient}

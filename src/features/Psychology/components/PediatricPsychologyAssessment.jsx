@@ -1,5 +1,6 @@
 import React, { useEffect, useState, createContext, useContext } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
+import SectionPreviewButton from "../../../shared/ui/SectionPreviewButton";
 import PatientCard from "../../../shared/cards/PatientCard";
 // Import original assessment components
 import DASSFormBuilder from "./DassForm";
@@ -1113,8 +1114,15 @@ export default function PediatricPsychologyAssessment({
           submitted={submitted}
           onAction={handleAction}
           assessmentRegistry={PSYCHOLOGY_ASSESSMENT_REGISTRY}
+          enableSectionPreview
         >
           <div style={submitRow}>
+            <SectionPreviewButton
+              title={`Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
+              schema={schemaMap[activeTab]}
+              values={computedValues}
+              assessmentRegistry={PSYCHOLOGY_ASSESSMENT_REGISTRY}
+            />
             {activeTab !== "plan" ? (
               <button
                 style={submitBtn}
@@ -1162,6 +1170,8 @@ const tabActive = {
 const submitRow = {
   display: "flex",
   justifyContent: "flex-end",
+  alignItems: "center",
+  gap: 10,
   marginTop: 20,
 };
 

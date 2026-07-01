@@ -23,6 +23,10 @@ import ProstheticsAndOrthoticsPatients from "../Prosthetics & Orthotics/Prosthet
 import VocationalAssessment     from "../VocationalRehab/components/PatientDetails";
 import MedicalAssistantDetails  from "../MedicalAssistant/components/PatientDetails";
 import { DoctorsInitialAssessmentForm as DoctorsAssessment } from "../Doctors/components/DoctorsInitialAssessment";
+import NursingGroupIntervention from "../Nursing/components/GroupIntervention";
+import POGroupIntervention from "../Prosthetics & Orthotics/GroupIntervention";
+import AudiologyGroupAssessmentForm from "../Audiology/components/AudiologyGroup";
+import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
 
 const ASSESSMENT_MAP = {
   "Nursing":                  NursingPatientDetails,
@@ -37,6 +41,12 @@ const ASSESSMENT_MAP = {
   "Work & Vocational Rehab":  VocationalAssessment,
   "Medical Assistant":        MedicalAssistantDetails,
   "Doctor":                   DoctorsAssessment,
+};
+
+const GROUP_INTERVENTION_MAP = {
+  "Nursing": NursingGroupIntervention,
+  "Prosthetics & Orthotics": POGroupIntervention,
+  "Audiology": AudiologyGroupAssessmentForm,
 };
 
 /* ── P&O specific card → assessment map ────────────────── */
@@ -56,6 +66,11 @@ export default function GenericDepartmentDashboard({
   const [approveDenyLoading, setApproveDenyLoading] = useState(false);
   const [showApproveDeny, setShowApproveDeny] = useState(false);
   const [approveDenyPatient, setApproveDenyPatient] = useState(null); // selected patient for assessment view
+  const [showGroupIntervention, setShowGroupIntervention] = useState(false);
+  const [showGroupPatientPicker, setShowGroupPatientPicker] = useState(false);
+  const [groupInterventionPatients, setGroupInterventionPatients] = useState([]);
+
+  const approveDenyInPendingCount = approveDenyPatients.length;
 
   const approveDenyInPendingCount = approveDenyPatients.length;
 
@@ -75,6 +90,40 @@ export default function GenericDepartmentDashboard({
   const dept = deptRaw === "Nursing & MA" ? "Nursing" : deptRaw;
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
+  const GroupInterventionComponent =
+    GROUP_INTERVENTION_MAP[dept] || NursingGroupIntervention;
+
+  if (showGroupPatientPicker) {
+    return (
+      <GroupInterventionPatientPicker
+        department={dept}
+        patients={patients}
+        initialSelected={groupInterventionPatients}
+        onBack={() => {
+          setShowGroupPatientPicker(false);
+          setGroupInterventionPatients([]);
+        }}
+        onProceed={(selected) => {
+          setGroupInterventionPatients(selected);
+          setShowGroupPatientPicker(false);
+          setShowGroupIntervention(true);
+        }}
+      />
+    );
+  }
+
+  if (showGroupIntervention) {
+    return (
+      <GroupInterventionComponent
+        selectedPatients={groupInterventionPatients}
+        patients={groupInterventionPatients}
+        onBack={() => {
+          setShowGroupIntervention(false);
+          setShowGroupPatientPicker(true);
+        }}
+      />
+    );
+  }
 
   /* ── P&O: render the correct patients page based on selected card ── */
   if (isPO && showPatients) {
@@ -164,6 +213,7 @@ export default function GenericDepartmentDashboard({
       }}
       /* Pass P&O card click handler so dashboard can wire up Wheelchair / 3D cards */
       onPOCardClick={isPO ? handlePOCardClick : undefined}
+      onGroupIntervention={() => setShowGroupPatientPicker(true)}
       kpiCards={[
         { label: "Today's Patients",    value: "20", sub: "10 new · 10 follow-up", icon: <FaUserInjured size={16} />,         accent: "#2563eb", trend: "up",   trendVal: "+2", onClick: () => setShowPatients(true) },
         { label: "Appointments Booked", value: "24", sub: "4 slots remaining",     icon: <FaCalendarCheck size={16} />,       accent: "#10b981", trend: "up",   trendVal: "+3" },

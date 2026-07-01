@@ -1,5 +1,6 @@
 import React, { useEffect, useState, createContext } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
+import SectionPreviewButton from "../../../shared/ui/SectionPreviewButton";
 import { localDateTimeString } from "../../../shared/utils/dateFormatter";
 import PatientCard from "../../../shared/cards/PatientCard";
 
@@ -329,6 +330,11 @@ export default function PsychologyProgress({ patient, onSubmit, onBack }) {
           {/* SUBMIT */}
 
           <div style={submitRow}>
+            <SectionPreviewButton
+              title={`Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
+              schema={schemaMap[activeTab]}
+              values={values}
+            />
             {activeTab !== "plan" ? (
               <button
                 style={submitBtn}
@@ -375,6 +381,8 @@ const tabActive = {
 const submitRow = {
   display: "flex",
   justifyContent: "flex-end",
+  alignItems: "center",
+  gap: 10,
   marginTop: 20,
 };
 

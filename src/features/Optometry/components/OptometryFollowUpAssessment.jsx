@@ -304,13 +304,12 @@ export default function OptometryFollowUpAssessment({
         <div style={S.soapShell}>
           {/* Tab bar — full width equal columns */}
           <div style={S.tabBar}>
-            {ASSESSMENT_TABS.map((tab, idx) => {
-              const isActive  = activeTab === tab;
-              const isDone    = idx < activeTabIdx;
+            {ASSESSMENT_TABS.map((tab) => {
+              const isActive = activeTab === tab;
               return (
                 <button
                   key={tab}
-                  style={{ ...S.tab, ...(isActive ? S.tabActive : isDone ? S.tabDone : {}) }}
+                  style={{ ...S.tab, ...(isActive ? S.tabActive : {}) }}
                   onClick={() => setActiveTab(tab)}
                 >
                   {TAB_META[tab].label}
@@ -413,7 +412,6 @@ const S = {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     background: "#fff",
-    borderBottom: "1px solid #f1f5f9",
   },
   tab: {
     display: "flex",
@@ -435,11 +433,8 @@ const S = {
   tabActive: {
     color: "#2563eb",
     fontWeight: 700,
-    borderBottomColor: "transparent",
+    borderBottomColor: "#2563eb",
     background: "none",
-  },
-  tabDone: {
-    color: "#16a34a",
   },
 
   /* Tab content — full width */

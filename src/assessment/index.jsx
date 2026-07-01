@@ -20,6 +20,7 @@ import EmptyState from "../shared/ui/EmptyState";
 import { ShimmerForm } from "../shared/ui/Shimmer";
 import ConfirmModal from "../shared/ui/ConfirmModal";
 import ReferralModal from "../shared/ui/ReferralModal";
+import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreviewModal";
 
 // Schema Load
 import actions from "../schema/actions.js";
@@ -104,6 +105,8 @@ export default function AssessmentLoader({ patient, department }) {
   // Appointment booking state
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const [bookingQueueRow, setBookingQueueRow]           = useState(null);
+  const [sectionPreview, setSectionPreview] = useState(null);
+  const isPsychology = department === "Psychology";
 
 useEffect(() => {
   if (!patient || !department) return;
@@ -223,15 +226,16 @@ useEffect(() => {
         // SUB ASSESSMENTS
         if (template?.sub_assessment?.length) {
           subAssessment[key] = template.sub_assessment.reduce((acc, sub) => {
+            const body =
+              sub.body && typeof sub.body === "object" ? sub.body : {};
             acc[sub.name] = {
               ...sub,
+              ...body,
               id: sub.id,
               name: sub.name,
               type: sub.type,
               score: sub.score ?? null,
-              body: sub.body ?? {},
               actions: actions.ACTIONS_BUTTON,
-              // session will override later
               session_id: null,
             };
             return acc;
@@ -537,7 +541,7 @@ useEffect(() => {
               Object.entries(currentTab).map(([key, template]) => {
                 // MATCH SELECTED ASSESSMENT
                 if (
-                  template.id === value ||
+                  String(template.id) === String(value) ||
                   template.name === tm?.data?.name ||
                   key === tm?.data?.name
                 ) {
@@ -667,6 +671,16 @@ useEffect(() => {
           ]}
         />
       )}
+      {sectionPreview && (
+        <AssessmentSectionPreviewModal
+          title={sectionPreview.title}
+          schema={sectionPreview.schema}
+          values={sectionPreview.values}
+          assessmentRegistry={sectionPreview.assessmentRegistry}
+          excludeSubAssessments
+          onClose={() => setSectionPreview(null)}
+        />
+      )}
       <div style={S.page}>
         {/* Referral and Start Assessment Button UI */}
         <div style={S.actionBar}>
@@ -764,9 +778,8 @@ useEffect(() => {
         <div style={S.soapShell}>
           {/* Tab Buttons UI */}
           <div style={S.tabBar}>
-            {TABS.map((tab, idx) => {
+            {TABS.map((tab) => {
               const isActive = activeTab === tab;
-              const isDone = idx < TABS.indexOf(activeTab);
               const hasData = ""; // ----= !!formDataIds[tab];
               // Tab Button
               return (
@@ -775,7 +788,7 @@ useEffect(() => {
                   onClick={() => setActiveTab(tab)}
                   style={{
                     ...S.tab,
-                    ...(isActive ? S.tabActive : isDone ? S.tabDone : {}),
+                    ...(isActive ? S.tabActive : {}),
                   }}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -867,6 +880,7 @@ useEffect(() => {
                       subAssessmentTemplate[activeTab] || {},
                     )}
                     parentSections={templates?.[activeTab]?.sections || []}
+                    enableSectionPreview={isPsychology}
                   >
                     <div style={S.actionRow}>
                       {activeTab === "plan" && (
@@ -878,6 +892,32 @@ useEffect(() => {
                           onClick={() => setAppointmentModalOpen(true)}
                         >
                           Book Appointment
+                        </button>
+                      )}
+                      {isPsychology && (
+                        <button
+                          type="button"
+                          style={S.previewBtn}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "#f1f5f9";
+                            e.currentTarget.style.borderColor = "#94a3b8";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "#fff";
+                            e.currentTarget.style.borderColor = "#cbd5e1";
+                          }}
+                          onClick={() =>
+                            setSectionPreview({
+                              title: `Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
+                              schema: activeSchema,
+                              values: assessmentsValues[activeTab] || {},
+                              assessmentRegistry: Object.values(
+                                subAssessmentTemplate[activeTab] || {},
+                              ),
+                            })
+                          }
+                        >
+                          Preview
                         </button>
                       )}
                       <button
@@ -1038,7 +1078,6 @@ const S = {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     background: "#fff",
-    borderBottom: "1px solid #f1f5f9",
   },
   tab: {
     display: "flex",
@@ -1060,11 +1099,8 @@ const S = {
   tabActive: {
     color: "#2563eb",
     fontWeight: 700,
-    borderBottomColor: "transparent",
+    borderBottomColor: "#2563eb",
     background: "none",
-  },
-  tabDone: {
-    color: "#16a34a",
   },
 
   /* Tab content — full width */
@@ -1084,6 +1120,17 @@ const S = {
     padding: "16px 24px",
     borderTop: "1px solid #e2e8f0",
     background: "#f8fafc",
+  },
+  previewBtn: {
+    background: "#fff",
+    color: "#334155",
+    border: "1px solid #cbd5e1",
+    borderRadius: 6,
+    padding: "9px 20px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "background .15s, border-color .15s",
   },
   nextBtn: {
     background: "#2563eb",

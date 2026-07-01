@@ -195,6 +195,7 @@ const BASE_SCHEMA = {
 export default function GroupIntervention({
   patient,
   patients = [],
+  selectedPatients = [],
   onSubmit,
   onBack
 }) {
@@ -202,6 +203,21 @@ export default function GroupIntervention({
   const [values, setValues] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [allPatients, setAllPatients] = useState([]);
+
+  const rosterPatients =
+    selectedPatients.length > 0 ? selectedPatients : patients;
+
+  useEffect(() => {
+    if (!rosterPatients.length) return;
+    const ids = rosterPatients
+      .map((p) => p.id ?? p.patient_id)
+      .filter((id) => id !== undefined && id !== null);
+    if (!ids.length) return;
+    setValues((prev) => ({
+      ...prev,
+      patient_list: prev.patient_list?.length ? prev.patient_list : ids,
+    }));
+  }, [rosterPatients]);
 
   useEffect(() => {
 
@@ -226,11 +242,11 @@ export default function GroupIntervention({
     }
   };
 
-  if (!patients || patients.length === 0) {
+  if (!rosterPatients || rosterPatients.length === 0) {
     fetchPatients();
   }
 
-}, [patients]);
+}, [rosterPatients]);
   /* =====================================================
      DYNAMIC SCHEMA
   ===================================================== */
@@ -238,8 +254,8 @@ export default function GroupIntervention({
   const schema = useMemo(() => {
 
 const sourcePatients =
-  patients && patients.length > 0
-    ? patients
+  rosterPatients && rosterPatients.length > 0
+    ? rosterPatients
     : allPatients;
 
 const poPatients = (sourcePatients || [])
@@ -306,7 +322,7 @@ const poPatients = (sourcePatients || [])
       }))
     };
 
-  }, [patients]);
+  }, [rosterPatients, allPatients]);
 
   /* =====================================================
      CHANGE HANDLER
