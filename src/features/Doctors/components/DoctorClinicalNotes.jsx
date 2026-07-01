@@ -1,23 +1,63 @@
 import React, { useState, useEffect, useMemo } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PatientCard from "../../../shared/cards/PatientCard";
+import AudiologySttFloatingMic from "../../Audiology/components/AudiologySttFloatingMic";
+import Toast from "../../../shared/ui/Toast";
 
 const mainContent = { padding: 15 };
 
-function buildFormValuesFromPatient(patient, draft = {}) {
+function hashSeed(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h) || 1;
+}
+
+function seededRandom(seed) {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function generateRandomVitals(patientKey) {
+  const rand = seededRandom(hashSeed(String(patientKey || "guest")));
+  const r = (min, max) => Math.floor(rand() * (max - min + 1)) + min;
+  const systolic = r(108, 142);
+  const diastolic = r(68, 92);
+  return {
+    bp: `${systolic}/${diastolic} mmHg`,
+    rr: `${r(12, 20)} /min`,
+    spo2: `${r(95, 99)}%`,
+    hr: `${r(62, 98)} bpm`,
+    temp: `${(36 + rand() * 1.4).toFixed(1)}°C`,
+    ps: `${r(70, 88)}`,
+  };
+}
+
+function normalizeYesNo(status) {
+  if (status === "done" || status === "yes") return "yes";
+  if (status === "non_indicator" || status === "no" || !status) return "no";
+  return status;
+}
+
+function buildFormValuesFromPatient(patient, draft = {}, generatedVitals = {}) {
   return {
     clinical_note_type: draft.clinical_note_type ?? patient?.clinical_note_type ?? "",
-    aduan: draft.aduan ?? patient?.complaint ?? patient?.medical_history ?? patient?.diagnosis_history ?? "-",
-    bp: draft.bp ?? patient?.vitals?.bp ?? patient?.bp ?? "",
-    rr: draft.rr ?? patient?.vitals?.rr ?? patient?.rr ?? "",
-    spo2: draft.spo2 ?? patient?.vitals?.spo2 ?? patient?.spo2 ?? "",
-    hr: draft.hr ?? patient?.vitals?.hr ?? patient?.pulse ?? patient?.hr ?? "",
-    temp: draft.temp ?? patient?.vitals?.temp ?? patient?.temp ?? "",
-    ps: draft.ps ?? patient?.vitals?.ps ?? patient?.ps ?? "",
-    xray_status: draft.xray_status ?? patient?.xray_status ?? "non_indicator",
-    xray_result: draft.xray_result ?? patient?.xray_result ?? "",
-    lab_status: draft.lab_status ?? patient?.lab_status ?? "non_indicator",
-    lab_result: draft.lab_result ?? patient?.lab_result ?? "",
+    aduan: draft.aduan ?? patient?.complaint ?? patient?.chief_complaint ?? "",
+    bp: generatedVitals.bp ?? draft.bp ?? patient?.vitals?.bp ?? patient?.bp ?? "",
+    rr: generatedVitals.rr ?? draft.rr ?? patient?.vitals?.rr ?? patient?.rr ?? "",
+    spo2: generatedVitals.spo2 ?? draft.spo2 ?? patient?.vitals?.spo2 ?? patient?.spo2 ?? "",
+    hr: generatedVitals.hr ?? draft.hr ?? patient?.vitals?.hr ?? patient?.pulse ?? patient?.hr ?? "",
+    temp: generatedVitals.temp ?? draft.temp ?? patient?.vitals?.temp ?? patient?.temp ?? "",
+    ps: generatedVitals.ps ?? draft.ps ?? patient?.vitals?.ps ?? patient?.ps ?? "",
+    xray_status: normalizeYesNo(draft.xray_status ?? patient?.xray_status),
+    xray_upload: draft.xray_upload ?? patient?.xray_upload ?? null,
+    lab_status: normalizeYesNo(draft.lab_status ?? patient?.lab_status),
+    lab_upload: draft.lab_upload ?? patient?.lab_upload ?? null,
     doctor_plan: draft.doctor_plan ?? patient?.doctor_plan ?? patient?.report_from_doctor ?? "",
     diagnosis: draft.diagnosis ?? patient?.diagnosis ?? patient?.diagnosis_history ?? "",
     dirawat_oleh_doktor:
@@ -49,23 +89,30 @@ const CLINICAL_NOTES_SCHEMA = {
         },
         {
           name: "aduan",
-          label: { en: "Complaint", ms: "Aduan" },
+          label: { en: "Chief Complaint", ms: "Aduan Utama" },
           type: "textarea",
-          readOnly: true,
+          placeholder: {
+            en: "Enter chief complaint",
+            ms: "Masukkan aduan utama",
+          },
         },
         {
-          type: "subheading",
+          type: "accordion",
+          name: "vitals_section",
           label: { en: "Vital Signs & Measurements", ms: "Tanda Vital" },
-        },
-        {
-          type: "row",
-          fields: [
-            { name: "bp", label: { en: "BP", ms: "BP" }, type: "input" },
-            { name: "rr", label: { en: "RR", ms: "RR" }, type: "input" },
-            { name: "spo2", label: { en: "SPO2", ms: "SPO2" }, type: "input" },
-            { name: "hr", label: { en: "HR", ms: "HR" }, type: "input" },
-            { name: "temp", label: { en: "T", ms: "T" }, type: "input" },
-            { name: "ps", label: { en: "P/S", ms: "P/S" }, type: "input" },
+          defaultOpen: false,
+          children: [
+            {
+              type: "row",
+              fields: [
+                { name: "bp", label: { en: "BP", ms: "BP" }, type: "input", readOnly: true },
+                { name: "rr", label: { en: "RR", ms: "RR" }, type: "input", readOnly: true },
+                { name: "spo2", label: { en: "SPO2", ms: "SPO2" }, type: "input", readOnly: true },
+                { name: "hr", label: { en: "HR", ms: "HR" }, type: "input", readOnly: true },
+                { name: "temp", label: { en: "T", ms: "T" }, type: "input", readOnly: true },
+                { name: "ps", label: { en: "P/S", ms: "P/S" }, type: "input", readOnly: true },
+              ],
+            },
           ],
         },
         {
@@ -76,37 +123,35 @@ const CLINICAL_NOTES_SCHEMA = {
           name: "xray_status",
           label: { en: "X-Ray", ms: "X-Ray" },
           type: "radio",
-          readOnly: true,
           options: [
-            { value: "non_indicator", label: { en: "Non Indicator", ms: "Tiada Petunjuk" } },
-            { value: "done", label: { en: "Done", ms: "Selesai" } },
+            { value: "yes", label: { en: "Yes", ms: "Ya" } },
+            { value: "no", label: { en: "No", ms: "Tidak" } },
           ],
         },
         {
-          name: "xray_result",
-          label: { en: "X-Ray Result", ms: "Keputusan X-Ray" },
-          type: "textarea",
-          placeholder: { en: "X-Ray result", ms: "Keputusan X-Ray" },
-          readOnly: true,
-          showIf: { field: "xray_status", equals: "done" },
+          name: "xray_upload",
+          title: { en: "Upload X-Ray Report", ms: "Muat Naik Laporan X-Ray" },
+          type: "attach-file",
+          accept: "application/pdf,image/*",
+          multiple: false,
+          showIf: { field: "xray_status", equals: "yes" },
         },
         {
           name: "lab_status",
-          label: { en: "Lab Result", ms: "Keputusan Makmal" },
+          label: { en: "Lab Report", ms: "Laporan Makmal" },
           type: "radio",
-          readOnly: true,
           options: [
-            { value: "non_indicator", label: { en: "Non Indicator", ms: "Tiada Petunjuk" } },
-            { value: "done", label: { en: "Done", ms: "Selesai" } },
+            { value: "yes", label: { en: "Yes", ms: "Ya" } },
+            { value: "no", label: { en: "No", ms: "Tidak" } },
           ],
         },
         {
-          name: "lab_result",
-          label: { en: "Lab Result", ms: "KEPUTUSAN MAKMAL" },
-          type: "textarea",
-          placeholder: { en: "Lab result", ms: "Keputusan makmal" },
-          readOnly: true,
-          showIf: { field: "lab_status", equals: "done" },
+          name: "lab_upload",
+          title: { en: "Upload Lab Report", ms: "Muat Naik Laporan Makmal" },
+          type: "attach-file",
+          accept: "application/pdf,image/*",
+          multiple: false,
+          showIf: { field: "lab_status", equals: "yes" },
         },
         {
           type: "subheading",
@@ -116,25 +161,25 @@ const CLINICAL_NOTES_SCHEMA = {
           name: "diagnosis",
           label: { en: "Diagnosis", ms: "Diagnosis" },
           type: "input",
-          readOnly: true,
+          placeholder: { en: "Enter diagnosis", ms: "Masukkan diagnosis" },
         },
         {
           name: "dirawat_oleh_doktor",
           label: { en: "Treated by Doctor", ms: "Dirawat Oleh Doktor" },
           type: "input",
-          readOnly: true,
+          placeholder: { en: "Doctor name", ms: "Nama doktor" },
         },
         {
           name: "doctor_plan",
           label: { en: "Plan / Management", ms: "Pelan / Pengurusan" },
           type: "textarea",
-          readOnly: true,
+          placeholder: { en: "Enter plan or management", ms: "Masukkan pelan atau pengurusan" },
         },
         {
           name: "others",
           label: { en: "Others", ms: "Lain-Lain" },
           type: "textarea",
-          readOnly: true,
+          placeholder: { en: "Additional notes", ms: "Nota tambahan" },
         },
       ],
     },
@@ -146,6 +191,7 @@ const CLINICAL_NOTES_SCHEMA = {
  */
 export default function DoctorClinicalNotes({ patient, onBack, onSubmit, onUpdatePatient }) {
   const [language, setLanguage] = useState("en");
+  const [toast, setToast] = useState(null);
   const storageKey = patient?.id ? `doctor_clinical_notes_draft_${patient.id}` : null;
   const [draft, setDraft] = useState({});
 
@@ -191,9 +237,15 @@ export default function DoctorClinicalNotes({ patient, onBack, onSubmit, onUpdat
     }
   }, [storageKey]);
 
+  const patientKey = patient?.id ?? patient?.patient_id ?? patient?.mrn ?? "guest";
+  const generatedVitals = useMemo(
+    () => generateRandomVitals(patientKey),
+    [patientKey]
+  );
+
   const formValues = useMemo(
-    () => buildFormValuesFromPatient(patient, draft),
-    [patient, draft]
+    () => buildFormValuesFromPatient(patient, draft, generatedVitals),
+    [patient, draft, generatedVitals]
   );
 
   const persist = (nextDraft, nextHistory = patientHistory) => {
@@ -205,8 +257,11 @@ export default function DoctorClinicalNotes({ patient, onBack, onSubmit, onUpdat
   };
 
   const handleChange = (name, value) => {
+    if (["bp", "rr", "spo2", "hr", "temp", "ps"].includes(name)) return;
     setDraft((prev) => {
       const next = { ...prev, [name]: value };
+      if (name === "xray_status" && value === "no") next.xray_upload = null;
+      if (name === "lab_status" && value === "no") next.lab_upload = null;
       persist(next);
       return next;
     });
@@ -259,6 +314,19 @@ export default function DoctorClinicalNotes({ patient, onBack, onSubmit, onUpdat
           Submit
         </button>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onClose={() => setToast(null)}
+        />
+      )}
+      <AudiologySttFloatingMic
+        onToast={setToast}
+        historyKey="doctor_clinical_notes_stt_history"
+        useTransportControls
+      />
     </div>
   );
 }

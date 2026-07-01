@@ -3,6 +3,13 @@ import AnatomyImageOverlayInputs from "./AnatomyImageSelector";
 import AudiogramGraph from "../Audiology/components/AudioGramGraph";
 import WoundLocationMarker from "../Nursing/components/WoundLocationMarker";
 import forms from "../../assessment/forms";
+import api from "../../shared/api/apiClient";
+import { API_URL } from "../../platform/config/api.config";
+import AssessmentSectionPreviewModal from "../../shared/ui/AssessmentSectionPreviewModal";
+import {
+  resolveSubFormPreviewSchema,
+  shouldUseValuePrefix,
+} from "../../shared/utils/assessmentPreviewUtils";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -231,7 +238,9 @@ export default function CommonFormBuilder({
   layout = "root",
   language,
   readOnly: formReadOnly = false,
-  showScores
+  showScores,
+  enableSectionPreview = false,
+  parentSections = [],
 }) {
   if (!schema) {
     return null;
@@ -240,6 +249,13 @@ export default function CommonFormBuilder({
     { title: null, fields: schema.fields }
   ];
   const supportsLanguage = schema?.enableLanguageToggle;
+  const renderFieldConfig = {
+    enabled: supportsLanguage === true,
+    lang: language,
+    showScores,
+    enableSectionPreview,
+    parentSections,
+  };
 
   return (
     <div className="fb-page">
@@ -457,11 +473,7 @@ export default function CommonFormBuilder({
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
-                                        {
-                                          enabled: schema?.enableLanguageToggle === true,
-                                          lang: language,
-                                          showScores
-                                        }
+                                        renderFieldConfig
                                       )}
                                     </div>
                                   </div>
@@ -482,11 +494,7 @@ export default function CommonFormBuilder({
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
-                                        {
-                                          enabled: schema?.enableLanguageToggle === true,
-                                          lang: language,
-                                          showScores
-                                        }
+                                        renderFieldConfig
                                       )}
                                     </div>
                                   </div>
@@ -494,11 +502,7 @@ export default function CommonFormBuilder({
 
                                 ) : field.type === "subheading" || field.type === "optional-section-toggle" ? (
 
-                                  renderField(field, value, values, onChange, onAction, assessmentRegistry, formReadOnly, {
-                                    enabled: schema?.enableLanguageToggle === true,
-                                    lang: language,
-                                    showScores
-                                  })
+                                  renderField(field, value, values, onChange, onAction, assessmentRegistry, formReadOnly, renderFieldConfig)
                                 ) : field.type === "row" ? (
                                   /* ✅ ROW FIELDS → Render directly without extra wrapper */
                                   renderField(
@@ -510,17 +514,15 @@ export default function CommonFormBuilder({
                                     assessmentRegistry,
                                     formReadOnly,
                                     {
-                                      enabled: schema?.enableLanguageToggle === true,
-                                      lang: language,
-                                      showScores
+                                      ...renderFieldConfig,
+                                      matrixColumnWidth,
                                     }
-
                                   )
                                 ) : (
                                   <div style={{ marginBottom: 16 }}>
 
                                     <>
-                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion"].includes(field.type)
+                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion", "dynamic-table", "custom"].includes(field.type)
                                         && field.type !== "checkbox-group"
                                         && (
                                           <label
@@ -542,10 +544,8 @@ export default function CommonFormBuilder({
                                         assessmentRegistry,
                                         formReadOnly,
                                         {
-                                          enabled: schema?.enableLanguageToggle === true,
-                                          lang: language,
+                                          ...renderFieldConfig,
                                           matrixColumnWidth,
-                                          showScores
                                         }
                                       )}
                                     </>
@@ -1018,6 +1018,88 @@ function MultiSelectDropdown({ field, value, onChange, languageConfig }) {
   );
 }
 
+function DevelopmentMilestones({ field, values, onChange }) {
+  const selected = Array.isArray(values.dev_age_group)
+    ? values.dev_age_group
+    : values.dev_age_group
+      ? [values.dev_age_group]
+      : [];
+
+  if (!selected.length) return null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {selected.map((key) => {
+        const ageGroup = field.data?.[key];
+        if (!ageGroup) return null;
+
+        return (
+          <div
+            key={key}
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: 10,
+              overflow: "hidden"
+            }}
+          >
+            <div
+              style={{
+                padding: "8px 14px",
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
+              {ageGroup.label} — Developmental Milestones
+            </div>
+
+            {ageGroup.sections?.[0]?.fields?.map((f) => (
+              <div
+                key={f.name}
+                style={{
+                  padding: "10px 14px",
+                  borderTop: "1px solid #f1f5f9"
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8
+                  }}
+                >
+                  {f.label}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 16
+                  }}
+                >
+                  {f.options.map((opt) => (
+                    <label key={opt.value}>
+                      <input
+                        type="radio"
+                        name={f.name}
+                        checked={values[f.name] === opt.value}
+                        onChange={() =>
+                          onChange(f.name, opt.value)
+                        }
+                      />
+                      {" "}
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function FileUploadModal({ field, value, onChange }) {
   const [showModal, setShowModal] = React.useState(false);
   const inputRef = React.useRef();
@@ -1142,14 +1224,42 @@ function FileUploadModal({ field, value, onChange }) {
 }
 
 
+function normalizeSubAssessmentSchema(assessment) {
+  if (!assessment) return null;
+
+  const source =
+    assessment.sections || assessment.fields
+      ? assessment
+      : assessment.body && typeof assessment.body === "object"
+        ? assessment.body
+        : assessment;
+
+  const sections =
+    source.sections ||
+    (Array.isArray(source.fields) && source.fields.length
+      ? [{ title: null, fields: source.fields }]
+      : null);
+
+  if (!sections) return null;
+
+  return {
+    ...assessment,
+    ...source,
+    title: source.title || assessment.title || assessment.name,
+    sections,
+  };
+}
+
 function AssessmentLauncher({
   field,
   values,
   onChange,
   assessmentRegistry,
   languageConfig,
-  parentSections
+  parentSections,
+  enableSectionPreview = false,
 }) {
+  const [subPreviewOpen, setSubPreviewOpen] = useState(false);
 
   const registryIsArray = Array.isArray(assessmentRegistry);
   const registryIsObject =
@@ -1292,6 +1402,18 @@ function AssessmentLauncher({
           selectedAssessment.Component ||
           selectedAssessment.component;
 
+        const normalizedSchema = normalizeSubAssessmentSchema(selectedAssessment);
+        const previewSchema = resolveSubFormPreviewSchema(
+          selectedAssessment,
+          normalizedSchema,
+        );
+        const previewValuePrefix = shouldUseValuePrefix(active);
+        const previewTitle = `Preview: ${
+          selectedAssessment.name ||
+          selectedAssessment.label ||
+          "Sub Assessment"
+        }`;
+
         if (SelectedComponent) {
           return (
             <div style={{ marginTop: 20 }}>
@@ -1302,11 +1424,41 @@ function AssessmentLauncher({
                 field={field}
                 assessmentKey={active}
               />
+
+              {enableSectionPreview && previewSchema && (
+                <div
+                  style={{
+                    marginTop: 16,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="fb-btn-ghost"
+                    onClick={() => setSubPreviewOpen(true)}
+                  >
+                    Preview
+                  </button>
+                </div>
+              )}
+
+              {enableSectionPreview && subPreviewOpen && previewSchema && (
+                <AssessmentSectionPreviewModal
+                  title={previewTitle}
+                  schema={previewSchema}
+                  values={values}
+                  valuePrefix={previewValuePrefix}
+                  assessmentRegistry={assessmentRegistry}
+                  onClose={() => setSubPreviewOpen(false)}
+                />
+              )}
             </div>
           );
         }
 
-        if (!selectedAssessment.sections) {
+        if (!normalizedSchema) {
           return null;
         }
 
@@ -1316,7 +1468,7 @@ function AssessmentLauncher({
             {/* FORM */}
             <CommonFormBuilder
               schema={{
-                ...selectedAssessment,
+                ...normalizedSchema,
 
                 // REMOVE INTERNAL ACTION BUTTONS
                 actions: []
@@ -1328,7 +1480,17 @@ function AssessmentLauncher({
             />
 
             {/* CUSTOM SAVE BUTTON */}
-            <div style={{ marginTop: 16 }}>
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+
+              {enableSectionPreview && previewSchema && (
+                <button
+                  type="button"
+                  className="fb-btn-ghost"
+                  onClick={() => setSubPreviewOpen(true)}
+                >
+                  Preview
+                </button>
+              )}
 
               <button
                 type="button"
@@ -1380,7 +1542,7 @@ const parentFieldNames = [];
 const subPrefixes = [];
 
 // DETECT PREFIXES FROM SUBASSESSMENT
-(selectedAssessment.sections || []).forEach(section => {
+(normalizedSchema.sections || []).forEach(section => {
 
   (section.fields || []).forEach(field => {
 
@@ -1443,6 +1605,17 @@ const subAssessmentData = Object.fromEntries(
               </button>
 
             </div>
+
+            {enableSectionPreview && subPreviewOpen && previewSchema && (
+              <AssessmentSectionPreviewModal
+                title={previewTitle}
+                schema={previewSchema}
+                values={values}
+                valuePrefix={previewValuePrefix}
+                assessmentRegistry={assessmentRegistry}
+                onClose={() => setSubPreviewOpen(false)}
+              />
+            )}
 
           </div>
         );
@@ -1971,27 +2144,204 @@ function renderField(
         </div>
       );
     }
+    case "dynamic-table": {
+      const columns = field.columns || [];
+      const makeEmptyRow = () => {
+        const row = {};
+        columns.forEach((col) => {
+          row[col.key] = col.defaultValue ?? "";
+        });
+        return row;
+      };
+      const minRows = field.minRows || 1;
+      const rawRows = values[field.name];
+      const rows =
+        Array.isArray(rawRows) && rawRows.length > 0
+          ? rawRows
+          : Array.from({ length: minRows }, makeEmptyRow);
+
+      const updateCell = (rowIdx, key, val) => {
+        const next = rows.map((r, i) => (i === rowIdx ? { ...r, [key]: val } : r));
+        onChange(field.name, next);
+      };
+
+      const addRow = () => onChange(field.name, [...rows, makeEmptyRow()]);
+
+      const removeRow = (rowIdx) => {
+        const next = rows.filter((_, i) => i !== rowIdx);
+        onChange(field.name, next.length > 0 ? next : [makeEmptyRow()]);
+      };
+
+      const showRemove = field.allowRemove !== false;
+      const template = `repeat(${columns.length}, minmax(110px, 1fr))${showRemove ? " 44px" : ""}`;
+
+      const renderCell = (col, row, rowIdx) => {
+        const cellValue = row[col.key] ?? "";
+
+        if (col.type === "single-select") {
+          return (
+            <select
+              style={styles.gridInput}
+              value={cellValue}
+              disabled={readOnly}
+              onChange={(e) => !readOnly && updateCell(rowIdx, col.key, e.target.value)}
+            >
+              <option value="">{col.placeholder || "Select"}</option>
+              {(col.options || []).map((opt, i) => {
+                const val = typeof opt === "object" && opt !== null && "value" in opt ? opt.value : opt;
+                const label = typeof opt === "object" && opt !== null && "label" in opt ? opt.label : opt;
+                return (
+                  <option key={val ?? i} value={val}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          );
+        }
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <input
+              type={col.type === "number" ? "number" : "text"}
+              min={col.type === "number" ? col.min ?? 0 : undefined}
+              value={cellValue}
+              readOnly={readOnly}
+              placeholder={col.placeholder || ""}
+              onChange={(e) => !readOnly && updateCell(rowIdx, col.key, e.target.value)}
+              style={{ ...styles.gridInput, width: "100%" }}
+            />
+            {col.suffix && (
+              <span style={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>{col.suffix}</span>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div style={{ marginTop: field.label ? 4 : 10, marginBottom: 8 }}>
+          {field.label && (
+            <div className="fb-subheading" style={{ marginBottom: 12 }}>
+              {t(field.label, languageConfig?.enabled ? languageConfig.lang : "en")}
+            </div>
+          )}
+          <div style={{ overflowX: "auto" }}>
+            <div style={{ ...styles.gridHeaderRow, gridTemplateColumns: template, background: "#f1f5f9", borderRadius: "8px 8px 0 0", padding: "10px 12px" }}>
+              {columns.map((col) => (
+                <div key={col.key} style={styles.gridHeaderCell}>
+                  {col.label}
+                </div>
+              ))}
+              {showRemove && <div />}
+            </div>
+            {rows.map((row, rowIdx) => (
+              <div
+                key={rowIdx}
+                style={{
+                  ...styles.gridRow,
+                  gridTemplateColumns: template,
+                  background: rowIdx % 2 === 0 ? "#fff" : "#fafbfc",
+                  padding: "8px 12px",
+                  marginBottom: 0,
+                }}
+              >
+                {columns.map((col) => (
+                  <div key={col.key}>{renderCell(col, row, rowIdx)}</div>
+                ))}
+                {showRemove && (
+                  <button
+                    type="button"
+                    onClick={() => !readOnly && removeRow(rowIdx)}
+                    disabled={readOnly}
+                    title="Remove row"
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#ef4444",
+                      fontSize: 16,
+                      cursor: readOnly ? "default" : "pointer",
+                      padding: "2px 6px",
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={addRow}
+              style={{
+                marginTop: 10,
+                padding: "8px 18px",
+                background: "#2563EB",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              + Add Row
+            </button>
+          )}
+        </div>
+      );
+    }
+
     case "enteral-feeding-table": {
-      const rows = values[`${field.name}_rows`] || [{ time: "", scoops: "", water: "", flushing: "" }];
+      const rows = values[`${field.name}_rows`] || [{ time: "", scoops1: "", water: "", flushing: "",onsType: "", onsOthers: "",scoops2: "",modular: "", }];
       const updateRow = (idx, col, val) => {
         const next = [...rows];
-        if (!next[idx]) next[idx] = { time: "", scoops: "", water: "", flushing: "" };
+        if (!next[idx]) next[idx] = { time: "", scoops1: "", water: "", flushing: "",  onsType: "", scoops2: "", modular: "",  onsOthers: ""};
         next[idx] = { ...next[idx], [col]: val };
         onChange(`${field.name}_rows`, next);
       };
       const addRow = () => {
         const last = rows.length > 0 ? rows[rows.length - 1] : { time: "", scoops: "", water: "", flushing: "" };
-        const newRow = { time: "", scoops: last.scoops || "", water: last.water || "", flushing: last.flushing || "" };
+        const newRow = { time: "", scoops: last.scoops || "", water: last.water || "", flushing: last.flushing || "",  onsType: "",scoops2: "", modular: "", onsOthers: ""};
         onChange(`${field.name}_rows`, [...rows, newRow]);
       };
       const removeRow = (idx) => onChange(`${field.name}_rows`, rows.filter((_, i) => i !== idx));
-      const template = "repeat(4, 1fr) 70px";
+      const template = "repeat(7, 1fr) 80px";
+      const onsOptions = [
+    "Nutren Optimum",
+    "Myotein",
+    "Nutren Glucobalance",
+    "Gucil",
+    "Nutren Fiber",
+    "Nutren Peptamen",
+    "Ensure Gold",
+    "Glucerna",
+    "Fontactiv Complete",
+    "Fontactiv Diabest",
+    "Resurge Gold",
+    "Resurge Optiblend DM",
+    "Optimaxe Lite",
+    "Supplement DM",
+    "Others"
+  ];
+
+  const modularOptions = [
+    "Modular Product",
+    "Protein Powder",
+    "Fiber Supplement",
+    "Others"
+  ];
+
       return (
         <div style={{ marginTop: 10 }}>
           {/* Header row */}
           <div style={{ ...styles.gridHeaderRow, gridTemplateColumns: template }}>
             <div style={styles.gridHeaderCell}>Time</div>
             <div style={styles.gridHeaderCell}>Scoops</div>
+             <div style={styles.gridHeaderCell}>Type of ONS</div>
+        <div style={styles.gridHeaderCell}>Scoops</div>
+        <div style={styles.gridHeaderCell}>Modular Product</div>
+
             <div style={styles.gridHeaderCell}>Water</div>
             <div style={styles.gridHeaderCell}>Flushing</div>
             <div style={styles.gridHeaderCell}></div>
@@ -2011,6 +2361,40 @@ function renderField(
                 onChange={e => updateRow(idx, "scoops", e.target.value)}
                 style={styles.gridInput}
               />
+                       <select
+            value={row.onsType || ""}
+            onChange={(e) => updateRow(idx, "onsType", e.target.value)}
+            style={styles.gridInput}
+          >
+            <option value="">Select</option>
+            {onsOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+
+          {/* Scoops 2 */}
+          <input
+            type="text"
+            value={row.scoops2 || ""}
+            onChange={(e) => updateRow(idx, "scoops2", e.target.value)}
+            style={styles.gridInput}
+          />
+
+          {/* ✅ Modular Dropdown */}
+          <select
+            value={row.modular || ""}
+            onChange={(e) => updateRow(idx, "modular", e.target.value)}
+            style={styles.gridInput}
+          >
+            <option value="">Select</option>
+            {modularOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
               <input
                 type="text"
                 value={row.water || ""}
@@ -2023,6 +2407,8 @@ function renderField(
                 onChange={e => updateRow(idx, "flushing", e.target.value)}
                 style={styles.gridInput}
               />
+      
+
               <button type="button" onClick={() => removeRow(idx)} style={{ padding: "6px 8px", fontSize: 12, background: "#ef4444", color: "white", border: "none", borderRadius: 4, cursor: "pointer" }}>Remove</button>
             </div>
           ))}
@@ -2551,7 +2937,7 @@ case "grid-table-advanced": {
                     {/* Render outer label for field types that don't self-label */}
                     {c?.label && !["subheading","radio-matrix","checkbox-group","button",
                       "optional-section-toggle","score-box","accordion","custom","row",
-                      "grid-header","grid-row","scale-slider","dynamic-goals","dynamic-section",
+                      "grid-header","grid-row","scale-slider","dynamic-goals","dynamic-section","dynamic-table",
                       "dynamic-simple-goals","assessment-launcher","refraction-12col"].includes(c?.type) && (
                       <label className="form-label">
                         {c.label}
@@ -2649,6 +3035,8 @@ case "grid-table-advanced": {
       const infoText = field.info
         ? t(field.info, languageConfig?.enabled ? languageConfig.lang : "en")
         : null;
+      const displayValue =
+        typeof field.compute === "function" ? field.compute(values) : (value ?? 0);
 
       const renderedLabel = infoText ? (
         <InfoTooltip
@@ -2667,7 +3055,7 @@ case "grid-table-advanced": {
             {renderedLabel}
           </div>
           <div className="fb-score-value">
-            {value ?? 0}
+            {displayValue ?? 0}
           </div>
         </div>
       );
@@ -2787,6 +3175,27 @@ if (typeof col === "object" && col.type === "radio") {
               );
             }
 
+            if (typeof col === "object" && col.type === "computed") {
+              const display =
+                typeof col.compute === "function" ? col.compute(values) : "";
+              return (
+                <div
+                  key={fieldKey}
+                  style={{
+                    ...styles.gridInput,
+                    backgroundColor: col.plain ? "transparent" : "#f8fafc",
+                    fontWeight: col.plain ? 500 : 700,
+                    color: col.plain ? "#6b7280" : "#2563eb",
+                    pointerEvents: "none",
+                    cursor: "default",
+                    textAlign: "center",
+                  }}
+                >
+                  {col.prefix || ""}{display}
+                </div>
+              );
+            }
+
             // Handle static (read-only) text column – e.g. Normal values in ROM tables
             if (typeof col === "object" && col.type === "static") {
               return (
@@ -2797,10 +3206,11 @@ if (typeof col === "object" && col.type === "radio") {
                     backgroundColor: "#f8fafc",
                     fontWeight: 600,
                     pointerEvents: "none",
-                    cursor: "default"
+                    cursor: "default",
+                    ...(col.textAlign && { textAlign: col.textAlign }),
                   }}
                 >
-                  {values[col.name] ?? 0}
+                  {col.text ?? values[col.name] ?? 0}
                 </div>
               );
             }
@@ -2876,6 +3286,11 @@ if (typeof col === "object" && col.type === "radio") {
                   ...(col.width && { width: col.width })
                 }}
                 value={values[fieldKey] || ""}
+                placeholder={
+                  typeof col === "object" && col.placeholder
+                    ? t(col.placeholder, languageConfig?.enabled ? languageConfig.lang : "en") || col.placeholder
+                    : ""
+                }
                 onChange={e => onChange(fieldKey, e.target.value)}
               />
             );
@@ -3218,7 +3633,8 @@ if (typeof col === "object" && col.type === "radio") {
           onChange={onChange}
           assessmentRegistry={assessmentRegistry} // ✅ FIX
           languageConfig={languageConfig}
-          parentSections={field.sections || []}
+          parentSections={languageConfig?.parentSections || field.sections || []}
+          enableSectionPreview={languageConfig?.enableSectionPreview}
         />
       );
 
@@ -3391,6 +3807,14 @@ if (typeof col === "object" && col.type === "radio") {
           value={value || []}
           onChange={onChange}
           languageConfig={languageConfig}
+        />
+      );
+    case "development-milestones":
+      return (
+        <DevelopmentMilestones
+          field={field}
+          values={values}
+          onChange={onChange}
         />
       );
     case "inline-input":
@@ -4046,16 +4470,47 @@ if (typeof col === "object" && col.type === "radio") {
     default:
       return null;
 
-    case "equipment-list": {
+case "equipment-list": {
   const isOpen = values[`${field.name}_open`] || false;
+  const bookedEquipmentIds = field.bookedEquipmentIds || [];
+
+  const equipmentOptions =
+    values[`${field.name}_options`] || field.options || [];
+
+  const loadEquipment = async () => {
+    try {
+      if (equipmentOptions.length > 0) return;
+
+      const response = await api.get(
+        `${API_URL.EQUIPMENT_LIST}?department_id=5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98&limit=100`
+      );
+
+      const options =
+        response?.data?.data?.map(item => ({
+          label: item.equipment_name,
+          value: item.id,
+          status: item.status,
+          equipment_code: item.equipment_code,
+          department_name: item.department_name,
+          raw: item,
+        })) || [];
+
+      onChange(`${field.name}_options`, options);
+    } catch (err) {
+      console.error("Equipment fetch failed", err);
+    }
+  };
 
   return (
     <div key={field.name}>
-      {/* Dropdown Header */}
       <div
-        onClick={() =>
-          onChange(`${field.name}_open`, !isOpen)
-        }
+        onClick={async () => {
+          if (!isOpen) {
+            await loadEquipment();
+          }
+
+          onChange(`${field.name}_open`, !isOpen);
+        }}
         style={{
           border: "1px solid #d1d5db",
           borderRadius: isOpen ? "8px 8px 0 0" : "8px",
@@ -4089,7 +4544,6 @@ if (typeof col === "object" && col.type === "radio") {
         </span>
       </div>
 
-      {/* Dropdown Body */}
       {isOpen && (
         <div
           style={{
@@ -4101,7 +4555,7 @@ if (typeof col === "object" && col.type === "radio") {
             background: "#fff"
           }}
         >
-          {field.options?.map(option => (
+          {equipmentOptions.map(option => (
             <div
               key={option.value}
               style={{
@@ -4112,7 +4566,6 @@ if (typeof col === "object" && col.type === "radio") {
                 borderBottom: "1px solid #eee"
               }}
             >
-              {/* Equipment Name */}
               <div
                 style={{
                   flex: 1,
@@ -4123,7 +4576,6 @@ if (typeof col === "object" && col.type === "radio") {
                 {option.label}
               </div>
 
-              {/* Status + Book */}
               <div
                 style={{
                   display: "flex",
@@ -4145,29 +4597,35 @@ if (typeof col === "object" && col.type === "radio") {
                   ● {option.status || "ACTIVE"}
                 </span>
 
-                <button
-                  type="button"
-                  style={{
-                    padding: "4px 18px",
-                    borderRadius: 8,
-                    border: "none",
-                    background: "#2563EB",
-                    color: "#fff",
-                    cursor: "pointer",
-                    fontWeight: 600
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-
-                    if (field.onBook) {
-                      field.onBook(option);
-                    } else {
-                      console.log("Book:", option);
-                    }
-                  }}
-                >
-                  Book
-                </button>
+                {bookedEquipmentIds.includes(option.value) ? (
+                  <button
+                    disabled
+                    style={{
+                      padding: "4px 18px",
+                      borderRadius: 30,
+                      border: "none",
+                      background: "#9CA3AF",
+                      color: "#fff",
+                      cursor: "not-allowed"
+                    }}
+                  >
+                    Booked
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => field.onBook?.(option)}
+                    style={{
+                      padding: "4px 18px",
+                      borderRadius: 30,
+                      border: "none",
+                      background: "#2563EB",
+                      color: "#fff",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Book
+                  </button>
+                )}
               </div>
             </div>
           ))}

@@ -1,5 +1,8 @@
+import { ACTIONS_BUTTON } from "../actions";
+
 const SUBJECTIVE = {
   "title": "",
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -41,7 +44,9 @@ const SUBJECTIVE = {
         {
           "name": "session",
           "label": "Session(s)",
-          "type": "custom"
+          "type": "input-number-range",
+          "min": 1,
+          "max": 1000
         }
       ]
     }
@@ -50,6 +55,7 @@ const SUBJECTIVE = {
 
 const OBJECTIVE = {
   "title": "",
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -101,6 +107,7 @@ const OBJECTIVE = {
 
 const ASSESSMENT = {
   "title": "",
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -149,8 +156,10 @@ const ASSESSMENT = {
   ]
 }
 
+
 const PLAN = {
   "title": "",
+  "actions": ACTIONS_BUTTON,
   "sections": [
     {
       "fields": [
@@ -173,3 +182,10 @@ const PLAN = {
     }
   ]
 }
+
+export default {
+  PLAN,
+  OBJECTIVE,
+  SUBJECTIVE,
+  ASSESSMENT,
+};

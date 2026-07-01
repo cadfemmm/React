@@ -585,10 +585,10 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           { name: "pain_present", label: "Pain present", type: "radio", options: YES_NO_OPTIONS },
           { type: "subheading", label: "Full pain panel (OPQRST)", showIf: { field: "pain_present", equals: "yes" } },
           { type: "row", fields: [
-            { name: "pain_onset", label: "O â€” Onset", type: "date" },
+            { name: "pain_onset", label: "Onset", type: "date" },
             {
               type: "subheading",
-              label: "P â€” Provocation/Palliation",
+              label: "Provocation/Palliation",
               showIf: {
                 field: "pain_present",
                 equals: "yes"
@@ -617,15 +617,15 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           ], showIf: { field: "pain_present", equals: "yes" } },
           { name: "pain_provocation_relieved_by", label: "Specify relieved by", type: "input", showIf: { field: "pain_provocation", equals: "relieved_by" } },
           { type: "row", fields: [
-            { name: "pain_quality", label: "Q â€” Quality", type: "input" },
-            { name: "pain_region", label: "R â€” Region/Radiation", type: "input" }
+            { name: "pain_quality", label: "Quality", type: "input" },
+            { name: "pain_region", label: "Region/Radiation", type: "input" }
           ], showIf: { field: "pain_present", equals: "yes" } },
           { type: "row", fields: [
-            { name: "pain_severity_at_rest", label: "S â€” Severity At rest (0â€“10)", type: "single-select", options: [0,1,2,3,4,5,6,7,8,9,10].map(n => ({ label: String(n), value: String(n) })) },
-            { name: "pain_severity_with_movement", label: "S â€” Severity With movement (0â€“10)", type: "single-select", options: [0,1,2,3,4,5,6,7,8,9,10].map(n => ({ label: String(n), value: String(n) })) }
+            { name: "pain_severity_at_rest", label: "Severity At rest (0 - 10)", type: "single-select", options: [0,1,2,3,4,5,6,7,8,9,10].map(n => ({ label: String(n), value: String(n) })) },
+            { name: "pain_severity_with_movement", label: "Severity With movement (0 - 10)", type: "single-select", options: [0,1,2,3,4,5,6,7,8,9,10].map(n => ({ label: String(n), value: String(n) })) }
           ], showIf: { field: "pain_present", equals: "yes" }},
           { name: "pain_assessment_form", label: "", type: "assessment-launcher", options: [{ label: "Numeric Rating Scale", value: "numeric_pain_rating_scale" }], showIf: { field: "pain_present", equals: "yes" } },
-          { name: "pain_timing", label: "T â€” Timing", type: "input", showIf: { field: "pain_present", equals: "yes" } },
+          { name: "pain_timing", label: "Timing", type: "input", showIf: { field: "pain_present", equals: "yes" } },
          {
             name: "pain_type",
             label: "Pain Type",
@@ -1039,7 +1039,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
               type: "radio",
               options: [
                 { label: "< 2 hours", value: "lt_2_hours" },
-                { label: "â‰¥ 2 hours", value: "gte_2_hours" }
+                { label: "> 2 hours", value: "gte_2_hours" }
               ],
               showIf: {
                 field: "adl_limitations",
@@ -1274,7 +1274,6 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           {
             type: "assessment-launcher",
             name: "spasticity_inline",
-            autoOpen: true,
             hideRemarks: true,
             options: [
               {
@@ -1295,13 +1294,13 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
         fields: [
           { type: "subheading", label: "Vital Signs" },
           { type: "row", fields: [
-            { name: "obj_body_temp", label: "Body Temperature (Â°C)", type: "input", placeholder: "Â°C" },
+            { name: "obj_body_temp", label: "Body Temperature (°C)", type: "input", placeholder: "°C" },
             { name: "obj_heart_rate", label: "Heart Rate (/min)", type: "input", placeholder: "/min" },
             { name: "obj_resp_rate", label: "Respiratory Rate (/min)", type: "input", placeholder: "/min" }
           ]},
           { type: "row", fields: [
             { name: "obj_bp", label: "Blood Pressure (mmHg)", type: "input", placeholder: "e.g. 120/80" },
-            { name: "obj_spo2", label: "Oxygen Saturation (SpOâ‚‚) (%)", type: "input", placeholder: "%" }
+            { name: "obj_spo2", label: "Oxygen Saturation (SpO2) (%)", type: "input", placeholder: "%" }
           ]},
           {
             name: "objective_pain_assessment_form",
@@ -1454,7 +1453,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "neuro_motor_strength_specify",
-            label: "Motor strength â€“ weak (specify side)",
+            label: "Motor strength weak (specify side)",
             type: "input",
             showIf: { field: "neuro_motor_strength", equals: "weak" }
           },
@@ -1469,7 +1468,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "neuro_sensory_function_specify",
-            label: "Sensory function â€“ impaired (specify)",
+            label: "Sensory function impaired (specify)",
             type: "input",
             showIf: { field: "neuro_sensory_function", equals: "impaired" }
           },
@@ -1503,7 +1502,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "neuro_deficits_specify",
-            label: "Neurological deficits â€“ specify",
+            label: "Neurological deficits specify",
             type: "textarea",
             showIf: { field: "neuro_deficits", equals: "present" }
           },
@@ -1525,7 +1524,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "hn_head_specify",
-            label: "Head â€“ abnormal (specify)",
+            label: "Head abnormal (specify)",
             type: "input",
             showIf: { field: "hn_head", equals: "abnormal" }
           },
@@ -1678,7 +1677,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
             type: "radio",
             options: [
               { label: "Room air (RA)", value: "ra" },
-              { label: "Oâ‚‚", value: "o2" }
+              { label: "O2", value: "o2" }
             ]
           },
           {
@@ -1719,7 +1718,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "resp_lung_auscultation_specify",
-            label: "Lung auscultation â€“ abnormal (specify)",
+            label: "Lung auscultation abnormal (specify)",
             type: "textarea",
             showIf: { field: "resp_lung_auscultation", equals: "abnormal" }
           },
@@ -1745,7 +1744,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "hv_radial_quality",
-            label: "Peripheral pulses â€” Radial",
+            label: "Peripheral pulses Radial",
             type: "radio",
             options: [
               { label: "Normal", value: "normal" },
@@ -1755,7 +1754,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "hv_dorsalis_pedis_quality",
-            label: "Peripheral pulses â€” Dorsalis pedis",
+            label: "Peripheral pulses Dorsalis pedis",
             type: "radio",
             options: [
               { label: "Normal", value: "normal" },
@@ -1765,7 +1764,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "hv_posterior_tibial_quality",
-            label: "Peripheral pulses â€” Posterior tibial",
+            label: "Peripheral pulses Posterior tibial",
             type: "radio",
             options: [
               { label: "Normal", value: "normal" },
@@ -1900,7 +1899,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "gi_frequency_specify",
-            label: "Frequency â€“ every ___ days",
+            label: "Frequency every ___ days",
             type: "input",
             placeholder: "e.g. every 3 days",
             showIf: { field: "gi_frequency", equals: "every_x_days" }
@@ -2196,7 +2195,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "msk_rom_specify",
-            label: "ROM limited â€“ specify joint",
+            label: "ROM limited specify joint",
             type: "input",
             showIf: { field: "msk_rom", equals: "limited" }
           },
@@ -2206,12 +2205,12 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
             type: "radio",
             options: [
               { label: "5/5", value: "5_5" },
-              { label: "â†“ strength (location)", value: "decreased" }
+              { label: "strength (location)", value: "decreased" }
             ]
           },
           {
             name: "msk_strength_specify",
-            label: "Muscle strength â†“ â€“ location",
+            label: "Muscle strength location",
             type: "input",
             showIf: { field: "msk_strength", equals: "decreased" }
           },
@@ -2245,7 +2244,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
           },
           {
             name: "msk_pain_with_movement_location",
-            label: "Pain with movement â€“ location",
+            label: "Pain with movement location",
             type: "input",
             showIf: { field: "msk_pain_with_movement", equals: "yes" }
           },
@@ -2332,7 +2331,7 @@ export default function NursingAssessment({ patient, onSubmit, onBack }) {
             type: "radio",
             options: [
               { label: "<2 hours", value: "lt_2h" },
-              { label: "â‰¥2 hours", value: "gte_2h" }
+              { label: ">2 hours", value: "gte_2h" }
             ]
           },
           {

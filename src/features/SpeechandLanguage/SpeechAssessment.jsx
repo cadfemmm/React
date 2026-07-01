@@ -6,7 +6,9 @@ import ClinicalSwallowingEvaluation from "./AdultSwallowing";
 
 export default function AssessmentForm({ patient, mode = "initial", onBack }) {
 
-  const isAdult = patient?.age >= 20;
+  // Match Audiology: missing age defaults to adult (99), not paediatric
+  const age = Number(patient?.age ?? 99);
+  const isAdult = age >= 20;
 
   const paedTabs = [
     { key: "speech", label: "PAEDIATRIC SPEECH-LANGUAGE" },

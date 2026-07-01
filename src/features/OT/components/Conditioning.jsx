@@ -266,6 +266,16 @@ const SUBJECTIVE_SCHEMA = {
   sections: [
     {
       fields: [
+        {
+          "type": "input",
+          "name": "chief_complaint",
+          "label": "Chief Complaint"
+        },
+        {
+          "type": "input",
+          "name": "history_present_illness",
+          "label": "History of Present Illness"
+        },
         { type: "subheading", label: "Subjective" },
         { type: "input", name: "chief_complaint", label: "Chief Complaint" },
         { type: "input", name: "history_present_illness", label: "History of Present Illness" },
@@ -511,6 +521,12 @@ const ASSESSMENT_SCHEMA = {
   sections: [
     {
       fields: [
+        {
+          "name": "Clinical Impression",
+          "label": "Clinical Impression / Notes",
+          "type": "input",
+          "placeholder": "Therapist assessment..."
+        },
         { type: "subheading", label: "Assessment" },
         { type: "textarea", name: "cognitive_strengths", label: "Cognitive Strengths" },
         { type: "textarea", name: "cognitive_deficits", label: "Cognitive Deficits (Problem List)" },

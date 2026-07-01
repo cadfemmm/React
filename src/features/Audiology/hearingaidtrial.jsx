@@ -196,18 +196,24 @@ export function Hearingaidtrial({ onBack }) {
           { name: "verif_pdf", label: "Attach Verification PDF", type: "file-upload-modal" },
 
           { type: "subheading", label: "Real Ear Measurement (REM)" },
+          { name: "rem",  label: "Real Ear Measurement (REM) upload", type: "attach-file" },
+
           { name: "rem_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
           { name: "rem_remarks", label: "Remarks",         type: "input" },
 
           { type: "subheading", label: "Visible Speech Mapping" },
+          { name: "Visible", label: "Visible Speech Mapping upload",         type: "attach-file" },
+
           { name: "vsm_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
           { name: "vsm_remarks", label: "Remarks",         type: "input" },
 
           { type: "subheading", label: "Maximum Power Output (MPO)" },
+          { name: "mpo", label: "Maximum Power Output upload",         type: "attach-file" },
           { name: "mpo_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(MPO_W, MPO) },
           { name: "mpo_remarks", label: "Remarks",         type: "input" },
 
           { type: "subheading", label: "Feedback Test" },
+          {name:'fb',label:'Feedback Test upload',type:'attach-file'},
           { name: "fb_test",     label: "Result",  type: "radio", labelAbove: true, options: opts(FB_TEST_W, FB_TEST) },
           { name: "fb_remarks",  label: "Remarks", type: "input" },
 
@@ -223,7 +229,8 @@ export function Hearingaidtrial({ onBack }) {
         fields: [
           /* Tool table */
           { type: "subheading", label: "COSI (Client Oriented Scale of Improvement)" },
-          { name: "cosi_result",         label: "Result",         type: "input" },
+          
+          { name: "cosi_result",         label: "Result",         type: "input", readOnly:true },
           { name: "cosi_interpretation", label: "Interpretation", type: "input" },
 
           { type: "subheading", label: "HHIA / HHIE (Hearing Handicap Inventory)" },

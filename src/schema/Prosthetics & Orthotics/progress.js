@@ -1,171 +1,171 @@
 const SUBJECTIVE = {
-   "sections":[
-      {
-         "fields":[
+  "sections": [
+    {
+      "fields": [
+        {
+          "name": "chief_complaint",
+          "label": "Chief Complaint",
+          "type": "input"
+        },
+        {
+          "name": "hpi",
+          "label": "History of Present Illness",
+          "type": "input"
+        },
+        {
+          "type": "textarea",
+          "name": "case_overview",
+          "label": "Case Overview"
+        },
+        {
+          "type": "single-select",
+          "name": "session_for",
+          "label": "Session For",
+          "options": [
             {
-               "name":"chief_complaint",
-               "label":"Chief Complaint",
-               "type":"input"
+              "label": "Prosthetic Training",
+              "value": "prosthetic_training"
             },
             {
-               "name":"hpi",
-               "label":"History of Present Illness",
-               "type":"input"
+              "label": "Orthotic Training",
+              "value": "orthotic_training"
             },
             {
-               "type":"textarea",
-               "name":"case_overview",
-               "label":"Case Overview"
+              "label": "Gait Training",
+              "value": "gait_training"
             },
             {
-               "type":"single-select",
-               "name":"session_for",
-               "label":"Session For",
-               "options":[
-                  {
-                     "label":"Prosthetic Training",
-                     "value":"prosthetic_training"
-                  },
-                  {
-                     "label":"Orthotic Training",
-                     "value":"orthotic_training"
-                  },
-                  {
-                     "label":"Gait Training",
-                     "value":"gait_training"
-                  },
-                  {
-                     "label":"Stump Care",
-                     "value":"stump_care"
-                  },
-                  {
-                     "label":"Others",
-                     "value":"others"
-                  }
-               ]
+              "label": "Stump Care",
+              "value": "stump_care"
             },
             {
-               "type":"single-select",
-               "name":"session_type",
-               "label":"Session Type",
-               "options":[
-                  {
-                     "label":"Centre-based",
-                     "value":"centre_based"
-                  },
-                  {
-                     "label":"Home-based",
-                     "value":"home_based"
-                  },
-                  {
-                     "label":"Tele-rehab",
-                     "value":"tele_rehab"
-                  }
-               ]
-            },
-            {
-               "type":"radio",
-               "name":"new_complaint",
-               "label":"New Complaint",
-               "options":[
-                  {
-                     "label":"Yes",
-                     "value":"yes"
-                  },
-                  {
-                     "label":"No",
-                     "value":"no"
-                  }
-               ]
-            },
-            {
-               "type":"radio",
-               "name":"pain_during_session",
-               "label":"Pain During Session",
-               "options":[
-                  {
-                     "label":"No",
-                     "value":"no"
-                  },
-                  {
-                     "label":"Yes",
-                     "value":"yes"
-                  }
-               ]
-            },
-            {
-               "name":"pain_score",
-               "label":"Pain Score",
-               "type":"scale-slider",
-               "min":0,
-               "max":10,
-               "ranges":[
-                  {
-                     "min":0,
-                     "max":3,
-                     "label":"Mild",
-                     "color":"#22c55e"
-                  },
-                  {
-                     "min":4,
-                     "max":7,
-                     "label":"Moderate",
-                     "color":"#facc15"
-                  },
-                  {
-                     "min":8,
-                     "max":10,
-                     "label":"Severe",
-                     "color":"#ef4444"
-                  }
-               ],
-               "showValue":true,
-               "showIf":{
-                  "field":"pain_during_session",
-                  "equals":"yes"
-               }
-            },
-            {
-               "type":"radio",
-               "name":"adverse_reaction",
-               "label":"Adverse Reaction",
-               "options":[
-                  {
-                     "label":"No",
-                     "value":"no"
-                  },
-                  {
-                     "label":"Yes",
-                     "value":"yes"
-                  }
-               ]
-            },
-            {
-               "type":"textarea",
-               "name":"adverse_reaction_details",
-               "label":"Adverse Reaction Details",
-               "showIf":{
-                  "field":"adverse_reaction",
-                  "equals":"yes"
-               }
-            },
-            {
-               "type":"input",
-               "name":"session_number",
-               "label":"Session Number",
-               "readOnly":true
-            },
-            {
-               "type":"textarea",
-               "name":"subjective_remarks",
-               "label":"Remarks"
+              "label": "Others",
+              "value": "others"
             }
-         ]
-      }
-   ]
+          ]
+        },
+        {
+          "type": "single-select",
+          "name": "session_type",
+          "label": "Session Type",
+          "options": [
+            {
+              "label": "Centre-based",
+              "value": "centre_based"
+            },
+            {
+              "label": "Home-based",
+              "value": "home_based"
+            },
+            {
+              "label": "Tele-rehab",
+              "value": "tele_rehab"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "new_complaint",
+          "label": "New Complaint",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "pain_during_session",
+          "label": "Pain During Session",
+          "options": [
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
+          ]
+        },
+        {
+          "name": "pain_score",
+          "label": "Pain Score",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10,
+          "ranges": [
+            {
+              "min": 0,
+              "max": 3,
+              "label": "Mild",
+              "color": "#22c55e"
+            },
+            {
+              "min": 4,
+              "max": 7,
+              "label": "Moderate",
+              "color": "#facc15"
+            },
+            {
+              "min": 8,
+              "max": 10,
+              "label": "Severe",
+              "color": "#ef4444"
+            }
+          ],
+          "showValue": true,
+          "showIf": {
+            "field": "pain_during_session",
+            "equals": "yes"
+          }
+        },
+        {
+          "type": "radio",
+          "name": "adverse_reaction",
+          "label": "Adverse Reaction",
+          "options": [
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
+          ]
+        },
+        {
+          "type": "textarea",
+          "name": "adverse_reaction_details",
+          "label": "Adverse Reaction Details",
+          "showIf": {
+            "field": "adverse_reaction",
+            "equals": "yes"
+          }
+        },
+        {
+          "type": "input",
+          "name": "session_number",
+          "label": "Session Number",
+          "readOnly": true
+        },
+        {
+          "type": "textarea",
+          "name": "subjective_remarks",
+          "label": "Remarks"
+        }
+      ]
+    }
+  ]
 }
 
-const OBJECTIVE ={
+const OBJECTIVE = {
   "sections": [
     {
       "fields": [
@@ -342,7 +342,7 @@ const OBJECTIVE ={
   ]
 }
 
-const ASSESSMENT ={
+const ASSESSMENT = {
   "sections": [
     {
       "fields": [
@@ -375,7 +375,6 @@ const ASSESSMENT ={
             }
           ]
         },
-        
         {
           "type": "multi-select-dropdown",
           "name": "problem_identified",

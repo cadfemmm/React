@@ -3,8 +3,7 @@ import axios from "axios";
 import { ShimmerRow } from "../../../shared/ui/Shimmer";
 import EmptyState from "../../../shared/ui/EmptyState";
 import { Eye } from "lucide-react";
-import api from "../../../shared/api/apiClient";
-import { API_URL } from "../../../platform/config/api.config";
+import { updatePatientApprovalStatus } from "../../../shared/api/patientsList";
 
 const externalApi = axios.create();
 externalApi.interceptors.request.use((config) => {
@@ -23,13 +22,13 @@ const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#
  *   patient  – patient object (id / patient_id / mrn, name, etc.)
  *   onBack   – fn to go back to the patient list
  */
-export default function ApproveDenyAssessments({ patient, onBack }) {
+export default function ApproveDenyAssessments({ patient, onBack, onPatientUpdated }) {
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
-  const [actionState, setActionState] = useState({}); // { [id]: "approving"|"denying"|"approved"|"denied" }
+  const [decisionLoading, setDecisionLoading] = useState(false);
+  const [patientDecision, setPatientDecision] = useState(null);
   const [selectedAssessment, setSelectedAssessment] = useState(null);
-  const [processingIds, setProcessingIds] = useState({});
   const [showDenyModal, setShowDenyModal] = useState(false);
   const [denyReason, setDenyReason] = useState("");
   const [showViewer, setShowViewer] = useState(false);
@@ -69,95 +68,41 @@ export default function ApproveDenyAssessments({ patient, onBack }) {
       .finally(() => setLoading(false));
   }, [patientId]);
 
-  /* ── Approve / Deny handler ── */
-const handleAction = async (
-  assessment,
-  action,
-  reason = ""
-) => {
+  /* ── Approve / Deny patient (updates approval_status via partial-update) ── */
+  const handlePatientDecision = async (action, reason = "") => {
+    if (!patientId || decisionLoading) return;
 
-  const id =
-    assessment.id ||
-    assessment.form_response_id;
-
-  if (processingIds[id]) return;
-
-  setProcessingIds((prev) => ({
-    ...prev,
-    [id]: true,
-  }));
-
-  try {
-
-    const payload = {
-      patient_id:
-        assessment?.patient_id || patientId,
-
-      status:
-        action === "approve"
-          ? "APPROVED"
-          : "DENIED",
-    };
-
-    // reason required only for denied
-    if (action === "deny") {
-      payload.reason = reason;
+    if (action === "deny" && !reason.trim()) {
+      alert("Please enter denial reason");
+      return;
     }
 
-    console.log(
-      "Sending alert payload:",
-      payload
-    );
+    setDecisionLoading(true);
+    setError(null);
 
-    // ONLY THIS API
-    const response = await api.post(
-      API_URL.PATIENT_ALERT,
-      payload
-    );
+    try {
+      const approvalStatus = action === "approve" ? "APPROVED" : "DENIED";
+      const extra =
+        action === "deny" && reason.trim()
+          ? { denial_reason: reason.trim() }
+          : {};
 
-    console.log(
-      "Alert success:",
-      response.data
-    );
+      await updatePatientApprovalStatus(patientId, approvalStatus, extra);
 
-    // Update local UI only
-    setAssessments((prev) =>
-      prev.map((a) =>
-        (a.id || a.form_response_id) === id
-          ? {
-              ...a,
-              status:
-                action === "approve"
-                  ? "approved"
-                  : "denied",
-            }
-          : a
-      )
-    );
-
-    setActionState((prev) => ({
-      ...prev,
-      [id]:
-        action === "approve"
-          ? "approved"
-          : "denied",
-    }));
-
-  } catch (err) {
-
-    console.error(
-      `Failed to ${action}:`,
-      err?.response?.data || err
-    );
-
-  } finally {
-
-    setProcessingIds((prev) => ({
-      ...prev,
-      [id]: false,
-    }));
-  }
-};
+      setPatientDecision(action === "approve" ? "approved" : "denied");
+      onPatientUpdated?.({ patientId, approval_status: approvalStatus });
+      onBack?.();
+    } catch (err) {
+      console.error(`Failed to ${action} patient:`, err?.response?.data || err);
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.detail ||
+          `Failed to ${action} patient. Please try again.`,
+      );
+    } finally {
+      setDecisionLoading(false);
+    }
+  };
   return (
     <div style={{ padding: "28px 28px 40px", minHeight: "100vh", fontFamily: "Inter, Roboto, sans-serif", background: "#F8FAFC" }}>
 
@@ -216,43 +161,27 @@ const handleAction = async (
           
           {/* Approve All */}
           <button
-            disabled={Object.values(processingIds).some(Boolean)}
-            onClick={async () => {
-
-              for (const assessment of assessments) {
-
-                const status =
-                  (assessment.status || "").toLowerCase();
-
-                if (status !== "approved") {
-
-                  await handleAction(
-                    assessment,
-                    "approve"
-                  );
-                }
-              }
-            }}
+            disabled={decisionLoading || patientDecision === "approved"}
+            onClick={() => handlePatientDecision("approve")}
             style={{
               padding: "10px 18px",
               borderRadius: 999,
               border: "1px solid #16A34A",
-              background: "#16A34A",
+              background: decisionLoading ? "#86EFAC" : "#16A34A",
               color: "#fff",
               fontWeight: 700,
               fontSize: 13,
-              cursor: "pointer",
+              cursor: decisionLoading ? "wait" : "pointer",
               boxShadow: "0 8px 18px rgba(22,163,74,0.18)",
             }}
           >
-            ✓ Approve
+            {decisionLoading ? "Updating…" : "✓ Approve"}
           </button>
 
-          {/* Deny All */}
+          {/* Deny */}
           <button
-            onClick={() => {
-              setShowDenyModal(true);
-            }}
+            disabled={decisionLoading || patientDecision === "denied"}
+            onClick={() => setShowDenyModal(true)}
             style={{
               padding: "10px 18px",
               borderRadius: 999,
@@ -388,20 +317,15 @@ const handleAction = async (
                   <Eye size={18} color="#4F46E5" />
                 </button>
 
-                {status === "approved" || actionState[id] === "approved" ? (
+                {patientDecision === "approved" ? (
                   <span style={{ fontSize: 13, color: "#16A34A", fontWeight: 600 }}>
                     ✓ Approved
                   </span>
-                ) : status === "denied" || actionState[id] === "denied" ? (
+                ) : patientDecision === "denied" ? (
                   <span style={{ fontSize: 13, color: "#DC2626", fontWeight: 600 }}>
                     ✕ Denied
                   </span>
-                ) : (
-                  <>
-                    
-
-                  </>
-                )}
+                ) : null}
               </div>
                 </div>
               );
@@ -500,32 +424,8 @@ const handleAction = async (
                       </button>
 
                       <button
-                        disabled={Object.values(processingIds).some(Boolean)}
-                        onClick={async () => {
-
-                          if (!denyReason.trim()) {
-                            alert("Please enter denial reason");
-                            return;
-                          }
-
-                          for (const assessment of assessments) {
-
-                            const status =
-                              (assessment.status || "").toLowerCase();
-
-                            if (status !== "denied") {
-
-                              await handleAction(
-                                assessment,
-                                "deny",
-                                denyReason
-                              );
-                            }
-                          }
-
-                          setShowDenyModal(false);
-                          setDenyReason("");
-                        }}
+                        disabled={decisionLoading}
+                        onClick={() => handlePatientDecision("deny", denyReason)}
                         style={{
                           padding: "10px 20px",
                           borderRadius: 999,

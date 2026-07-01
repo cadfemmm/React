@@ -7,10 +7,22 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
     const [medications, setMedications] = useState([]);
     const [medicationOptions, setMedicationOptions] = useState([]);
     const [unitOptions, setUnitOptions] = useState([]);
+    const storageKey = `patient_${patient?.id}_medications`;
 
     useEffect(() => {
         fetchMedicationMasters();
-        }, []);
+        // Load medications from localStorage for this patient
+        if (patient?.id) {
+            try {
+                const stored = localStorage.getItem(storageKey);
+                if (stored) {
+                    setMedications(JSON.parse(stored));
+                }
+            } catch (e) {
+                console.error('Failed to load medications from localStorage', e);
+            }
+        }
+        }, [patient?.id, storageKey]);
 
         const fetchMedicationMasters = async () => {
         try {
@@ -111,12 +123,26 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
             completed_date: calculateCompletionDate(formData.prescribed_date, formData.duration)
         }
 
-        setMedications(prev => [...prev, newMedication])
+        const updatedMeds = [newMedication, ...medications];
+        setMedications(updatedMeds);
+        // Store medications in localStorage for this patient
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(updatedMeds));
+        } catch (e) {
+            console.error('Failed to save medications to localStorage', e);
+        }
         setFormData({})
     }
 
     const handleDeleteMedication = (id) => {
-        setMedications(prev => prev.filter(med => med.id !== id))
+        const updatedMeds = medications.filter(med => med.id !== id);
+        setMedications(updatedMeds);
+        // Update localStorage when medication is deleted
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(updatedMeds));
+        } catch (e) {
+            console.error('Failed to update medications in localStorage', e);
+        }
     }
 
     const getMedicationName = (value) => {

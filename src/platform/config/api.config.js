@@ -1,19 +1,31 @@
 const BASE_API = (process.env.REACT_APP_API_DJANGO || 'https://backend.tps-ind.com') + '/api/'
 const RMS_API = 'https://api.dev.rehab-software.com/api/v1/'
-const TYMPANOGRAM_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/tympanogram";
-const OTOSCOPIC_EXTRACT_URL = "https://ai.dev.rehab-software.com/api/extract/otoscopic";
+const AI_SERVICE_TARGET =
+    process.env.REACT_APP_AI_SERVICE_TARGET || "https://ai.dev.rehab-software.com";
+const TYMPANOGRAM_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/tympanogram`;
+const OTOSCOPIC_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/otoscopic`;
+// Dev: same-origin /new-stt via setupProxy.js. Prod: call AI service directly (or override via env).
+const STT_API_BASE =
+    process.env.REACT_APP_STT_API_BASE ||
+    (process.env.NODE_ENV === "production"
+        ? `${AI_SERVICE_TARGET}/new-stt`
+        : "/new-stt");
+const STT_SESSION_START_URL =
+    process.env.REACT_APP_STT_SESSION_START_URL || `${STT_API_BASE}/session/start`;
+const sttWebspeechUrl = (sessionId) =>
+    `${STT_API_BASE}/session/${encodeURIComponent(sessionId)}/webspeech`;
 
 const API_URL = {
     // Users apis
     USER: BASE_API + 'user/',
     ME: BASE_API + 'user/me/',
-    LOGIN: BASE_API + 'user/login/',
-    LOGOUT: BASE_API + 'user/logout/',
+    LOGIN: RMS_API + 'auth/login/',
+    LOGOUT: RMS_API + 'auth/logout/',
 
     // Tokens apis
     TOKEN: BASE_API + 'token/',
     VERIFY: BASE_API + 'token/verify/',
-    REFRESH: BASE_API + 'token/refresh/',
+    REFRESH: RMS_API + 'auth/refresh/',
 
     // Assessment apis
     ASSESSMENT: BASE_API + 'assessment/',
@@ -29,12 +41,22 @@ const API_URL = {
     
     // Department
     DEPTARMENT: BASE_API + 'department/',
+    
+    // ICD codes with ICF and ICHI
+    icdByDepartment: (department) =>
+        BASE_API + `codes/icd/${encodeURIComponent(department)}/`,
 
     // Patients apis
     PATIENT: BASE_API + 'patient/',
+    PATIENTS_LIST: RMS_API + 'patients/',
+    PATIENT_PARTIAL_UPDATE: (patientId) =>
+        `${RMS_API}patients/${encodeURIComponent(patientId)}/partial-update/`,
     PATIENT_ALL: BASE_API + 'patient/all',
     PATIENT_ALERT: BASE_API + 'alerts/patient',
     EQUIPMENT_LIST: RMS_API + "rehab-equipment-lists/",
+
+    // Medication api
+    MEDICATION_MASTER: RMS_API + "medication-masters/",
     BOOKING_QUEUE: RMS_API + "booking-queue/",
     BOOKING_QUEUE_SUMMARY: RMS_API + "booking-queue/summary/",
     BOOKING_QUEUE_CONTINUE_SLOTS: (bookingId) =>
@@ -45,10 +67,6 @@ const API_URL = {
         RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/reserve/`,
     BOOKING_QUEUE_BOOK_CONFIRM: (bookingId) =>
         RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/confirm/`,
-
-    // Medication api
-    MEDICATION_MASTER: RMS_API + "medication-masters/",
-
     // Billing price
     BILLING: (
         dept,
@@ -65,5 +83,8 @@ export {
     BASE_API,
     RMS_API,
     TYMPANOGRAM_EXTRACT_URL,
-    OTOSCOPIC_EXTRACT_URL
+    OTOSCOPIC_EXTRACT_URL,
+    STT_SESSION_START_URL,
+    STT_API_BASE,
+    sttWebspeechUrl,
 }

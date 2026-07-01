@@ -1,14 +1,13 @@
 import React, { useState, useCallback, useMemo } from "react";
 import OptometryFollowUpAssessment from "./components/OptometryFollowUpAssessment";
-import OptometryFollowUpDashboard from "./components/OptometryFollowUpDashboard";
 import OptometryProgressAssessment from "./components/OptometryProgressAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import { fetchPatientsList } from "../../shared/api/patientsList";
+import { filterApprovedPatients } from "../../shared/utils/patientFilters";
 
 // Assessment Loader
-import AssessmentLoader from "../../assessment"
+import AssessmentLoader from "../../assessment";
 
 /* ── Status palette ─────────────────────────────────────────────────────── */
 const STATUS = {
@@ -65,7 +64,6 @@ const OPTION_CARDS = [
 ];
 
 export default function OptometryPatients({ onBack, loading = false }) {
-  const userRole = localStorage.getItem("userRole") || "";
   const [selectedPatient,      setSelectedPatient]      = useState(null);
   const [assessmentView,       setAssessmentView]       = useState(null);
   const [submittedAssessments, setSubmittedAssessments] = useState({});
@@ -82,10 +80,8 @@ export default function OptometryPatients({ onBack, loading = false }) {
   React.useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const res = await api.get(
-          API_URL.PATIENT + (['Admin', 'Staff'].includes(userRole) ? `?department=Optometry` : '')
-        );
-        setPatients(res.data.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch (e) {
         setPatients([]);
       }
@@ -112,10 +108,19 @@ export default function OptometryPatients({ onBack, loading = false }) {
   }, [patients]);                                          // runs whenever patients loads
 
   /* hooks must be before early returns */
-  const filtered = useMemo(() => patients.filter(p => {
+  const approvedPatients = useMemo(() => filterApprovedPatients(patients), [patients]);
+
+  const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return !q || (p.name||"").toLowerCase().includes(q) || (p.email||"").toLowerCase().includes(q) || (p.mrn||"").toLowerCase().includes(q);
-  }), [patients, search]);
+    const base = approvedPatients;
+    return !q
+      ? base
+      : base.filter(p =>
+          (p.name || "").toLowerCase().includes(q) ||
+          (p.email || "").toLowerCase().includes(q) ||
+          (p.mrn || "").toLowerCase().includes(q)
+        );
+  }, [approvedPatients, search]);
 
   /* ── Assessment views ── */
   if (selectedPatient && assessmentView === "initial") {
@@ -185,13 +190,12 @@ export default function OptometryPatients({ onBack, loading = false }) {
             <button style={S.headerBackBtn} onClick={handleBackToPatients}>← Back</button>
             <div style={S.patientAvatar}>{initials}</div>
             <div>
-              <div style={S.patientName}>{selectedPatient.name || selectedPatient.email}</div>
+              <div style={S.patientName}>{selectedPatient.name || selectedPatient.email || "—"}</div>
               <div style={S.patientMeta}>
                 {[
                   selectedPatient.mrn && `MRN: ${selectedPatient.mrn}`,
                   selectedPatient.age && `${selectedPatient.age} yrs`,
                   selectedPatient.gender,
-                  selectedPatient.icd && `ICD: ${selectedPatient.icd}`,
                 ].filter(Boolean).join("  ·  ")}
               </div>
             </div>
@@ -217,10 +221,7 @@ export default function OptometryPatients({ onBack, loading = false }) {
 
         {/* ── Body ── */}
         <div style={S.selectionBody}>
-          <div style={S.selectionHeading}>Select Assessment Type</div>
-          <div style={S.selectionSubheading}>
-            Choose the appropriate assessment for this patient visit
-          </div>
+
 
           <div style={S.cardsGrid}>
             {OPTION_CARDS.map(card => (
@@ -344,7 +345,7 @@ function PatientRow({ patient: p, idx, onStart }) {
           {initial}
         </div>
         <div>
-          <div style={S.tdName}>{p.name || p.email}</div>
+          <div style={S.tdName}>{p.name || p.email || "—"}</div>
           {(p.age || p.gender) && (
             <div style={S.tdSub}>{[p.age && `${p.age} yrs`, p.gender].filter(Boolean).join(" · ")}</div>
           )}

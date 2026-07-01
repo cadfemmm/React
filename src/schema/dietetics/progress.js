@@ -3,6 +3,16 @@ const SUBJECTIVE = {
     {
       "fields": [
         {
+          "name": "chief_complaint",
+          "label": "Chief Complaint",
+          "type": "input"
+        },
+        {
+          "name": "hpi",
+          "label": "History of Presenting Illness (HPI)",
+          "type": "input"
+        },
+        {
           "name": "session_for",
           "label": "Session For",
           "type": "radio",
@@ -12,10 +22,19 @@ const SUBJECTIVE = {
               "value": "therapy"
             },
             {
-              "label": "Dietetic Rehabilitation",
-              "value": "rehabilitation"
+              "label": "Specialised Programme",
+              "value": "specialized_programmes"
             }
           ]
+        },
+        {
+          "name": "specialized_programme",
+          "label": "Specify Specialized Programme",
+          "type": "input",
+          "showIf": {
+            "field": "session_for",
+            "equals": "specialized_programmes"
+          }
         },
         {
           "name": "consent",
@@ -29,14 +48,42 @@ const SUBJECTIVE = {
           ]
         },
         {
-          "name": "new_complaints",
-          "label": "New Complaints",
-          "type": "textarea"
+          "name": "consent_document",
+          "label": "Upload Consent Document",
+          "type": "attach-file",
+          "showIf": {
+            "field": "consent",
+            "includes": "yes"
+          }
         },
         {
-          "name": "sessions",
-          "label": "Sessions",
-          "type": "textarea"
+          "name": "case_overview",
+          "label": "Case Overview",
+          "type": "input"
+        },
+        {
+          "name": "has_new_complaints",
+          "label": "New Complaints",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "new_complaints",
+          "label": "Please Specify New Complaints",
+          "type": "input",
+          "showIf": {
+            "field": "has_new_complaints",
+            "equals": "yes"
+          }
         }
       ]
     }
@@ -48,13 +95,93 @@ const OBJECTIVE = {
     {
       "fields": [
         {
-          "name": "case_overview",
-          "label": "Case Overview",
-          "type": "textarea"
+          "name": "objectives",
+          "label": "Objective(s)",
+          "type": "dynamic-section",
+          "fields": [
+            {
+              "name": "objective",
+              "label": "Objective",
+              "type": "input"
+            }
+          ]
         },
         {
+          "name": "case_overview",
+          "label": "Case Overview",
+          "type": "input"
+        },
+        {
+          "type": "radio",
           "name": "modalities",
           "label": "Modalities",
+          "options": [
+            {
+              "label": "Weighing scale",
+              "value": "weighing_scale"
+            },
+            {
+              "label": "Body Composition Analysis",
+              "value": "body_composition_analysis"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            },
+            {
+              "label": "Not relevant",
+              "value": "not_relevant"
+            }
+          ]
+        },
+        {
+          "type": "input",
+          "name": "modalities_other",
+          "label": "Specify Other Modality",
+          "showIf": {
+            "field": "modalities",
+            "equals": "others"
+          }
+        },
+        {
+          "name": "therapeutic_exercise",
+          "label": "Therapeutic Exercise/Intervention",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Medical Nutrition Therapy",
+              "value": "mnt"
+            },
+            {
+              "label": "Therapeutic Diet Preparation",
+              "value": "tdp"
+            },
+            {
+              "label": "Nutrition Support",
+              "value": "nutrition_support"
+            },
+            {
+              "label": "Dietary Education",
+              "value": "dietary_education"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ]
+        },
+        {
+          "name": "therapeutic_exercise_others",
+          "label": "Others - Please Specify",
+          "type": "input",
+          "showIf": {
+            "field": "therapeutic_exercise",
+            "includes": "others"
+          }
+        },
+        {
+          "name": "strateggies_activities",
+          "label": "Strateggies/Activities",
           "type": "checkbox-group",
           "options": [
             {
@@ -76,21 +203,37 @@ const OBJECTIVE = {
           ]
         },
         {
-          "name": "strategies",
-          "label": "Strategies",
-          "type": "textarea"
-        },
-        {
-          "name": "objectives",
-          "label": "Objective(s)",
-          "type": "dynamic-section",
-          "fields": [
+          "name": "adverse_reaction",
+          "label": "Adverse Reaction",
+          "type": "radio",
+          "options": [
             {
-              "name": "objective",
-              "label": "Objective",
-              "type": "input"
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
             }
           ]
+        },
+        {
+          "name": "adverse_reaction_details",
+          "label": "Details of Adverse Reaction",
+          "type": "input",
+          "showIf": {
+            "field": "adverse_reaction",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "adverse_reaction_document",
+          "label": "Upload Supporting Document",
+          "type": "file-upload",
+          "showIf": {
+            "field": "adverse_reaction",
+            "equals": "yes"
+          }
         }
       ]
     }
@@ -101,6 +244,11 @@ const ASSESSMENT = {
   "sections": [
     {
       "fields": [
+        {
+          "type": "input",
+          "label": "Clinical Impression",
+          "name": "clinical impression"
+        },
         {
           "type": "subheading",
           "label": "A – ANALYSIS / ASSESSMENT / ACTION"
@@ -155,19 +303,30 @@ const PLAN = {
     {
       "fields": [
         {
+          "type": "subheading",
+          "label": "Short-Term Goals (2–4 weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "short_term_goals"
+        },
+        {
+          "type": "subheading",
+          "label": "Long-Term Goals (6–12 weeks)"
+        },
+        {
+          "type": "dynamic-goals",
+          "name": "long_term_goals"
+        },
+        {
           "name": "plan",
           "label": "Plan",
-          "type": "textarea"
+          "type": "input"
         },
         {
           "name": "comment",
           "label": "Comment",
-          "type": "textarea"
-        },
-        {
-          "name": "remark",
-          "label": "Remark",
-          "type": "textarea"
+          "type": "input"
         }
       ]
     }

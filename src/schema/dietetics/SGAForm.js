@@ -1,0 +1,556 @@
+const sgaSchema = {
+  "title": "Subjective Global Assessment (SGA)",
+  "subtitle": "Nutritional status assessment",
+  "sections": [
+    {
+      "title": "Nutrient Intake",
+      "fields": [
+        {
+          "type": "radio",
+          "name": "intake_status",
+          "label": "Current Intake",
+          "options": [
+            {
+              "label": "No change; adequate",
+              "value": "adequate"
+            },
+            {
+              "label": "Inadequate",
+              "value": "inadequate"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "intake_pattern",
+          "label": "If inadequate",
+          "showIf": {
+            "field": "intake_status",
+            "equals": "inadequate"
+          },
+          "options": [
+            {
+              "label": "Suboptimal solid diet",
+              "value": "suboptimal"
+            },
+            {
+              "label": "Full fluids / supplements",
+              "value": "fluids"
+            },
+            {
+              "label": "Minimal intake / starvation",
+              "value": "minimal"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "intake_last_2_weeks",
+          "label": "Nutrient Intake in past 2 weeks",
+          "options": [
+            {
+              "label": "Adequate",
+              "value": "adequate"
+            },
+            {
+              "label": "Improved but not adequate",
+              "value": "improving"
+            },
+            {
+              "label": "No improvement / inadequate",
+              "value": "poor"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Weight",
+      "fields": [
+        {
+          "type": "row",
+          "fields": [
+            {
+              "type": "input",
+              "name": "usual_weight",
+              "label": "Usual Weight (kg)"
+            },
+            {
+              "type": "input",
+              "name": "current_weight",
+              "label": "Current Weight (kg)"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "weight_change_6_months",
+          "label": "Non-fluid weight change past 6 months",
+          "options": [
+            {
+              "label": "< 5% or stable",
+              "value": "stable"
+            },
+            {
+              "label": "5–10% loss",
+              "value": "moderate_loss"
+            },
+            {
+              "label": "> 10% loss ongoing",
+              "value": "severe_loss"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "weight_change_2_weeks",
+          "label": "Weight change past 2 weeks",
+          "options": [
+            {
+              "label": "Increased",
+              "value": "increased"
+            },
+            {
+              "label": "No change",
+              "value": "no_change"
+            },
+            {
+              "label": "Decreased",
+              "value": "decreased"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Symptoms Affecting Intake",
+      "fields": [
+        {
+          "type": "checkbox-group",
+          "name": "symptoms",
+          "label": "Symptoms present",
+          "options": [
+            {
+              "label": "Pain on eating",
+              "value": "pain"
+            },
+            {
+              "label": "Anorexia",
+              "value": "anorexia"
+            },
+            {
+              "label": "Nausea",
+              "value": "nausea"
+            },
+            {
+              "label": "Vomiting",
+              "value": "vomiting"
+            },
+            {
+              "label": "Dysphagia",
+              "value": "dysphagia"
+            },
+            {
+              "label": "Diarrhea",
+              "value": "diarrhea"
+            },
+            {
+              "label": "Constipation",
+              "value": "constipation"
+            },
+            {
+              "label": "Feels full quickly",
+              "value": "early_satiety"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "symptom_severity",
+          "label": "Severity",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Intermittent / mild",
+              "value": "mild"
+            },
+            {
+              "label": "Constant / severe",
+              "value": "severe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Functional Capacity",
+      "fields": [
+        {
+          "type": "radio",
+          "name": "functional_status",
+          "label": "Functional capacity",
+          "options": [
+            {
+              "label": "No dysfunction",
+              "value": "normal"
+            },
+            {
+              "label": "Reduced capacity",
+              "value": "reduced"
+            },
+            {
+              "label": "Bed / chair ridden",
+              "value": "bedridden"
+            }
+          ]
+        },
+        {
+          "type": "radio",
+          "name": "functional_change_2_weeks",
+          "label": "Change in past 2 weeks",
+          "options": [
+            {
+              "label": "Improved",
+              "value": "improved"
+            },
+            {
+              "label": "No change",
+              "value": "no_change"
+            },
+            {
+              "label": "Decreased",
+              "value": "decreased"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Metabolic Requirement",
+      "fields": [
+        {
+          "type": "radio",
+          "name": "high_metabolic_demand",
+          "label": "High metabolic requirement",
+          "options": [
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Subcutaneous Fat",
+      "fields": [
+        {
+          "type": "radio-matrix",
+          "name": "under_eyes",
+          "label": "Under the eyes",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "triceps",
+          "label": "Triceps",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "biceps",
+          "label": "Biceps",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Muscle Wasting",
+      "fields": [
+        {
+          "type": "radio-matrix",
+          "name": "temple",
+          "label": "Temple",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "clavicle",
+          "label": "Clavicle",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "shoulder",
+          "label": "Shoulder",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "scapula",
+          "label": "Scapula/Ribs",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "quadriceps",
+          "label": "Quadriceps",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "calf",
+          "label": "Calf",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "knee",
+          "label": "Knee",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "interosseous",
+          "label": "Interosseous",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Physical Examination",
+      "fields": [
+        {
+          "type": "radio-matrix",
+          "name": "oedema",
+          "label": "Oedema",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        },
+        {
+          "type": "radio-matrix",
+          "name": "ascites",
+          "label": "Ascites",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Mild / Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "SGA Rating",
+      "fields": [
+        {
+          "type": "radio",
+          "name": "sga_rating",
+          "options": [
+            {
+              "label": "A – Well nourished",
+              "value": "A"
+            },
+            {
+              "label": "B – Mild / Moderate malnutrition",
+              "value": "B"
+            },
+            {
+              "label": "C – Severe malnutrition",
+              "value": "C"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Contributing Factors",
+      "fields": [
+        {
+          "type": "checkbox-group",
+          "name": "contributing_factors",
+          "options": [
+            {
+              "label": "Cachexia",
+              "value": "cachexia"
+            },
+            {
+              "label": "Sarcopenia",
+              "value": "sarcopenia"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

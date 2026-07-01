@@ -1,4 +1,4 @@
-const SCHEMA = {
+export const SCHEMA = {
   "title": "Binocular Vision",
   "sections": [
     {
@@ -690,6 +690,15 @@ const SCHEMA = {
             {
               "label": "Distance",
               "value": "distance"
+            },
+            {
+              "label": "ADD",
+              "value": "add_ref",
+              "merge": 4
+            },
+            {
+              "label": "Near",
+              "value": "near_ref"
             }
           ],
           "showIf": {

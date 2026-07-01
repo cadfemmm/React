@@ -134,6 +134,41 @@ function DonutCard({ title, total, segments, footer }) {
   );
 }
 
+/* ── Group Intervention (dashboard entry) ── */
+function GroupInterventionCard({ onOpen }) {
+  return (
+    <div className="bg-white rounded-xl shadow-card p-4">
+      <SectionHeader title="Group Intervention" />
+      <div
+        className="rounded-xl border border-red-100 bg-red-50/40 p-5 flex items-center gap-4 cursor-pointer transition-shadow hover:shadow-md"
+        onClick={onOpen}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen?.();
+          }
+        }}
+      >
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
+          style={{ background: "#fee2e2" }}
+        >
+          👥
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[15px] font-bold text-gray-900">Group Session Documentation</div>
+          <div className="text-[13px] text-muted mt-1">
+            Record group therapy sessions, health education, and multi-patient interventions.
+          </div>
+        </div>
+        <span className="text-[13px] font-semibold text-red-600 flex-shrink-0">Open →</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Appointment Table ── */
 const STATUS_STYLE = {
   Completed:    { bg: "#d1fae5", color: "#065f46" },
@@ -385,6 +420,7 @@ export default function DepartmentDashboard({
   recordingsCount = 0,
   onViewAllPatients,
   onNewAppointment,
+  onGroupIntervention,
   onPOCardClick,        // P&O only: called with card title ("Wheelchair" | "3D")
 }) {
   const today = new Date().toLocaleDateString("en-GB", {
@@ -473,9 +509,13 @@ export default function DepartmentDashboard({
         </div>
       )}
 
-      {/* ── Appointments + Pending ── */}
+      {/* ── Group Intervention + Pending (replaces Today's Appointments) ── */}
       <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 300px" }}>
-        <AppointmentTable appointments={appointments} onViewAll={onViewAllPatients} />
+        {onGroupIntervention ? (
+          <GroupInterventionCard onOpen={onGroupIntervention} />
+        ) : (
+          <AppointmentTable appointments={appointments} onViewAll={onViewAllPatients} />
+        )}
         <PendingActions items={pendingActions} />
       </div>
 

@@ -2,16 +2,14 @@ import React, { useState, useEffect, useMemo } from "react";
 import AudiologyDepartmentAdultPage    from "./components/AudiologyAdultIA";
 import AudiologyDepartmentPediatricPage from "./components/AudiologyPediatricIA";
 import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
-import AudiologyGroupAssessmentForm from "./components/AudiologyGroup";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import AssessmentLoader from "../../assessment";
+import { fetchPatientsList } from "../../shared/api/patientsList";
 
 /* ── Assessment type cards ── */
 const OPTION_CARDS = [
   { id: "initial",  title: "Initial Assessment",    desc: "Full SOAP assessment for new patient",      icon: "📋", color: "#2563EB" },
   { id: "followup", title: "Follow-up Visit",        desc: "Follow-up visit documentation",             icon: "🔄", color: "#059669" },
   { id: "progress", title: "Progress Intervention",  desc: "Track progress and interventions",          icon: "📈", color: "#7C3AED" },
-  { id: "group",    title: "Group Intervention",     desc: "Group session documentation",               icon: "👥", color: "#EA580C" },
 ];
 
 const DEPARTMENT = "Audiology";
@@ -26,25 +24,19 @@ function getAssessmentComponent(patient) {
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
 
 export default function AudiologyPatients({ onBack }) {
-  const userRole = localStorage.getItem("userRole") || "";
-
   const [patients,         setPatients]         = useState([]);
   const [loading,          setLoading]          = useState(true);
   const [search,           setSearch]           = useState("");
   const [selectedPatient,  setSelectedPatient]  = useState(null);
-  const [assessmentView,   setAssessmentView]   = useState(null); // "initial" | "followup" | "progress" | "group"
+  const [assessmentView,   setAssessmentView]   = useState(null); // "initial" | "followup" | "progress"
 
   /* ── Fetch patients from API ── */
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
       try {
-        const url = API_URL.PATIENT +
-          (['Admin', 'Staff'].includes(userRole)
-            ? `?department=${encodeURIComponent(DEPARTMENT)}`
-            : '');
-        const res = await api.get(url);
-        setPatients(res.data.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch {
         setPatients([]);
       } finally {
@@ -69,7 +61,16 @@ export default function AudiologyPatients({ onBack }) {
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentView) {
     const Component = getAssessmentComponent(selectedPatient);
-    const isAdult   = Component === AudiologyDepartmentAdultPage;
+
+    // initial — use shared AssessmentLoader (has Start + Referral buttons)
+    if (assessmentView === "initial") {
+      return (
+        <AssessmentLoader
+          department="Audiology"
+          patient={selectedPatient}
+        />
+      );
+    }
 
     // progress — dedicated form for both adult and pediatric
     if (assessmentView === "progress") {
@@ -82,17 +83,7 @@ export default function AudiologyPatients({ onBack }) {
       );
     }
 
-    // group — coming soon
-    if (assessmentView === "group") {
-      return (
-        <AudiologyGroupAssessmentForm
-          patient={selectedPatient}
-          onSubmit={() => setAssessmentView(null)}
-          onBack={() => setAssessmentView(null)}
-        />
-      );
-    }
-
+    // initial and followup use age-based components
     return (
       <Component
         patient={selectedPatient}
@@ -246,7 +237,7 @@ export default function AudiologyPatients({ onBack }) {
                     background: AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length]
                   }}>{initial}</div>
                   <div>
-                    <div style={S.tdName}>{p.name || p.email}</div>
+                    <div style={S.tdName}>{p.name || p.email || "—"}</div>
                     {p.gender && <div style={S.tdSub}>{p.gender}</div>}
                   </div>
                 </div>

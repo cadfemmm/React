@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
-import api from "../../shared/api/apiClient";
-import { API_URL } from "../../platform/config/api.config";
+import { fetchPatientsList } from "../../shared/api/patientsList";
+import { filterApprovedPatients } from "../../shared/utils/patientFilters";
 import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
 import ProgressIntervention from "./ProgressIntervention";
@@ -89,19 +89,13 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
   const [loading, setLoading]                 = useState(true);
   const [search, setSearch]                   = useState("");
 
-  const userRole = localStorage.getItem("userRole") || "";
-
   /* ── Fetch patients from API ── */
   useEffect(() => {
     const fetchPatients = async () => {
       setLoading(true);
       try {
-        const url = API_URL.PATIENT +
-          (['Admin', 'Staff'].includes(userRole)
-            ? `?department=${encodeURIComponent(DEPARTMENT)}`
-            : '');
-        const res = await api.get(url);
-        setPatients(res.data.results || []);
+        const list = await fetchPatientsList();
+        setPatients(list);
       } catch {
         setPatients([]);
       } finally {
@@ -112,8 +106,9 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
   }, []);
 
   /* ── Filter by tab + search ── */
-  const newPatients      = useMemo(() => patients.filter(p => (p.status || "").toLowerCase() !== "old"), [patients]);
-  const existingPatients = useMemo(() => patients.filter(p => (p.status || "").toLowerCase() === "old"), [patients]);
+  const approvedPatients = useMemo(() => filterApprovedPatients(patients), [patients]);
+  const newPatients      = useMemo(() => approvedPatients.filter(p => (p.status || "").toLowerCase() !== "old"), [approvedPatients]);
+  const existingPatients = useMemo(() => approvedPatients.filter(p => (p.status || "").toLowerCase() === "old"), [approvedPatients]);
   const baseList         = tab === "new" ? newPatients : existingPatients;
 
   const filtered = useMemo(() => {
@@ -288,12 +283,7 @@ if (selectedCard === "3D") {
 
         {/* Card grid */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "44px 28px" }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", marginBottom: 6 }}>
-            Select Assessment Type
-          </div>
-          <div style={{ fontSize: 14, color: "#6B7280", marginBottom: 36 }}>
-            Choose the appropriate assessment for this patient visit
-          </div>
+
           <div style={{
             display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
             gap: 20, width: "100%", maxWidth: 860

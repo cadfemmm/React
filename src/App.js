@@ -16,9 +16,8 @@ import Signup from "./pages/Signup";
 import SpinalInjury from "./pages/SpinalInjury";
 import stroke from "./pages/stroke";
 import latest from "./pages/Carddisplay.js";
-import PatientDetails from "./features/Psychology/components/PatientDetails.jsx";
+// import PatientDetails from "./features/Psychology/components/PatientDetails.jsx";
 import DeptEntry from "./pages/DeptEntry";
-import SessionAssessmentPage from "./features/Optometry/pages/SessionAssessmentPage";
 import TokenHandler from "./shared/auth/TokenHandler";
 
 // ── Auth check ──────────────────────────────────────────────────────────────
@@ -69,7 +68,7 @@ function App() {
 
             {/* ── SSO deep-links — handle their own auth via ?token= ── */}
             <Route path="/dept/:department"                component={DeptEntry} />
-            <Route path="/optometry/assessment/:sessionId" exact component={SessionAssessmentPage} />
+            {/* <Route path="/optometry/assessment/:sessionId" exact component={SessionAssessmentPage} /> */}
 
             {/* ── Protected pages — redirect to / if not logged in ── */}
             <PrivateRoute path="/Home"           exact component={Home} />
@@ -82,7 +81,7 @@ function App() {
             <PrivateRoute path="/Doctor"         exact component={stroke} />
             <PrivateRoute path="/Spinalinjury"   exact component={SpinalInjury} />
             <PrivateRoute path="/Output"         exact component={Output} />
-            <PrivateRoute path="/psychology/patient/:id" exact component={PatientDetails} />
+            {/* <PrivateRoute path="/psychology/patient/:id" exact component={PatientDetails} /> */}
             <PrivateRoute path="/Modalities"     exact component={latest} />
           </Switch>
         </Router>

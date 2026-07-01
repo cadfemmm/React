@@ -3,6 +3,11 @@ import { useEffect, useState, useCallback, createContext } from "react";
 // Common Form Builder
 import CommonFormBuilder from "../features/CommonComponenets/FormBuilder.jsx";
 
+// Equipment Booking
+import EquipmentBookingPopup from "../features/Audiology/components/EquipmentBookingPopup.jsx";
+import { BookAppointmentModal } from "../features/book-appointment-modal/BookAppointmentModal";
+import { fetchBookingQueue } from "../features/book-appointment-modal/bookingQueueService";
+
 // Utils
 import { localDateTimeString } from "../shared/utils/dateFormatter";
 
@@ -15,6 +20,7 @@ import EmptyState from "../shared/ui/EmptyState";
 import { ShimmerForm } from "../shared/ui/Shimmer";
 import ConfirmModal from "../shared/ui/ConfirmModal";
 import ReferralModal from "../shared/ui/ReferralModal";
+import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreviewModal";
 
 // Schema Load
 import actions from "../schema/actions.js";
@@ -22,6 +28,11 @@ import actions from "../schema/actions.js";
 // API calls
 import forms from "./forms.js";
 import session from "./session.js";
+
+// ICD Components
+import AudiologyICDSection from "../features/Audiology/components/AudiologyICDSection";
+import AudiologySttFloatingMic from "../features/Audiology/components/AudiologySttFloatingMic";
+import OptometryICDSection from "../features/Optometry/components/OptometryICDSection";
 
 // ── Context ────────────────────────────────────────────────────────────────
 // Carries patient + the questionaire FormData ID map + save helper
@@ -62,6 +73,77 @@ export default function AssessmentLoader({ patient, department }) {
     plan: {},
   });
 
+  // Equipment booking state
+  const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment]       = useState(null);
+  const [bookedEquipmentIds, setBookedEquipmentIds]     = useState([]);
+  const [equipmentOptions, setEquipmentOptions]         = useState([]);
+
+  const equipmentStorageKey = patient?.id ? `patient_${patient.id}_equipment` : null;
+
+  const getStoredEquipmentItems = () => {
+    if (!equipmentStorageKey) return [];
+    try {
+      const raw = localStorage.getItem(equipmentStorageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.error("Failed to parse stored equipment", e);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (!equipmentStorageKey) return;
+    const storedItems = getStoredEquipmentItems();
+    setBookedEquipmentIds(
+      storedItems
+        .map((item) => item.id || item.value)
+        .filter((id) => !!id),
+    );
+  }, [equipmentStorageKey]);
+
+  // Appointment booking state
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const [bookingQueueRow, setBookingQueueRow]           = useState(null);
+  const [sectionPreview, setSectionPreview] = useState(null);
+  const isPsychology = department === "Psychology";
+
+useEffect(() => {
+  if (!patient || !department) return;
+
+  fetchBookingQueue({ limit: 100 })
+    .then((data) => {
+      const patientName = (
+        patient?.full_name ||
+        patient?.name ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const departmentName = department
+        .trim()
+        .toLowerCase();
+
+      const row = data.rows?.find(
+        (r) =>
+          (r.patient_name || "")
+            .trim()
+            .toLowerCase() === patientName &&
+          (r.department || "")
+            .trim()
+            .toLowerCase() === departmentName
+      );
+
+      // console.log("department:", department);
+      // console.log("patient:", patientName);
+      // console.log("matched booking row:", row);
+
+      setBookingQueueRow(row || null);
+    })
+    .catch(console.error);
+}, [patient, department]);
+
   // Mapping template to the schema registry
   const loadTemplates = async () => {
     setIsLoading(true);
@@ -70,34 +152,90 @@ export default function AssessmentLoader({ patient, department }) {
     try {
       const map = {};
       const subAssessment = {};
-      const data = await forms.fetch(department);
+      const data = await forms.fetch(department);      
       if (!data || data.length === 0) {
         setError(true);
         return;
       }
       data.forEach((template) => {
-        const key = template.assessment_type?.toLowerCase();
+        const key = template.assessment_type?.toLowerCase();        
         // MAIN ASSESSMENT
         if (TABS.includes(key)) {
-          map[key] = {
+          let processedTemplate = {
             ...template.body,
             id: template.id,
             name: template.name,
             actions: actions.ACTIONS_BUTTON,
           };
+          
+          // ✨ ADD ICD COMPONENTS FOR SPECIFIC DEPARTMENTS AND TABS
+          if ((department === "Audiology" || department === "Optometry") && (key === "assessment" || key === "plan")) {
+            
+            // Choose the right component based on department
+            const ICDComponent = department === "Optometry" ? OptometryICDSection : AudiologyICDSection;
+            
+            if (processedTemplate.sections && processedTemplate.sections[0] && processedTemplate.sections[0].fields) {
+              if (key === "assessment") {
+                // Add ICD selection + ICF display to Assessment tab
+                processedTemplate.sections[0].fields.push({
+                  type: "custom",
+                  name: "icd_icf_ichi_section",
+                  render: ({ values, onChange }) => {
+                    return (
+                      <ICDComponent 
+                        values={values} 
+                        onChange={onChange} 
+                        mode="icd-icf" 
+                      />
+                    );
+                  }
+                });
+              } else if (key === "plan") {
+                // Add ICHI display to Plan tab (insert after intervention_plan if it exists)
+                const fields = processedTemplate.sections[0].fields;
+                
+                const interventionIndex = fields.findIndex(f => f.name === "intervention_plan");
+                
+                const ichiComponent = {
+                  type: "custom",
+                  name: "ichi_section", 
+                  render: ({ values, onChange }) => {
+                    return (
+                      <ICDComponent 
+                        values={values} 
+                        onChange={onChange} 
+                        mode="plan" 
+                      />
+                    );
+                  }
+                };
+                
+                if (interventionIndex !== -1) {
+                  // Insert after intervention_plan
+                  fields.splice(interventionIndex + 1, 0, ichiComponent);
+                } else {
+                  // If no intervention_plan field, add at the end
+                  fields.push(ichiComponent);
+                }
+              }
+            }
+          }
+          
+          map[key] = processedTemplate;
         }
         // SUB ASSESSMENTS
         if (template?.sub_assessment?.length) {
           subAssessment[key] = template.sub_assessment.reduce((acc, sub) => {
+            const body =
+              sub.body && typeof sub.body === "object" ? sub.body : {};
             acc[sub.name] = {
               ...sub,
+              ...body,
               id: sub.id,
               name: sub.name,
               type: sub.type,
               score: sub.score ?? null,
-              body: sub.body ?? {},
               actions: actions.ACTIONS_BUTTON,
-              // session will override later
               session_id: null,
             };
             return acc;
@@ -369,7 +507,16 @@ export default function AssessmentLoader({ patient, department }) {
 
   // OnChange handler
   const onChange = useCallback(
-    async (name, value) => {
+    async (name, value) => {      
+      // =========================
+      // EQUIPMENT OPTIONS CAPTURE
+      // =========================
+      // When FormBuilder lazily loads equipment into `*_options`, capture it
+      // so the booking popup has the full list available.
+      if (name.endsWith("_options") && Array.isArray(value) && value.length > 0) {
+        setEquipmentOptions(value);
+      }
+
       // =========================
       // SUB ASSESSMENT HANDLING
       // =========================
@@ -394,7 +541,7 @@ export default function AssessmentLoader({ patient, department }) {
               Object.entries(currentTab).map(([key, template]) => {
                 // MATCH SELECTED ASSESSMENT
                 if (
-                  template.id === value ||
+                  String(template.id) === String(value) ||
                   template.name === tm?.data?.name ||
                   key === tm?.data?.name
                 ) {
@@ -432,6 +579,27 @@ export default function AssessmentLoader({ patient, department }) {
           });
         }
       }
+      
+      // =========================
+      // ICD/ICF/ICHI DATA PERSISTENCE
+      // =========================
+      // When ICD data is updated, we need to persist it across ALL tabs
+      // so it's available in the Plan tab
+      if (name === "selected_icds" || name === "icf_data" || name === "ichi_data") {
+        setAssessmentsValues((v) => {
+          const newValues = { ...v };
+          // Update ALL tabs with the ICD-related data to ensure persistence
+          ["subjective", "objective", "assessment", "plan"].forEach(tab => {
+            newValues[tab] = {
+              ...newValues[tab],
+              [name]: value
+            };
+          });
+          return newValues;
+        });
+        return;
+      }
+      
       // =========================
       // MAIN ASSESSMENT VALUES
       // =========================
@@ -501,6 +669,16 @@ export default function AssessmentLoader({ patient, department }) {
             "Assessment data is accurate and complete",
             "Submission cannot be edited after confirmation",
           ]}
+        />
+      )}
+      {sectionPreview && (
+        <AssessmentSectionPreviewModal
+          title={sectionPreview.title}
+          schema={sectionPreview.schema}
+          values={sectionPreview.values}
+          assessmentRegistry={sectionPreview.assessmentRegistry}
+          excludeSubAssessments
+          onClose={() => setSectionPreview(null)}
         />
       )}
       <div style={S.page}>
@@ -600,9 +778,8 @@ export default function AssessmentLoader({ patient, department }) {
         <div style={S.soapShell}>
           {/* Tab Buttons UI */}
           <div style={S.tabBar}>
-            {TABS.map((tab, idx) => {
+            {TABS.map((tab) => {
               const isActive = activeTab === tab;
-              const isDone = idx < TABS.indexOf(activeTab);
               const hasData = ""; // ----= !!formDataIds[tab];
               // Tab Button
               return (
@@ -611,7 +788,7 @@ export default function AssessmentLoader({ patient, department }) {
                   onClick={() => setActiveTab(tab)}
                   style={{
                     ...S.tab,
-                    ...(isActive ? S.tabActive : isDone ? S.tabDone : {}),
+                    ...(isActive ? S.tabActive : {}),
                   }}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -657,61 +834,207 @@ export default function AssessmentLoader({ patient, department }) {
                 />
               </div>
             ) : (
-              <CommonFormBuilder
-                readOnly={false}
-                onChange={onChange}
-                submitted={isSubmitted}
-                onAction={handleAction}
-                schema={templates[activeTab]}
-                values={assessmentsValues[activeTab] || {}}
-                assessmentRegistry={Object.values(
-                  subAssessmentTemplate[activeTab] || {},
-                )}
-                parentSections={templates?.[activeTab]?.sections || []}
-              >
-                <div style={S.actionRow}>
-                  <button
-                    style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "#2563eb")
-                    }
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        activeTab === "plan" ? "#1d4ed8" : "#1a6fc4")
-                    }
-                    onClick={() => {
-                      // FINAL STEP
-                      if (activeTab === "plan") {
-                        setIsConfirmModal(true);
+              (() => {
+                // Patch equipment-list fields in the plan tab with onBook handler
+                const handleEquipmentBook = (equipment) => {
+                  setSelectedEquipment(equipment);
+                  setEquipmentBookingOpen(true);
+                };
 
-                        return;
+                let activeSchema = templates[activeTab];
+                if (activeTab === "plan" && activeSchema) {
+                  const patchFields = (fields) =>
+                    fields.map((f) => {
+                      if (f.type === "equipment-list") {
+                        return {
+                          ...f,
+                          onBook: handleEquipmentBook,
+                          bookedEquipmentIds,
+                        };
                       }
+                      return f;
+                    });
 
-                      // NORMAL NEXT
-                      handleAction("next");
-                    }}
+                  activeSchema = {
+                    ...activeSchema,
+                    sections: (activeSchema.sections || []).map((sec) => ({
+                      ...sec,
+                      fields: patchFields(sec.fields || []),
+                    })),
+                    // also patch top-level fields if the schema uses that shape
+                    ...(activeSchema.fields
+                      ? { fields: patchFields(activeSchema.fields) }
+                      : {}),
+                  };
+                }
+
+                return (
+                  <CommonFormBuilder
+                    readOnly={false}
+                    onChange={onChange}
+                    submitted={isSubmitted}
+                    onAction={handleAction}
+                    schema={activeSchema}
+                    values={assessmentsValues[activeTab] || {}}
+                    assessmentRegistry={Object.values(
+                      subAssessmentTemplate[activeTab] || {},
+                    )}
+                    parentSections={templates?.[activeTab]?.sections || []}
+                    enableSectionPreview={isPsychology}
                   >
-                    {activeTab === "plan"
-                      ? "Submit Assessment"
-                      : (() => {
-                          const currentIndex = TABS.indexOf(activeTab);
+                    <div style={S.actionRow}>
+                      {activeTab === "plan" && (
+                        <button
+                          type="button"
+                          style={S.bookAppointmentBtn}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#0b4fd4")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "#0d6efd")}
+                          onClick={() => setAppointmentModalOpen(true)}
+                        >
+                          Book Appointment
+                        </button>
+                      )}
+                      {isPsychology && (
+                        <button
+                          type="button"
+                          style={S.previewBtn}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "#f1f5f9";
+                            e.currentTarget.style.borderColor = "#94a3b8";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "#fff";
+                            e.currentTarget.style.borderColor = "#cbd5e1";
+                          }}
+                          onClick={() =>
+                            setSectionPreview({
+                              title: `Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
+                              schema: activeSchema,
+                              values: assessmentsValues[activeTab] || {},
+                              assessmentRegistry: Object.values(
+                                subAssessmentTemplate[activeTab] || {},
+                              ),
+                            })
+                          }
+                        >
+                          Preview
+                        </button>
+                      )}
+                      <button
+                        style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "#2563eb")
+                        }
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            activeTab === "plan" ? "#1d4ed8" : "#1a6fc4")
+                        }
+                        onClick={() => {
+                          // FINAL STEP
+                          if (activeTab === "plan") {
+                            setIsConfirmModal(true);
 
-                          const nextTab =
-                            currentIndex < TABS.length - 1
-                              ? TABS[currentIndex + 1]
-                              : null;
+                            return;
+                          }
 
-                          return nextTab
-                            ? `Next :${nextTab.charAt(0).toUpperCase() + nextTab.slice(1)} →`
-                            : "Submit";
-                        })()}
-                  </button>
-                </div>
-              </CommonFormBuilder>
+                          // NORMAL NEXT
+                          handleAction("next");
+                        }}
+                      >
+                        {activeTab === "plan"
+                          ? "Submit Assessment"
+                          : (() => {
+                              const currentIndex = TABS.indexOf(activeTab);
+
+                              const nextTab =
+                                currentIndex < TABS.length - 1
+                                  ? TABS[currentIndex + 1]
+                                  : null;
+
+                              return nextTab
+                                ? `Next :${nextTab.charAt(0).toUpperCase() + nextTab.slice(1)} →`
+                                : "Submit";
+                            })()}
+                      </button>
+                    </div>
+                  </CommonFormBuilder>
+                );
+              })()
             )}
           </div>
         </div>
       </div>
+      <EquipmentBookingPopup
+        open={equipmentBookingOpen}
+        equipmentOptions={equipmentOptions}
+        selectedEquipment={selectedEquipment}
+        onClose={() => setEquipmentBookingOpen(false)}
+        onBooked={(equipment) => {
+          const entry = (() => {
+            if (!equipment) return null;
+            if (typeof equipment === "object") {
+              return {
+                id: equipment.id || equipment.value || String(equipment),
+                name: equipment.name || equipment.label || String(equipment),
+                status: equipment.status || "Booked",
+              };
+            }
+            const option = equipmentOptions.find(
+              (item) => item.value === equipment || item.id === equipment,
+            );
+            return {
+              id: equipment,
+              name: option?.label || option?.name || String(equipment),
+              status: "Booked",
+            };
+          })();
+
+          if (!entry?.id) {
+            setEquipmentBookingOpen(false);
+            return;
+          }
+
+          setBookedEquipmentIds((prev) =>
+            prev.includes(entry.id) ? prev : [...prev, entry.id],
+          );
+
+          if (equipmentStorageKey) {
+            try {
+              const stored = getStoredEquipmentItems();
+              const exists = stored.some((item) => item.id === entry.id);
+              const updated = exists ? stored : [entry, ...stored];
+              localStorage.setItem(equipmentStorageKey, JSON.stringify(updated));
+            } catch (e) {
+              console.error("Failed to save booked equipment", e);
+            }
+          }
+
+          setEquipmentBookingOpen(false);
+        }}
+      />
+      {department === "Audiology" && (
+        <AudiologySttFloatingMic onToast={setToast} />
+      )}
+      <BookAppointmentModal
+        open={appointmentModalOpen}
+        row={{
+          id: bookingQueueRow?.booking_id,
+          patient: patient?.full_name || patient?.name || "",
+          refId: patient?.referral_id || "",
+          department,
+          priority: "Medium",
+        }}
+        initialMode="doctor"
+        onClose={() => setAppointmentModalOpen(false)}
+        onConfirm={(data) => {
+          console.log("Booking confirmed", data);
+          setAppointmentModalOpen(false);
+        }}
+        onRequestOverride={() => {}}
+        onAddWaitlist={() => {}}
+        onConflict={() => {}}
+        onCancel={() => setAppointmentModalOpen(false)}
+      />
     </PatientContext.Provider>
   );
 }
@@ -755,7 +1078,6 @@ const S = {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     background: "#fff",
-    borderBottom: "1px solid #f1f5f9",
   },
   tab: {
     display: "flex",
@@ -777,11 +1099,8 @@ const S = {
   tabActive: {
     color: "#2563eb",
     fontWeight: 700,
-    borderBottomColor: "transparent",
+    borderBottomColor: "#2563eb",
     background: "none",
-  },
-  tabDone: {
-    color: "#16a34a",
   },
 
   /* Tab content — full width */
@@ -802,6 +1121,17 @@ const S = {
     borderTop: "1px solid #e2e8f0",
     background: "#f8fafc",
   },
+  previewBtn: {
+    background: "#fff",
+    color: "#334155",
+    border: "1px solid #cbd5e1",
+    borderRadius: 6,
+    padding: "9px 20px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "background .15s, border-color .15s",
+  },
   nextBtn: {
     background: "#2563eb",
     color: "#fff",
@@ -813,6 +1143,17 @@ const S = {
     cursor: "pointer",
     transition: "background .15s",
     boxShadow: "0 1px 4px rgba(37,99,235,0.2)",
+  },
+  bookAppointmentBtn: {
+    background: "#0d6efd",
+    color: "#fff",
+    border: "1px solid #0d6efd",
+    borderRadius: 6,
+    padding: "9px 20px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "background .15s",
   },
   submitBtn: {
     background: "#2563eb",

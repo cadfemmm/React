@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
+import { SCHEMA } from "../../../schema/psychology/phqform";
 
 export default function PHQ9FormBuilder({ patient, onSubmit, onBack }) {
   const [values, setValues] = useState({});
@@ -10,59 +11,6 @@ export default function PHQ9FormBuilder({ patient, onSubmit, onBack }) {
   const storageKey = patient?.id
     ? `psychology::${patient.id}::PHQ9`
     : null;
-
-  /* ---------------- SCHEMA ---------------- */
-  const PHQ9_SCHEMA = useMemo(() => {
-    const optionsWithScores = [
-      { label: "Not at all (0)", value: 0 },
-      { label: "Several days (1)", value: 1 },
-      { label: "More than half the days (2)", value: 2 },
-      { label: "Nearly every day (3)", value: 3 }
-    ];
-    const optionsWithoutScores = [
-      { label: "Not at all", value: 0 },
-      { label: "Several days", value: 1 },
-      { label: "More than half the days", value: 2 },
-      { label: "Nearly every day", value: 3 }
-    ];
-
-    return {
-      title: "Patient Health Questionnaire (PHQ-9)",
-      enableScoreToggle: true,
-      actions: [{ type: "toggle-show-scores" }],
-      sections: [
-        {
-          fields: [
-            "Little interest or pleasure in doing things.",
-            "Feeling down, depressed, or hopeless.",
-            "Trouble falling or staying asleep, or sleeping too much.",
-            "Feeling tired or having little energy.",
-            "Poor appetite or overeating.",
-            "Feeling bad about yourself — or that you are a failure or have let yourself or your family down.",
-            "Trouble concentrating on things, such as reading the newspaper or watching television.",
-            "Moving or speaking so slowly that other people could have noticed? Or being so fidgety or restless that you have been moving more than usual.",
-            "Thoughts that you would be better off dead or of hurting yourself in some way."
-          ].map((text, index) => ({
-            name: `q${index + 1}`,
-            label: `${index + 1}. ${text}`,
-            type: "radio-matrix",
-            validation: { required: true, message: "This question is required" },
-            info: index === 0 && scoresVisible ? {
-              title: "PHQ-9 Scale",
-              content: [
-                "0 – Not at all",
-                "1 – Several days",
-                "2 – More than half the days",
-                "3 – Nearly every day"
-              ]
-            } : undefined,
-            showInfoInRow: false,
-            options: scoresVisible ? optionsWithScores : optionsWithoutScores
-          }))
-        }
-      ]
-    };
-  }, [scoresVisible]);
 
   /* ---------------- AUTO REFILL ---------------- */
   useEffect(() => {
@@ -82,7 +30,7 @@ export default function PHQ9FormBuilder({ patient, onSubmit, onBack }) {
   };
 
   const allRequiredFilled = useMemo(() => {
-    return PHQ9_SCHEMA.sections[0].fields.every(f => values[f.name] !== undefined);
+    return SCHEMA.sections[0].fields.every(f => values[f.name] !== undefined);
   }, [values]);
 
   /* ---------------- SCORE ---------------- */
@@ -172,7 +120,7 @@ export default function PHQ9FormBuilder({ patient, onSubmit, onBack }) {
   return (
     <div style={mainContent}>
       <CommonFormBuilder
-        schema={PHQ9_SCHEMA}
+        schema={SCHEMA}
         layout="nested"
         values={values}
         onChange={onChange}

@@ -1,0 +1,1444 @@
+const SCHEMA_OBJECTIVE= {
+  "sections": [
+    {
+      "fields": [
+        {
+          "name": "speech_functions",
+          "label": "Speech Language Assessment",
+          "type": "checkbox-group",
+          "labelAbove": true,
+          "options": [
+            {
+              "label": "Language",
+              "value": "language"
+            },
+            {
+              "label": "Speech",
+              "value": "speech"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Language",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "language"
+          }
+        },
+        {
+          "name": "language_assessment_tools",
+          "label": "Assessment tool",
+          "type": "checkbox-group",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "language"
+          },
+          "options": [
+            {
+              "label": "Western Aphasia Battery – Revised",
+              "value": "wab_r"
+            },
+            {
+              "label": "Boston Diagnostic Aphasia Examination",
+              "value": "bdae"
+            },
+            {
+              "label": "Cognitive Linguistic Quick Test",
+              "value": "clqt"
+            },
+            {
+              "label": "Comprehensive Aphasia Test",
+              "value": "cat"
+            },
+            {
+              "label": "Mount Wilga High Level Language Test (MWHLLT)",
+              "value": "mwhllt"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "language_assessment_other",
+          "label": "Specify other assessment tool",
+          "type": "input",
+          "showIf": {
+            "field": "language_assessment_tools",
+            "includes": "other",
+            "and": {
+              "field": "speech_functions",
+              "includes": "language"
+            }
+          }
+        },
+        {
+          "name": "language_score",
+          "label": "Score",
+          "type": "input",
+          "placeholder": "Enter score...",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "language"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Impairments observed in",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "language"
+          }
+        },
+        {
+          "name": "lang_impairments",
+          "label": "Impairments observed in",
+          "type": "checkbox-group",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "language"
+          },
+          "options": [
+            {
+              "label": "Auditory comprehension",
+              "value": "auditory_comprehension"
+            },
+            {
+              "label": "Verbal expression",
+              "value": "verbal_expression"
+            },
+            {
+              "label": "Naming / Word-finding",
+              "value": "naming"
+            },
+            {
+              "label": "Sentence formulation",
+              "value": "sentence_formulation"
+            },
+            {
+              "label": "Pragmatics",
+              "value": "pragmatics"
+            },
+            {
+              "label": "Cognitive-communication skills",
+              "value": "cognitive_comm"
+            },
+            {
+              "label": "Reading comprehension",
+              "value": "reading_comprehension"
+            },
+            {
+              "label": "Written expression",
+              "value": "written_expression"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "lang_impairments_other",
+          "label": "Specify other impairment",
+          "type": "input",
+          "showIf": {
+            "field": "lang_impairments",
+            "includes": "other",
+            "and": {
+              "field": "speech_functions",
+              "includes": "language"
+            }
+          }
+        },
+        {
+          "name": "lang_auditory_severity",
+          "label": "Auditory comprehension – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "qm0 - No impairment",
+              "value": "qm0"
+            },
+            {
+              "label": "qm1 - Mild impairment",
+              "value": "qm1"
+            },
+            {
+              "label": "qm2 - Moderate impairment",
+              "value": "qm2"
+            },
+            {
+              "label": "qm3 - Severe impairment",
+              "value": "qm3"
+            },
+            {
+              "label": "qm4 - Complete impairment",
+              "value": "qm4"
+            },
+            {
+              "label": "qm8 - Not applicable",
+              "value": "qm8"
+            },
+            {
+              "label": "qm9 - Not specified",
+              "value": "qm9"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "lang_impairments",
+            "includes": "auditory_comprehension",
+            "and": {
+              "field": "speech_functions",
+              "includes": "language"
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Speech",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "speech"
+          }
+        },
+        {
+          "name": "speech_assessment_tools",
+          "label": "Assessment tool",
+          "type": "checkbox-group",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "speech"
+          },
+          "options": [
+            {
+              "label": "Frenchay Dysarthria Assessment (FDA-2)",
+              "value": "fda2"
+            },
+            {
+              "label": "Robertson",
+              "value": "robertson"
+            },
+            {
+              "label": "Apraxia Battery for Adults (ABA-2)",
+              "value": "aba2"
+            },
+            {
+              "label": "Stuttering Severity Index (SSI-4)",
+              "value": "ssi4"
+            },
+            {
+              "label": "One Page Stuttering Assessment",
+              "value": "one_page"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "speech_assessment_other",
+          "label": "Specify other assessment tool",
+          "type": "input",
+          "showIf": {
+            "field": "speech_assessment_tools",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "speech_score",
+          "label": "Score",
+          "type": "input",
+          "placeholder": "Enter score...",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "speech"
+          }
+        },
+        {
+          "name": "speech_fda2_graph",
+          "label": "Upload FDA-2 graph",
+          "type": "attach-file",
+          "accept": "image/*,.pdf",
+          "showIf": {
+            "field": "speech_assessment_tools",
+            "includes": "fda2"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Impairments observed in",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "speech"
+          }
+        },
+        {
+          "name": "speech_impairments",
+          "label": "Impairments observed in",
+          "type": "checkbox-group",
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "speech"
+          },
+          "options": [
+            {
+              "label": "Reflexes",
+              "value": "reflexes"
+            },
+            {
+              "label": "Respiratory support",
+              "value": "respiration"
+            },
+            {
+              "label": "Phonatory function",
+              "value": "phonatory"
+            },
+            {
+              "label": "Articulation: Lips / Tongue",
+              "value": "articulation"
+            },
+            {
+              "label": "Resonance",
+              "value": "resonance"
+            },
+            {
+              "label": "Prosody & intelligibility",
+              "value": "intelligibility"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "reflexes_severity",
+          "label": "Reflexes – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "0 - No impairment",
+              "value": "0"
+            },
+            {
+              "label": "1 - Mild impairment",
+              "value": "1"
+            },
+            {
+              "label": "2 - Moderate impairment",
+              "value": "2"
+            },
+            {
+              "label": "3 - Severe impairment",
+              "value": "3"
+            },
+            {
+              "label": "4 - Complete impairment",
+              "value": "4"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "reflexes"
+          }
+        },
+        {
+          "name": "reflexes_severity_other",
+          "label": "Specify other severity",
+          "type": "input",
+          "showIf": {
+            "field": "reflexes_severity",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "respiratory_severity",
+          "label": "Respiratory support – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "0 - No impairment",
+              "value": "0"
+            },
+            {
+              "label": "1 - Mild impairment",
+              "value": "1"
+            },
+            {
+              "label": "2 - Moderate impairment",
+              "value": "2"
+            },
+            {
+              "label": "3 - Severe impairment",
+              "value": "3"
+            },
+            {
+              "label": "4 - Complete impairment",
+              "value": "4"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "respiration"
+          }
+        },
+        {
+          "name": "respiratory_severity_other",
+          "label": "Specify other severity",
+          "type": "input",
+          "showIf": {
+            "field": "respiratory_severity",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "phonatory_severity",
+          "label": "Phonatory function – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "0 - No impairment",
+              "value": "0"
+            },
+            {
+              "label": "1 - Mild impairment",
+              "value": "1"
+            },
+            {
+              "label": "2 - Moderate impairment",
+              "value": "2"
+            },
+            {
+              "label": "3 - Severe impairment",
+              "value": "3"
+            },
+            {
+              "label": "4 - Complete impairment",
+              "value": "4"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "phonatory"
+          }
+        },
+        {
+          "name": "phonatory_severity_other",
+          "label": "Specify other severity",
+          "type": "input",
+          "showIf": {
+            "field": "phonatory_severity",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "articulation_severity",
+          "label": "Articulation: Lips / Tongue – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "0 - No impairment",
+              "value": "0"
+            },
+            {
+              "label": "1 - Mild impairment",
+              "value": "1"
+            },
+            {
+              "label": "2 - Moderate impairment",
+              "value": "2"
+            },
+            {
+              "label": "3 - Severe impairment",
+              "value": "3"
+            },
+            {
+              "label": "4 - Complete impairment",
+              "value": "4"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "articulation"
+          }
+        },
+        {
+          "name": "articulation_severity_other",
+          "label": "Specify other severity",
+          "type": "input",
+          "showIf": {
+            "field": "articulation_severity",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "resonance_severity",
+          "label": "Resonance – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "0 - No impairment",
+              "value": "0"
+            },
+            {
+              "label": "1 - Mild impairment",
+              "value": "1"
+            },
+            {
+              "label": "2 - Moderate impairment",
+              "value": "2"
+            },
+            {
+              "label": "3 - Severe impairment",
+              "value": "3"
+            },
+            {
+              "label": "4 - Complete impairment",
+              "value": "4"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "resonance"
+          }
+        },
+        {
+          "name": "resonance_severity_other",
+          "label": "Specify other severity",
+          "type": "input",
+          "showIf": {
+            "field": "resonance_severity",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "prosody_severity",
+          "label": "Prosody & intelligibility – severity",
+          "type": "single-select",
+          "options": [
+            {
+              "label": "0 - No impairment",
+              "value": "0"
+            },
+            {
+              "label": "1 - Mild impairment",
+              "value": "1"
+            },
+            {
+              "label": "2 - Moderate impairment",
+              "value": "2"
+            },
+            {
+              "label": "3 - Severe impairment",
+              "value": "3"
+            },
+            {
+              "label": "4 - Complete impairment",
+              "value": "4"
+            },
+            {
+              "label": "Other (specify)",
+              "value": "other"
+            }
+          ],
+          "placeholder": "— Select severity —",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "intelligibility"
+          }
+        },
+        {
+          "name": "prosody_severity_other",
+          "label": "Specify other severity",
+          "type": "input",
+          "showIf": {
+            "field": "prosody_severity",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "speech_impairments_other",
+          "label": "Specify other impairment",
+          "type": "input",
+          "showIf": {
+            "field": "speech_impairments",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "intelligibility_rating",
+          "label": "Intelligibility rating",
+          "type": "radio",
+          "labelAbove": true,
+          "options": [
+            {
+              "label": "5 - Completely intelligible",
+              "value": "5"
+            },
+            {
+              "label": "4 - Mostly intelligible",
+              "value": "4"
+            },
+            {
+              "label": "3 - Somewhat intelligible",
+              "value": "3"
+            },
+            {
+              "label": "2 - Mostly unintelligible",
+              "value": "2"
+            },
+            {
+              "label": "1 - Completely unintelligible",
+              "value": "1"
+            }
+          ],
+          "showIf": {
+            "field": "speech_functions",
+            "includes": "speech"
+          }
+        }
+      ]
+    }
+  ]
+}
+
+const SCHEMA_ASSESSMENT = {
+  "sections": [
+    {
+      "title": "Clinical Impression",
+      "fields": [
+        {
+          "name": "speech_language_status",
+          "label": "",
+          "type": "radio",
+          "options": [
+            {
+              "label": "No speech and language impairment observed",
+              "value": "none"
+            },
+            {
+              "label": "The patient presents with speech-language impairment(s)",
+              "value": "impaired"
+            }
+          ]
+        },
+        {
+          "name": "speech_language_diagnoses",
+          "label": "The patient presents with",
+          "type": "checkbox-group",
+          "showIf": {
+            "field": "speech_language_status",
+            "equals": "impaired"
+          },
+          "options": [
+            {
+              "label": "Aphasia",
+              "value": "aphasia"
+            },
+            {
+              "label": "Dysarthria",
+              "value": "dysarthria"
+            },
+            {
+              "label": "Apraxia of Speech",
+              "value": "apraxia"
+            },
+            {
+              "label": "Cognitive-Communication Disorder",
+              "value": "cognitive_comm"
+            },
+            {
+              "label": "Other and unspecified speech disturbances",
+              "value": "other_speech"
+            },
+            {
+              "label": "Stuttering / stammering",
+              "value": "stuttering"
+            },
+            {
+              "label": "Cluttering",
+              "value": "cluttering"
+            }
+          ]
+        },
+        {
+          "name": "aphasia_type",
+          "label": "Aphasia type",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Broca's",
+              "value": "brocas"
+            },
+            {
+              "label": "Wernicke's",
+              "value": "wernickes"
+            },
+            {
+              "label": "Global",
+              "value": "global"
+            },
+            {
+              "label": "Anomic",
+              "value": "anomic"
+            },
+            {
+              "label": "Other",
+              "value": "other"
+            }
+          ],
+          "showIf": {
+            "field": "speech_language_diagnoses",
+            "includes": "aphasia"
+          }
+        },
+        {
+          "name": "aphasia_other",
+          "label": "Other aphasia type",
+          "type": "input",
+          "showIf": {
+            "field": "aphasia_type",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "aphasia_severity",
+          "label": "Aphasia severity",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Mild",
+              "value": "mild"
+            },
+            {
+              "label": "Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Severe",
+              "value": "severe"
+            }
+          ],
+          "showIf": {
+            "field": "speech_language_diagnoses",
+            "includes": "aphasia"
+          }
+        },
+        {
+          "name": "dysarthria_type",
+          "label": "Dysarthria type",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Flaccid",
+              "value": "flaccid"
+            },
+            {
+              "label": "Spastic",
+              "value": "spastic"
+            },
+            {
+              "label": "Ataxic",
+              "value": "ataxic"
+            },
+            {
+              "label": "Hypokinetic",
+              "value": "hypokinetic"
+            },
+            {
+              "label": "Hyperkinetic",
+              "value": "hyperkinetic"
+            },
+            {
+              "label": "Mixed",
+              "value": "mixed"
+            }
+          ],
+          "showIf": {
+            "field": "speech_language_diagnoses",
+            "includes": "dysarthria"
+          }
+        },
+        {
+          "name": "cognitive_comm_associated",
+          "label": "Associated with",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "TBI",
+              "value": "tbi"
+            },
+            {
+              "label": "Stroke",
+              "value": "stroke"
+            },
+            {
+              "label": "Dementia",
+              "value": "dementia"
+            }
+          ],
+          "showIf": {
+            "field": "speech_language_diagnoses",
+            "includes": "cognitive_comm"
+          }
+        },
+        {
+          "name": "other_speech_details",
+          "label": "Please specify",
+          "type": "input",
+          "showIf": {
+            "field": "speech_language_diagnoses",
+            "includes": "other_speech"
+          }
+        }
+      ]
+    }
+  ]
+}
+
+const SCHEMA_PLAN = {
+  "sections": [
+    {
+      "title": "Plan",
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Therapy"
+        },
+        {
+          "name": "therapy_plan",
+          "label": "",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Training in receiving spoken messages",
+              "value": "spoken_messages_training"
+            },
+            {
+              "label": "Training in speaking",
+              "value": "speaking_training"
+            }
+          ]
+        },
+        {
+          "name": "speech_exercises",
+          "label": "Speech exercises",
+          "type": "textarea"
+        },
+        {
+          "type": "subheading",
+          "label": "Other Management"
+        },
+        {
+          "name": "other_management",
+          "label": "",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Referral for medical management",
+              "value": "medical_referral"
+            },
+            {
+              "label": "Further Assessment",
+              "value": "further_assessment"
+            }
+          ]
+        },
+        {
+          "name": "further_assessment_options",
+          "label": "Further Assessment",
+          "type": "checkbox-group",
+          "showIf": {
+            "field": "other_management",
+            "includes": "further_assessment"
+          },
+          "options": [
+            {
+              "label": "Assessment of communication, unspecified",
+              "value": "communication_assessment"
+            },
+            {
+              "label": "Test of communication, unspecified",
+              "value": "communication_test"
+            },
+            {
+              "label": "Observation of communication, unspecified",
+              "value": "communication_observation"
+            },
+            {
+              "label": "Interview in relation to communication, unspecified",
+              "value": "communication_interview"
+            },
+            {
+              "label": "Assessment of ingestion functions",
+              "value": "ingestion_assessment"
+            },
+            {
+              "label": "Assessment of swallowing",
+              "value": "swallowing_assessment"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+//not required 
+
+const SCHEMA_SUBJECTIVE = {
+  "sections": [
+    {
+      "title": "Voice Assessment",
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Medical history (related to voice)"
+        },
+        {
+          "name": "reflux",
+          "label": "Reflux",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "throat_surgery",
+          "label": "Throat surgery",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "vf_pathology",
+          "label": "Known VF pathology",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "current_medication",
+          "label": "Current medication",
+          "type": "textarea"
+        },
+        {
+          "type": "subheading",
+          "label": "Voice History"
+        },
+        {
+          "type": "row",
+          "fields": [
+            {
+              "name": "onset",
+              "label": "Onset",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Gradual",
+                  "value": "gradual"
+                },
+                {
+                  "label": "Sudden",
+                  "value": "sudden"
+                }
+              ]
+            },
+            {
+              "name": "onset_duration",
+              "label": "Date or duration",
+              "type": "date"
+            }
+          ]
+        },
+        {
+          "name": "progression",
+          "label": "Progression",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Better",
+              "value": "better"
+            },
+            {
+              "label": "Worse",
+              "value": "worse"
+            },
+            {
+              "label": "No Change",
+              "value": "no_change"
+            }
+          ]
+        },
+        {
+          "name": "vocal_misuse",
+          "label": "Vocal misuse/abuse behaviours",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Screaming",
+              "value": "screaming"
+            },
+            {
+              "label": "Shouting",
+              "value": "shouting"
+            },
+            {
+              "label": "Excessive throat clearing",
+              "value": "throat_clearing"
+            }
+          ]
+        },
+        {
+          "name": "vocal_demand",
+          "label": "Vocal Demand Level",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Low",
+              "value": "low"
+            },
+            {
+              "label": "Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "High",
+              "value": "high"
+            },
+            {
+              "label": "Elite Voice User",
+              "value": "elite_voice_user"
+            }
+          ]
+        },
+        {
+          "name": "talking_hours",
+          "label": "Hours of talking per day",
+          "type": "radio",
+          "options": [
+            {
+              "label": "<1",
+              "value": "<1"
+            },
+            {
+              "label": "1-3",
+              "value": "1-3"
+            },
+            {
+              "label": "3-5",
+              "value": "3-5"
+            },
+            {
+              "label": ">5",
+              "value": ">5"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Lifestyle / Dietary Habits"
+        },
+        {
+          "name": "water_intake",
+          "label": "Daily water intake",
+          "type": "radio",
+          "options": [
+            {
+              "label": "<0.5L",
+              "value": "<0.5L"
+            },
+            {
+              "label": "0.5-1.0L",
+              "value": "0.5-1.0L"
+            },
+            {
+              "label": "1-1.5L",
+              "value": "1-1.5L"
+            },
+            {
+              "label": "1.5-2.0L",
+              "value": "1.5-2.0L"
+            },
+            {
+              "label": ">2.0L",
+              "value": ">2.0L"
+            }
+          ]
+        },
+        {
+          "name": "smoking",
+          "label": "Smoking",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "smoking_packs",
+          "label": "Packs/day",
+          "type": "input",
+          "showIf": {
+            "field": "smoking",
+            "equals": "yes"
+          }
+        },
+        {
+          "name": "vaping",
+          "label": "Vaping exposure",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "second_hand_smoke",
+          "label": "Second-hand smoke exposure",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "hydration_habits",
+          "label": "Hydration habits",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Sips frequently",
+              "value": "sips"
+            },
+            {
+              "label": "Long gaps without drinking",
+              "value": "gaps"
+            }
+          ]
+        },
+        {
+          "name": "diet_intake",
+          "label": "Diet intake",
+          "type": "textarea"
+        },
+        {
+          "name": "alcohol",
+          "label": "Alcohol",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Never",
+              "value": "never"
+            },
+            {
+              "label": "Occasionally",
+              "value": "occasionally"
+            },
+            {
+              "label": "Daily",
+              "value": "daily"
+            }
+          ]
+        },
+        {
+          "name": "caffeine",
+          "label": "Caffeine",
+          "type": "radio",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "1-2 cups/day",
+              "value": "1-2_cups/day"
+            },
+            {
+              "label": ">2 cups/day",
+              "value": ">2_cups/day"
+            }
+          ]
+        },
+        {
+          "name": "spicy_food",
+          "label": "Spicy food",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Rare",
+              "value": "rare"
+            },
+            {
+              "label": "Regular",
+              "value": "regular"
+            }
+          ]
+        },
+        {
+          "name": "dairy",
+          "label": "Dairy",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Rare",
+              "value": "rare"
+            },
+            {
+              "label": "Regular",
+              "value": "regular"
+            }
+          ]
+        },
+        {
+          "name": "acidic_food",
+          "label": "Acidic foods (citrus)",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Rare",
+              "value": "rare"
+            },
+            {
+              "label": "Regular",
+              "value": "regular"
+            }
+          ]
+        },
+        {
+          "name": "late_eating",
+          "label": "Eating late at night",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Associated Symptoms"
+        },
+        {
+          "name": "globus",
+          "label": "Globus sensation",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "throat_dryness",
+          "label": "Throat dryness",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "throat_tightness",
+          "label": "Throat tension / tightness",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "pain_talking",
+          "label": "Pain when talking",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "vocal_fatigue",
+          "label": "Vocal fatigue / endurance issues",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "dysphagia_liquids",
+          "label": "Dysphagia or coughing with liquids",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "breathlessness_talking",
+          "label": "Feeling out of breath when talking",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "other_symptoms",
+          "label": "Other(s)",
+          "type": "textarea"
+        },
+        {
+          "type": "subheading",
+          "label": "Musculoskeletal symptoms"
+        },
+        {
+          "name": "jaw_tension",
+          "label": "Jaw tension / teeth clenching",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "neck_shoulder_tension",
+          "label": "Neck/shoulder tension",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

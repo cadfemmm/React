@@ -30,6 +30,7 @@ export default function TokenHandler() {
 
     // 1. Set the token immediately so all subsequent API calls are authenticated
     setAccessToken({
+      access_token: token,
       access: {
         token,
         expire_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()  // assume 24h
@@ -48,6 +49,7 @@ export default function TokenHandler() {
         localStorage.setItem("user",     JSON.stringify(user));
         localStorage.setItem("username", user.username?.trim() || "");
         localStorage.setItem("userRole", user.user_type || "DOCTOR");
+        localStorage.setItem("user_id", user.id)
       })
       .catch(() => {
         // Token invalid — clear it

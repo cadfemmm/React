@@ -9,7 +9,12 @@ import { VestibularAdvancedForm, VestibularAdvancedFormObj } from "../vestibular
 import { Hearingaidtrial } from "../hearingaidtrial";
 import { IndustrialAudiometry } from "../industrialaudiometry";
 import PatientCard from "../../../shared/cards/PatientCard";
-import {OTOSCOPIC_EXTRACT_URL} from "../../../platform/config/api.config"
+import EquipmentBookingPopup from "./EquipmentBookingPopup";
+import AudiologyICDSection from "./AudiologyICDSection";
+import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
+import api from "../../../shared/api/apiClient";
+import { BookAppointmentModal } from "../../book-appointment-modal/BookAppointmentModal";
+import { fetchBookingQueue } from "../../book-appointment-modal/bookingQueueService";
 /* ===================== OPTIONS ===================== */
 
 const INTACT_IMPAIRED = [
@@ -50,33 +55,71 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("subjective");
   const [processingOCR, setProcessingOCR] = useState(false);
+  const [equipmentOptions, setEquipmentOptions] = useState([]);
+  const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [bookedEquipmentIds, setBookedEquipmentIds] = useState([]);
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const [bookingQueueRow, setBookingQueueRow] = useState(null);
 
+useEffect(() => {
+  const loadBookingQueue = async () => {
+    try {
+      const data = await fetchBookingQueue({
+        department_id: departmentId,
+        limit: 100,
+      });
+
+      const row = data.rows.find(
+        r => r.patient_name === (patient?.full_name || patient?.name)
+      );
+
+      setBookingQueueRow(row || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (patient) {
+    loadBookingQueue();
+  }
+}, [patient]);
+  const bookingRow = {
+    id: bookingQueueRow?.booking_id,
+    patient: patient?.full_name || patient?.name || "",
+    refId: patient?.referral_id || "",
+    department: "Audiology",
+    // disciplineCode: "AUD",
+    priority: "Medium",
+  };
+  // console.log("bookingQueueRow", bookingQueueRow);
+  // console.log("bookingRow", bookingRow);
   /* --------- Patient History State --------- */
-  const [patientHistory, setPatientHistory] = useState({
-    past_medical_history: patient?.medical_history || "",
-    past_family_history: patient?.family_medical_history || "",
-    alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-  });
+  // const [patientHistory, setPatientHistory] = useState({
+  //   past_medical_history: patient?.medical_history || "",
+  //   past_family_history: patient?.family_medical_history || "",
+  //   alerts_and_allergies: patient?.alerts_and_allergies_history || ""
+  // });
 
-  useEffect(() => {
-    setPatientHistory({
-      past_medical_history: patient?.medical_history || "",
-      past_family_history: patient?.family_medical_history || "",
-      alerts_and_allergies: patient?.alerts_and_allergies_history || ""
-    });
-  }, [patient?.id]);
+  // useEffect(() => {
+  //   setPatientHistory({
+  //     past_medical_history: patient?.medical_history || "",
+  //     past_family_history: patient?.family_medical_history || "",
+  //     alerts_and_allergies: patient?.alerts_and_allergies_history || ""
+  //   });
+  // }, [patient?.id]);
 
-  useEffect(() => {
-    if (!patient) return;
-    const updated = {
-      ...patient,
-      medical_history: patientHistory.past_medical_history,
-      family_medical_history: patientHistory.past_family_history,
-      alerts_and_allergies_history: patientHistory.alerts_and_allergies
-    };
-    localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
-    onUpdatePatient?.(updated);
-  }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
+  // useEffect(() => {
+  //   if (!patient) return;
+  //   const updated = {
+  //     ...patient,
+  //     medical_history: patientHistory.past_medical_history,
+  //     family_medical_history: patientHistory.past_family_history,
+  //     alerts_and_allergies_history: patientHistory.alerts_and_allergies
+  //   };
+  //   localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+  //   onUpdatePatient?.(updated);
+  // }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
 
   const today = new Date();
   const formatDate = (dateStr) => {
@@ -115,6 +158,51 @@ export default function AudiologyDepartmentAdultPage({ patient, onUpdatePatient,
       setValues(savedValues);
     }
   }, [storageKey, patient]);
+
+  /* ---------------- EQUIPMENT LIST FROM API ---------------- */
+  const departmentId = "5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98";
+  useEffect(() => {
+    const fetchEquipmentList = async () => {
+      try {
+        let page = 1;
+        let hasNext = true;
+        let allEquipment = [];
+
+        while (hasNext) {
+          const response = await api.get(
+            `${API_URL.EQUIPMENT_LIST}?department_id=${departmentId}&page=${page}`
+          );
+
+          allEquipment = [
+            ...allEquipment,
+            ...(response?.data?.data || [])
+          ];
+
+          hasNext = response?.data?.meta?.has_next;
+          page++;
+        }
+
+        const options = allEquipment.map(item => ({
+          label: item.equipment_name,
+          value: item.id,
+          status: item.status,
+          equipment_code: item.equipment_code,
+          department_name: item.department_name,
+          raw: item,
+        }));
+
+        setEquipmentOptions(options);
+
+        console.log("Total Equipment:", options.length);
+      } catch (error) {
+        console.error("Equipment list fetch failed:", error);
+      }
+    };
+
+    if (departmentId) {
+      fetchEquipmentList();
+    }
+  }, [departmentId]);
 
   // Extract tympanometry values from OCR text
   const extractTympanometryValues = (text) => {
@@ -945,7 +1033,23 @@ const SUBJECTIVE_SCHEMA = {
     { type: "save", label: "Save" }
   ],
   sections: [
+     {
+   
+    fields: [
+      {
+        type: "input",
+        name: "chief_complaints",
+        label: "Chief Complaints"
+      },
+      {
+        type: "input",
+        name: "hpi",
+        label: "History of Present Illness (HPI)"
+      }
+    ]
+  },
     /* ===================== A. OTOLOGY ===================== */
+    
     {
       title: "A. Otology",
       fields: [
@@ -961,7 +1065,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "ear_infection_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "ear_infection", 
             oneOf: ["right", "left", "bilateral","none"] 
@@ -980,7 +1084,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "ear_fullness_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "ear_fullness", 
             oneOf: ["right", "left", "bilateral"] 
@@ -998,7 +1102,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "head_neck_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: {
             field: "head_neck_injury",
             equals: "1"
@@ -1016,7 +1120,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "ear_pain_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "ear_pain", 
             oneOf: ["right", "left", "bilateral","none"] 
@@ -1035,7 +1139,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "otorrhea_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "otorrhea", 
             oneOf: ["right", "left", "bilateral","none"] 
@@ -1045,7 +1149,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "otology_others",
           label: "Others",
-          type: "textarea"
+          type: "input"
         }
       ]
     },
@@ -1069,7 +1173,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "tinnitus_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "tinnitus", 
             oneOf: ["right", "left", "bilateral", "in_head"] 
@@ -1088,7 +1192,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "loudness_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "loudness_discomfort", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1107,7 +1211,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "hearing_difficulties_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "hearing_difficulties", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1125,7 +1229,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "better_hearing_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "better_hearing", 
             oneOf: ["right", "left", "bilateral"] 
@@ -1146,7 +1250,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "communication_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "communication_difficulties", 
             oneOf: ["in_quiet", "in_noise", "group", "telephone"] 
@@ -1166,26 +1270,26 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "exposure_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "exposure_loud_sounds", 
             oneOf: ["occupational", "recreational"] 
           }
         },
 
-        {
-          name: "family_social_from_registration",
-          label: "Family History",
-          type: "radio",
-          options: [
-            { label: "Yes", value: "1"},
-            { label: "No", value: "0"}
-          ]
-        },
+        // {
+        //   name: "family_social_from_registration",
+        //   label: "Family History",
+        //   type: "radio",
+        //   options: [
+        //     { label: "Yes", value: "1"},
+        //     { label: "No", value: "0"}
+        //   ]
+        // },
         {
           name: "family_history_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: {
             field: "family_social_from_registration",
             equals: "1"
@@ -1207,7 +1311,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "psychosocial_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { field: "psychosocial_impact", oneOf: ["1", "2", "3", "4"] }
         },
 
@@ -1225,7 +1329,7 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "environmental_notes",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { 
             field: "environmental_context", 
             oneOf: ["1", "2", "3"] 
@@ -1244,13 +1348,13 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "amplification_notes",
           label: "",
-          type: "textarea",
+          type: "input",
           showIf: { field: "presence_amplification", equals: "1" }
         },
         {
           name: "others",
           label: "Others",
-          type: "textarea"
+          type: "input"
         },
         {
           name: "hearing_assessments_launcher",
@@ -1284,14 +1388,14 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "vestibular_notes",
           label: "",
-          type: "textarea",
+          type: "input",
           showIf: { field: "vestibular_symptoms", oneOf: ["1", "2", "3", "4"] }
         },
 
         {
           name: "duration_frequency",
           label: "Duration / Frequency",
-          type: "textarea"
+          type: "input"
         },
 
         {
@@ -1309,20 +1413,20 @@ const SUBJECTIVE_SCHEMA = {
         {
           name: "trigger_notes",
           label: "",
-          type: "textarea",
+          type: "input",
           showIf: { field: "triggers", oneOf: ["1", "2", "3", "4"] }
         },
 
         {
           name: "falls_history",
           label: "Fall History",
-          type: "textarea"
+          type: "input"
         },
 
         {
           name: "vestibular_others",
           label: "Others",
-          type: "textarea"
+          type: "input"
         },
         {
           name: "vestibular_assessments_launcher",
@@ -1487,12 +1591,12 @@ const OBJECTIVE_SCHEMA = {
                 {
                   name: "impression_r",
                   label: "Impression – Right Ear",
-                  type: "textarea"
+                  type: "input"
                 },
                 {
                   name: "impression_l",
                   label: "Impression – Left Ear",
-                  type: "textarea"
+                  type: "input"
                 }
               ]
             },
@@ -1559,12 +1663,28 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "problem_list",
         label: "Problem Listing",
-        type: "textarea"
+        type: "input"
       },
       {
         name: "clinical_impression",
         label: "Clinical Impression",
         type: "textarea"
+      },
+      {
+        name: "icd_icf_ichi_data",
+        type: "custom",
+        render: ({ values, onChange }) => (
+          <AudiologyICDSection 
+            values={values}
+            onChange={onChange}
+            mode="icd-icf"
+          />
+        )
+
+
+
+        
+
       }
     ]
   };
@@ -1577,6 +1697,12 @@ const OBJECTIVE_SCHEMA = {
         
         { type: "subheading", label: "Long Term Goals (6–12 Weeks)" },
         { type: "dynamic-goals", name: "long_term_goals" },
+        {
+          name: "equipment_list",
+          label: "Equipment List",
+          type: "equipment-list",
+          options: []
+        },
         {
           name: "intervention_plan",
           label: "Intervention Plan",
@@ -1597,7 +1723,7 @@ const OBJECTIVE_SCHEMA = {
         {
           name: "intervention_plan_details",
           label: "Specify",
-          type: "textarea",
+          type: "input",
           showIf: { field: "intervention_plan", includes: "other" }
       },
       {
@@ -1652,7 +1778,7 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "plan_options_details",
         label: "Specify",
-        type: "textarea",
+        type: "input",
         showIf: { field: "plan_options", includes: "other" }
       },
       {
@@ -1703,7 +1829,7 @@ const OBJECTIVE_SCHEMA = {
       {
         name: "plan_special_test_details",
         label: "Special Test Details",
-        type: "textarea",
+        type: "input",
         placeholder: "Enter special test details...",
         showIf: { field: "plan_options", includes: "special_test" }
       },
@@ -1727,15 +1853,40 @@ const OBJECTIVE_SCHEMA = {
         type: "input",
         placeholder: "Specify referral details...",
         showIf: { field: "plan_required_referral", equals: "yes" }
+      },
+      {
+        name: "icd_icf_ichi_data",
+        type: "custom",
+        render: ({ values, onChange }) => (
+          <AudiologyICDSection 
+            values={values}
+            onChange={onChange}
+            mode="plan"
+          />
+        )
       }
     ]
+  };
+
+  const handleEquipmentBook = (equipment) => {
+    setSelectedEquipment(equipment);
+    setEquipmentBookingOpen(true);
+  };
+
+  const planSchemaWithEquipment = {
+    ...PLAN_SCHEMA,
+    fields: PLAN_SCHEMA.fields.map((field) =>
+      field.name === "equipment_list"
+        ? { ...field, options: equipmentOptions, onBook: handleEquipmentBook, bookedEquipmentIds }
+        : field
+    ),
   };
 
   const schemaMap = {
     subjective: SUBJECTIVE_SCHEMA,
     objective: OBJECTIVE_SCHEMA,
     assessment: ASSESSMENT_SCHEMA,
-    plan: PLAN_SCHEMA
+    plan: planSchemaWithEquipment
   };
 
   /* ===================== PATIENT INFO ===================== */
@@ -1830,8 +1981,8 @@ function AudiometryFrequencyTable({ value = {}, onChange }) {
   {/* ===== PATIENT INFORMATION CARD ===== */}
   <PatientCard
     patient={patient}
-    patientHistory={patientHistory}
-    setPatientHistory={setPatientHistory}
+    // patientHistory={patientHistory}
+    // setPatientHistory={setPatientHistory}
   />
 
   {/* ===== TABS ===== */}
@@ -1899,6 +2050,30 @@ function AudiometryFrequencyTable({ value = {}, onChange }) {
           )}
         </div>
   </CommonFormBuilder>
+
+  <EquipmentBookingPopup
+    open={equipmentBookingOpen}
+    equipmentOptions={equipmentOptions}
+    selectedEquipment={selectedEquipment}
+    onClose={() => setEquipmentBookingOpen(false)}
+    onBooked={(equipmentId) => {
+      setBookedEquipmentIds(prev => [...prev, equipmentId]);
+    }}
+  />
+      <BookAppointmentModal
+      open={appointmentModalOpen}
+      row={bookingRow}
+      initialMode="doctor"
+      onClose={() => setAppointmentModalOpen(false)}
+      onConfirm={(data) => {
+        console.log("Booking confirmed", data);
+        setAppointmentModalOpen(false);
+      }}
+      onRequestOverride={() => {}}
+      onAddWaitlist={() => {}}
+      onConflict={() => {}}
+      onCancel={() => setAppointmentModalOpen(false)}
+    />
 </div>
 
   );

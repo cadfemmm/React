@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/new-stt/:path*",
+      "destination": "https://ai.dev.rehab-software.com/new-stt/:path*"
+    }
+  ]
+}
