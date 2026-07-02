@@ -1,22 +1,19 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { fetchPatientsList } from "../../shared/api/patientsList";
-import { filterApprovedPatients } from "../../shared/utils/patientFilters";
+import { filterPatientsForDepartment } from "../../shared/utils/patientFilters";
 import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
 import ProgressIntervention from "./ProgressIntervention";
-import GroupIntervention from "./GroupIntervention";
 import CheckoutAssessment from "./Checkout";
 import WheelchairAssessment from "./WheelchairAssessment";
 import ThreeDAssessment from "./ThreeDAssessment";
 import ThreeDProgress from './ThreeDProgress';
-import WheelchairGroup from './WheelchairGroup'
 
 const ASSESSMENT_CARDS = [
   { id: "initial",  title: "Initial Assessment",    desc: "Comprehensive assessment for new patient visit",   icon: "📋", accent: "#1D4ED8", tag: "New Patient",   tagBg: "#dbeafe", tagColor: "#1d4ed8" },
   { id: "followup", title: "Follow-up Visit",        desc: "Review progress and adjust treatment plan",        icon: "🔄", accent: "#059669", tag: "Returning",     tagBg: "#d1fae5", tagColor: "#065f46" },
   { id: "progress", title: "Progress Intervention",  desc: "Document interventions and track outcomes",        icon: "📈", accent: "#7C3AED", tag: "Ongoing Care",  tagBg: "#ede9fe", tagColor: "#5b21b6" },
-  { id: "group",    title: "Group Intervention",     desc: "Record group session and multi-patient notes",     icon: "👥", accent: "#DC2626", tag: "Group Session", tagBg: "#fee2e2", tagColor: "#991b1b" },
   { id: "checkout", title: "Check Out", desc: "Finalize visit, confirm completion and discharge workflow", icon: "✅", accent: "#EA580C", tag: "Visit Closure", tagBg: "#ffedd5", tagColor: "#9a3412" }
 ];
 
@@ -84,7 +81,7 @@ function AssessmentTypeCard({ card, onClick }) {
 export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }) {
   const [tab, setTab]                         = useState("new");
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [assessmentMode, setAssessmentMode]   = useState(null); // initial | followup | progress | group
+  const [assessmentMode, setAssessmentMode]   = useState(null); // initial | followup | progress | checkout
   const [patients, setPatients]               = useState([]);
   const [loading, setLoading]                 = useState(true);
   const [search, setSearch]                   = useState("");
@@ -106,9 +103,12 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
   }, []);
 
   /* ── Filter by tab + search ── */
-  const approvedPatients = useMemo(() => filterApprovedPatients(patients), [patients]);
-  const newPatients      = useMemo(() => approvedPatients.filter(p => (p.status || "").toLowerCase() !== "old"), [approvedPatients]);
-  const existingPatients = useMemo(() => approvedPatients.filter(p => (p.status || "").toLowerCase() === "old"), [approvedPatients]);
+  const deptPatients = useMemo(
+    () => filterPatientsForDepartment(patients, DEPARTMENT),
+    [patients],
+  );
+  const newPatients      = useMemo(() => deptPatients.filter(p => (p.status || "").toLowerCase() !== "old"), [deptPatients]);
+  const existingPatients = useMemo(() => deptPatients.filter(p => (p.status || "").toLowerCase() === "old"), [deptPatients]);
   const baseList         = tab === "new" ? newPatients : existingPatients;
 
   const filtered = useMemo(() => {
@@ -144,22 +144,12 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
       />
     );
   }
-
-  // group → WheelchairGroup
-  if (assessmentMode === "group") {
-    return (
-      <WheelchairGroup
-        patient={selectedPatient}
-        onBack={() => setAssessmentMode(null)}
-      />
-    );
-  }
 }
 
 if (selectedCard === "3D") {
 
-  // initial, followup, group → ThreeDAssessment
-  if (["initial", "followup", "group"].includes(assessmentMode)) {
+  // initial, followup → ThreeDAssessment
+  if (["initial", "followup"].includes(assessmentMode)) {
     return (
       <ThreeDAssessment
         patient={selectedPatient}
@@ -200,16 +190,6 @@ if (selectedCard === "3D") {
         />
       );
     }
-    // Group Intervention
-    if (assessmentMode === "group") {
-      return (
-        <GroupIntervention
-          patient={selectedPatient}
-          onBack={() => setAssessmentMode(null)}
-          onSubmit={() => setAssessmentMode(null)}
-        />
-      );
-    }    
     // Checkout Intervention
     if (assessmentMode === "checkout") {
       return (
@@ -442,7 +422,7 @@ if (selectedCard === "3D") {
         ) : (
           filtered.map((p, idx) => (
             <div
-              key={p.id}
+              key={p.id ?? p.patient_id ?? p.mrn ?? idx}
               style={{
                 ...styles.row,
                 background: idx % 2 === 0 ? "#fff" : "#FAFBFC"
