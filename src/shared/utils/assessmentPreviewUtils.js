@@ -524,4 +524,27 @@ export function resolveSubFormPreviewSchema(selectedAssessment, normalizedSchema
   return PSYCHOLOGY_LEGACY_SUB_SCHEMAS[key] || null;
 }
 
+/** Plain-text report for clipboard (label : value rows, section headings). */
+export function formatAssessmentReportText(entries, { title } = {}) {
+  const lines = [];
+
+  if (title) {
+    lines.push(title);
+    lines.push("");
+  }
+
+  (entries || []).forEach((entry) => {
+    if (entry.kind === "section" && entry.label) {
+      if (lines.length > 0 && lines[lines.length - 1] !== "") lines.push("");
+      lines.push(entry.label);
+      return;
+    }
+    if (entry.kind === "row" && entry.value) {
+      lines.push(`${entry.label} : ${entry.value}`);
+    }
+  });
+
+  return lines.join("\n").trim();
+}
+
 export { shouldUseValuePrefix, normalizeSubAssessmentSchema };

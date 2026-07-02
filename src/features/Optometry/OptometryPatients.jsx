@@ -4,10 +4,10 @@ import OptometryProgressAssessment from "./components/OptometryProgressAssessmen
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
 import { fetchPatientsList } from "../../shared/api/patientsList";
-import { filterApprovedPatients } from "../../shared/utils/patientFilters";
-
-// Assessment Loader
+import { filterPatientsForDepartment } from "../../shared/utils/patientFilters";
 import AssessmentLoader from "../../assessment";
+
+const DEPARTMENT = "Optometry";
 
 /* ── Status palette ─────────────────────────────────────────────────────── */
 const STATUS = {
@@ -55,21 +55,17 @@ const OPTION_CARDS = [
     icon: "📈", accent: "#7C3AED",
     tag: "Ongoing Care", tagColor: "#ede9fe", tagText: "#5b21b6",
   },
-  {
-    id: "group",    title: "Group Intervention",
-    desc: "Record group therapy session and multi-patient documentation",
-    icon: "👥", accent: "#DC2626",
-    tag: "Group Session", tagColor: "#fee2e2", tagText: "#991b1b",
-  },
 ];
 
-export default function OptometryPatients({ onBack, loading = false }) {
+export default function OptometryPatients({ onBack, loading: loadingProp = false }) {
   const [selectedPatient,      setSelectedPatient]      = useState(null);
   const [assessmentView,       setAssessmentView]       = useState(null);
   const [submittedAssessments, setSubmittedAssessments] = useState({});
   const [submittedFollowups,   setSubmittedFollowups]   = useState({});
   const [search,               setSearch]               = useState("");
   const [patients,             setPatients]             = useState([]);
+  const [fetchLoading,         setFetchLoading]         = useState(true);
+  const loading = loadingProp || fetchLoading;
 
   const handleBackToPatients = useCallback(() => { setSelectedPatient(null); setAssessmentView(null); }, []);
   const handleBackToCards    = useCallback(() => { setAssessmentView(null); }, []);
@@ -79,11 +75,14 @@ export default function OptometryPatients({ onBack, loading = false }) {
   /* Fetch patients department wise */
   React.useEffect(() => {
     const fetchPatients = async () => {
+      setFetchLoading(true);
       try {
         const list = await fetchPatientsList();
         setPatients(list);
       } catch (e) {
         setPatients([]);
+      } finally {
+        setFetchLoading(false);
       }
     };
     fetchPatients();
@@ -100,7 +99,9 @@ export default function OptometryPatients({ onBack, loading = false }) {
 
     if (!patientId) return;
 
-    const found = patients.find(p => p.id === patientId);
+    const found = patients.find(
+      (p) => String(p.id ?? p.patient_id) === String(patientId),
+    );
     if (found) {
       setSelectedPatient(found);
       setAssessmentView(assessment);
@@ -108,19 +109,22 @@ export default function OptometryPatients({ onBack, loading = false }) {
   }, [patients]);                                          // runs whenever patients loads
 
   /* hooks must be before early returns */
-  const approvedPatients = useMemo(() => filterApprovedPatients(patients), [patients]);
+  const deptPatients = useMemo(
+    () => filterPatientsForDepartment(patients, DEPARTMENT),
+    [patients],
+  );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    const base = approvedPatients;
+    const base = deptPatients;
     return !q
       ? base
       : base.filter(p =>
-          (p.name || "").toLowerCase().includes(q) ||
+          (p.name || p.patient_name || "").toLowerCase().includes(q) ||
           (p.email || "").toLowerCase().includes(q) ||
           (p.mrn || "").toLowerCase().includes(q)
         );
-  }, [approvedPatients, search]);
+  }, [deptPatients, search]);
 
   /* ── Assessment views ── */
   if (selectedPatient && assessmentView === "initial") {
@@ -151,29 +155,6 @@ export default function OptometryPatients({ onBack, loading = false }) {
         onSubmit={handleFollowupSubmit}
         onBack={handleBackToCards}
       />
-    );
-  }
-
-  if (selectedPatient && assessmentView === "group") {
-    const card = OPTION_CARDS.find(c => c.id === "group");
-    return (
-      <div style={S.page}>
-        <div style={{ padding: 40, textAlign: "center", color: "#6b7280" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>{card.icon}</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#374151", marginBottom: 6 }}>
-            {card.title} — Coming Soon
-          </div>
-          <div style={{ fontSize: 14, color: "#6B7280", marginBottom: 24 }}>
-            This module is under development for Optometry.
-          </div>
-          <button
-            onClick={handleBackToCards}
-            style={{ padding: "9px 22px", borderRadius: 8, border: "1px solid #2563eb", background: "#fff", color: "#2563eb", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
-          >
-            ← Back to Options
-          </button>
-        </div>
-      </div>
     );
   }
 
@@ -287,7 +268,7 @@ export default function OptometryPatients({ onBack, loading = false }) {
         ) : (
           filtered.map((p, idx) => (
             <PatientRow
-              key={p.id}
+              key={p.id ?? p.patient_id ?? p.mrn ?? idx}
               patient={p}
               idx={idx}
               onStart={() => setSelectedPatient(p)}
@@ -299,7 +280,7 @@ export default function OptometryPatients({ onBack, loading = false }) {
       {/* Footer count */}
       {!loading && filtered.length > 0 && (
         <div style={S.footerCount}>
-          Showing <strong>{filtered.length}</strong> of <strong>{patients.length}</strong> patient{patients.length !== 1 ? "s" : ""}
+          Showing <strong>{filtered.length}</strong> of <strong>{deptPatients.length}</strong> patient{deptPatients.length !== 1 ? "s" : ""}
         </div>
       )}
     </div>
