@@ -1,67 +1,80 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Select from "react-select";
 import { API_URL } from "../../../platform/config/api.config";
 
-export default function MedicationAssessment({patient, onSubmit, onBack}) {
+export default function MedicationAssessment({
+  patient,
+  onSubmit,
+  onBack,
+  embedded = false,
+  values = {},
+  onChange,
+}) {
     const [formData, setFormData] = useState({})
-    const [medications, setMedications] = useState([]);
+    const [medications, setMedications] = useState(() => values.medications || []);
     const [medicationOptions, setMedicationOptions] = useState([]);
     const [unitOptions, setUnitOptions] = useState([]);
     const storageKey = `patient_${patient?.id}_medications`;
 
+    const persistMedications = useCallback((updatedMeds) => {
+        setMedications(updatedMeds);
+        onChange?.("medications", updatedMeds);
+        if (patient?.id) {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(updatedMeds));
+            } catch (e) {
+                console.error("Failed to save medications to localStorage", e);
+            }
+        }
+    }, [onChange, patient?.id, storageKey]);
+
     useEffect(() => {
+        const fetchMedicationMasters = async () => {
+            try {
+                const token = localStorage.getItem("access_token");
+                const response = await fetch(API_URL.MEDICATION_MASTER, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const result = await response.json();
+                const data = result?.data || [];
+                setMedicationOptions(data);
+                const uniqueUnits = [
+                    ...new Set(data.map((item) => item.unit).filter(Boolean)),
+                ];
+                setUnitOptions(uniqueUnits);
+            } catch (error) {
+                console.error("Failed to fetch medications", error);
+            }
+        };
+
         fetchMedicationMasters();
-        // Load medications from localStorage for this patient
+
+        if (Array.isArray(values.medications) && values.medications.length > 0) {
+            setMedications(values.medications);
+            return;
+        }
+
         if (patient?.id) {
             try {
                 const stored = localStorage.getItem(storageKey);
                 if (stored) {
-                    setMedications(JSON.parse(stored));
+                    const parsed = JSON.parse(stored);
+                    setMedications(parsed);
+                    onChange?.("medications", parsed);
                 }
             } catch (e) {
-                console.error('Failed to load medications from localStorage', e);
+                console.error("Failed to load medications from localStorage", e);
             }
         }
-        }, [patient?.id, storageKey]);
+    }, [patient?.id, storageKey]);
 
-        const fetchMedicationMasters = async () => {
-        try {
-            const token =
-            localStorage.getItem("access_token");
-
-            const response = await fetch(
-            API_URL.MEDICATION_MASTER,
-            {
-                headers: {
-                Authorization: `Bearer ${token}`
-                }
-            }
-            );
-
-            const result = await response.json();
-
-            const data = result?.data || [];
-
-            setMedicationOptions(data);
-
-            const uniqueUnits = [
-            ...new Set(
-                data
-                .map(item => item.unit)
-                .filter(Boolean)
-            )
-            ];
-
-            setUnitOptions(uniqueUnits);
-
-        } catch (error) {
-            console.error(
-            "Failed to fetch medications",
-            error
-            );
+    useEffect(() => {
+        if (Array.isArray(values.medications)) {
+            setMedications(values.medications);
         }
-        };
-        const handleInputChange = (e) => {
+    }, [values.medications]);
+
+    const handleInputChange = (e) => {
             const { name, value } = e.target;
             let finalValue = value;
 
@@ -124,25 +137,13 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
         }
 
         const updatedMeds = [newMedication, ...medications];
-        setMedications(updatedMeds);
-        // Store medications in localStorage for this patient
-        try {
-            localStorage.setItem(storageKey, JSON.stringify(updatedMeds));
-        } catch (e) {
-            console.error('Failed to save medications to localStorage', e);
-        }
+        persistMedications(updatedMeds);
         setFormData({})
     }
 
     const handleDeleteMedication = (id) => {
         const updatedMeds = medications.filter(med => med.id !== id);
-        setMedications(updatedMeds);
-        // Update localStorage when medication is deleted
-        try {
-            localStorage.setItem(storageKey, JSON.stringify(updatedMeds));
-        } catch (e) {
-            console.error('Failed to update medications in localStorage', e);
-        }
+        persistMedications(updatedMeds);
     }
 
     const getMedicationName = (value) => {
@@ -164,7 +165,7 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
     }
 
     return (
-        <div style={containerStyle}>
+        <div style={embedded ? embeddedContainerStyle : containerStyle}>
             <div style={tableWrapperFullStyle}>
                 <div style={headerStyle}>
                     <h3 style={sectionTitleStyle}>Add Medication</h3>
@@ -434,6 +435,11 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
 const containerStyle = {
     width: "100%",
     backgroundColor: "#f9f9f9"
+}
+
+const embeddedContainerStyle = {
+    width: "100%",
+    marginTop: 8,
 }
 
 const tableWrapperFullStyle = {

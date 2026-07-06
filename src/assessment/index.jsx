@@ -33,6 +33,7 @@ import session from "./session.js";
 import AudiologyICDSection from "../features/Audiology/components/AudiologyICDSection";
 import AudiologySttFloatingMic from "../features/Audiology/components/AudiologySttFloatingMic";
 import OptometryICDSection from "../features/Optometry/components/OptometryICDSection";
+import MedicationAssessment from "../features/Doctors/components/MedicationAssessment";
 
 // ── Context ────────────────────────────────────────────────────────────────
 // Carries patient + the questionaire FormData ID map + save helper
@@ -216,6 +217,25 @@ useEffect(() => {
                 } else {
                   // If no intervention_plan field, add at the end
                   fields.push(ichiComponent);
+                }
+
+                if (department === "Optometry") {
+                  fields.push({
+                    type: "subheading",
+                    label: "Medication",
+                  });
+                  fields.push({
+                    type: "custom",
+                    name: "medications",
+                    render: ({ values, onChange: fieldOnChange }) => (
+                      <MedicationAssessment
+                        patient={patient}
+                        embedded
+                        values={values}
+                        onChange={fieldOnChange}
+                      />
+                    ),
+                  });
                 }
               }
             }
@@ -585,7 +605,13 @@ useEffect(() => {
       // =========================
       // When ICD data is updated, we need to persist it across ALL tabs
       // so it's available in the Plan tab
-      if (name === "selected_icds" || name === "icf_data" || name === "ichi_data") {
+      if (
+        name === "selected_icds" ||
+        name === "selected_icfs" ||
+        name === "selected_additional_ichi" ||
+        name === "icf_data" ||
+        name === "ichi_data"
+      ) {
         setAssessmentsValues((v) => {
           const newValues = { ...v };
           // Update ALL tabs with the ICD-related data to ensure persistence

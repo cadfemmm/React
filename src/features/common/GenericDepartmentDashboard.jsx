@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { fetchInPendingPatients } from "../../shared/api/patientsList";
+import React, { useState, useEffect, useMemo } from "react";
+import { fetchInPendingPatients, fetchDepartmentAppointments } from "../../shared/api/patientsList";
 import DepartmentDashboard from "./DepartmentDashboard";
 import DepartmentPatients from "./DepartmentPatients";
 import ApproveDenyAssessments from "../Doctors/components/ApproveDenyAssessments";
@@ -51,6 +51,38 @@ const GROUP_INTERVENTION_MAP = {
   "Optometry": OptometryGroupIntervention,
 };
 
+const DEPARTMENT_APPOINTMENT_SLUGS = {
+  Optometry: "optometry",
+};
+
+function formatAppointmentTime(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) {
+    const match = String(value).match(/(\d{1,2}:\d{2})/);
+    return match?.[1] ?? "—";
+  }
+  return d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function mapPatientsToDashboardAppointments(patients = []) {
+  return patients.map((p) => {
+    const timeRange = [p.start_time_myt, p.end_time_myt].filter(Boolean).join(" – ");
+    return {
+      time: timeRange || formatAppointmentTime(p.appointment_date ?? p.appointment_time),
+      name: p.name || p.patient_name || "—",
+      type: p.appointment_type || "Assessment",
+      status: p.status || "Scheduled",
+      va: p.va || "—",
+      date: p.appointment_date_myt,
+    };
+  });
+}
+
 /* ── P&O specific card → assessment map ────────────────── */
 
 export default function GenericDepartmentDashboard({
@@ -71,6 +103,9 @@ export default function GenericDepartmentDashboard({
   const [showGroupIntervention, setShowGroupIntervention] = useState(false);
   const [showGroupPatientPicker, setShowGroupPatientPicker] = useState(false);
   const [groupInterventionPatients, setGroupInterventionPatients] = useState([]);
+  const [todayPatients, setTodayPatients] = useState([]);
+  const [todayPatientsLoading, setTodayPatientsLoading] = useState(false);
+  const [todayPatientsTotal, setTodayPatientsTotal] = useState(0);
 
   const approveDenyInPendingCount = approveDenyPatients.length;
 
@@ -88,10 +123,36 @@ export default function GenericDepartmentDashboard({
   };
   const deptRaw = departmentName.replace(" Department", "").trim();
   const dept = deptRaw === "Nursing & MA" ? "Nursing" : deptRaw;
+  const appointmentSlug = DEPARTMENT_APPOINTMENT_SLUGS[dept];
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
   const GroupInterventionComponent =
     GROUP_INTERVENTION_MAP[dept] || NursingGroupIntervention;
+
+  useEffect(() => {
+    if (!appointmentSlug) return;
+
+    setTodayPatientsLoading(true);
+    fetchDepartmentAppointments(appointmentSlug, { page: 1, limit: 10 })
+      .then(({ patients: list, meta }) => {
+        setTodayPatients(list);
+        setTodayPatientsTotal(meta.total ?? list.length);
+      })
+      .catch((err) => {
+        console.error(`Failed to fetch ${dept} appointments:`, err);
+        setTodayPatients([]);
+        setTodayPatientsTotal(0);
+      })
+      .finally(() => setTodayPatientsLoading(false));
+  }, [appointmentSlug, dept]);
+
+  const dashboardAppointments = useMemo(
+    () => mapPatientsToDashboardAppointments(todayPatients),
+    [todayPatients],
+  );
+
+  const patientsForList = appointmentSlug ? todayPatients : patients;
+  const patientsListLoading = appointmentSlug ? todayPatientsLoading : false;
 
   if (showGroupPatientPicker) {
     return (
@@ -177,8 +238,10 @@ export default function GenericDepartmentDashboard({
       const Comp = PatientsComponent;
       return (
         <Comp
-          patients={patients}
-          Patients={patients}
+          patients={patientsForList}
+          Patients={patientsForList}
+          totalPatients={todayPatientsTotal}
+          loading={patientsListLoading}
           department={dept}
           updatePatientInMainList={updatePatientInMainList}
           initialView="patients"
@@ -215,7 +278,18 @@ export default function GenericDepartmentDashboard({
       onPOCardClick={isPO ? handlePOCardClick : undefined}
       onGroupIntervention={() => setShowGroupPatientPicker(true)}
       kpiCards={[
-        { label: "Today's Patients",    value: "20", sub: "10 new · 10 follow-up", icon: <FaUserInjured size={16} />,         accent: "#2563eb", trend: "up",   trendVal: "+2", onClick: () => setShowPatients(true) },
+        {
+          label: "Today's Patients",
+          value: appointmentSlug
+            ? (todayPatientsLoading ? "…" : String(todayPatientsTotal || todayPatients.length))
+            : "20",
+          sub: appointmentSlug ? "Scheduled for today" : "10 new · 10 follow-up",
+          icon: <FaUserInjured size={16} />,
+          accent: "#2563eb",
+          trend: "up",
+          trendVal: "+2",
+          onClick: () => setShowPatients(true),
+        },
         { label: "Appointments Booked", value: "24", sub: "4 slots remaining",     icon: <FaCalendarCheck size={16} />,       accent: "#10b981", trend: "up",   trendVal: "+3" },
         { label: "No-Show Rate",        value: "7%", sub: "1–2 no-shows today",    icon: <FaCalendarTimes size={16} />,       accent: "#ef4444", trend: "down", trendVal: "-1%" },
         { label: "Avg. Wait Time",      value: "13 min", sub: "Target: ≤ 15 min", icon: <FaClock size={16} />,               accent: "#f59e0b" },
@@ -248,7 +322,10 @@ export default function GenericDepartmentDashboard({
           { label: "Inactive",  value: 10, color: "#6b7280" },
         ],
       }]}
-      appointments={[
+      appointments={
+        appointmentSlug
+          ? dashboardAppointments
+          : [
         { time: "08:30", name: "Ahmad Razali",  type: "Initial Assessment",  status: "Completed",   va: "—" },
         { time: "09:00", name: "Siti Norzahra", type: "Follow-up Session",   status: "In Progress", va: "—" },
         { time: "09:30", name: "Lim Wei Jian",  type: "Progress Review",     status: "Waiting",     va: "—" },

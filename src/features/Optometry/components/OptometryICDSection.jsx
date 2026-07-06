@@ -6,6 +6,19 @@ import { API_URL } from "../../../platform/config/api.config";
  * Clean ICD-ICF-ICHI Section for Optometry with Accordion UI
  */
 
+const ADDITIONAL_ICHI_OPTIONS = [
+  { code: "OPTO-ICHI-001", name: "Comprehensive refraction and spectacle dispensing" },
+  { code: "OPTO-ICHI-002", name: "Low vision assessment and optical aids training" },
+  { code: "OPTO-ICHI-003", name: "Binocular vision and orthoptic exercises" },
+  { code: "OPTO-ICHI-004", name: "Contact lens fitting and care education" },
+  { code: "OPTO-ICHI-005", name: "Visual field screening and rehabilitation" },
+  { code: "OPTO-ICHI-006", name: "Eccentric viewing and scanning training" },
+  { code: "OPTO-ICHI-007", name: "Paediatric vision therapy session" },
+  { code: "OPTO-ICHI-008", name: "Ocular health education and hygiene counselling" },
+  { code: "OPTO-ICHI-009", name: "Computer-based visual perceptual training" },
+  { code: "OPTO-ICHI-010", name: "Driving vision assessment and advice" },
+];
+
 function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
   const DEPARTMENT = "Optometry";
   const showICF = mode === "icd-icf" || mode === "assessment";
@@ -14,8 +27,12 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
   // State
   const [icdList, setIcdList] = useState([]);
   const [selectedICDs, setSelectedICDs] = useState(() => values.selected_icds || []);
+  const [selectedICFs, setSelectedICFs] = useState(() => values.selected_icfs || []);
   const [icfData, setIcfData] = useState(() => values.icf_data || {});
   const [ichiData, setIchiData] = useState(() => values.ichi_data || {});
+  const [selectedAdditionalIchi, setSelectedAdditionalIchi] = useState(
+    () => values.selected_additional_ichi || [],
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
@@ -23,7 +40,8 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
   const [expandedSections, setExpandedSections] = useState({
     icd: true,
     icf: false,
-    ichi: false
+    ichi: false,
+    additional_ichi: false,
   });
 
   // Load ICDs on mount
@@ -34,8 +52,10 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
   // Sync with external changes
   useEffect(() => {
     if (values.selected_icds) setSelectedICDs(values.selected_icds);
+    if (values.selected_icfs) setSelectedICFs(values.selected_icfs);
     if (values.icf_data) setIcfData(values.icf_data);
     if (values.ichi_data) setIchiData(values.ichi_data);
+    if (values.selected_additional_ichi) setSelectedAdditionalIchi(values.selected_additional_ichi);
   }, [values]);
 
   const loadICDs = async () => {
@@ -51,6 +71,8 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
     }
   };
 
+  const getIcfKey = (item) => `${item.source_icd}::${item.code}`;
+
   const toggleICD = (icdCode) => {
     const newSelected = selectedICDs.includes(icdCode)
       ? selectedICDs.filter(x => x !== icdCode)
@@ -61,6 +83,7 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
     if (selectedICD) {
       const newIcfData = { ...icfData };
       const newIchiData = { ...ichiData };
+      let newSelectedICFs = [...selectedICFs];
       
       if (newSelected.includes(icdCode)) {
         newIcfData[icdCode] = selectedICD.icf || [];
@@ -68,16 +91,38 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
       } else {
         delete newIcfData[icdCode];
         delete newIchiData[icdCode];
+        newSelectedICFs = newSelectedICFs.filter((key) => !key.startsWith(`${icdCode}::`));
       }
       
       setIcfData(newIcfData);
       setIchiData(newIchiData);
+      setSelectedICFs(newSelectedICFs);
       onChange?.("icf_data", newIcfData);
       onChange?.("ichi_data", newIchiData);
+      onChange?.("selected_icfs", newSelectedICFs);
     }
 
     setSelectedICDs(newSelected);
     onChange?.("selected_icds", newSelected);
+  };
+
+  const toggleICF = (item) => {
+    const key = getIcfKey(item);
+    const newSelected = selectedICFs.includes(key)
+      ? selectedICFs.filter((x) => x !== key)
+      : [...selectedICFs, key];
+
+    setSelectedICFs(newSelected);
+    onChange?.("selected_icfs", newSelected);
+  };
+
+  const toggleAdditionalIchi = (code) => {
+    const newSelected = selectedAdditionalIchi.includes(code)
+      ? selectedAdditionalIchi.filter((x) => x !== code)
+      : [...selectedAdditionalIchi, code];
+
+    setSelectedAdditionalIchi(newSelected);
+    onChange?.("selected_additional_ichi", newSelected);
   };
 
   const toggleSection = (section) => {
@@ -143,15 +188,15 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
         </div>
       )}
 
-      {/* ICF Items Section */}
-      {showICF && allICFItems.length > 0 && (
+      {/* ICF Selection Section */}
+      {showICF && selectedICDs.length > 0 && (
         <div style={S.section}>
           <div 
             style={S.header} 
             onClick={() => toggleSection('icf')}
           >
             <span style={S.headerText}>
-              🔍 ICF Items ({allICFItems.length} items)
+              🔍 ICF Selection ({selectedICFs.length} selected)
             </span>
             <span style={S.chevron}>
               {expandedSections.icf ? '▼' : '▶'}
@@ -160,13 +205,40 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
           
           {expandedSections.icf && (
             <div style={S.content}>
-              {allICFItems.map((item) => (
-                <div key={`${item.source_icd}-${item.code}`} style={S.itemCard}>
-                  <div style={S.itemCode}>{item.code}</div>
-                  <div style={S.itemName}>{item.name}</div>
-                  {item.notes && <div style={S.itemNotes}>{item.notes}</div>}
+              {allICFItems.length === 0 ? (
+                <div style={S.emptyHint}>No ICF items linked to the selected ICD(s).</div>
+              ) : (
+                <div style={S.icdGrid}>
+                  {allICFItems.map((item) => {
+                    const key = getIcfKey(item);
+                    const isSelected = selectedICFs.includes(key);
+                    return (
+                      <label
+                        key={key}
+                        style={{
+                          ...S.icdCard,
+                          background: isSelected ? "#f0fdf4" : "#fff",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleICF(item)}
+                          style={S.checkbox}
+                        />
+                        <div>
+                          <div style={S.icdCode}>{item.code}</div>
+                          <div style={S.icdName}>{item.name}</div>
+                          {item.source_icd && (
+                            <div style={S.itemSource}>ICD: {item.source_icd}</div>
+                          )}
+                          {item.notes && <div style={S.itemNotes}>{item.notes}</div>}
+                        </div>
+                      </label>
+                    );
+                  })}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
@@ -195,6 +267,53 @@ function OptometryICDSection({ values = {}, onChange, mode = "plan" }) {
                   <div style={S.itemName}>{item.name}</div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Additional ICHI — optometry catalogue (multi-select) */}
+      {showICHI && (
+        <div style={S.section}>
+          <div
+            style={S.header}
+            onClick={() => toggleSection("additional_ichi")}
+          >
+            <span style={S.headerText}>
+              ➕ Additional ICHI ({selectedAdditionalIchi.length} selected)
+            </span>
+            <span style={S.chevron}>
+              {expandedSections.additional_ichi ? "▼" : "▶"}
+            </span>
+          </div>
+
+          {expandedSections.additional_ichi && (
+            <div style={S.content}>
+              <div style={S.icdGrid}>
+                {ADDITIONAL_ICHI_OPTIONS.map((item) => {
+                  const isSelected = selectedAdditionalIchi.includes(item.code);
+                  return (
+                    <label
+                      key={item.code}
+                      style={{
+                        ...S.icdCard,
+                        background: isSelected ? "#fef3c7" : "#fff",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleAdditionalIchi(item.code)}
+                        style={{ ...S.checkbox, accentColor: "#d97706" }}
+                      />
+                      <div>
+                        <div style={S.icdCode}>{item.code}</div>
+                        <div style={S.icdName}>{item.name}</div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -312,6 +431,16 @@ const S = {
     fontSize: 11,
     color: "#6b7280",
     fontStyle: "italic",
+  },
+  itemSource: {
+    fontSize: 11,
+    color: "#6b7280",
+    marginTop: 4,
+  },
+  emptyHint: {
+    fontSize: 13,
+    color: "#6b7280",
+    padding: "8px 0",
   },
   emptyState: {
     textAlign: "center",

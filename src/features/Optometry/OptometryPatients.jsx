@@ -3,37 +3,8 @@ import OptometryFollowUpAssessment from "./components/OptometryFollowUpAssessmen
 import OptometryProgressAssessment from "./components/OptometryProgressAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
-import { fetchPatientsList } from "../../shared/api/patientsList";
-import { filterPatientsForDepartment } from "../../shared/utils/patientFilters";
 import AssessmentLoader from "../../assessment";
-
-const DEPARTMENT = "Optometry";
-
-/* ── Status palette ─────────────────────────────────────────────────────── */
-const STATUS = {
-  new:      { bg: "#ECFDF5", color: "#166534", border: "#A7F3D0", dot: "#22C55E" },
-  ongoing:  { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE", dot: "#3B82F6" },
-  done:     { bg: "#F0FDF4", color: "#15803D", border: "#BBF7D0", dot: "#22C55E" },
-  inactive: { bg: "#F8FAFC", color: "#64748B", border: "#E2E8F0", dot: "#94A3B8" },
-};
-
-function StatusPill({ status }) {
-  const normalized = (status || "New").trim().toLowerCase();
-  const s = STATUS[normalized] || STATUS.inactive;
-  const label = normalized === "new" ? "New" : (status || "Unknown");
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 6,
-      padding: "6px 12px", borderRadius: 999,
-      fontSize: 12, fontWeight: 700, letterSpacing: "0.15px",
-      background: s.bg, color: s.color, border: `1px solid ${s.border}`,
-      boxShadow: "0 6px 12px rgba(15,23,42,0.035)",
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
-      {label}
-    </span>
-  );
-}
+import { formatAppointmentDateTime } from "../../shared/api/patientsList";
 
 /* ── Option cards ───────────────────────────────────────────────────────── */
 const OPTION_CARDS = [
@@ -57,36 +28,25 @@ const OPTION_CARDS = [
   },
 ];
 
-export default function OptometryPatients({ onBack, loading: loadingProp = false }) {
+export default function OptometryPatients({
+  onBack,
+  patients: patientsProp = [],
+  totalPatients: totalPatientsProp,
+  loading: loadingProp = false,
+}) {
   const [selectedPatient,      setSelectedPatient]      = useState(null);
   const [assessmentView,       setAssessmentView]       = useState(null);
   const [submittedAssessments, setSubmittedAssessments] = useState({});
   const [submittedFollowups,   setSubmittedFollowups]   = useState({});
   const [search,               setSearch]               = useState("");
-  const [patients,             setPatients]             = useState([]);
-  const [fetchLoading,         setFetchLoading]         = useState(true);
-  const loading = loadingProp || fetchLoading;
+  const patients = patientsProp;
+  const totalPatients = totalPatientsProp ?? patients.length;
+  const loading = loadingProp;
 
   const handleBackToPatients = useCallback(() => { setSelectedPatient(null); setAssessmentView(null); }, []);
   const handleBackToCards    = useCallback(() => { setAssessmentView(null); }, []);
   const handleInitialSubmit  = useCallback((v) => setSubmittedAssessments(p => ({ ...p, [selectedPatient.id]: v })), [selectedPatient]);
   const handleFollowupSubmit = useCallback((v) => setSubmittedFollowups(p => ({ ...p, [selectedPatient.id]: v })), [selectedPatient]);
-
-  /* Fetch patients department wise */
-  React.useEffect(() => {
-    const fetchPatients = async () => {
-      setFetchLoading(true);
-      try {
-        const list = await fetchPatientsList();
-        setPatients(list);
-      } catch (e) {
-        setPatients([]);
-      } finally {
-        setFetchLoading(false);
-      }
-    };
-    fetchPatients();
-  }, []);
 
   /* Deep-link: auto-select patient once list is loaded */
   React.useEffect(() => {
@@ -109,22 +69,18 @@ export default function OptometryPatients({ onBack, loading: loadingProp = false
   }, [patients]);                                          // runs whenever patients loads
 
   /* hooks must be before early returns */
-  const deptPatients = useMemo(
-    () => filterPatientsForDepartment(patients, DEPARTMENT),
-    [patients],
-  );
-
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    const base = deptPatients;
+    const base = patients;
     return !q
       ? base
       : base.filter(p =>
           (p.name || p.patient_name || "").toLowerCase().includes(q) ||
           (p.email || "").toLowerCase().includes(q) ||
-          (p.mrn || "").toLowerCase().includes(q)
+          (p.mrn || p.ic || "").toLowerCase().includes(q) ||
+          (p.icd || "").toLowerCase().includes(q)
         );
-  }, [deptPatients, search]);
+  }, [patients, search]);
 
   /* ── Assessment views ── */
   if (selectedPatient && assessmentView === "initial") {
@@ -223,7 +179,7 @@ export default function OptometryPatients({ onBack, loading: loadingProp = false
           <button style={S.headerBackBtn} onClick={onBack}>&lt;</button>
           <div>
             <h1 style={S.pageTitle}>Patients</h1>
-            <p style={S.pageSub}>Premium optometry patient queue</p>
+            <p style={S.pageSub}>Today&apos;s optometry appointment queue</p>
           </div>
         </div>
 
@@ -251,8 +207,7 @@ export default function OptometryPatients({ onBack, loading: loadingProp = false
         {/* Header */}
         <div style={S.thead}>
           <div style={S.th}>Patient</div>
-          <div style={S.th}>MRN / ICD</div>
-          <div style={S.th}>Status</div>
+          <div style={S.th}>Date &amp; Time</div>
           <div style={{ ...S.th, textAlign: "right" }}>Action</div>
         </div>
 
@@ -280,7 +235,7 @@ export default function OptometryPatients({ onBack, loading: loadingProp = false
       {/* Footer count */}
       {!loading && filtered.length > 0 && (
         <div style={S.footerCount}>
-          Showing <strong>{filtered.length}</strong> of <strong>{deptPatients.length}</strong> patient{deptPatients.length !== 1 ? "s" : ""}
+          Showing <strong>{filtered.length}</strong> of <strong>{totalPatients || patients.length}</strong> patient{(totalPatients || patients.length) !== 1 ? "s" : ""}
         </div>
       )}
     </div>
@@ -333,21 +288,13 @@ function PatientRow({ patient: p, idx, onStart }) {
         </div>
       </div>
 
-      {/* MRN */}
-      <div style={S.tdMuted}>{p.mrn || p.icd || "—"}</div>
-
-      {/* Status */}
-      <div><StatusPill status={p.status} /></div>
+      {/* Appointment date & time */}
+      <div style={S.tdSchedule}>{formatAppointmentDateTime(p)}</div>
 
       {/* Action */}
       <div style={{ textAlign: "right" }}>
-        <button
-          style={S.startBtn}
-          onMouseEnter={e => { e.currentTarget.style.background = "#0058FF"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "#0058FF"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#0058FF"; e.currentTarget.style.borderColor = "#BFDBFE"; }}
-          onClick={onStart}
-        >
-          Begin assessment
+        <button type="button" style={S.actionLink} onClick={onStart}>
+          Begin Assessment
         </button>
       </div>
     </div>
@@ -481,13 +428,13 @@ const S = {
     boxShadow: "0 24px 80px rgba(15,23,42,0.08)",
   },
   thead:      {
-    display: "grid", gridTemplateColumns: "2.5fr 2fr 1.2fr 1fr",
+    display: "grid", gridTemplateColumns: "2.5fr 1.5fr 1fr",
     padding: "18px 24px", background: "#F8FAFC",
     borderBottom: "1px solid #E6E8F0",
   },
   th:         { fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.18em" },
   tr:         {
-    display: "grid", gridTemplateColumns: "2.5fr 1.8fr 1.2fr 1fr",
+    display: "grid", gridTemplateColumns: "2.5fr 1.5fr 1fr",
     padding: "14px 20px", alignItems: "center",
     borderBottom: "1px solid #F1F5F9",
     transition: "background .15s, transform .15s",
@@ -500,14 +447,16 @@ const S = {
   },
   tdName:     { fontSize: 15, fontWeight: 700, color: "#111827" },
   tdSub:      { fontSize: 12, color: "#6B7280", marginTop: 4, lineHeight: 1.4 },
-  tdMuted:    { fontSize: 13, color: "#6B7280", fontFamily: "monospace" },
+  tdSchedule: { fontSize: 13, color: "#374151", lineHeight: 1.45, fontWeight: 500 },
 
-  startBtn:   {
-    background: "#fff", border: "1px solid #2563EB",
-    color: "#2563EB", borderRadius: 999,
-    padding: "8px 18px", fontSize: 13, fontWeight: 700,
-    cursor: "pointer", transition: "transform .18s, box-shadow .18s, background .18s, color .18s",
-    boxShadow: "0 10px 24px rgba(37,99,235,0.12)",
+  actionLink: {
+    fontSize: 12,
+    color: "#2563eb",
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+    fontWeight: 600,
   },
 
   footerCount: { marginTop: 12, fontSize: 12, color: "#94A3B8", textAlign: "right" },

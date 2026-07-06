@@ -67,6 +67,8 @@ const API_URL = {
         RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/reserve/`,
     BOOKING_QUEUE_BOOK_CONFIRM: (bookingId) =>
         RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/confirm/`,
+    DEPARTMENT_APPOINTMENTS: (departmentSlug) =>
+        RMS_API + `appointment/appmts/${encodeURIComponent(departmentSlug)}/`,
     // Billing price
     BILLING: (
         dept,
