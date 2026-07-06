@@ -72,8 +72,6 @@ export default function GenericDepartmentDashboard({
 
   const approveDenyInPendingCount = approveDenyPatients.length;
 
-  const approveDenyInPendingCount = approveDenyPatients.length;
-
   const handleApproveDenyClick = () => {
     // Navigate immediately — data loads inside the patients page
     setShowApproveDeny(true);
