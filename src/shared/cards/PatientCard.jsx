@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { localDateTimeString } from "../utils/dateFormatter";
+import { fetchPatientDetails } from "../api/patientsList";
 
 const PRIMARY_ROW_COUNT = 2;
 const COLS = 3;
@@ -15,8 +16,6 @@ function getIcNumber(patient) {
     patient.ic_number ||
     patient.nric ||
     patient.identification_number ||
-    patient.mrn ||
-    patient.id ||
     null
   );
 }
@@ -33,7 +32,7 @@ function buildDemographics(patient) {
       : patient.education_background;
 
   return [
-    { key: "dob", label: "Date of birth", value: localDateTimeString(patient.dob) },
+    { key: "dob", label: "Date of birth", value: localDateTimeString(patient.dob || patient.date_of_birth) },
     { key: "age_gender", label: "Age / gender", value: [patient.age ? `${patient.age} yrs` : null, patient.sex || patient.gender].filter(Boolean).join(" · ") || null },
     { key: "primary_dx", label: "Primary diagnosis", value: patient.diagnosis_history || patient.icd },
     { key: "marital", label: "Marital status", value: patient.marital_status },
@@ -71,10 +70,49 @@ export default function PatientCard({
   department,
   assignmentType,
   onAssignmentTypeChange,
+  fetchDetails = true,
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [details, setDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
-  const demographics = useMemo(() => (patient ? buildDemographics(patient) : []), [patient]);
+  useEffect(() => {
+    if (!fetchDetails || !patient) {
+      setDetails(null);
+      return;
+    }
+
+    if (!patient.id && !patient.patient_id) return;
+
+    let cancelled = false;
+    setDetailsLoading(true);
+
+    fetchPatientDetails(patient)
+      .then((data) => {
+        if (!cancelled) setDetails(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load patient details:", error);
+        if (!cancelled) setDetails(null);
+      })
+      .finally(() => {
+        if (!cancelled) setDetailsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchDetails, patient?.id, patient?.patient_id]);
+
+  const displayPatient = useMemo(
+    () => (patient ? { ...patient, ...(details || {}) } : null),
+    [patient, details],
+  );
+
+  const demographics = useMemo(
+    () => (displayPatient ? buildDemographics(displayPatient) : []),
+    [displayPatient],
+  );
 
   const primaryCount = PRIMARY_ROW_COUNT * COLS;
   const primaryFields = demographics.slice(0, primaryCount);
@@ -85,7 +123,7 @@ export default function PatientCard({
 
   if (!patient) return <span style={{ color: "#64748b" }}>—</span>;
 
-  const initials = (patient.name || patient.email || "?")
+  const initials = (displayPatient.name || displayPatient.email || "?")
     .split(/\s+/)
     .map((w) => w[0])
     .join("")
@@ -117,10 +155,10 @@ export default function PatientCard({
             {initials}
           </div>
           <div style={headerText}>
-            <div style={headerName}>{displayValue(patient.name)}</div>
+            <div style={headerName}>{displayValue(displayPatient.name)}</div>
             <div style={headerIcRow}>
               <span style={headerIcLabel}>IC</span>
-              <span style={headerIcValue}>{displayValue(getIcNumber(patient))}</span>
+              <span style={headerIcValue}>{displayValue(getIcNumber(displayPatient))}</span>
             </div>
           </div>
         </div>
@@ -145,11 +183,17 @@ export default function PatientCard({
       </div>
 
       {/* Demographics — first 2 rows */}
-      <div style={grid} className="patient-card-grid">
-        {primaryFields.map((f) => (
-          <FieldCell key={f.key} label={f.label} value={f.value} />
-        ))}
-      </div>
+      {detailsLoading ? (
+        <div style={{ fontSize: 13, color: "#64748b", padding: "8px 0" }}>
+          Loading patient details…
+        </div>
+      ) : (
+        <div style={grid} className="patient-card-grid">
+          {primaryFields.map((f) => (
+            <FieldCell key={f.key} label={f.label} value={f.value} />
+          ))}
+        </div>
+      )}
 
       {hasExpandable && (
         <button

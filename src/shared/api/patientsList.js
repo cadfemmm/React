@@ -115,8 +115,8 @@ function mapAppointmentToPatient(record) {
   return {
     ...patient,
     ...record,
-    id: record.patient_id ?? patient.id ?? patient.patient_id ?? record.id,
-    patient_id: record.patient_id ?? patient.id ?? patient.patient_id ?? record.id,
+    id: patient.id ?? record.patient_uuid ?? record.patient_id ?? patient.patient_id ?? record.id,
+    patient_id: record.patient_id ?? patient.patient_id ?? patient.id,
     name,
     patient_name: name,
     mrn,
@@ -240,4 +240,120 @@ export async function updatePatientApprovalStatus(patientId, approvalStatus, ext
     { headers: { accept: "application/json" } },
   );
   return res.data;
+}
+
+function formatEnumLabel(value) {
+  if (!value) return null;
+  return String(value)
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatGender(value) {
+  if (!value) return null;
+  const normalized = String(value).trim().toUpperCase();
+  if (normalized === "M" || normalized === "MALE") return "Male";
+  if (normalized === "F" || normalized === "FEMALE") return "Female";
+  return formatEnumLabel(value);
+}
+
+function formatDisplayDate(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatGlDuration(coverage) {
+  if (!coverage) return null;
+  const start = formatDisplayDate(coverage.coverage_start_date);
+  const end = formatDisplayDate(coverage.coverage_end_date);
+  if (start && end) return `${start} – ${end}`;
+  return start || end || null;
+}
+
+export function mapPatientDetailsFromApi(data) {
+  if (!data || typeof data !== "object") return {};
+
+  const carers = Array.isArray(data.carers) ? data.carers : [];
+  const caregiver = carers.find((c) => c.is_caregiver) || carers[0];
+  const emergencyContact =
+    carers.find((c) => c.is_emergency_contact_person) || caregiver;
+  const dob = data.date_of_birth || data.dob;
+
+  return {
+    ...data,
+    id: data.id,
+    patient_id: data.patient_id,
+    name: data.patient_name || data.name,
+    patient_name: data.patient_name,
+    ic: data.ic,
+    mrn: data.mrn,
+    dob,
+    date_of_birth: dob,
+    age: resolvePatientAge({ ...data, dob }),
+    gender: formatGender(data.gender),
+    sex: formatGender(data.gender),
+    marital_status: formatEnumLabel(data.marital_status),
+    language_preference: data.language_preference,
+    diagnosis_history: data.case?.diagnosis || null,
+    icd: data.case?.diagnosis || null,
+    secondary_diagnosis: data.case?.referral_details || null,
+    scheme:
+      data.patient_category ||
+      data.case?.gl_details?.existing_payer_type ||
+      null,
+    gl_date: formatGlDuration(data.case?.coverage),
+    main_caregiver: caregiver?.full_name || null,
+    next_of_kin:
+      data.emergency_contact_person || emergencyContact?.full_name || null,
+    employment_status: data.occupation || formatEnumLabel(data.client_type),
+    email: data.email,
+    phone: data.phone,
+    address: data.address,
+    nationality: data.nationality,
+    state: data.state,
+    patient_category: data.patient_category,
+    approval_status: data.approval_status,
+  };
+}
+
+function getPatientDetailsFetchIds(patient) {
+  if (!patient) return [];
+  return [...new Set(
+    [patient.id, patient.patient_id, patient.patient_uuid]
+      .filter(Boolean)
+      .map(String),
+  )];
+}
+
+export async function fetchPatientDetails(patientOrId) {
+  const ids =
+    typeof patientOrId === "string" || typeof patientOrId === "number"
+      ? [String(patientOrId)]
+      : getPatientDetailsFetchIds(patientOrId);
+
+  if (!ids.length) {
+    throw new Error("Patient id is required");
+  }
+
+  let lastError;
+  for (const patientId of ids) {
+    try {
+      const res = await api.get(API_URL.PATIENT_DETAILS(patientId), {
+        headers: { accept: "application/json" },
+      });
+      const data = res.data?.data ?? res.data;
+      return mapPatientDetailsFromApi(data);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error("Failed to fetch patient details");
 }
