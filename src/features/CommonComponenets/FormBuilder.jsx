@@ -1492,22 +1492,23 @@ function AssessmentLauncher({
                 </button>
               )}
 
-              <button
-                type="button"
-                className="fb-btn-ghost"
+              {selectedAssessment.session_id ? (
+                <button
+                  type="button"
+                  className="fb-btn-ghost"
 
-                onClick={async () => {
+                  onClick={async () => {
 
-                  try {
+                    try {
 
-                    const templateDataId =
-                      selectedAssessment.session_id;
+                      const templateDataId =
+                        selectedAssessment.session_id;
 
-                    if (!templateDataId) {
-                      throw new Error(
-                        "Missing sub assessment session id"
-                      );
-                    }
+                      if (!templateDataId) {
+                        throw new Error(
+                          "Missing sub assessment session id"
+                        );
+                      }
 
 const parentFieldNames = [];
 
@@ -1583,26 +1584,38 @@ const subAssessmentData = Object.fromEntries(
 
 );
 
-                    await forms.save(
-                      templateDataId,
-                      subAssessmentData
-                    );
+                      await forms.save(
+                        templateDataId,
+                        subAssessmentData
+                      );
 
-                    console.log(
-                      "Sub Assessment Saved",
-                      selectedAssessment.name
-                    );
+                      console.log(
+                        "Sub Assessment Saved",
+                        selectedAssessment.name
+                      );
 
-                  } catch (e) {
+                    } catch (e) {
 
-                    console.log(e);
+                      console.log(e);
 
-                  }
+                    }
 
-                }}
-              >
-                Save
-              </button>
+                  }}
+                >
+                  Save
+                </button>
+              ) : (
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "#9ca3af",
+                    fontStyle: "italic",
+                    alignSelf: "center",
+                  }}
+                >
+                  Start an assessment session to enable saving
+                </span>
+              )}
 
             </div>
 

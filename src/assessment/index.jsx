@@ -316,30 +316,62 @@ useEffect(() => {
         }
         // SUB ASSESSMENT
         else {
-          setSubAssessmentTemplate((prev) => ({
-            ...prev,
-            [tab]: Object.fromEntries(
-              Object.entries(prev[tab] || {}).map(([key, subTemplate]) => {
+          const SOAP_TABS = ["subjective", "objective", "assessment", "plan"];
+
+          // Helper to update session_id for a matching sub-template in a given tab
+          const updateSessionId = (prev, targetTab) => {
+            let matched = false;
+            const newEntries = Object.entries(prev[targetTab] || {}).map(
+              ([key, subTemplate]) => {
                 if (
                   subTemplate.name === template.name ||
                   key === template.name
                 ) {
+                  matched = true;
                   return [
                     key,
                     {
                       ...subTemplate,
-                      // KEEP ORIGINAL FORM ID
                       id: subTemplate.id,
-                      // STORE SESSION INSTANCE SEPARATELY
                       session_id: template.id,
                       type: template.type,
                     },
                   ];
                 }
                 return [key, subTemplate];
-              }),
-            ),
-          }));
+              },
+            );
+            if (matched) {
+              return {
+                ...prev,
+                [targetTab]: Object.fromEntries(newEntries),
+              };
+            }
+            return null;
+          };
+
+          setSubAssessmentTemplate((prev) => {
+            // First try the derived tab (original logic)
+            const result = updateSessionId(prev, tab);
+            if (result) return result;
+
+            // Fallback: search ALL soap tabs for a matching sub-template name
+            for (const soapTab of SOAP_TABS) {
+              if (soapTab === tab) continue; // already tried above
+              const fallbackResult = updateSessionId(prev, soapTab);
+              if (fallbackResult) {
+                console.log(
+                  `[Start] Matched sub-template "${template.name}" in soap tab "${soapTab}" (fallback from "${tab}")`,
+                );
+                return fallbackResult;
+              }
+            }
+
+            console.warn(
+              `[Start] Could not match sub-template "${template.name}" in any tab`,
+            );
+            return prev;
+          });
         }
       });
       setIsSessionActive(true);
