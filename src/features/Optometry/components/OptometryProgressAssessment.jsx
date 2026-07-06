@@ -8,16 +8,16 @@ import { ASSESSMENT_TABS, TAB_META } from "../../../schema/actions"
 
 /* ── Main component ── */
 export default function OptometryProgressAssessment({ patient, onSubmit, onBack }) {
-  const [values,    setValues]    = useState({});
+  const [values,    setValues]    = useState({ session_number: "1" });
   const [activeTab, setActiveTab] = useState("subjective");
 
   const activeTabIdx = ASSESSMENT_TABS.indexOf(activeTab);
 
-  const handleChange = (name, value) => setValues(prev => ({ ...prev, [name]: value }));
+  const handleChange = (name, value) => setValues((prev) => ({ ...prev, [name]: value }));
 
   const handleAction = (type) => {
     if (type === "back")  { onBack?.(); return; }
-    if (type === "clear") { setValues({}); return; }
+    if (type === "clear") { setValues({ session_number: "1" }); return; }
     if (type === "save")  { onSubmit?.(values); return; }
     if (type === "next") {
       const idx = ASSESSMENT_TABS.indexOf(activeTab);

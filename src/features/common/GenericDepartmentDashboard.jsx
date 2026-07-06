@@ -26,6 +26,7 @@ import { DoctorsInitialAssessmentForm as DoctorsAssessment } from "../Doctors/co
 import NursingGroupIntervention from "../Nursing/components/GroupIntervention";
 import POGroupIntervention from "../Prosthetics & Orthotics/GroupIntervention";
 import AudiologyGroupAssessmentForm from "../Audiology/components/AudiologyGroup";
+import OptometryGroupIntervention from "../Optometry/components/OptometryGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
 
 const ASSESSMENT_MAP = {
@@ -47,6 +48,7 @@ const GROUP_INTERVENTION_MAP = {
   "Nursing": NursingGroupIntervention,
   "Prosthetics & Orthotics": POGroupIntervention,
   "Audiology": AudiologyGroupAssessmentForm,
+  "Optometry": OptometryGroupIntervention,
 };
 
 /* ── P&O specific card → assessment map ────────────────── */

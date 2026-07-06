@@ -6,47 +6,52 @@ const SUBJECTIVE = {
   "sections": [
     {
       "fields": [
+
+        {
+          "name": "case_overview",
+          "label": "Case Overview",
+          "type": "input"
+        },
         {
           "name": "session_for",
           "label": "Session For",
           "type": "radio",
           "options": [
-            {
-              "label": "Vision Therapy",
-              "value": "vision_therapy"
-            },
-            {
-              "label": "Visual Rehabilitation",
-              "value": "visual_rehabilitation"
-            },
-            {
-              "label": "Low Vision-Blind Rehabilitation",
-              "value": "low_vision_blind_rehab"
-            }
+            { "label": "Vision Therapy", "value": "vision_therapy" },
+            { "label": "Visual Rehabilitation", "value": "visual_rehabilitation" },
+            { "label": "Low Vision & Blind Rehabilitation", "value": "low_vision_blind_rehab" },
+            { "label": "Specialized Programme", "value": "specialized_programme" }
           ]
         },
         {
-          "name": "consent",
-          "label": "Consent",
-          "type": "checkbox-group",
+          "name": "session_type",
+          "label": "Session Type",
+          "type": "radio",
           "options": [
-            {
-              "label": "Consultation has been given based on findings. Client was in his/her best interest.",
-              "value": "yes"
-            }
+            { "label": "In Office training", "value": "in_office_training" },
+            { "label": "Home-based exercise review", "value": "home_based_exercise_review" },
+            { "label": "Consultation", "value": "consultation" },
+            { "label": "Tele-rehabilitation", "value": "tele_rehabilitation" }
           ]
         },
         {
-          "name": "new_complaints",
-          "label": "New Complaint(s)",
-          "type": "textarea"
+          "type": "subheading",
+          "label": "Consent"
         },
         {
-          "name": "session",
-          "label": "Session(s)",
-          "type": "input-number-range",
-          "min": 1,
-          "max": 1000
+          "name": "new_complaint",
+          "label": "New Complaint",
+          "type": "radio",
+          "options": [
+            { "label": "Yes", "value": "yes" },
+            { "label": "No", "value": "no" }
+          ]
+        },
+        {
+          "name": "session_number",
+          "label": "Session Number",
+          "type": "input",
+          "readOnly": true
         }
       ]
     }
@@ -60,45 +65,45 @@ const OBJECTIVE = {
     {
       "fields": [
         {
-          "name": "case_overview",
-          "label": "Case Overview",
-          "type": "textarea"
-        },
-        {
-          "name": "modalities",
-          "label": "Modalities",
-          "type": "checkbox-group",
-          "options": [
-            {
-              "label": "Home Exercise",
-              "value": "home_exercise"
-            },
-            {
-              "label": "In Office Training",
-              "value": "in_office_training"
-            },
-            {
-              "label": "Both",
-              "value": "both"
-            }
-          ]
-        },
-        {
-          "name": "strategies",
-          "label": "Strategies",
-          "type": "textarea"
-        },
-        {
-          "name": "objectives",
-          "label": "Objectives",
+          "name": "objectives_of_strategies",
+          "label": "Objective of the Strategies",
           "type": "dynamic-section",
           "fields": [
             {
-              "name": "objective_text",
-              "label": "Objective",
-              "type": "input"
+              "name": "strategy_text",
+              "label": "Strategy",
+              "type": "textarea"
             }
           ]
+        },
+        {
+          "type": "multi-select-dropdown",
+          "name": "modalities_used",
+          "label": "Modalities Used",
+          "options": [
+            { "label": "Vision Therapy module", "value": "vision_therapy_module" },
+            { "label": "Neuro-Visual Rehabilitation module", "value": "neuro_visual_rehabilitation_module" },
+            { "label": "Low Vision & Blind Rehabilitation module", "value": "low_vision_blind_rehabilitation_module" },
+            { "label": "Restitution Program", "value": "restitution_program" },
+            { "label": "Visual Adaptation Technique", "value": "visual_adaptation_technique" },
+            { "label": "Computer-based/Digital Training", "value": "computer_based_digital_training" },
+            { "label": "Visual Sustitution Method", "value": "visual_substitution_method" },
+            { "label": "Compensatory Strategies", "value": "compensatory_strategies" },
+            { "label": "Visual Aids Trial & Training", "value": "visual_aids_trial_training" },
+            { "label": "Low Vision Aids Trial & Training", "value": "low_vision_aids_trial_training" },
+            { "label": "Low Vision Aids Dispensing", "value": "low_vision_aids_dispensing" },
+            { "label": "Eccentric Viewing Training", "value": "eccentric_viewing_training" },
+            { "label": "Others", "value": "others" }
+          ]
+        },
+        {
+          "name": "modalities_used_others",
+          "label": "Others (specify)",
+          "type": "input",
+          "showIf": {
+            "field": "modalities_used",
+            "includes": "others"
+          }
         }
       ]
     }
@@ -111,6 +116,11 @@ const ASSESSMENT = {
   "sections": [
     {
       "fields": [
+        {
+          "name": "observation_during_treatment",
+          "label": "Observation During Treatment",
+          "type": "input"
+        },
         {
           "name": "tasks",
           "label": "Tasks",
@@ -164,19 +174,29 @@ const PLAN = {
     {
       "fields": [
         {
-          "name": "plan_text",
+          "name": "plan",
           "label": "Plan",
-          "type": "textarea"
+          "type": "radio",
+          "options": [
+            { "label": "To continue current modalities", "value": "continue_current_modalities" },
+            { "label": "To re-evaluate/modify current modalities", "value": "reevaluate_modify_modalities" },
+            { "label": "To re-assess client performance", "value": "reassess_client_performance" },
+            { "label": "Others", "value": "others" }
+          ]
         },
         {
-          "name": "comment_text",
-          "label": "Comment",
-          "type": "textarea"
+          "name": "plan_others",
+          "label": "Others (specify)",
+          "type": "input",
+          "showIf": {
+            "field": "plan",
+            "equals": "others"
+          }
         },
         {
-          "name": "remark_text",
-          "label": "Remark",
-          "type": "textarea"
+          "name": "remarks",
+          "label": "Remarks",
+          "type": "input"
         }
       ]
     }
