@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, createContext } from "react";
+import { createWorker } from "tesseract.js";
 
 // Common Form Builder
 import CommonFormBuilder from "../features/CommonComponenets/FormBuilder.jsx";
@@ -24,6 +25,7 @@ import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreview
 
 // Schema Load
 import actions from "../schema/actions.js";
+import { OTOSCOPIC_EXTRACT_URL } from "../platform/config/api.config";
 
 // API calls
 import forms from "./forms.js";
@@ -73,6 +75,10 @@ export default function AssessmentLoader({ patient, department }) {
     assessment: {},
     plan: {},
   });
+
+  // OCR & Otoscopic processing state
+  const [processingOCR, setProcessingOCR] = useState(false);
+  const [isOtoscopicLoading, setIsOtoscopicLoading] = useState(false);
 
   // Equipment booking state
   const [equipmentBookingOpen, setEquipmentBookingOpen] = useState(false);
@@ -659,6 +665,43 @@ useEffect(() => {
       }
       
       // =========================
+      // OTOSCOPIC EXTRACT INTERCEPT
+      // =========================
+      if (name === "otoscopic_report" && value?.data) {
+        await handleOtoscopicUpload(value);
+        return;
+      }
+
+      // =========================
+      // TYMPANOGRAM OCR INTERCEPT
+      // =========================
+      const isRightTympanometry = name === 'tympanometry_report_right';
+      const isLeftTympanometry = name === 'tympanometry_report_left';
+      if ((isRightTympanometry || isLeftTympanometry) && value) {
+        const isFile = value instanceof File || (value && typeof value === 'object' && value.constructor?.name === 'File');
+        const isImage = isFile && (value.type?.startsWith('image/') || value.name?.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i));
+
+        const patchActiveTab = (nextFieldValues) => {
+          setAssessmentsValues((v) => ({
+            ...v,
+            [activeTab]: {
+              ...(v[activeTab] || {}),
+              ...nextFieldValues
+            }
+          }));
+        };
+
+        if (isFile && isImage) {
+          const earSide = isRightTympanometry ? 'right' : 'left';
+          patchActiveTab({ [name]: value });
+          await processTympanometryImage(value, earSide);
+        } else {
+          patchActiveTab({ [name]: value });
+        }
+        return;
+      }
+
+      // =========================
       // MAIN ASSESSMENT VALUES
       // =========================
       setAssessmentsValues((v) => ({
@@ -671,6 +714,141 @@ useEffect(() => {
     },
     [activeTab, sessionId],
   );
+
+  // ── Otoscopic Extract Handler ──────────────────────────────────────────────
+  const handleOtoscopicUpload = async (file) => {
+    try {
+      setIsOtoscopicLoading(true);
+      const base64Data = file.data.split(",")[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const pdfBlob = new Blob([byteArray], { type: file.type });
+      const pdfFile = new File([pdfBlob], file.filename, { type: file.type });
+      const formData = new FormData();
+      formData.append("file", pdfFile);
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
+        method: "POST",
+        headers: token ? { "Authorization": token } : {},
+        body: formData
+      });
+      const result = await response.json();
+      const rightImage = result?.data?.canals?.right?.image?.data;
+      const leftImage = result?.data?.canals?.left?.image?.data;
+      setAssessmentsValues((v) => ({
+        ...v,
+        objective: {
+          ...(v.objective || {}),
+          otoscopic_right_image: rightImage ? `data:image/jpeg;base64,${rightImage}` : "",
+          otoscopic_left_image: leftImage ? `data:image/jpeg;base64,${leftImage}` : ""
+        }
+      }));
+    } catch (error) {
+      console.error("Otoscopic extraction failed", error);
+    } finally {
+      setIsOtoscopicLoading(false);
+    }
+  };
+
+  // ── Tympanogram OCR Handlers ───────────────────────────────────────────────
+  const extractTympanometryValues = (text) => {
+    const vals = {};
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+    const volumePatterns = [
+      /Volume[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Volume[:\s]*([\d]+\.[\d]+|[\d]+)ml/i,
+      /Vol[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Vol[:\s]*([\d]+\.[\d]+|[\d]+)ml/i
+    ];
+    for (const p of volumePatterns) { const m = text.match(p); if (m) { vals.volume = m[1]; break; } }
+
+    const mlMatches = text.match(/([\d]+\.[\d]+|[\d]+)\s*ml/gi);
+    let mlNumbers = [];
+    if (mlMatches) {
+      mlNumbers = mlMatches.map(m => { const n = m.match(/([\d]+\.[\d]+|[\d]+)/); return n ? { str: n[1], num: parseFloat(n[1]) } : null; }).filter(n => n !== null && n.num > 0 && n.num < 10);
+      mlNumbers.sort((a, b) => b.num - a.num);
+    }
+
+    if (!vals.volume && mlMatches?.length) {
+      const vi = text.toLowerCase().indexOf('volume');
+      if (vi !== -1) { const vm = text.substring(vi).match(/([\d]+\.[\d]+|[\d]+)\s*ml/i); if (vm) vals.volume = vm[1]; }
+      else if (mlNumbers.length && mlNumbers[0].num >= 0.5 && mlNumbers[0].num <= 2.0) vals.volume = mlNumbers[0].str;
+    }
+
+    const pressurePatterns = [
+      /Pressure[:\s]*([\d.-]+)\s*daPa/i, /Pressure[:\s]*([\d.-]+)daPa/i,
+      /Press[:\s]*([\d.-]+)\s*daPa/i, /Press[:\s]*([\d.-]+)daPa/i
+    ];
+    for (const p of pressurePatterns) { const m = text.match(p); if (m) { vals.pressure = m[1]; break; } }
+    if (!vals.pressure) {
+      const dm = text.match(/([\d.-]+)\s*daPa/gi);
+      if (dm) {
+        const pi = text.toLowerCase().indexOf('pressure');
+        if (pi !== -1) { const pm = text.substring(pi).match(/([\d.-]+)\s*daPa/i); if (pm) vals.pressure = pm[1]; }
+        else { for (const d of dm) { const n = d.match(/([\d.-]+)/); if (n) { const num = parseFloat(n[1]); if (Math.abs(num) <= 200 && num !== 77 && num !== 81 && (Math.abs(num) < 50 || num === 0)) { vals.pressure = n[1]; break; } } } }
+      }
+    }
+
+    const compliancePatterns = [
+      /Compliance[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Compliance[:\s]*([\d]+\.[\d]+|[\d]+)ml/i,
+      /Comp[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Comp[:\s]*([\d]+\.[\d]+|[\d]+)ml/i
+    ];
+    for (const p of compliancePatterns) { const m = text.match(p); if (m) { vals.compliance = m[1]; break; } }
+
+    if (!vals.compliance && mlNumbers.length) {
+      const sa = [...mlNumbers].sort((a, b) => a.num - b.num);
+      const vn = vals.volume ? parseFloat(vals.volume) : null;
+      for (const mv of sa) { if (mv.num >= 0.1 && mv.num <= 1.0 && (!vn || Math.abs(vn - mv.num) > 0.1)) { vals.compliance = mv.str; break; } }
+      if (!vals.compliance && mlNumbers.length >= 2) { for (const mv of sa) { if (mv.num >= 0.1 && mv.num < 1.0 && (!vn || Math.abs(vn - mv.num) > 0.05)) { vals.compliance = mv.str; break; } } }
+    }
+
+    return vals;
+  };
+
+  const processTympanometryImage = async (file, earSide) => {
+    setProcessingOCR(true);
+    try {
+      const worker = await createWorker('eng');
+      await worker.setParameters({
+        tessedit_char_whitelist: '0123456789.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:mlPaGradientVolumePressureCompliance ',
+        tessedit_pageseg_mode: '6',
+      });
+      let { data: { text } } = await worker.recognize(file);
+      if (!text.match(/Volume|Pressure|Compliance|[\d]+\.[\d]+\s*ml|[\d.-]+\s*daPa/i)) {
+        await worker.setParameters({ tessedit_pageseg_mode: '11' });
+        const r2 = await worker.recognize(file);
+        if (r2.data.text.length > text.length) text = r2.data.text;
+      }
+      await worker.terminate();
+
+      const extracted = extractTympanometryValues(text);
+      if (extracted.volume || extracted.pressure || extracted.compliance) {
+        setAssessmentsValues((v) => {
+          const updates = {};
+          if (extracted.volume) updates.ecv = { ...(v.ecv || {}), [`ecv_${earSide === 'right' ? 'r' : 'l'}`]: String(extracted.volume) };
+          if (extracted.pressure) updates.peak_pressure = { ...(v.peak_pressure || {}), [`peak_pressure_${earSide === 'right' ? 'r' : 'l'}`]: String(extracted.pressure) };
+          if (extracted.compliance) updates.static_compliance = { ...(v.static_compliance || {}), [`static_compliance_${earSide === 'right' ? 'r' : 'l'}`]: String(extracted.compliance) };
+          if (Object.keys(updates).length > 0) {
+            const cnt = Object.keys(extracted).filter(k => extracted[k]).length;
+            setTimeout(() => alert(`Extracted ${cnt} value(s) from ${earSide} ear tympanometry image:\n${extracted.volume ? `Volume: ${extracted.volume} ml\n` : ''}${extracted.pressure ? `Pressure: ${extracted.pressure} daPa\n` : ''}${extracted.compliance ? `Compliance: ${extracted.compliance} ml` : ''}`), 100);
+            return { ...v, [activeTab]: { ...(v[activeTab] || {}), ...updates } };
+          }
+          return v;
+        });
+      } else {
+        alert('Could not extract values from the image. Please enter values manually.');
+      }
+    } catch (error) {
+      console.error('OCR processing error:', error);
+      alert(`OCR error: ${error.message}`);
+    } finally {
+      setProcessingOCR(false);
+    }
+  };
+
   // UI Components for rendering the assessment forms and sub assessments tab-wise will go here
   return (
     <PatientContext.Provider value={{ patient }}>
@@ -927,6 +1105,21 @@ useEffect(() => {
                 }
 
                 return (
+                  <>
+                  {processingOCR && (
+                    <div style={{
+                      padding: "12px 16px",
+                      marginBottom: "16px",
+                      background: "#e0f2fe",
+                      border: "1px solid #0ea5e9",
+                      borderRadius: "8px",
+                      color: "#0c4a6e",
+                      fontWeight: 600,
+                      textAlign: "center"
+                    }}>
+                      🔄 Processing image with OCR... Please wait
+                    </div>
+                  )}
                   <CommonFormBuilder
                     readOnly={false}
                     onChange={onChange}
@@ -1016,6 +1209,7 @@ useEffect(() => {
                       </button>
                     </div>
                   </CommonFormBuilder>
+                  </>
                 );
               })()
             )}

@@ -892,8 +892,10 @@ const handleOtoscopicUpload = async (file) => {
     const formData = new FormData();
     formData.append("file", pdfFile);
 
+    const token = localStorage.getItem("access_token");
     const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
       method: "POST",
+      headers: token ? { "Authorization": token } : {},
       body: formData
     });
 
