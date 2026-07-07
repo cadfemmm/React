@@ -733,7 +733,7 @@ useEffect(() => {
       const token = localStorage.getItem("access_token");
       const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
         method: "POST",
-        headers: token ? { "Authorization": token } : {},
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
         body: formData
       });
       const result = await response.json();

@@ -294,7 +294,7 @@ const handleOtoscopicUpload = async (file) => {
     console.log('[handleOtoscopicUpload] Sending to', OTOSCOPIC_EXTRACT_URL, 'with auth token:', !!token);
     const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
       method: "POST",
-      headers: token ? { "Authorization": token } : {},
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
       body: formData
     });
     console.log('[handleOtoscopicUpload] Response status:', response.status);
