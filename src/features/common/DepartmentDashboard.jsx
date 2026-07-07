@@ -1,5 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Line, Doughnut } from "react-chartjs-2";
+import FormBuilderLauncher from "../CommonComponenets/FormBuilderLauncher";
+// import React, { useState, useEffect } from "react";
 import {
   Chart as ChartJS, LineElement, PointElement, LinearScale,
   CategoryScale, Tooltip, Filler, ArcElement, Legend,
@@ -133,7 +135,6 @@ function DonutCard({ title, total, segments, footer }) {
     </div>
   );
 }
-
 /* ── Group Intervention (dashboard entry) ── */
 function GroupInterventionCard({ onOpen }) {
   return (
@@ -171,11 +172,11 @@ function GroupInterventionCard({ onOpen }) {
 
 /* ── Appointment Table ── */
 const STATUS_STYLE = {
-  Completed:    { bg: "#d1fae5", color: "#065f46" },
-  "In Progress":{ bg: "#dbeafe", color: "#1e40af" },
-  Waiting:      { bg: "#fef3c7", color: "#92400e" },
-  "No Show":    { bg: "#fee2e2", color: "#991b1b" },
-  Scheduled:    { bg: "#f3f4f6", color: "#374151" },
+  Completed: { bg: "#d1fae5", color: "#065f46" },
+  "In Progress": { bg: "#dbeafe", color: "#1e40af" },
+  Waiting: { bg: "#fef3c7", color: "#92400e" },
+  "No Show": { bg: "#fee2e2", color: "#991b1b" },
+  Scheduled: { bg: "#f3f4f6", color: "#374151" },
 };
 
 function AppointmentTable({ appointments, onViewAll }) {
@@ -422,121 +423,135 @@ export default function DepartmentDashboard({
   onNewAppointment,
   onGroupIntervention,
   onPOCardClick,        // P&O only: called with card title ("Wheelchair" | "3D")
+  showBuilder,
+  setShowBuilder,
+  onCloseBuilder,
 }) {
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
 
   return (
-    <div className="flex flex-col gap-4 p-5 ">
+    <>
+      <div className="flex flex-col gap-4 p-5 ">
 
-      {/* ── Page header ── */}
-      <div className="flex justify-between items-center">
-        <div>
-          <div className="text-xl font-bold text-gray-900">{departmentName}</div>
-          <div className="text-[12px] text-muted mt-0.5">{today}</div>
-        </div>
-        <div className="flex gap-2.5">
-          {onViewAllPatients && (
-            <button onClick={onViewAllPatients}
-              className="dash-btn-outline flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold cursor-pointer">
-              View All Patients
-            </button>
-          )}
-          {onNewAppointment && (
-            <button onClick={onNewAppointment}
-              onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.color = "#fff"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "#2563eb"; e.currentTarget.style.color = "#fff"; }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-semibold border-0 cursor-pointer transition-colors">
-              <FaPlus size={11} /> New Appointment
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── KPI row ── */}
-      <div className="grid grid-cols-4 gap-3">
-        {kpiCards.map((c, i) => <KpiCard key={i} {...c} />)}
-      </div>
-
-      {/* ── P&O exclusive: Wheelchair & 3D quick-access cards ── */}
-      {onPOCardClick && (
-        <div>
-          <div className="text-[12px] font-bold uppercase tracking-wider text-gray-500 mb-3">
-            Exclusive Services
+        {/* ── Page header ── */}
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="text-xl font-bold text-gray-900">{departmentName}</div>
+            <div className="text-[12px] text-muted mt-0.5">{today}</div>
           </div>
-          <div className="grid grid-cols-2 gap-4" style={{ maxWidth: 560 }}>
-            {[
-              { title: "Wheelchair",  icon: "🦽", color: "#0EA5E9", desc: "Wheelchair service, repair & training" },
-              { title: "3D",          icon: "🧊", color: "#8B5CF6", desc: "3D scanning, printing & customisation" },
-            ].map(card => (
-              <div
-                key={card.title}
-                onClick={() => onPOCardClick(card.title)}
-                className="bg-white rounded-xl shadow-card"
-                style={{
-                  borderLeft: `4px solid ${card.color}`,
-                  padding: "18px 20px",
-                  cursor: "pointer",
-                  transition: "box-shadow .2s, transform .2s",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${card.color}30`; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = ""; e.currentTarget.style.transform = "none"; }}
-              >
-                <div style={{
-                  width: 48, height: 48, borderRadius: 12, flexShrink: 0,
-                  background: card.color + "15",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 24,
-                }}>
-                  {card.icon}
-                </div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{card.title} Assessment</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 3 }}>{card.desc}</div>
-                </div>
-                <div style={{
-                  marginLeft: "auto", width: 28, height: 28, borderRadius: "50%",
-                  background: card.color, display: "flex", alignItems: "center",
-                  justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 700, flexShrink: 0,
-                }}>›</div>
-              </div>
-            ))}
+          <div className="flex gap-2.5">
+            {onViewAllPatients && (
+              <button onClick={onViewAllPatients}
+                className="dash-btn-outline flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold cursor-pointer">
+                View All Patients
+              </button>
+            )}
+            {onNewAppointment && (
+              <button onClick={onNewAppointment}
+                onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#2563eb"; e.currentTarget.style.color = "#fff"; }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-semibold border-0 cursor-pointer transition-colors">
+                <FaPlus size={11} /> New Appointment
+              </button>
+            )}
           </div>
         </div>
-      )}
 
-      {/* ── Group Intervention + Pending (replaces Today's Appointments) ── */}
+        {/* ── KPI row ── */}
+        <div className="grid grid-cols-4 gap-3">
+          {kpiCards.map((c, i) => <KpiCard key={i} {...c} />)}
+        </div>
+
+        {/* ── P&O exclusive: Wheelchair & 3D quick-access cards ── */}
+        {onPOCardClick && (
+          <div>
+            <div className="text-[12px] font-bold uppercase tracking-wider text-gray-500 mb-3">
+              Exclusive Services
+            </div>
+            <div className="grid grid-cols-2 gap-4" style={{ maxWidth: 560 }}>
+              {[
+                { title: "Wheelchair", icon: "🦽", color: "#0EA5E9", desc: "Wheelchair service, repair & training" },
+                { title: "3D", icon: "🧊", color: "#8B5CF6", desc: "3D scanning, printing & customisation" },
+              ].map(card => (
+                <div
+                  key={card.title}
+                  onClick={() => onPOCardClick(card.title)}
+                  className="bg-white rounded-xl shadow-card"
+                  style={{
+                    borderLeft: `4px solid ${card.color}`,
+                    padding: "18px 20px",
+                    cursor: "pointer",
+                    transition: "box-shadow .2s, transform .2s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 16,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${card.color}30`; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = ""; e.currentTarget.style.transform = "none"; }}
+                >
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+                    background: card.color + "15",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 24,
+                  }}>
+                    {card.icon}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{card.title} Assessment</div>
+                    <div style={{ fontSize: 12, color: "#6b7280", marginTop: 3 }}>{card.desc}</div>
+                  </div>
+                  <div style={{
+                    marginLeft: "auto", width: 28, height: 28, borderRadius: "50%",
+                    background: card.color, display: "flex", alignItems: "center",
+                    justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 700, flexShrink: 0,
+                  }}>›</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+         {/* ── Group Intervention + Pending (replaces Today's Appointments) ── */}
       <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 300px" }}>
-        {onGroupIntervention ? (
+         {onGroupIntervention ? (
           <GroupInterventionCard onOpen={onGroupIntervention} />
         ) : (
           <AppointmentTable appointments={appointments} onViewAll={onViewAllPatients} />
         )}
-        <PendingActions items={pendingActions} />
-      </div>
+        
+          <PendingActions items={pendingActions} />
+        </div>
 
-      {/* ── Flow + Diagnosis donuts + Referrals ── */}
-      <div className="grid grid-cols-3 gap-4">
-        <PatientFlowCard labels={patientFlowLabels} datasets={patientFlowDatasets} />
-        {donutCards.map((d, i) => <DonutCard key={i} {...d} />)}
-        <ReferralCard incoming={referralIncoming} outgoing={referralOutgoing} />
-      </div>
+        {/* ── Flow + Diagnosis donuts + Referrals ── */}
+        <div className="grid grid-cols-3 gap-4">
+          <PatientFlowCard labels={patientFlowLabels} datasets={patientFlowDatasets} />
+          {donutCards.map((d, i) => <DonutCard key={i} {...d} />)}
+          <ReferralCard incoming={referralIncoming} outgoing={referralOutgoing} />
+        </div>
 
-      {/* ── Recordings + Monthly stats ── */}
-      <div className="grid gap-4" style={{ gridTemplateColumns: "300px 1fr" }}>
-        <RecordingCard count={recordingsCount} />
-        <MonthlyStats stats={monthlyStats} />
-      </div>
+        {/* ── Recordings + Monthly stats ── */}
+        <div className="grid gap-4" style={{ gridTemplateColumns: "300px 1fr" }}>
+          <RecordingCard count={recordingsCount} />
+          <MonthlyStats stats={monthlyStats} />
+        </div>
 
-      {/* ── Trend chart ── */}
-      {/* {Object.keys(trendMetrics).length > 0 && (
+        {/* ── Trend chart ── */}
+        {/* {Object.keys(trendMetrics).length > 0 && (
         <TrendChartCard metrics={trendMetrics} labels={trendLabels} />
       )} */}
 
-    </div>
+        {showBuilder && (
+          <div className="flex flex-1 overflow-hidden">
+            <FormBuilderLauncher showBuilder={showBuilder} setShowBuilder={setShowBuilder} />
+          </div>
+        )}
+
+      </div>
+    </>
   );
 }
+
+

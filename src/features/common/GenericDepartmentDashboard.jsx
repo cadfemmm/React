@@ -28,6 +28,7 @@ import POGroupIntervention from "../Prosthetics & Orthotics/GroupIntervention";
 import AudiologyGroupAssessmentForm from "../Audiology/components/AudiologyGroup";
 import OptometryGroupIntervention from "../Optometry/components/OptometryGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
+import FormBuilderLauncher from "../CommonComponenets/FormBuilderLauncher";
 
 const ASSESSMENT_MAP = {
   "Nursing":                  NursingPatientDetails,
@@ -95,6 +96,7 @@ export default function GenericDepartmentDashboard({
   const hasDeepLink = !!new URLSearchParams(window.location.search).get("patient_id");
 
   const [showPatients, setShowPatients] = useState(hasDeepLink);
+  const [showBuilder, setShowBuilder] = useState(false);
   const [poSelectedCard, setPoSelectedCard] = useState(null); // tracks which P&O card was clicked
   const [approveDenyPatients, setApproveDenyPatients] = useState([]);
   const [approveDenyLoading, setApproveDenyLoading] = useState(false);
@@ -126,7 +128,7 @@ export default function GenericDepartmentDashboard({
   const appointmentSlug = DEPARTMENT_APPOINTMENT_SLUGS[dept];
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
-  const GroupInterventionComponent =
+   const GroupInterventionComponent =
     GROUP_INTERVENTION_MAP[dept] || NursingGroupIntervention;
 
   useEffect(() => {
@@ -268,17 +270,20 @@ export default function GenericDepartmentDashboard({
   };
 
   return (
-    <DepartmentDashboard
+      <DepartmentDashboard
       departmentName={departmentName}
       onViewAllPatients={() => {
-        if (isPO) { setPoSelectedCard("My Appointments"); }
+      if (isPO) { setPoSelectedCard("My Appointments"); }
         setShowPatients(true);
       }}
       /* Pass P&O card click handler so dashboard can wire up Wheelchair / 3D cards */
       onPOCardClick={isPO ? handlePOCardClick : undefined}
       onGroupIntervention={() => setShowGroupPatientPicker(true)}
+      showBuilder={showBuilder}
+      setShowBuilder={setShowBuilder}
+      onCloseBuilder={() => setShowBuilder(false)}
       kpiCards={[
-        {
+                {
           label: "Today's Patients",
           value: appointmentSlug
             ? (todayPatientsLoading ? "…" : String(todayPatientsTotal || todayPatients.length))
@@ -297,6 +302,7 @@ export default function GenericDepartmentDashboard({
         { label: "Referrals Today",     value: "6",  sub: "3 in · 3 out",          icon: <FaShareSquare size={16} />,         accent: "#06b6d4" },
         { label: "Pending Billing",     value: "RM 2,100", sub: "9 invoices",      icon: <FaFileInvoiceDollar size={16} />,   accent: "#f97316" },
         { label: "Follow-ups Overdue",  value: "4",  sub: "Requires attention",    icon: <FaExclamationTriangle size={16} />, accent: "#dc2626" },
+        { label: "Form Builder",       value: "Open", sub: "Design assessment forms",icon: <FaClipboardCheck size={16} />,   accent: "#7c3aed",      onClick: () => setShowBuilder(true)},
           ...(dept === "Doctor"
             ? [{
                 label: "Approve / Deny Patients",
@@ -322,7 +328,7 @@ export default function GenericDepartmentDashboard({
           { label: "Inactive",  value: 10, color: "#6b7280" },
         ],
       }]}
-      appointments={
+       appointments={
         appointmentSlug
           ? dashboardAppointments
           : [
