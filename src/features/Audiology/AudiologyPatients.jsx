@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
-import AudiologyDepartmentAdultPage    from "./components/AudiologyAdultIA";
-import AudiologyDepartmentPediatricPage from "./components/AudiologyPediatricIA";
+import AudiologyAssessment, {
+  ADULT_AGE_THRESHOLD,
+  getAudiologyPatientAge,
+} from "./AudiologyAssessment";
 import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
-import AssessmentLoader from "../../assessment";
 import { fetchPatientsList } from "../../shared/api/patientsList";
 
 /* ── Assessment type cards ── */
@@ -13,12 +14,6 @@ const OPTION_CARDS = [
 ];
 
 const DEPARTMENT = "Audiology";
-
-/* ── Age-based component selector ── */
-function getAssessmentComponent(patient) {
-  const age = Number(patient?.age ?? 99);
-  return age < 20 ? AudiologyDepartmentPediatricPage : AudiologyDepartmentAdultPage;
-}
 
 /* ── Avatar colours ── */
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
@@ -60,19 +55,6 @@ export default function AudiologyPatients({ onBack }) {
 
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentView) {
-    const Component = getAssessmentComponent(selectedPatient);
-
-    // initial — use shared AssessmentLoader (has Start + Referral buttons)
-    if (assessmentView === "initial") {
-      return (
-        <AssessmentLoader
-          department="Audiology"
-          patient={selectedPatient}
-        />
-      );
-    }
-
-    // progress — dedicated form for both adult and pediatric
     if (assessmentView === "progress") {
       return (
         <AudiologyProgressAssessmentForm
@@ -83,9 +65,8 @@ export default function AudiologyPatients({ onBack }) {
       );
     }
 
-    // initial and followup use age-based components
     return (
-      <Component
+      <AudiologyAssessment
         patient={selectedPatient}
         mode={assessmentView}
         onSubmit={() => setAssessmentView(null)}
@@ -96,8 +77,8 @@ export default function AudiologyPatients({ onBack }) {
 
   /* ── Step 2: Assessment type cards ── */
   if (selectedPatient) {
-    const age     = Number(selectedPatient.age ?? 0);
-    const isAdult = age >= 20;
+    const age     = getAudiologyPatientAge(selectedPatient);
+    const isAdult = age >= ADULT_AGE_THRESHOLD;
     const initial = (selectedPatient.name || selectedPatient.email || "P")
       .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
     const avatarBg = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];
@@ -220,8 +201,8 @@ export default function AudiologyPatients({ onBack }) {
           </div>
         ) : (
           filtered.map((p, idx) => {
-            const age     = Number(p.age ?? 0);
-            const isAdult = age >= 20;
+            const age     = getAudiologyPatientAge(p);
+            const isAdult = age >= ADULT_AGE_THRESHOLD;
             const initial = ((p.name || p.email || "P")[0] || "P").toUpperCase();
             return (
               <div

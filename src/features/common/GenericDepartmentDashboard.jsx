@@ -15,7 +15,8 @@ import NursingPatientDetails    from "../Nursing/components/PatientDetails";
 import PTPatientDetails         from "../PT/components/PatientDetails";
 import IntegratedRehabProgramTabs from "../PT/components/IntegratedRehabProgramTabs";
 import OTPatientDetails         from "../OT/components/PatientDetails";
-import AudiologyAdultIA         from "../Audiology/components/AudiologyAdultIA";import DietAssessment           from "../Dietetics/pages/DietPatientspage";
+import AudiologyAssessment      from "../Audiology/AudiologyAssessment";
+import DietAssessment           from "../Dietetics/pages/DietPatientspage";
 import PsychologyAssessment     from "../Psychology/components/PsychologyAssessment";
 import SpeechAssessment         from "../SpeechandLanguage/SpeechAssessment";
 import ProstheticsAssessment    from "../Prosthetics & Orthotics/ProstheticsAndOrthoticsAssessments";
@@ -34,7 +35,7 @@ const ASSESSMENT_MAP = {
   "Physiotherapy":            PTPatientDetails,
   "Integrated Rehab":         IntegratedRehabProgramTabs,
   "Occupational Therapy":     OTPatientDetails,
-  "Audiology":                AudiologyAdultIA,
+  "Audiology":                AudiologyAssessment,
   "Dietetics":                DietAssessment,
   "Psychology":               PsychologyAssessment,
   "Speech & Language Therapy":SpeechAssessment,
