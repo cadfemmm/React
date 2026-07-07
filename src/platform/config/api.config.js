@@ -45,6 +45,7 @@ const API_URL = {
     // ICD codes with ICF and ICHI
     icdByDepartment: (department) =>
         BASE_API + `codes/icd/${encodeURIComponent(department)}/`,
+    ICD_ALL: BASE_API + 'codes/icd/all/',
 
     // Patients apis
     PATIENT: BASE_API + 'patient/',

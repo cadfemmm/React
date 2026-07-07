@@ -476,6 +476,105 @@ export function buildAssessmentReportEntries(
   return deduped;
 }
 
+const SOAP_TAB_LABELS = {
+  subjective: "Subjective",
+  objective: "Objective",
+  assessment: "Assessment",
+  plan: "Plan",
+};
+
+export function appendOptometrySoapSupplements(entries, tab, values = {}) {
+  if (tab === "assessment") {
+    if (values.selected_icds?.length) {
+      entries.push({
+        kind: "row",
+        label: "Selected ICDs",
+        value: values.selected_icds.join(", "),
+      });
+    }
+    if (values.selected_icfs?.length) {
+      entries.push({
+        kind: "row",
+        label: "Selected ICFs",
+        value: values.selected_icfs.join(", "),
+      });
+    }
+  }
+
+  if (tab === "plan") {
+    const ichiItems = Object.values(values.ichi_data || {}).flat();
+    if (ichiItems.length) {
+      entries.push({
+        kind: "row",
+        label: "ICHI Interventions",
+        value: ichiItems
+          .map((item) => `${item.code || ""}: ${item.name || ""}`.trim())
+          .filter(Boolean)
+          .join("\n"),
+      });
+    }
+    if (values.selected_additional_ichi?.length) {
+      entries.push({
+        kind: "row",
+        label: "Additional ICHI",
+        value: values.selected_additional_ichi.join(", "),
+      });
+    }
+    if (Array.isArray(values.medications) && values.medications.length) {
+      entries.push({
+        kind: "row",
+        label: "Medications",
+        value: values.medications
+          .map((med) => {
+            const parts = [
+              med.medication_name,
+              med.dose && med.unit ? `${med.dose} ${med.unit}` : null,
+              med.frequency,
+              med.type,
+            ].filter(Boolean);
+            return parts.join(" · ");
+          })
+          .join("\n"),
+      });
+    }
+  }
+}
+
+export function buildFullSoapReportEntries({
+  tabs = [],
+  templates = {},
+  assessmentsValues = {},
+  subAssessmentTemplate = {},
+  supplementaryAppender,
+}) {
+  const entries = [];
+
+  tabs.forEach((tab) => {
+    const schema = templates[tab];
+    if (!schema) return;
+
+    entries.push({
+      kind: "section",
+      label: SOAP_TAB_LABELS[tab] || tab.charAt(0).toUpperCase() + tab.slice(1),
+    });
+
+    const tabEntries = buildAssessmentReportEntries(
+      schema,
+      assessmentsValues[tab] || {},
+      Object.values(subAssessmentTemplate[tab] || {}),
+      { excludeSubAssessments: false },
+    );
+
+    tabEntries.forEach((entry) => entries.push(entry));
+
+    if (supplementaryAppender) {
+      supplementaryAppender(entries, tab, assessmentsValues[tab] || {});
+    }
+  });
+
+  return entries;
+}
+
 /**
  * Extract field values that belong to a sub-assessment schema (by field name prefix).
  */

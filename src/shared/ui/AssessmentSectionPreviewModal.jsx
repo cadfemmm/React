@@ -21,6 +21,7 @@ const AssessmentSectionPreviewModal = memo(function AssessmentSectionPreviewModa
   schema,
   values = {},
   assessmentRegistry = {},
+  entries: providedEntries,
   valuePrefix,
   excludeSubAssessments = false,
   onClose,
@@ -37,14 +38,20 @@ const AssessmentSectionPreviewModal = memo(function AssessmentSectionPreviewModa
     };
   }, [onClose]);
 
-  const reportEntries = useMemo(
-    () =>
-      buildAssessmentReportEntries(schema, values, assessmentRegistry, {
-        valuePrefix,
-        excludeSubAssessments,
-      }),
-    [schema, values, assessmentRegistry, valuePrefix, excludeSubAssessments],
-  );
+  const reportEntries = useMemo(() => {
+    if (providedEntries) return providedEntries;
+    return buildAssessmentReportEntries(schema, values, assessmentRegistry, {
+      valuePrefix,
+      excludeSubAssessments,
+    });
+  }, [
+    providedEntries,
+    schema,
+    values,
+    assessmentRegistry,
+    valuePrefix,
+    excludeSubAssessments,
+  ]);
 
   const hasContent = useMemo(
     () => reportEntries.some((e) => e.kind === "row" && e.value),
@@ -74,7 +81,7 @@ const AssessmentSectionPreviewModal = memo(function AssessmentSectionPreviewModa
     }
   }, [hasContent, reportEntries, title]);
 
-  if (!schema) return null;
+  if (!schema && !providedEntries) return null;
 
   const modal = (
     <div style={S.overlay} onClick={onClose}>

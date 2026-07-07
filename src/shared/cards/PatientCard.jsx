@@ -20,6 +20,31 @@ function getIcNumber(patient) {
   );
 }
 
+function buildPrimaryDiagnosis(patient) {
+  const baseDiagnosis = patient.diagnosis_history || patient.icd || "";
+  const doctorPrimary = patient.doctor_primary_icd || "";
+
+  if (!baseDiagnosis) return doctorPrimary || null;
+  if (!doctorPrimary) return baseDiagnosis;
+  if (String(baseDiagnosis).includes(doctorPrimary)) return baseDiagnosis;
+
+  return `${baseDiagnosis}, ${doctorPrimary}`;
+}
+
+function mergeLocalPatientExtras(patient) {
+  if (!patient || !patient.id) return patient;
+
+  try {
+    const stored = localStorage.getItem("patient_" + patient.id);
+    if (!stored) return patient;
+    const parsed = JSON.parse(stored);
+    if (!parsed || typeof parsed !== "object") return patient;
+    return { ...patient, ...parsed };
+  } catch {
+    return patient;
+  }
+}
+
 function buildDemographics(patient) {
   const livingEnv =
     patient.living_environment === "Other" && patient.living_environment_other
@@ -34,7 +59,7 @@ function buildDemographics(patient) {
   return [
     { key: "dob", label: "Date of birth", value: localDateTimeString(patient.dob || patient.date_of_birth) },
     { key: "age_gender", label: "Age / gender", value: [patient.age ? `${patient.age} yrs` : null, patient.sex || patient.gender].filter(Boolean).join(" · ") || null },
-    { key: "primary_dx", label: "Primary diagnosis", value: patient.diagnosis_history || patient.icd },
+    { key: "primary_dx", label: "Primary diagnosis", value: buildPrimaryDiagnosis(patient) },
     { key: "marital", label: "Marital status", value: patient.marital_status },
     { key: "secondary_dx", label: "Secondary diagnosis", value: patient.medical_history || patient.secondary_diagnosis },
     { key: "living", label: "Living environment", value: livingEnv },
@@ -75,6 +100,7 @@ export default function PatientCard({
   const [expanded, setExpanded] = useState(false);
   const [details, setDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [showReports, setShowReports] = useState(false);
 
   useEffect(() => {
     if (!fetchDetails || !patient) {
@@ -105,9 +131,33 @@ export default function PatientCard({
   }, [fetchDetails, patient?.id, patient?.patient_id]);
 
   const displayPatient = useMemo(
-    () => (patient ? { ...patient, ...(details || {}) } : null),
+    () => {
+      if (!patient) return null;
+      const base = { ...patient, ...(details || {}) };
+      return mergeLocalPatientExtras(base);
+    },
     [patient, details],
   );
+
+  const doctorHistoryForReports = useMemo(() => {
+    const id = displayPatient?.id || displayPatient?.patient_id;
+    if (!id) return { medical_history: "", family_medical_history: "" };
+    try {
+      const stored = localStorage.getItem("patient_" + id);
+      const parsed = stored ? JSON.parse(stored) : {};
+      return {
+        medical_history:
+          parsed?.medical_history ?? displayPatient?.medical_history ?? "",
+        family_medical_history:
+          parsed?.family_medical_history ?? displayPatient?.family_medical_history ?? "",
+      };
+    } catch {
+      return {
+        medical_history: displayPatient?.medical_history ?? "",
+        family_medical_history: displayPatient?.family_medical_history ?? "",
+      };
+    }
+  }, [displayPatient?.id, displayPatient?.patient_id, displayPatient?.medical_history, displayPatient?.family_medical_history]);
 
   const demographics = useMemo(
     () => (displayPatient ? buildDemographics(displayPatient) : []),
@@ -174,7 +224,7 @@ export default function PatientCard({
             <button
               type="button"
               style={reportBtnOutline}
-              onClick={() => alert("Report will be generating soon")}
+              onClick={() => setShowReports(true)}
             >
               Doctor&apos;s reports
             </button>
@@ -278,6 +328,48 @@ export default function PatientCard({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {showReports && (
+        <div style={overlay}>
+          <div style={reportsModal}>
+            <div style={reportsHeader}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
+                Doctor&apos;s Reports
+              </div>
+              <button type="button" style={closeBtn} onClick={() => setShowReports(false)}>
+                Close
+              </button>
+            </div>
+                <div style={{ padding: 16 }}>
+                  <div style={{ fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>
+                    Medical & Family History
+                  </div>
+                  <div style={{ display: "grid", gap: 12 }}>
+                    <div style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 12 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>
+                        Medical History
+                      </div>
+                      <div style={{ fontSize: 13, color: "#0f172a", whiteSpace: "pre-wrap" }}>
+                        {doctorHistoryForReports.medical_history?.trim()
+                          ? doctorHistoryForReports.medical_history
+                          : "Not recorded"}
+                      </div>
+                    </div>
+                    <div style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 12 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>
+                        Family History
+                      </div>
+                      <div style={{ fontSize: 13, color: "#0f172a", whiteSpace: "pre-wrap" }}>
+                        {doctorHistoryForReports.family_medical_history?.trim()
+                          ? doctorHistoryForReports.family_medical_history
+                          : "Not recorded"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
         </div>
       )}
     </div>
@@ -537,4 +629,43 @@ const radioLabel = {
   cursor: "pointer",
   fontSize: 14,
   color: "#334155",
+};
+
+const overlay = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(15, 23, 42, 0.45)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 9999,
+  padding: 16,
+};
+
+const reportsModal = {
+  width: "min(960px, 95vw)",
+  background: "#fff",
+  borderRadius: 12,
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 10px 25px rgba(15, 23, 42, 0.2)",
+  overflow: "hidden",
+};
+
+const reportsHeader = {
+  padding: "12px 16px",
+  borderBottom: "1px solid #e2e8f0",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+const closeBtn = {
+  border: "1px solid #cbd5e1",
+  background: "#fff",
+  color: "#334155",
+  borderRadius: 8,
+  padding: "6px 12px",
+  fontSize: 13,
+  fontWeight: 600,
+  cursor: "pointer",
 };

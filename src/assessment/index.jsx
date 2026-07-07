@@ -22,6 +22,10 @@ import { ShimmerForm } from "../shared/ui/Shimmer";
 import ConfirmModal from "../shared/ui/ConfirmModal";
 import ReferralModal from "../shared/ui/ReferralModal";
 import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreviewModal";
+import {
+  buildFullSoapReportEntries,
+  appendOptometrySoapSupplements,
+} from "../shared/utils/assessmentPreviewUtils";
 
 // Schema Load
 import actions from "../schema/actions.js";
@@ -114,6 +118,7 @@ export default function AssessmentLoader({ patient, department }) {
   const [bookingQueueRow, setBookingQueueRow]           = useState(null);
   const [sectionPreview, setSectionPreview] = useState(null);
   const isPsychology = department === "Psychology";
+  const isOptometry = department === "Optometry";
 
 useEffect(() => {
   if (!patient || !department) return;
@@ -913,6 +918,7 @@ useEffect(() => {
           schema={sectionPreview.schema}
           values={sectionPreview.values}
           assessmentRegistry={sectionPreview.assessmentRegistry}
+          entries={sectionPreview.entries}
           excludeSubAssessments
           onClose={() => setSectionPreview(null)}
         />
@@ -1165,6 +1171,34 @@ useEffect(() => {
                               assessmentRegistry: Object.values(
                                 subAssessmentTemplate[activeTab] || {},
                               ),
+                            })
+                          }
+                        >
+                          Preview
+                        </button>
+                      )}
+                      {isOptometry && activeTab === "plan" && (
+                        <button
+                          type="button"
+                          style={S.previewBtn}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "#f1f5f9";
+                            e.currentTarget.style.borderColor = "#94a3b8";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "#fff";
+                            e.currentTarget.style.borderColor = "#cbd5e1";
+                          }}
+                          onClick={() =>
+                            setSectionPreview({
+                              title: "Full Assessment Preview",
+                              entries: buildFullSoapReportEntries({
+                                tabs: TABS,
+                                templates,
+                                assessmentsValues,
+                                subAssessmentTemplate,
+                                supplementaryAppender: appendOptometrySoapSupplements,
+                              }),
                             })
                           }
                         >
