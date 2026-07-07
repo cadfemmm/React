@@ -4,9 +4,10 @@ import EmptyState from "../../shared/ui/EmptyState";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import { API_URL } from "../../platform/config/api.config";
 import React, { useEffect, useMemo, useState } from "react";
+import pdfLogo from "../../assets/pdf logo.webp";
 
 
-const ASSESSMENT_GRID_COLUMNS = "1.5fr 1.2fr 1.2fr 1.2fr 1.2fr 1.2fr 1.2fr";
+const ASSESSMENT_GRID_COLUMNS = "1.8fr 1.1fr 1.1fr 1fr 1fr 1fr 1.2fr";
 
 
 function formatDate(value, { includeTime = false } = {}) {
@@ -34,7 +35,7 @@ function formatDate(value, { includeTime = false } = {}) {
     });
 }
 
-function SessionRow({ sessionData, idx, onView }) {
+function SessionRow({ sessionData, idx, onViewReport, onOpenAssessment }) {
     const [hovered, setHovered] = useState(false);
     const dateCellStyle = {
         fontSize: 12,
@@ -65,7 +66,6 @@ function SessionRow({ sessionData, idx, onView }) {
                 fontWeight: 500,
                 letterSpacing: "0.18em",
             }}
-            onClick={() => onView?.(sessionData)}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
@@ -136,6 +136,10 @@ function SessionRow({ sessionData, idx, onView }) {
                     {/* Short UUID */}
                     <div
                         title={sessionData.id}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenAssessment?.(sessionData);
+                        }}
                         style={{
                             fontSize: 12,
                             fontWeight: 700,
@@ -157,6 +161,19 @@ function SessionRow({ sessionData, idx, onView }) {
                             : "—"}
                     </div>
                 </div>
+                <div
+                    style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: "#6B7280",
+                        marginTop: 4,
+                        lineHeight: 1.3,
+                    }}
+                >
+                    {formatDate(sessionData.updated_at, {
+                        includeTime: true,
+                    })}
+                </div>
             </div>
             <div style={dateCellStyle}>
                             {sessionData.department_name}
@@ -173,18 +190,32 @@ function SessionRow({ sessionData, idx, onView }) {
             <div style={dateCellStyle}>
                 {sessionData?.total_score || 0}
             </div>
-            <div style={dateCellStyle}>
-                {sessionData?.progress_percentage || 0}
-            </div>
-            <div style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#6B7280",
-                lineHeight: 1.4,
-                whiteSpace: "nowrap",
-                overflow: "visible",
-            }}>
-                {formatDate(sessionData.updated_at, { includeTime: true })}
+            <div style={{ ...dateCellStyle, display: "flex", alignItems: "center", gap: 8 }}>
+                <span>{sessionData?.progress_percentage || 0}</span>
+                <button
+                    type="button"
+                    title="View session report"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onViewReport?.(sessionData);
+                    }}
+                    style={{
+                        border: "1px solid #cbd5e1",
+                        background: "#fff",
+                        borderRadius: 6,
+                        width: 26,
+                        height: 26,
+                        cursor: "pointer",
+                        color: "#1d4ed8",
+                        fontSize: 14,
+                        lineHeight: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    👁
+                </button>
             </div>
         </div>
     );
@@ -199,6 +230,9 @@ export default function SOAPSession({
     const [loading, setLoading] = useState(true);
     const [sessionData, setSessionData] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
+    const [selectedAssessmentSession, setSelectedAssessmentSession] = useState(null);
+    const [combinedSessionContent, setCombinedSessionContent] = useState([]);
+    const [reportLoading, setReportLoading] = useState(false);
 
     useEffect(() => {
         if (!patient?.id) {
@@ -254,14 +288,71 @@ export default function SOAPSession({
         });
     }, [sessionData, search]);
 
-    if (selectedSession) {
+    const loadCombinedSessionContent = async (session) => {
+        const assessmentItems = Array.isArray(session?.assessment_ids)
+            ? session.assessment_ids
+            : [];
+
+        if (assessmentItems.length === 0) {
+            setCombinedSessionContent([]);
+            return;
+        }
+
+        setReportLoading(true);
+        try {
+            const responses = await Promise.all(
+                assessmentItems
+                    .map((item) => item?.id)
+                    .filter(Boolean)
+                    .map((assessmentId) =>
+                        api.get(API_URL.assessmentFormData(assessmentId)).catch(() => null),
+                    ),
+            );
+
+            const merged = [];
+            responses.forEach((res, idx) => {
+                const payload = res?.data?.data;
+                if (!payload || typeof payload !== "object") return;
+
+                const source =
+                    assessmentItems[idx]?.name ||
+                    assessmentItems[idx]?.type ||
+                    `Assessment ${idx + 1}`;
+
+                Object.entries(payload).forEach(([key, value]) => {
+                    if (value === null || value === undefined || value === "") return;
+                    const renderedValue = Array.isArray(value)
+                        ? value.join(", ")
+                        : typeof value === "object"
+                            ? JSON.stringify(value)
+                            : String(value);
+                    merged.push({
+                        source,
+                        key: String(key).replaceAll("_", " "),
+                        value: renderedValue,
+                    });
+                });
+            });
+
+            setCombinedSessionContent(merged);
+        } finally {
+            setReportLoading(false);
+        }
+    };
+
+    const handleViewSessionReport = async (session) => {
+        setSelectedSession(session);
+        await loadCombinedSessionContent(session);
+    };
+
+    if (selectedAssessmentSession) {
         return (
             <Assessment
                 patient={patient}
-                session={selectedSession}
-                onBack={() => setSelectedSession(null)}d
+                session={selectedAssessmentSession}
+                onBack={() => setSelectedAssessmentSession(null)}
             />
-        )
+        );
     }
 
     return (
@@ -441,14 +532,13 @@ export default function SOAPSession({
                     }}
                 >
                     {[
-                        "Session ID",
+                        "Session ID\nLast Updated",
                         "Department",
                         "Visit Type",
                         "Completed",
                         "Duration",
                         "Score",
                         "Progress (%)",
-                        "Last Updated",
                     ].map((h) => (
                         <div
                             key={h}
@@ -505,7 +595,8 @@ export default function SOAPSession({
                             }
                             sessionData={a}
                             idx={idx}
-                            onView={setSelectedSession}
+                            onViewReport={handleViewSessionReport}
+                            onOpenAssessment={setSelectedAssessmentSession}
                         />
                     ))
                 )}
@@ -536,6 +627,216 @@ export default function SOAPSession({
                             : ""}
                     </div>
                 )}
+
+            {selectedSession && (
+                <div
+                    className="rap-pdf-overlay"
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(15, 23, 42, 0.5)",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 9999,
+                        padding: 16,
+                    }}
+                >
+                    <div
+                        className="rap-pdf-shell"
+                        style={{
+                            width: "min(920px, 96vw)",
+                            maxHeight: "92vh",
+                            overflowY: "auto",
+                            borderRadius: 12,
+                            background: "#fff",
+                            border: "1px solid #e2e8f0",
+                            boxShadow: "0 14px 30px rgba(0,0,0,0.2)",
+                        }}
+                    >
+                        <div
+                            className="rap-pdf-toolbar"
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "12px 16px",
+                                borderBottom: "1px solid #e2e8f0",
+                            }}
+                        >
+                            <strong style={{ color: "#0f172a" }}>Session Report (PDF View)</strong>
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <button
+                                    type="button"
+                                    onClick={() => window.print()}
+                                    style={{
+                                        border: "1px solid #cbd5e1",
+                                        borderRadius: 8,
+                                        background: "#fff",
+                                        padding: "6px 10px",
+                                        cursor: "pointer",
+                                    }}
+                                >
+                                    Print / Save PDF
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedSession(null)}
+                                    style={{
+                                        border: "1px solid #cbd5e1",
+                                        borderRadius: 8,
+                                        background: "#fff",
+                                        padding: "6px 10px",
+                                        cursor: "pointer",
+                                    }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="rap-pdf-page-wrap" style={{ padding: 24, background: "#f8fafc" }}>
+                            <div
+                                className="rap-pdf-page"
+                                style={{
+                                    width: "100%",
+                                    maxWidth: 800,
+                                    margin: "0 auto",
+                                    background: "#fff",
+                                    border: "1px solid #dbe5f0",
+                                    
+                                    padding: 24,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        marginBottom: 16,
+                                        borderBottom: "1px solid #111827",
+                                        paddingBottom: 12,
+                                    }}
+                                >
+                                    <img
+                                        src={pdfLogo}
+                                        alt="PDF Logo"
+                                        style={{ height: 110, objectFit: "contain", marginBottom: 6 }}
+                                    />
+                                    <div style={{ textAlign: "center", fontSize: 18, fontWeight: 800, color: "#111827" }}>
+                                       SESSION REPORT
+                                    </div>
+                                </div>
+                                <div style={{ textAlign: "right", fontSize: 14, fontWeight: 700, marginBottom: 18 }}>
+                                    {new Date().toLocaleDateString("en-GB", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </div>
+
+                                <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 22 }}>
+                                    <tbody>
+                                        {[
+                                            ["Name", patient?.name || patient?.patient_name || "—"],
+                                            ["IC number/ Passport number", patient?.ic_number || patient?.ic || "—"],
+                                            ["Diagnosis", patient?.diagnosis || patient?.diagnosis_history || patient?.icd || "—"],
+                                            ["Date of admission", patient?.admission_date || "—"],
+                                            ["Date of discharge", patient?.discharge_date || "—"],
+                                        ].map(([label, value]) => (
+                                            <tr key={label}>
+                                                <th
+                                                    style={{
+                                                        textAlign: "left",
+                                                        width: "28%",
+                                                        border: "1px solid #111827",
+                                                        padding: "8px 10px",
+                                                        background: "#fff",
+                                                        color: "#111827",
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    {label}
+                                                </th>
+                                                <td style={{ border: "1px solid #111827", padding: "8px 10px" }}>{value}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                <div style={{ fontWeight: 800, textDecoration: "underline", marginBottom: 8 }}>
+                                    SESSION COMBINED CONTENT
+                                </div>
+                                {reportLoading ? (
+                                    <div style={{ fontSize: 13, color: "#475569", marginBottom: 12 }}>
+                                        Loading combined session content...
+                                    </div>
+                                ) : combinedSessionContent.length === 0 ? (
+                                    <div style={{ fontSize: 13, color: "#475569", marginBottom: 12 }}>
+                                        No report content found inside this session.
+                                    </div>
+                                ) : (
+                                    <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 18 }}>
+                                        <thead>
+                                            <tr>
+                                                <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Report</th>
+                                                <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Field</th>
+                                                <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px" }}>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {combinedSessionContent.map((row, idx) => (
+                                                <tr key={`${row.source}-${row.key}-${idx}`}>
+                                                    <td style={{ border: "1px solid #111827", padding: "8px 10px", fontWeight: 600 }}>{row.source}</td>
+                                                    <td style={{ border: "1px solid #111827", padding: "8px 10px" }}>{row.key}</td>
+                                                    <td style={{ border: "1px solid #111827", padding: "8px 10px", whiteSpace: "pre-wrap" }}>{row.value}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </div>
+
+                        <style>{`
+                          @media print {
+                            body * {
+                              visibility: hidden !important;
+                            }
+                            .rap-pdf-overlay, .rap-pdf-overlay * {
+                              visibility: visible !important;
+                            }
+                            .rap-pdf-overlay {
+                              position: static !important;
+                              background: #fff !important;
+                              padding: 0 !important;
+                            }
+                            .rap-pdf-shell {
+                              width: 100% !important;
+                              max-height: none !important;
+                              border: none !important;
+                              box-shadow: none !important;
+                              overflow: visible !important;
+                            }
+                            .rap-pdf-toolbar {
+                              display: none !important;
+                            }
+                            .rap-pdf-page-wrap {
+                              background: #fff !important;
+                              padding: 0 !important;
+                            }
+                            .rap-pdf-page {
+                              max-width: 100% !important;
+                              border: none !important;
+                              border-radius: 0 !important;
+                              padding: 8mm !important;
+                            }
+                          }
+                        `}</style>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

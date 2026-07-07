@@ -20,6 +20,40 @@ const filteredReports =
     ? reports.filter((r) => r.createdBy === "Doctor" && r.type !== "progress")
     : reports;
 
+const doctorDraftReport = (() => {
+  if (mode !== "doctor" || !patient?.id) return null;
+
+  const snapshot = JSON.parse(localStorage.getItem(`patient_${patient.id}`) || "{}");
+  const hasDraftData =
+    Boolean(snapshot.medical_history) ||
+    Boolean(snapshot.family_medical_history) ||
+    Boolean(snapshot.doctor_primary_icd) ||
+    Boolean(snapshot.doctor_secondary_icd);
+
+  if (!hasDraftData) return null;
+
+  return {
+    reportId: "doctor_draft_current",
+    createdBy: "Doctor",
+    timestamp: Date.now(),
+    isDraft: true,
+    patientHistory: {
+      medical_history: snapshot.medical_history || "",
+      family_history: snapshot.family_medical_history || "",
+    },
+    diagnoses: {
+      primary_icd: snapshot.doctor_primary_icd || "",
+      secondary_icd: snapshot.doctor_secondary_icd || "",
+    },
+    summary: {},
+  };
+})();
+
+const reportList =
+  mode === "doctor" && doctorDraftReport
+    ? [doctorDraftReport, ...filteredReports]
+    : filteredReports;
+
   if (!patient) return null;
 
 const getTitle = (r) => {
@@ -33,6 +67,29 @@ const getTitle = (r) => {
 const renderDoctorReportDetails = (r) => {
   const swallowing = r.summary?.swallowing || {};
   const visual = r.summary?.visual || {};
+  const reportMedicalHistory = r.patientHistory?.medical_history;
+  const reportFamilyHistory = r.patientHistory?.family_history;
+  const reportPrimaryIcd = r.diagnoses?.primary_icd;
+  const reportSecondaryIcd = r.diagnoses?.secondary_icd;
+  const patientSnapshot = JSON.parse(localStorage.getItem(`patient_${patient?.id}`) || "{}");
+  const medicalHistory =
+    reportMedicalHistory ??
+    patientSnapshot.medical_history ??
+    patient?.medical_history ??
+    "Not recorded";
+  const familyHistory =
+    reportFamilyHistory ??
+    patientSnapshot.family_medical_history ??
+    patient?.family_medical_history ??
+    "Not recorded";
+  const primaryIcd =
+    reportPrimaryIcd ??
+    patientSnapshot.doctor_primary_icd ??
+    "Not recorded";
+  const secondaryIcd =
+    reportSecondaryIcd ??
+    patientSnapshot.doctor_secondary_icd ??
+    "Not recorded";
 
   const difficultyLabel =
     swallowing.hasDifficulty === "yes"
@@ -62,6 +119,42 @@ const renderDoctorReportDetails = (r) => {
         fontSize: 14,
       }}
     >
+
+      <div style={{ marginBottom: 16 }}>
+        <div
+          style={{
+            background: "#005b82",
+            color: "#fff",
+            padding: "8px 12px",
+            borderRadius: 6,
+            fontWeight: 700,
+            marginBottom: 6,
+          }}
+        >
+          Doctor Notes
+        </div>
+
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <th style={rowHead}>Medical History</th>
+              <td style={rowData}>{medicalHistory || "Not recorded"}</td>
+            </tr>
+            <tr>
+              <th style={rowHead}>Family History</th>
+              <td style={rowData}>{familyHistory || "Not recorded"}</td>
+            </tr>
+            <tr>
+              <th style={rowHead}>Primary ICD</th>
+              <td style={rowData}>{primaryIcd || "Not recorded"}</td>
+            </tr>
+            <tr>
+              <th style={rowHead}>Secondary ICD</th>
+              <td style={rowData}>{secondaryIcd || "Not recorded"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       {/* ================= Swallowing Section ================= */}
       <div style={{ marginBottom: 16 }}>
@@ -327,7 +420,7 @@ return (
   <div style={{ padding: 15 }}>
     <h3 style={{ marginBottom: 12 }}>Reports</h3>
 
-    {filteredReports.length === 0 ? (
+    {reportList.length === 0 ? (
       <div style={{ color: "#666", fontSize: 14 }}>
         {mode === "progress"
           ? "No progress reports generated yet."
@@ -335,7 +428,7 @@ return (
       </div>
     ) : (
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {filteredReports.map((r, index) => {
+        {reportList.map((r, index) => {
           const isOpen = openIndex === index;
           const hasDoctorSummary = r.createdBy === "Doctor" || r.summaryText;
 
@@ -349,7 +442,9 @@ return (
                 background: "#fafafa",
               }}
             >
-              <strong>{getTitle(r)}</strong>
+              <strong>
+                {r.isDraft ? "Doctor Current Draft" : getTitle(r)}
+              </strong>
 
               <div style={{ fontSize: 13, color: "#444", marginTop: 4 }}>
                 {r.timestamp

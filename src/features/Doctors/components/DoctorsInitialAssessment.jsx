@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import Select, { components } from "react-select";
 import  VisualAssessment from "../components/Visual";
 import SocialHistory from "./SocialHistory";
 import WorkHistory from "./WorkHistory";
@@ -16,6 +17,185 @@ import SkinAssessment from "./SkinAssessment";
 import ProcedureAssessment from "./ProcedureAssessment";
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PatientCard from "../../../shared/cards/PatientCard";
+import { fetchIcdCodesPage } from "../../../shared/api/icdCodes";
+
+const ICD_SELECT_STYLES = {
+  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+};
+
+function IcdSelectMenuList(props) {
+  const { children, innerProps, selectProps } = props;
+  const { onLoadMore, isLoadingMore } = selectProps;
+
+  const handleScroll = (event) => {
+    innerProps?.onScroll?.(event);
+    const target = event.currentTarget;
+    if (!target || !onLoadMore) return;
+
+    const nearBottom =
+      target.scrollHeight - target.scrollTop <= target.clientHeight + 48;
+    if (nearBottom) {
+      onLoadMore();
+    }
+  };
+
+  return (
+    <components.MenuList
+      {...props}
+      innerProps={{
+        ...innerProps,
+        onScroll: handleScroll,
+      }}
+    >
+      {children}
+      {isLoadingMore ? (
+        <div style={{ padding: "8px 12px", textAlign: "center", color: "#64748b", fontSize: 13 }}>
+          Loading more diagnoses...
+        </div>
+      ) : null}
+    </components.MenuList>
+  );
+}
+
+function mergeIcdSelectOptions(prev, items, replace) {
+  const base = replace ? [] : [...prev];
+  const seen = new Set(base.map((option) => option.value));
+
+  items.forEach((item) => {
+    if (!seen.has(item.value)) {
+      seen.add(item.value);
+      base.push({ value: item.value, label: item.label, code: item.code, name: item.name });
+    }
+  });
+
+  // Sorting on every "append" becomes very expensive for large ICD lists.
+  // Keep append order stable; only sort on full replace (initial load).
+  if (!replace) return base;
+  return base.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+}
+
+function filterIcdOption(option, inputValue) {
+  if (!inputValue) return true;
+  const q = inputValue.toLowerCase().trim();
+  const label = (option.label || "").toLowerCase();
+  const value = (option.value || "").toLowerCase();
+  const code = (option.data?.code || option.code || value).toLowerCase();
+  const name = (option.data?.name || option.name || "").toLowerCase();
+  return (
+    label.includes(q) ||
+    value.includes(q) ||
+    code.includes(q) ||
+    name.includes(q)
+  );
+}
+
+function IcdDiagnosisSelect({ label, value, onChange, placeholder }) {
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const requestIdRef = useRef(0);
+  const pageRef = useRef(1);
+  const hasMoreRef = useRef(true);
+  const loadingMoreRef = useRef(false);
+
+  const loadPage = useCallback(async ({ pageNum = 1, append = false }) => {
+    if (append && (loadingMoreRef.current || !hasMoreRef.current)) return;
+
+    const requestId = ++requestIdRef.current;
+
+    if (append) {
+      loadingMoreRef.current = true;
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setOptions([]);
+      hasMoreRef.current = true;
+      setHasMore(true);
+      pageRef.current = 1;
+    }
+
+    try {
+      const { items, meta } = await fetchIcdCodesPage({
+        page: pageNum,
+        limit: 100,
+      });
+
+      if (requestId !== requestIdRef.current) return;
+
+      setOptions((prev) =>
+        append ? mergeIcdSelectOptions(prev, items, false) : mergeIcdSelectOptions([], items, true)
+      );
+      hasMoreRef.current = Boolean(meta.hasNext);
+      setHasMore(Boolean(meta.hasNext));
+      pageRef.current = pageNum;
+    } catch (error) {
+      console.error("Failed to load ICD codes:", error);
+      if (requestId !== requestIdRef.current) return;
+      if (!append) setOptions([]);
+      hasMoreRef.current = false;
+      setHasMore(false);
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, []);
+
+  useEffect(() => {
+    loadPage({ pageNum: 1, append: false });
+  }, [loadPage]);
+
+  const handleLoadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return;
+    loadPage({
+      pageNum: pageRef.current + 1,
+      append: true,
+    });
+  }, [hasMore, loadPage, loading, loadingMore]);
+
+  const selectedOption =
+    options.find((option) => option.value === value) ||
+    (value ? { value, label: value } : null);
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <label style={{ fontWeight: 600 }}>{label}</label>
+      <div style={{ marginTop: 6 }}>
+        <Select
+          placeholder={loading ? "Loading diagnoses..." : placeholder}
+          options={options}
+          value={selectedOption}
+          onChange={(selected) => onChange(selected?.value || "")}
+          onMenuScrollToBottom={handleLoadMore}
+          onLoadMore={handleLoadMore}
+          isLoadingMore={loadingMore}
+          isLoading={loading}
+          isClearable
+          isSearchable
+          filterOption={filterIcdOption}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          menuPlacement="auto"
+          components={{ MenuList: IcdSelectMenuList }}
+          styles={ICD_SELECT_STYLES}
+          noOptionsMessage={() =>
+            loading ? "Loading..." : "No diagnoses found"
+          }
+          loadingMessage={() => "Loading diagnoses..."}
+        />
+      </div>
+    </div>
+  );
+}
 
 /* -------------------------------------------------------------
    MULTISELECT CHECKBOX DROPDOWN  (UI ONLY - NO BUSINESS LOGIC)
@@ -23,100 +203,8 @@ import PatientCard from "../../../shared/cards/PatientCard";
 function MultiSelectDropdown({ options, selected, setSelected }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
-const icdOptions = [
-  "Stroke Comprehensive",
-  "Traumatic Brain Injury Comprehensive",
-  "Spinal Cord Injury Long-Term Comprehensive",
-  "Multiple Sclerosis Comprehensive",
-  "Musculoskeletal post-Acute Comprehensive",
-  "Low Back Pain Comprehensive",
-  "Osteoarthritis Comprehensive",
-  "Cardiopulmonary post-acute Comprehensive",
-  "Diabetes Mellitus Comprehensive",
-  "Children / Youth with Cerebral Palsy Comprehensive",
-  "Vertigo Comprehensive",
-  "Hearing Loss Comprehensive",
-  "Vocational Rehabilitation Comprehensive",
-  "Hand Condition Comprehensive",
-  "Depression Comprehensive",
-  "Bipolar Disorders Comprehensive"
-];
 
-const [primaryICD, setPrimaryICD] = useState("");
-const [secondaryICD, setSecondaryICD] = useState("");
-const [showSecondary, setShowSecondary] = useState(false);
   return (
-    <div>
-      {/* PRIMARY ICD */}
-     
-      {/* <div><h3>Assessment</h3><textarea></textarea></div>
-      <div><h3>Plan</h3><textarea></textarea></div> */}
-<div style={{ marginBottom: 20 }}>
-  <label style={{ fontWeight: 600 }}>Primary ICD</label>
-  <select
-    value={primaryICD}
-    onChange={(e) => setPrimaryICD(e.target.value)}
-    style={{
-      width: "100%",
-      padding: 10,
-      borderRadius: 6,
-      border: "1px solid #ccc",
-      marginTop: 6,
-    }}
-  >
-    <option value="">Select Primary ICD</option>
-    {icdOptions.map((code) => (
-      <option key={code} value={code}>
-        {code}
-      </option>
-    ))}
-  </select>
-
-  {/* PLUS BUTTON TO ADD SECONDARY ICD */}
-  {!showSecondary && (
-    <button
-      onClick={() => setShowSecondary(true)}
-      style={{
-        marginTop: 8,
-        padding: "6px 10px",
-        borderRadius: 6,
-        background: "#007bff",
-        color: "#fff",
-        border: "none",
-        cursor: "pointer",
-        fontSize: 14,
-        fontWeight: 600,
-      }}
-    >
-      + Add Secondary ICD
-    </button>
-  )}
-</div>
-
-{/* SECONDARY ICD (appears only after + is clicked) */}
-{showSecondary && (
-  <div style={{ marginBottom: 20 }}>
-    <label style={{ fontWeight: 600 }}>Secondary ICD</label>
-    <select
-      value={secondaryICD}
-      onChange={(e) => setSecondaryICD(e.target.value)}
-      style={{
-        width: "100%",
-        padding: 10,
-        borderRadius: 6,
-        border: "1px solid #ccc",
-        marginTop: 6,
-      }}
-    >
-      <option value="">Select Secondary ICD</option>
-      {icdOptions.map((code) => (
-        <option key={code} value={code}>
-          {code}
-        </option>
-      ))}
-    </select>
-  </div>
-)}
     <div
       ref={dropdownRef}
       style={{ width: "100%", marginBottom: 20, position: "relative" }}
@@ -173,6 +261,61 @@ const [showSecondary, setShowSecondary] = useState(false);
         </div>
       )}
     </div>
+  );
+}
+
+function IcdDiagnosisFields({
+  primaryICD,
+  onPrimaryICDChange,
+  secondaryICD,
+  onSecondaryICDChange,
+}) {
+  const [showSecondary, setShowSecondary] = useState(false);
+
+  useEffect(() => {
+    if (!secondaryICD) {
+      setShowSecondary(false);
+    }
+  }, [secondaryICD]);
+
+  return (
+    <div>
+      <IcdDiagnosisSelect
+        label="Primary diagnosis"
+        value={primaryICD}
+        onChange={onPrimaryICDChange}
+        placeholder="Search primary diagnosis"
+      />
+
+      {!showSecondary && (
+        <button
+          type="button"
+          onClick={() => setShowSecondary(true)}
+          style={{
+            marginTop: -8,
+            marginBottom: 20,
+            padding: "6px 10px",
+            borderRadius: 6,
+            background: "#007bff",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          + Add Secondary diagnosis
+        </button>
+      )}
+
+      {showSecondary && (
+        <IcdDiagnosisSelect
+          label="Secondary diagnosis"
+          value={secondaryICD}
+          onChange={onSecondaryICDChange}
+          placeholder="Search secondary diagnosis"
+        />
+      )}
     </div>
   );
 }
@@ -258,6 +401,8 @@ function buildVisualSummaryText(data) {
 export function DoctorsInitialAssessmentForm({ patient, onUpdatePatient }) {
   const [activeTab, setActiveTab] = useState(0);
   const scrollRef = useRef(null);
+  const [primaryICD, setPrimaryICD] = useState(() => patient?.doctor_primary_icd || "");
+  const [secondaryICD, setSecondaryICD] = useState(() => patient?.doctor_secondary_icd || "");
 
   /* --------- Store Assessment Data for Report --------- */
   const [swallowingData, setSwallowingData] = useState(null);
@@ -278,6 +423,28 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
     alerts_and_allergies: patient?.alerts_and_allergies_history || "",
   });
 
+  const HISTORY_SCHEMA = {
+    title: "",
+    sections: [
+      {
+        fields: [
+          {
+            type: "input",
+            name: "past_medical_history",
+            label: "Medical History",
+            placeholder: "Enter medical history",
+          },
+          {
+            type: "input",
+            name: "past_family_history",
+            label: "Family History",
+            placeholder: "Enter family history",
+          },
+        ],
+      },
+    ],
+  };
+
   // Keep in sync when the selected patient changes.
   useEffect(() => {
     setPatientHistory({
@@ -290,13 +457,22 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
   // Persist changes so other department forms can see them.
   useEffect(() => {
     if (!patient?.id) return;
+    const patientKey = "patient_" + patient.id;
+    let existing = {};
+    try {
+      existing = JSON.parse(localStorage.getItem(patientKey) || "{}");
+    } catch {
+      existing = {};
+    }
+
     const updated = {
-      ...patient,
+      ...existing,
       medical_history: patientHistory.past_medical_history,
       family_medical_history: patientHistory.past_family_history,
       alerts_and_allergies_history: patientHistory.alerts_and_allergies,
     };
-    localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+
+    localStorage.setItem(patientKey, JSON.stringify(updated));
     onUpdatePatient?.(updated);
   }, [patient?.id, patientHistory.past_medical_history, patientHistory.past_family_history, patientHistory.alerts_and_allergies]);
 
@@ -307,18 +483,49 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
   useEffect(() => {
     setDoctorGoals(patient?.doctor_goals || "");
     setDoctorPlan(patient?.doctor_plan || "");
+    setPrimaryICD(patient?.doctor_primary_icd || "");
+    setSecondaryICD(patient?.doctor_secondary_icd || "");
   }, [patient?.id]);
 
   useEffect(() => {
     if (!patient?.id) return;
+    const patientKey = "patient_" + patient.id;
+    let existing = {};
+    try {
+      existing = JSON.parse(localStorage.getItem(patientKey) || "{}");
+    } catch {
+      existing = {};
+    }
+
     const updated = {
-      ...patient,
+      ...existing,
       doctor_goals: doctorGoals,
       doctor_plan: doctorPlan,
     };
-    localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+
+    localStorage.setItem(patientKey, JSON.stringify(updated));
     onUpdatePatient?.(updated);
   }, [patient?.id, doctorGoals, doctorPlan]);
+
+  useEffect(() => {
+    if (!patient?.id) return;
+    const patientKey = "patient_" + patient.id;
+    let existing = {};
+    try {
+      existing = JSON.parse(localStorage.getItem(patientKey) || "{}");
+    } catch {
+      existing = {};
+    }
+
+    const updated = {
+      ...existing,
+      doctor_primary_icd: primaryICD || "",
+      doctor_secondary_icd: secondaryICD || "",
+    };
+
+    localStorage.setItem(patientKey, JSON.stringify(updated));
+    onUpdatePatient?.(updated);
+  }, [patient?.id, primaryICD, secondaryICD]);
   /* --------- Tabs --------- */
   const tabs = [
     "Cognitive",
@@ -385,8 +592,21 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
     const bladderControl = BladderAssessmentData?.urinaryProblem || "";
     const bowelControl = BowelAssessmentData?.control === "Yes" ? "CONTINENT" : BowelAssessmentData?.control === "No" ? "INCONTINENT" : "";
     if (bladderControl || bowelControl) {
-      const updated = { ...patient, bladder_control: bladderControl || patient.bladder_control, bowel_control: bowelControl || patient.bowel_control };
-      localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+      const key = "patient_" + patient.id;
+      let existing = {};
+      try {
+        existing = JSON.parse(localStorage.getItem(key) || "{}");
+      } catch {
+        existing = {};
+      }
+
+      const updated = {
+        ...existing,
+        bladder_control: bladderControl || existing.bladder_control || patient.bladder_control,
+        bowel_control: bowelControl || existing.bowel_control || patient.bowel_control,
+      };
+
+      localStorage.setItem(key, JSON.stringify(updated));
       onUpdatePatient?.(updated);
     }
   }, [patient?.id, BladderAssessmentData?.urinaryProblem, BowelAssessmentData?.control]);
@@ -417,21 +637,29 @@ const handleSubmitReferral = () => {
 
   const bladderControl = BladderAssessmentData?.urinaryProblem || patient.bladder_control || "";
   const bowelControl = BowelAssessmentData?.control === "Yes" ? "CONTINENT" : BowelAssessmentData?.control === "No" ? "INCONTINENT" : patient.bowel_control || "";
+  const key = "patient_" + patient.id;
+  let existing = {};
+  try {
+    existing = JSON.parse(localStorage.getItem(key) || "{}");
+  } catch {
+    existing = {};
+  }
+
   const updated = {
-    ...patient,
+    ...existing,
     bladder_control: bladderControl,
     bowel_control: bowelControl,
     // keep existing departments, always include "Doctor", plus newly selected ones
     departments: Array.from(
       new Set([
-        ...(patient.departments || []),
+        ...(existing.departments || patient.departments || []),
         "Doctor",
         ...selectedDepartments,
       ])
     ),
   };
 
-  localStorage.setItem("patient_" + patient.id, JSON.stringify(updated));
+  localStorage.setItem(key, JSON.stringify(updated));
 
   // 🔹 Mark this patient as an “existing” patient for Doctor
   markDoctorExisting(patient.id);
@@ -477,15 +705,40 @@ const handleSubmitReferral = () => {
         swallowing: buildSwallowingSummaryText(swallowingData),
         visual: buildVisualSummaryText(visualData),
       },
+      patientHistory: {
+        medical_history: patientHistory.past_medical_history || "",
+        family_history: patientHistory.past_family_history || "",
+      },
+      diagnoses: {
+        primary_icd: primaryICD || "",
+        secondary_icd: secondaryICD || "",
+      },
     };
 
     localStorage.setItem(key, JSON.stringify([...existingReports, report]));
 
     // Persist bladder_control and bowel_control to patient so Diet can display (read-only)
     const bladderControl = BladderAssessmentData?.urinaryProblem || "";
-    const bowelControl = BowelAssessmentData?.control === "Yes" ? "CONTINENT" : BowelAssessmentData?.control === "No" ? "INCONTINENT" : "";
-    const updatedPatient = { ...patient, bladder_control: bladderControl, bowel_control: bowelControl };
-    localStorage.setItem("patient_" + patient.id, JSON.stringify(updatedPatient));
+    const bowelControl =
+      BowelAssessmentData?.control === "Yes"
+        ? "CONTINENT"
+        : BowelAssessmentData?.control === "No"
+          ? "INCONTINENT"
+          : "";
+    const patientKey = "patient_" + patient.id;
+    let existing = {};
+    try {
+      existing = JSON.parse(localStorage.getItem(patientKey) || "{}");
+    } catch {
+      existing = {};
+    }
+
+    const updatedPatient = {
+      ...existing,
+      bladder_control: bladderControl,
+      bowel_control: bowelControl,
+    };
+    localStorage.setItem(patientKey, JSON.stringify(updatedPatient));
     if (onUpdatePatient) onUpdatePatient(updatedPatient);
 
     alert("Report generated and shared with referred departments!");
@@ -509,6 +762,21 @@ const handleSubmitReferral = () => {
         setPatientHistory={setPatientHistory}
         showDoctorsReport={false}
       />
+
+      {/* ===== QUICK HISTORY (always visible) ===== */}
+      <div style={{ marginTop: 6, marginBottom: 18 }}>
+        <CommonFormBuilder
+          schema={HISTORY_SCHEMA}
+          values={patientHistory}
+          onChange={(name, val) =>
+            setPatientHistory((prev) => ({
+              ...prev,
+              [name]: val,
+            }))
+          }
+          layout="nested"
+        />
+      </div>
 
       {/* ------------------ TABS ------------------ */}
       <div style={{ flexShrink: 0, width: "100%", marginBottom: 20 }}>
@@ -669,6 +937,12 @@ const handleSubmitReferral = () => {
             }}
           /> */}
         {/* </div> */}
+        <IcdDiagnosisFields
+          primaryICD={primaryICD}
+          onPrimaryICDChange={setPrimaryICD}
+          secondaryICD={secondaryICD}
+          onSecondaryICDChange={setSecondaryICD}
+        />
         {/* REFER TO DEPARTMENTS DROPDOWN */}
         <MultiSelectDropdown
           options={departmentOptions}
