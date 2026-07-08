@@ -8,45 +8,6 @@ const schema = {
   ],
   "sections": [
     {
-      "title": "Hearing device Trial",
-      "showIf": {
-        "field": "mode",
-        "equals": "followup"
-      },
-      "fields": [
-        {
-          "name": "hearingaidtrial_required",
-          "label": "Hearing device Trial",
-          "type": "radio",
-          "options": [
-            {
-              "label": "Yes",
-              "value": "yes"
-            },
-            {
-              "label": "No",
-              "value": "no"
-            }
-          ]
-        },
-        {
-          "name": "hearingaidtrial_launcher_obj",
-          "label": "",
-          "type": "assessment-launcher",
-          "showIf": {
-            "field": "hearingaidtrial_required",
-            "equals": "yes"
-          },
-          "options": [
-            {
-              "label": "Hearing device Trial",
-              "value": "hearingaidtrial_form_obj"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "title": null,
       "fields": [
         {
