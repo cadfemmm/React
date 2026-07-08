@@ -1057,7 +1057,7 @@ useEffect(() => {
           values={sectionPreview.values}
           assessmentRegistry={sectionPreview.assessmentRegistry}
           entries={sectionPreview.entries}
-          excludeSubAssessments
+          excludeSubAssessments={!sectionPreview.entries}
           onClose={() => setSectionPreview(null)}
         />
       )}
