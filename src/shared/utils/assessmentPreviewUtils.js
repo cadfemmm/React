@@ -245,20 +245,150 @@ function normalizeSubAssessmentSchema(assessment) {
   };
 }
 
-function findRegistryAssessment(registry, activeId) {
-  if (!activeId && activeId !== 0) return null;
+function normalizeRegistryEntries(registry) {
+  if (Array.isArray(registry)) return registry.filter(Boolean);
+  if (!registry || typeof registry !== "object") return [];
 
-  const list = Array.isArray(registry)
-    ? registry
-    : Object.values(registry || {});
+  return Object.entries(registry).map(([key, item]) => ({
+    ...item,
+    key: item?.key ?? key,
+    registryKey: key,
+    value: item?.value ?? key,
+  }));
+}
 
-  return list.find(
+function labelsRoughlyMatch(a, b) {
+  if (!a || !b) return false;
+  const left = String(a).trim().toLowerCase();
+  const right = String(b).trim().toLowerCase();
+  return left === right || left.includes(right) || right.includes(left);
+}
+
+function findRegistryAssessment(registry, activeId, fieldOptions) {
+  if (activeId === undefined || activeId === null || activeId === "") return null;
+
+  const list = normalizeRegistryEntries(registry);
+
+  const directMatch = list.find(
     (item) =>
       item &&
-      [item.id, item.value, item.key].some(
+      [item.id, item.value, item.key, item.name, item.registryKey].some(
         (id) => id !== undefined && id !== null && String(id) === String(activeId),
       ),
   );
+  if (directMatch) return directMatch;
+
+  if (!fieldOptions?.length) return null;
+
+  const option = fieldOptions.find(
+    (opt) => String(opt?.value ?? opt?.id) === String(activeId),
+  );
+  if (!option) return null;
+
+  const optionLabel = option.label ?? option.name;
+  const optionMatch = list.find(
+    (item) =>
+      item &&
+      [item.name, item.label, item.title, item.registryKey].some((label) =>
+        labelsRoughlyMatch(label, optionLabel),
+      ),
+  );
+  if (optionMatch) return optionMatch;
+
+  return null;
+}
+
+function collectSchemaFieldNames(fields = [], names = []) {
+  fields.forEach((field) => {
+    if (!field || SKIP_FIELD_TYPES.has(field.type)) return;
+
+    if (field.name) names.push(field.name);
+
+    if (field.fields?.length) {
+      collectSchemaFieldNames(field.fields, names);
+    }
+
+    if (field.cols?.length) {
+      field.cols.forEach((col) => {
+        if (col?.name) names.push(col.name);
+      });
+    }
+  });
+
+  return names;
+}
+
+function subAssessmentHasFilledValues(values, sections = []) {
+  const fieldNames = collectSchemaFieldNames(
+    sections.flatMap((section) => section.fields || []),
+  );
+
+  return fieldNames.some((fieldName) => hasContent(values?.[fieldName]));
+}
+
+function getLauncherRegistryItems(field, assessmentRegistry) {
+  const registry = field.assessmentRegistry || assessmentRegistry;
+  const registryEntries = normalizeRegistryEntries(registry);
+
+  if (!field.options?.length) {
+    return registryEntries;
+  }
+
+  return field.options
+    .map((opt) => {
+      const optionId = opt?.value ?? opt?.id;
+      if (optionId === undefined || optionId === null) return null;
+
+      const matched =
+        findRegistryAssessment(registryEntries, optionId, field.options) ||
+        registryEntries.find((item) =>
+          labelsRoughlyMatch(item?.name ?? item?.label, opt?.label),
+        );
+
+      return {
+        ...(matched || {}),
+        id: matched?.id ?? optionId,
+        value: optionId,
+        name: opt?.label ?? matched?.name ?? optionId,
+        label: opt?.label ?? matched?.label ?? matched?.name ?? optionId,
+      };
+    })
+    .filter(Boolean);
+}
+
+function resolveLauncherAssessments(field, values, assessmentRegistry) {
+  const registry = field.assessmentRegistry || assessmentRegistry;
+  const registryIsArray = Array.isArray(registry);
+  const activeKey =
+    field.activeKey ||
+    (registryIsArray ? "active_assessment_id" : `${field.name}_active`);
+  const activeId = values[activeKey];
+  const registryItems = getLauncherRegistryItems(field, registry);
+  const resolved = [];
+  const seen = new Set();
+
+  const addAssessment = (item) => {
+    if (!item) return;
+    const dedupeKey = String(
+      item.id ?? item.value ?? item.key ?? item.name ?? item.label ?? "",
+    );
+    if (!dedupeKey || seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    resolved.push(item);
+  };
+
+  if (activeId !== undefined && activeId !== null && activeId !== "") {
+    addAssessment(findRegistryAssessment(registry, activeId, field.options));
+  }
+
+  registryItems.forEach((item) => {
+    const subSchema = normalizeSubAssessmentSchema(item);
+    if (!subSchema?.sections) return;
+    if (!subAssessmentHasFilledValues(values, subSchema.sections)) return;
+    addAssessment(item);
+  });
+
+  return { activeId, assessments: resolved };
 }
 
 function appendFieldEntries(entries, field, values, assessmentRegistry, options = {}) {
@@ -278,39 +408,45 @@ function appendFieldEntries(entries, field, values, assessmentRegistry, options 
   }
 
   if (field.type === "assessment-launcher") {
-    const registry = field.assessmentRegistry || assessmentRegistry;
-    const registryIsArray = Array.isArray(registry);
-    const activeKey =
-      field.activeKey ||
-      (registryIsArray ? "active_assessment_id" : `${field.name}_active`);
-    const activeId = values[activeKey];
-    const selected = findRegistryAssessment(registry, activeId);
+    const { activeId, assessments } = resolveLauncherAssessments(
+      field,
+      values,
+      assessmentRegistry,
+    );
 
-    if (selected) {
+    assessments.forEach((selected) => {
       const subSchema = normalizeSubAssessmentSchema(selected);
-      if (subSchema?.sections) {
+      if (!subSchema?.sections) return;
+
+      entries.push({
+        kind: "section",
+        label: resolveLabel(
+          selected.name || selected.label || selected.title || "Sub Assessment",
+        ),
+      });
+      appendSections(entries, subSchema.sections, values, assessmentRegistry, {
+        ...options,
+        valuePrefix: shouldUseValuePrefix(selected.value ?? activeId) || valuePrefix,
+      });
+
+      const remarksKeys = [
+        selected.value ? `${selected.value}_remarks` : null,
+        selected.id ? `${selected.id}_remarks` : null,
+      ].filter(Boolean);
+
+      const remarks = remarksKeys
+        .map((remarksKey) => values[remarksKey])
+        .find((value) => hasContent(value));
+
+      if (remarks) {
         entries.push({
-          kind: "section",
-          label: resolveLabel(
-            selected.name || selected.label || selected.title || "Sub Assessment",
-          ),
-        });
-        appendSections(entries, subSchema.sections, values, assessmentRegistry, {
-          ...options,
-          valuePrefix: shouldUseValuePrefix(activeId) || valuePrefix,
+          kind: "row",
+          label: "Remarks",
+          value: String(remarks),
         });
       }
-    }
+    });
 
-    const remarksKey = activeId ? `${activeId}_remarks` : null;
-    const remarks = remarksKey ? values[remarksKey] : null;
-    if (remarks) {
-      entries.push({
-        kind: "row",
-        label: "Remarks",
-        value: String(remarks),
-      });
-    }
     return;
   }
 
@@ -561,7 +697,7 @@ export function buildFullSoapReportEntries({
     const tabEntries = buildAssessmentReportEntries(
       schema,
       assessmentsValues[tab] || {},
-      Object.values(subAssessmentTemplate[tab] || {}),
+      subAssessmentTemplate[tab] || {},
       { excludeSubAssessments: false },
     );
 

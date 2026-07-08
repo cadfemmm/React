@@ -582,9 +582,10 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
 
     const formData = new FormData();
     formData.append("file", file);
-
+const token = localStorage.getItem("access_token");
     const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
       method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData
     });
 
