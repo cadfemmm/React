@@ -24,8 +24,8 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
     "Because of your tinnitus, do you find that you are often irritable?",
     "Because of your tinnitus, is it difficult for you to read?",
     "Does your tinnitus make you upset?",
-    "Do you feel that your tinnitus has placed stress on your relationships?",
-    "Do you find it difficult to focus your attention away from your tinnitus?",
+    "Do you feel that your tinnitus has placed stress on your relationships with family and friends?",
+    "Do you find it difficult to focus your attention away from your tinnitus and on other things?",
     "Do you feel that you have no control over your tinnitus?",
     "Because of your tinnitus, do you often feel tired?",
     "Because of your tinnitus, do you feel depressed?",
@@ -57,6 +57,17 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
     "How anxious did you feel because of your tinnitus?",
     "How depressed did you feel because of your tinnitus?",
     "How hopeless did you feel because of your tinnitus?"
+  ];
+
+  const TFI_DOMAIN_GROUPS = [
+    { label: "1. Intrusive", questionNumbers: [1, 2, 3] },
+    { label: "2. Sense of Control", questionNumbers: [4, 5] },
+    { label: "3. Cognitive", questionNumbers: [6, 7] },
+    { label: "4. Sleep", questionNumbers: [8, 9, 10] },
+    { label: "5. Auditory", questionNumbers: [11, 12, 13] },
+    { label: "6. Relaxation", questionNumbers: [14, 15] },
+    { label: "7. Quality of Life", questionNumbers: [16, 17, 18] },
+    { label: "8. Emotional", questionNumbers: [19, 20, 21] }
   ];
 
   // ✅ CALCULATIONS (DONE OUTSIDE BUILDER)
@@ -425,14 +436,16 @@ export function TinnitusAdvancedForm({ onBack, mode }) {
       title: null,
       fields: [
         { type: "info-text", text: "0 = none, 10 = worst possible" },
-
-        ...TFI_QUESTIONS.map((q, i) => ({
-          name: `tfi_${i + 1}`,
-          label: `${i + 1}. ${q}`,
-          type: "scale-slider",
-          min: 0,
-          max: 10
-        })),
+        ...TFI_DOMAIN_GROUPS.flatMap((group) => [
+          { type: "subheading", label: group.label },
+          ...group.questionNumbers.map((questionNumber) => ({
+            name: `tfi_${questionNumber}`,
+            label: `${questionNumber}. ${TFI_QUESTIONS[questionNumber - 1]}`,
+            type: "scale-slider",
+            min: 0,
+            max: 10
+          }))
+        ]),
 
         ...(tfiScoresVisible
           ? [
@@ -626,13 +639,13 @@ export function TinnitusAdvancedFormObj({ onBack }) {
           ]
         },
         {
-          type: "subheading",
-          label: "Special Test"
-        },
-        {
-          name: "special_test",
-          label: "Details",
-          type: "input"
+          type: "accordion",
+          name: "special_test_section",
+          label: "Special Test",
+          defaultOpen: false,
+          children: [
+            { name: "special_test", label: "Details", type: "input" }
+          ]
         },
         {
           type: "accordion",

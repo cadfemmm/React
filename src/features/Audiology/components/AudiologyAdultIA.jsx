@@ -1586,7 +1586,7 @@ const OBJECTIVE_SCHEMA = {
               previewSize: { width: 400, height: 400 },
               hideInputAfterSelect: true
             },
-            { type: "audiogram-graph", name: "audiogram_graph" },
+            // { type: "audiogram-graph", name: "audiogram_graph" },
             {
               type: "row",
               fields: [

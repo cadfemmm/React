@@ -637,7 +637,7 @@ const mainSchema = {
         },
         {
           "name": "thi_17",
-          "label": "17. Do you feel that your tinnitus has placed stress on your relationships?",
+          "label": "17. Do you feel that your tinnitus has placed stress on your relationships with family and friends?",
           "type": "radio-matrix",
           "options": [
             {
@@ -656,7 +656,7 @@ const mainSchema = {
         },
         {
           "name": "thi_18",
-          "label": "18. Do you find it difficult to focus your attention away from your tinnitus?",
+          "label": "18. Do you find it difficult to focus your attention away from your tinnitus and on other things?",
           "type": "radio-matrix",
           "options": [
             {
