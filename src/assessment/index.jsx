@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, createContext } from "react";
-import { createWorker } from "tesseract.js";
 
 // Common Form Builder
 import CommonFormBuilder from "../features/CommonComponenets/FormBuilder.jsx";
@@ -25,7 +24,7 @@ import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreview
 
 // Schema Load
 import actions from "../schema/actions.js";
-import { OTOSCOPIC_EXTRACT_URL } from "../platform/config/api.config";
+import { OTOSCOPIC_EXTRACT_URL, TYMPANOGRAM_EXTRACT_URL } from "../platform/config/api.config";
 
 // API calls
 import forms from "./forms.js";
@@ -40,6 +39,14 @@ import MedicationAssessment from "../features/Doctors/components/MedicationAsses
 // ── Context ────────────────────────────────────────────────────────────────
 // Carries patient + the questionaire FormData ID map + save helper
 const PatientContext = createContext(null);
+
+const valueToText = (value) => (value === undefined || value === null ? "" : String(value));
+
+const setIfPresent = (target, key, value) => {
+  if (value !== undefined && value !== null && value !== "") {
+    target[key] = valueToText(value);
+  }
+};
 
 /**
  * This component is responsible for fetching the assessment forms
@@ -673,31 +680,25 @@ useEffect(() => {
       }
 
       // =========================
-      // TYMPANOGRAM OCR INTERCEPT
+      // TYMPANOGRAM EXTRACT INTERCEPT
       // =========================
-      const isRightTympanometry = name === 'tympanometry_report_right';
-      const isLeftTympanometry = name === 'tympanometry_report_left';
-      if ((isRightTympanometry || isLeftTympanometry) && value) {
-        const isFile = value instanceof File || (value && typeof value === 'object' && value.constructor?.name === 'File');
-        const isImage = isFile && (value.type?.startsWith('image/') || value.name?.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i));
+      if (
+        (name === "tympanometry_report" ||
+          name === "tympanometry_report_right" ||
+          name === "tympanometry_report_left") &&
+        value
+      ) {
+        setAssessmentsValues((v) => ({
+          ...v,
+          [activeTab]: {
+            ...(v[activeTab] || {}),
+            [name]: value,
+          },
+        }));
 
-        const patchActiveTab = (nextFieldValues) => {
-          setAssessmentsValues((v) => ({
-            ...v,
-            [activeTab]: {
-              ...(v[activeTab] || {}),
-              ...nextFieldValues
-            }
-          }));
-        };
-
-        if (isFile && isImage) {
-          const earSide = isRightTympanometry ? 'right' : 'left';
-          patchActiveTab({ [name]: value });
-          await processTympanometryImage(value, earSide);
-        } else {
-          patchActiveTab({ [name]: value });
-        }
+        await extractTympanogramValues(value).catch((error) => {
+          console.error("Tympanogram extraction failed", error);
+        });
         return;
       }
 
@@ -754,96 +755,233 @@ useEffect(() => {
     }
   };
 
-  // ── Tympanogram OCR Handlers ───────────────────────────────────────────────
-  const extractTympanometryValues = (text) => {
-    const vals = {};
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  // ── Tympanogram Extract Handlers ─────────────────────────────────────────
+  const unwrapTympanogramPayload = (payload) => {
+    let current = payload;
 
-    const volumePatterns = [
-      /Volume[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Volume[:\s]*([\d]+\.[\d]+|[\d]+)ml/i,
-      /Vol[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Vol[:\s]*([\d]+\.[\d]+|[\d]+)ml/i
-    ];
-    for (const p of volumePatterns) { const m = text.match(p); if (m) { vals.volume = m[1]; break; } }
-
-    const mlMatches = text.match(/([\d]+\.[\d]+|[\d]+)\s*ml/gi);
-    let mlNumbers = [];
-    if (mlMatches) {
-      mlNumbers = mlMatches.map(m => { const n = m.match(/([\d]+\.[\d]+|[\d]+)/); return n ? { str: n[1], num: parseFloat(n[1]) } : null; }).filter(n => n !== null && n.num > 0 && n.num < 10);
-      mlNumbers.sort((a, b) => b.num - a.num);
-    }
-
-    if (!vals.volume && mlMatches?.length) {
-      const vi = text.toLowerCase().indexOf('volume');
-      if (vi !== -1) { const vm = text.substring(vi).match(/([\d]+\.[\d]+|[\d]+)\s*ml/i); if (vm) vals.volume = vm[1]; }
-      else if (mlNumbers.length && mlNumbers[0].num >= 0.5 && mlNumbers[0].num <= 2.0) vals.volume = mlNumbers[0].str;
-    }
-
-    const pressurePatterns = [
-      /Pressure[:\s]*([\d.-]+)\s*daPa/i, /Pressure[:\s]*([\d.-]+)daPa/i,
-      /Press[:\s]*([\d.-]+)\s*daPa/i, /Press[:\s]*([\d.-]+)daPa/i
-    ];
-    for (const p of pressurePatterns) { const m = text.match(p); if (m) { vals.pressure = m[1]; break; } }
-    if (!vals.pressure) {
-      const dm = text.match(/([\d.-]+)\s*daPa/gi);
-      if (dm) {
-        const pi = text.toLowerCase().indexOf('pressure');
-        if (pi !== -1) { const pm = text.substring(pi).match(/([\d.-]+)\s*daPa/i); if (pm) vals.pressure = pm[1]; }
-        else { for (const d of dm) { const n = d.match(/([\d.-]+)/); if (n) { const num = parseFloat(n[1]); if (Math.abs(num) <= 200 && num !== 77 && num !== 81 && (Math.abs(num) < 50 || num === 0)) { vals.pressure = n[1]; break; } } } }
+    while (current && typeof current === "object") {
+      if (
+        current.right_ear ||
+        current.left_ear ||
+        current.rightEar ||
+        current.leftEar ||
+        current.volume ||
+        current.pressure ||
+        current.compliance ||
+        current.ecv ||
+        current.peak_pressure ||
+        current.static_compliance
+      ) {
+        return current;
       }
+
+      if (current.data) {
+        current = current.data;
+        continue;
+      }
+
+      if (current.result) {
+        current = current.result;
+        continue;
+      }
+
+      if (current.payload) {
+        current = current.payload;
+        continue;
+      }
+
+      if (current.response) {
+        current = current.response;
+        continue;
+      }
+
+      break;
     }
 
-    const compliancePatterns = [
-      /Compliance[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Compliance[:\s]*([\d]+\.[\d]+|[\d]+)ml/i,
-      /Comp[:\s]*([\d]+\.[\d]+|[\d]+)\s*ml/i, /Comp[:\s]*([\d]+\.[\d]+|[\d]+)ml/i
-    ];
-    for (const p of compliancePatterns) { const m = text.match(p); if (m) { vals.compliance = m[1]; break; } }
-
-    if (!vals.compliance && mlNumbers.length) {
-      const sa = [...mlNumbers].sort((a, b) => a.num - b.num);
-      const vn = vals.volume ? parseFloat(vals.volume) : null;
-      for (const mv of sa) { if (mv.num >= 0.1 && mv.num <= 1.0 && (!vn || Math.abs(vn - mv.num) > 0.1)) { vals.compliance = mv.str; break; } }
-      if (!vals.compliance && mlNumbers.length >= 2) { for (const mv of sa) { if (mv.num >= 0.1 && mv.num < 1.0 && (!vn || Math.abs(vn - mv.num) > 0.05)) { vals.compliance = mv.str; break; } } }
-    }
-
-    return vals;
+    return current || {};
   };
 
-  const processTympanometryImage = async (file, earSide) => {
+  const getEarValues = (payload, ear) => {
+    const normalized = unwrapTympanogramPayload(payload);
+    const earData =
+      normalized[`${ear}_ear`] ||
+      normalized[`${ear}Ear`] ||
+      normalized[ear] ||
+      {};
+
+    return {
+      volume:
+        earData.volume ??
+        earData.ecv ??
+        normalized[`${ear}_volume`] ??
+        normalized[`${ear}Volume`] ??
+        normalized[`ecv_${ear === "right" ? "r" : "l"}`] ??
+        normalized.volume,
+      pressure:
+        earData.pressure ??
+        earData.peak_pressure ??
+        normalized[`${ear}_pressure`] ??
+        normalized[`${ear}Pressure`] ??
+        normalized[`peak_pressure_${ear === "right" ? "r" : "l"}`] ??
+        normalized.pressure,
+      compliance:
+        earData.compliance ??
+        earData.static_compliance ??
+        normalized[`${ear}_compliance`] ??
+        normalized[`${ear}Compliance`] ??
+        normalized[`static_compliance_${ear === "right" ? "r" : "l"}`] ??
+        normalized.compliance,
+    };
+  };
+
+  const applyTympanogramResult = (payload) => {
+    const right = getEarValues(payload, "right");
+    const left = getEarValues(payload, "left");
+
+    const extractedFields = {
+      peak_pressure: {
+        ...(right.pressure !== undefined && right.pressure !== null && right.pressure !== ""
+          ? { peak_pressure_r: valueToText(right.pressure) }
+          : {}),
+        ...(left.pressure !== undefined && left.pressure !== null && left.pressure !== ""
+          ? { peak_pressure_l: valueToText(left.pressure) }
+          : {}),
+      },
+      static_compliance: {
+        ...(right.compliance !== undefined && right.compliance !== null && right.compliance !== ""
+          ? { static_compliance_r: valueToText(right.compliance) }
+          : {}),
+        ...(left.compliance !== undefined && left.compliance !== null && left.compliance !== ""
+          ? { static_compliance_l: valueToText(left.compliance) }
+          : {}),
+      },
+      ecv: {
+        ...(right.volume !== undefined && right.volume !== null && right.volume !== ""
+          ? { ecv_r: valueToText(right.volume) }
+          : {}),
+        ...(left.volume !== undefined && left.volume !== null && left.volume !== ""
+          ? { ecv_l: valueToText(left.volume) }
+          : {}),
+      },
+      ...(right.pressure !== undefined && right.pressure !== null && right.pressure !== ""
+        ? { peak_pressure_r: valueToText(right.pressure) }
+        : {}),
+      ...(left.pressure !== undefined && left.pressure !== null && left.pressure !== ""
+        ? { peak_pressure_l: valueToText(left.pressure) }
+        : {}),
+      ...(right.compliance !== undefined && right.compliance !== null && right.compliance !== ""
+        ? { static_compliance_r: valueToText(right.compliance) }
+        : {}),
+      ...(left.compliance !== undefined && left.compliance !== null && left.compliance !== ""
+        ? { static_compliance_l: valueToText(left.compliance) }
+        : {}),
+      ...(right.volume !== undefined && right.volume !== null && right.volume !== ""
+        ? { ecv_r: valueToText(right.volume) }
+        : {}),
+      ...(left.volume !== undefined && left.volume !== null && left.volume !== ""
+        ? { ecv_l: valueToText(left.volume) }
+        : {}),
+    };
+
+    setAssessmentsValues((prev) => {
+      const next = { ...prev };
+
+      ["subjective", "objective", "assessment", "plan"].forEach((tab) => {
+        next[tab] = {
+          ...(next[tab] || {}),
+          ...extractedFields,
+        };
+      });
+
+      return {
+        ...next,
+        [activeTab]: {
+          ...(next[activeTab] || {}),
+          ...extractedFields,
+        },
+      };
+    });
+  };
+
+  const buildTympanogramUploadFile = (value) => {
+    if (value instanceof File || value instanceof Blob) {
+      return value;
+    }
+
+    if (value && typeof value === "object" && typeof value.data === "string") {
+      const base64Data = value.data.includes(",") ? value.data.split(",")[1] : value.data;
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+
+      for (let i = 0; i < byteCharacters.length; i += 1) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: value.type || "application/octet-stream" });
+      return new File([blob], value.filename || value.name || "tympanogram-report", {
+        type: value.type || "application/octet-stream",
+      });
+    }
+
+    return null;
+  };
+
+  const extractTympanogramValues = async (value) => {
+    const file = buildTympanogramUploadFile(value);
+    if (!file) return;
+
     setProcessingOCR(true);
     try {
-      const worker = await createWorker('eng');
-      await worker.setParameters({
-        tessedit_char_whitelist: '0123456789.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:mlPaGradientVolumePressureCompliance ',
-        tessedit_pageseg_mode: '6',
-      });
-      let { data: { text } } = await worker.recognize(file);
-      if (!text.match(/Volume|Pressure|Compliance|[\d]+\.[\d]+\s*ml|[\d.-]+\s*daPa/i)) {
-        await worker.setParameters({ tessedit_pageseg_mode: '11' });
-        const r2 = await worker.recognize(file);
-        if (r2.data.text.length > text.length) text = r2.data.text;
-      }
-      await worker.terminate();
+      const fetchingFields = {
+        peak_pressure: {
+          peak_pressure_r: "Fetching...",
+          peak_pressure_l: "Fetching...",
+        },
+        static_compliance: {
+          static_compliance_r: "Fetching...",
+          static_compliance_l: "Fetching...",
+        },
+        ecv: {
+          ecv_r: "Fetching...",
+          ecv_l: "Fetching...",
+        },
+      };
 
-      const extracted = extractTympanometryValues(text);
-      if (extracted.volume || extracted.pressure || extracted.compliance) {
-        setAssessmentsValues((v) => {
-          const updates = {};
-          if (extracted.volume) updates.ecv = { ...(v.ecv || {}), [`ecv_${earSide === 'right' ? 'r' : 'l'}`]: String(extracted.volume) };
-          if (extracted.pressure) updates.peak_pressure = { ...(v.peak_pressure || {}), [`peak_pressure_${earSide === 'right' ? 'r' : 'l'}`]: String(extracted.pressure) };
-          if (extracted.compliance) updates.static_compliance = { ...(v.static_compliance || {}), [`static_compliance_${earSide === 'right' ? 'r' : 'l'}`]: String(extracted.compliance) };
-          if (Object.keys(updates).length > 0) {
-            const cnt = Object.keys(extracted).filter(k => extracted[k]).length;
-            setTimeout(() => alert(`Extracted ${cnt} value(s) from ${earSide} ear tympanometry image:\n${extracted.volume ? `Volume: ${extracted.volume} ml\n` : ''}${extracted.pressure ? `Pressure: ${extracted.pressure} daPa\n` : ''}${extracted.compliance ? `Compliance: ${extracted.compliance} ml` : ''}`), 100);
-            return { ...v, [activeTab]: { ...(v[activeTab] || {}), ...updates } };
-          }
-          return v;
+      setAssessmentsValues((prev) => {
+        const next = { ...prev };
+        ["subjective", "objective", "assessment", "plan"].forEach((tab) => {
+          next[tab] = {
+            ...(next[tab] || {}),
+            ...fetchingFields,
+          };
         });
-      } else {
-        alert('Could not extract values from the image. Please enter values manually.');
+
+        return {
+          ...next,
+          [activeTab]: {
+            ...(next[activeTab] || {}),
+            ...fetchingFields,
+          },
+        };
+      });
+
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Tympanogram extraction failed");
       }
-    } catch (error) {
-      console.error('OCR processing error:', error);
-      alert(`OCR error: ${error.message}`);
+
+      const result = await response.json();
+      applyTympanogramResult(result);
     } finally {
       setProcessingOCR(false);
     }
@@ -1117,7 +1255,7 @@ useEffect(() => {
                       fontWeight: 600,
                       textAlign: "center"
                     }}>
-                      🔄 Processing image with OCR... Please wait
+                      Fetching tympanogram values... Please wait
                     </div>
                   )}
                   <CommonFormBuilder
