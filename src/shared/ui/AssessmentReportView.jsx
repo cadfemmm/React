@@ -61,7 +61,7 @@ export default function AssessmentReportView({ entries = [] }) {
                 lineHeight: 1.5,
               }}
             >
-              {entry.label} :
+              {entry.label}
             </div>
             <div
               style={{
