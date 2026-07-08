@@ -6,6 +6,63 @@ import { API_URL } from "../../platform/config/api.config";
 import React, { useEffect, useMemo, useState } from "react";
 import pdfLogo from "../../assets/pdf logo.webp";
 
+/**
+ * Resolve a scale-table row label that may be a plain string or a bilingual object { en, ms }.
+ */
+function resolveRowLabel(rowLabel) {
+  if (!rowLabel) return "";
+  if (typeof rowLabel === "string") return rowLabel;
+  if (typeof rowLabel === "object" && !Array.isArray(rowLabel)) {
+    return rowLabel.en || rowLabel.ms || Object.values(rowLabel)[0] || "";
+  }
+  return String(rowLabel);
+}
+
+/**
+ * Build a flat map of scale-table field keys → human-readable row labels
+ * from a single schema definition. e.g. { "ssi_0": "Dizziness", … }
+ */
+function buildScaleTableLabelMap(schema) {
+  const map = {};
+  if (!schema?.sections) return map;
+  for (const section of schema.sections) {
+    if (!section?.fields) continue;
+    for (const field of section.fields) {
+      if (field?.type !== "scale-table" || !field.name || !Array.isArray(field.rows)) continue;
+      field.rows.forEach((rowLabel, rIdx) => {
+        const key = `${field.name}_${rIdx}`;
+        if (!(key in map)) {
+          map[key] = resolveRowLabel(rowLabel);
+        }
+      });
+    }
+  }
+  return map;
+}
+
+/** In-memory cache: form template ID → label map, to avoid duplicate API calls */
+const schemaLabelMapCache = new Map();
+
+/**
+ * Fetch the form template body for a given formId and build a scale-table label map.
+ * Results are cached so the same template is only fetched once.
+ */
+async function fetchScaleTableLabelMap(formId) {
+  if (!formId) return {};
+  if (schemaLabelMapCache.has(formId)) return schemaLabelMapCache.get(formId);
+  try {
+    const res = await api.get(`${API_URL.ASSESSMENT}form/${formId}/`);
+    const body = res?.data?.body;
+    if (body) {
+      const map = buildScaleTableLabelMap(body);
+      schemaLabelMapCache.set(formId, map);
+      return map;
+    }
+  } catch { /* ignore */ }
+  schemaLabelMapCache.set(formId, {});
+  return {};
+}
+
 
 const ASSESSMENT_GRID_COLUMNS = "1.8fr 1.1fr 1.1fr 1fr 1fr 1fr 1.2fr";
 
@@ -304,13 +361,19 @@ export default function SOAPSession({
                 assessmentItems
                     .map((item) => item?.id)
                     .filter(Boolean)
-                    .map((assessmentId) =>
-                        api.get(API_URL.assessmentFormData(assessmentId)).catch(() => null),
-                    ),
+                    .map(async (assessmentId) => {
+                        const dataRes = await api.get(API_URL.assessmentFormData(assessmentId)).catch(() => null);
+                        if (!dataRes) return { data: null, labelMap: {} };
+                        // Attempt to get the form template ID from the data response
+                        // so we can fetch its schema for label resolution
+                        const formId = dataRes?.data?.form;
+                        const labelMap = formId ? await fetchScaleTableLabelMap(formId) : {};
+                        return { data: dataRes, labelMap };
+                    }),
             );
 
             const merged = [];
-            responses.forEach((res, idx) => {
+            responses.forEach(({ data: res, labelMap }, idx) => {
                 const payload = res?.data?.data;
                 if (!payload || typeof payload !== "object") return;
 
@@ -326,9 +389,14 @@ export default function SOAPSession({
                         : typeof value === "object"
                             ? JSON.stringify(value)
                             : String(value);
+
+                    // Resolve scale-table keys (e.g. "ssi_0" → "Dizziness") using the dynamically-fetched label map
+                    const resolvedLabel = labelMap[key];
+                    const displayKey = resolvedLabel || String(key).replaceAll("_", " ");
+
                     merged.push({
                         source,
-                        key: String(key).replaceAll("_", " "),
+                        key: displayKey,
                         value: renderedValue,
                     });
                 });
@@ -780,7 +848,7 @@ export default function SOAPSession({
                                     <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 18 }}>
                                         <thead>
                                             <tr>
-                                                <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Report</th>
+                                                {/* <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Report</th> */}
                                                 <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Field</th>
                                                 <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px" }}>Value</th>
                                             </tr>
@@ -788,7 +856,7 @@ export default function SOAPSession({
                                         <tbody>
                                             {combinedSessionContent.map((row, idx) => (
                                                 <tr key={`${row.source}-${row.key}-${idx}`}>
-                                                    <td style={{ border: "1px solid #111827", padding: "8px 10px", fontWeight: 600 }}>{row.source}</td>
+                                                    {/* <td style={{ border: "1px solid #111827", padding: "8px 10px", fontWeight: 600 }}>{row.source}</td> */}
                                                     <td style={{ border: "1px solid #111827", padding: "8px 10px" }}>{row.key}</td>
                                                     <td style={{ border: "1px solid #111827", padding: "8px 10px", whiteSpace: "pre-wrap" }}>{row.value}</td>
                                                 </tr>

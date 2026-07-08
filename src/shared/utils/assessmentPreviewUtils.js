@@ -302,7 +302,15 @@ function collectSchemaFieldNames(fields = [], names = []) {
   fields.forEach((field) => {
     if (!field || SKIP_FIELD_TYPES.has(field.type)) return;
 
-    if (field.name) names.push(field.name);
+    if (field.type === "scale-table" && field.name && Array.isArray(field.rows)) {
+      // For scale-table, add individual row keys (e.g. "ssi_0", "ssi_1", …)
+      // so subAssessmentHasFilledValues can detect filled scale-table data.
+      field.rows.forEach((_, rIdx) => {
+        names.push(`${field.name}_${rIdx}`);
+      });
+    } else if (field.name) {
+      names.push(field.name);
+    }
 
     if (field.fields?.length) {
       collectSchemaFieldNames(field.fields, names);
@@ -399,6 +407,26 @@ function appendFieldEntries(entries, field, values, assessmentRegistry, options 
 
   if (field.showIf && !evaluateShowIf(field.showIf, values)) return;
 
+  if (field.type === "scale-table") {
+    if (!field.name || !Array.isArray(field.rows)) return;
+    field.rows.forEach((rowLabel, rIdx) => {
+      const rawKey = `${field.name}_${rIdx}`;
+      // Try direct, then prefixed
+      let cellValue = values[rawKey];
+      if (!hasContent(cellValue) && valuePrefix) {
+        cellValue = values[`${valuePrefix}_${rawKey}`];
+      }
+      if (!hasContent(cellValue)) return;
+      const resolvedLabel = typeof rowLabel === "object" && !Array.isArray(rowLabel)
+        ? (rowLabel.en || rowLabel.ms || Object.values(rowLabel)[0] || "")
+        : String(rowLabel ?? "");
+      if (!resolvedLabel) return;
+      const resolvedValue = resolveOptionLabel(field.columns || [], cellValue) || String(cellValue);
+      entries.push({ kind: "row", label: resolvedLabel, value: resolvedValue });
+    });
+    return;
+  }
+
   if (field.type === "subheading") {
     entries.push({
       kind: "section",
@@ -470,6 +498,22 @@ function appendFieldEntries(entries, field, values, assessmentRegistry, options 
   }
 
   if (field.type === "row" && field.fields?.length) {
+    // If the row has no name, treat each child as its own independent row entry
+    if (!field.name) {
+      field.fields.forEach((child) => {
+        const childValue = resolveFieldValue(values, child.name, valuePrefix);
+        if (!hasContent(childValue)) return;
+        const childFormatted = formatReportValue(childValue, child);
+        if (!childFormatted) return;
+        entries.push({
+          kind: "row",
+          label: resolveLabel(child.label || child.name),
+          value: childFormatted,
+        });
+      });
+      return;
+    }
+
     const rowValue = resolveFieldValue(values, field.name, valuePrefix);
     let formatted = rowValue && typeof rowValue === "object"
       ? formatReportValue(rowValue, field)
