@@ -1012,7 +1012,7 @@ function HearingAidTrialAdapter({ onChange }) {
   return (
     <Hearingaidtrial
     mode={mode}
-      onBack={() => onChange("hearingaidtrial_launcher_obj", null)}
+      onBack={() => onChange("hearing_assessments_launcher_obj", null)}
     />
   );
 }
@@ -1651,6 +1651,7 @@ const OBJECTIVE_SCHEMA = {
             { label: "Hyperacusis Profile", value: "loudness_form_obj" },
             { label: "Vestibular Profile", value: "vestibular_form_obj" },
             { label: "Industrial Audiometry", value: "industrial_form_obj" },
+            { label: "Hearing Device Trial", value: "hearingaidtrial_form_obj" },
           ]
         }
       ]
@@ -1890,7 +1891,7 @@ const OBJECTIVE_SCHEMA = {
     assessment: ASSESSMENT_SCHEMA,
     plan: planSchemaWithEquipment
   };
-
+console.log (SUBJECTIVE_SCHEMA);
   /* ===================== PATIENT INFO ===================== */
 
 function AudiometryFrequencyTable({ value = {}, onChange }) {

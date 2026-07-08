@@ -964,6 +964,10 @@ const OBJECTIVE = {
             {
               "label": "Industrial Audiometry",
               "value": "industrial_form_obj"
+            },
+            {
+              "label": "Hearing Device Trial",
+              "value": "hearingaidtrial_form_obj"
             }
           ]
         }

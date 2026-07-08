@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import CommonFormBuilder from "../CommonComponenets/FormBuilder";
-import {Hearingaidtrial } from "../Audiology/hearingaidtrial";
 import {TYMPANOGRAM_EXTRACT_URL} from "../../platform/config/api.config"
 
 const valueToText = (value) =>
@@ -625,29 +624,6 @@ const token = localStorage.getItem("access_token");
     actions: [{ type: "back", label: "Back" }],
 
     sections: [
-     {
-      title: "Hearing device Trial",
-      showIf: { field: "mode", equals: "followup" },
-      fields: [
-        {
-          name: "hearingaidtrial_required",
-          label: "Hearing device Trial",
-          type: "radio",
-          options: [
-            { label: "Yes", value: "yes" },
-            { label: "No", value: "no" }
-          ]
-        },
-        {
-          name: "hearingaidtrial_launcher_obj",
-          label: "",
-          type: "assessment-launcher",
-          showIf: { field: "hearingaidtrial_required", equals: "yes" },
-          options: [{ label: "Hearing device Trial", value: "hearingaidtrial_form_obj" }]
-        }
-      ]
-    },
-
       // =========================
       // ACOUSTIC REFLEX
       // =========================
@@ -1258,14 +1234,6 @@ const token = localStorage.getItem("access_token");
       layout="nested"
       onChange={handleChange}
       onAction={(type) => type === "back" && onBack?.()}
-      assessmentRegistry={{
-        hearingaidtrial_form_obj: ({ onChange }) => (
-          <Hearingaidtrial
-            mode={mode}
-            onBack={() => onChange("hearingaidtrial_launcher_obj", null)}
-          />
-        )
-      }}
     />
   );
 }
