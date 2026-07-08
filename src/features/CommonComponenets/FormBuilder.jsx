@@ -4120,35 +4120,47 @@ if (typeof col === "object" && col.type === "radio") {
       const flatCols = groups.flatMap(g => g.columns);
       const colCount = flatCols.length;
       const showColumnHeaders = field.showColumnHeaders !== false;
+      const showGroupHeaders = field.showGroupHeaders !== false;
 
       const gridTemplate = `200px repeat(${colCount}, 1fr)`;
+      const cornerCellStyle = cornerLikeGroupHeader
+        ? { ...styles.vaGroupHeader, borderRight: "1px solid #eef2f7" }
+        : styles.vaCorner;
 
       return (
         <div style={styles.vaWrap}>
-          <div style={{ display: "grid", gridTemplateColumns: gridTemplate }}>
-            <div style={cornerLikeGroupHeader ? { ...styles.vaGroupHeader, borderRight: "1px solid #eef2f7" } : styles.vaCorner}>
-              {cornerLabel}
+          {showGroupHeaders && (
+            <div style={{ display: "grid", gridTemplateColumns: gridTemplate }}>
+              <div style={cornerCellStyle}>
+                {cornerLabel}
+              </div>
+              {groups.map((g, i) => {
+                const allDisabled = g.columns.length > 0 && g.columns.every(c => c.disabled);
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      ...styles.vaGroupHeader,
+                      gridColumn: `span ${g.columns.length}`,
+                      ...(allDisabled ? { background: "#f0f0f0", color: "#aaa" } : {})
+                    }}
+                  >
+                    {languageConfig?.enabled ? t(g.label, languageConfig.lang) : g.label}
+                  </div>
+                );
+              })}
             </div>
-            {groups.map((g, i) => {
-              const allDisabled = g.columns.length > 0 && g.columns.every(c => c.disabled);
-              return (
-                <div
-                  key={i}
-                  style={{
-                    ...styles.vaGroupHeader,
-                    gridColumn: `span ${g.columns.length}`,
-                    ...(allDisabled ? { background: "#f0f0f0", color: "#aaa" } : {})
-                  }}
-                >
-                  {languageConfig?.enabled ? t(g.label, languageConfig.lang) : g.label}
-                </div>
-              );
-            })}
-          </div>
+          )}
 
           {showColumnHeaders && (
             <div style={{ display: "grid", gridTemplateColumns: gridTemplate }}>
-              <div style={styles.vaCorner} />
+              {showGroupHeaders ? (
+                <div style={styles.vaCorner} />
+              ) : (
+                <div style={cornerCellStyle}>
+                  {cornerLabel}
+                </div>
+              )}
               {flatCols.map((c, i) => (
                 <div key={i} style={styles.vaColHeader}>
                   {c.key}

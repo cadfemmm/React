@@ -872,10 +872,10 @@ const OBJECTIVE = {
               },
               "hideInputAfterSelect": true
             },
-            {
-              "type": "audiogram-graph",
-              "name": "audiogram_graph"
-            },
+            // {
+            //   "type": "audiogram-graph",
+            //   "name": "audiogram_graph"
+            // },
             {
               "type": "row",
               "fields": [

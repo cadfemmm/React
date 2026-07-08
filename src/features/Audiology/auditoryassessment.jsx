@@ -686,8 +686,8 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
             },
             {
               type: "paired-select",
-              right: { name: "tymp_type_r", title: "Right Ear" },
-              left: { name: "tymp_type_l", title: "Left Ear" },
+              right: { name: "tymp_type_r", title: "Tympanogram Type - Right Ear" },
+              left: { name: "tymp_type_l", title: "Tympanogram Type - Left Ear" },
               options: [
                 { label: "Type A", value: "A" },
                 { label: "Type As", value: "As" },
@@ -911,33 +911,34 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
       // ETF
       // =========================
       {
-        title: "Eustachian Tube Function",
+        title: null,
         fields: [
           {
-            type: "row",
-            cols: 2,
-            labelAbove: true,
-            fields: [
+            type: "accordion",
+            name: "etf_section",
+            label: "Eustachian Tube Function",
+            defaultOpen: false,
+            children: [
               {
                 name: "etf_right",
                 label: "Right Ear Peak Pressure (daPa)",
-                type: "radio",
+                type: "radio-matrix",
                 options: [
                   { label: "Normal", value: 0 },
                   { label: "Reduced", value: 1 },
                   { label: "Absent", value: 2 },
-                  { label: "Could Not Test", value: "could_not"}
+                  { label: "Could Not Test", value: "could_not" }
                 ]
               },
               {
                 name: "etf_left",
                 label: "Left Ear Peak Pressure (daPa)",
-                type: "radio",
+                type: "radio-matrix",
                 options: [
                   { label: "Normal", value: 0 },
                   { label: "Reduced", value: 1 },
                   { label: "Absent", value: 2 },
-                  { label: "Could Not Test", value: "could_not"}
+                  { label: "Could Not Test", value: "could_not" }
                 ]
               }
             ]
@@ -949,24 +950,32 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
       // SPEECH
       // =========================
       {
-        title: "Speech Test",
+        title: null,
         fields: [
           {
-            type: "checkbox-group",
-            name: "speech_tests",
-            label: "",
-            options: [
-              { label: "Speech Reception Threshold (SRT)", value: "srt" },
-              { label: "Word Recognition Score (WRS)",     value: "wrs" },
-              { label: "Listening Comprehension Task (LCT)", value: "lct" },
-              { label: "Auditory Processing Task (APT)",   value: "apt" }
+            type: "accordion",
+            name: "type_of_test_section",
+            label: "Type of Test",
+            defaultOpen: false,
+            children: [
+              {
+                type: "checkbox-group",
+                name: "type_of_tests",
+                label: "",
+                options: [
+                  { label: "Speech Reception Threshold (SRT)", value: "srt" },
+                  { label: "Word Recognition Score (WRS)", value: "wrs" },
+                  { label: "Listening Comprehension Task (LCT)", value: "lct" },
+                  { label: "Auditory Processing Task (APT)", value: "apt" }
+                ]
+              },
+              { type: "row", cols: 2, showIf: { field: "type_of_tests", includes: "srt" }, fields: [{ name: "srt_r", label: "SRT Right Ear", type: "input" }, { name: "srt_l", label: "SRT Left Ear", type: "input" }] },
+              { type: "row", cols: 2, showIf: { field: "type_of_tests", includes: "wrs" }, fields: [{ name: "wrs_r", label: "WRS Right Ear", type: "input" }, { name: "wrs_l", label: "WRS Left Ear", type: "input" }] },
+              { type: "row", cols: 2, showIf: { field: "type_of_tests", includes: "lct" }, fields: [{ name: "lct_r", label: "LCT Right Ear", type: "input" }, { name: "lct_l", label: "LCT Left Ear", type: "input" }] },
+              { type: "row", cols: 2, showIf: { field: "type_of_tests", includes: "apt" }, fields: [{ name: "apt_r", label: "APT Right Ear", type: "input" }, { name: "apt_l", label: "APT Left Ear", type: "input" }] },
+              { name: "remarks", label: "Remarks", type: "input", showIf: { field: "type_of_tests", notEmpty: true } }
             ]
-          },
-          { type: "row", cols: 2, showIf: { field: "speech_tests", includes: "srt" }, fields: [{ name: "srt_r", label: "SRT Right Ear", type: "input" }, { name: "srt_l", label: "SRT Left Ear", type: "input" }] },
-          { type: "row", cols: 2, showIf: { field: "speech_tests", includes: "wrs" }, fields: [{ name: "wrs_r", label: "WRS Right Ear", type: "input" }, { name: "wrs_l", label: "WRS Left Ear", type: "input" }] },
-          { type: "row", cols: 2, showIf: { field: "speech_tests", includes: "lct" }, fields: [{ name: "lct_r", label: "LCT Right Ear", type: "input" }, { name: "lct_l", label: "LCT Left Ear", type: "input" }] },
-          { type: "row", cols: 2, showIf: { field: "speech_tests", includes: "apt" }, fields: [{ name: "apt_r", label: "APT Right Ear", type: "input" }, { name: "apt_l", label: "APT Left Ear", type: "input" }] },
-          { name: "remarks", label: "Remarks", type: "input", showIf: { field: "speech_tests", notEmpty: true } }
+          }
         ]
       },
 
@@ -982,6 +991,15 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
             label: "Auditory Steady-State Response",
             defaultOpen: false,
             children: [
+              {
+                name: "assr_upload",
+                type: "attach-file",
+                accept: "application/pdf,image/*",
+                title: "Upload ASSR File",
+                multiple: false,
+                previewSize: { width: 400, height: 400 },
+                hideInputAfterSelect: true
+              },
               {
                 type: "refraction-12col",
                 name: "assr_matrix",
@@ -1014,6 +1032,15 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
             defaultOpen: false,
             children: [
               {
+                name: "abr_upload",
+                type: "attach-file",
+                accept: "application/pdf,image/*",
+                title: "Upload ABR File",
+                multiple: false,
+                previewSize: { width: 400, height: 400 },
+                hideInputAfterSelect: true
+              },
+              {
                 type: "refraction-12col",
                 name: "abr_matrix",
                 cornerLabel: "",
@@ -1043,6 +1070,15 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
             defaultOpen: false,
             children: [
               {
+                name: "ep_upload",
+                type: "attach-file",
+                accept: "application/pdf,image/*",
+                title: "Upload Electrophysiology File",
+                multiple: false,
+                previewSize: { width: 400, height: 400 },
+                hideInputAfterSelect: true
+              },
+              {
                 type: "refraction-12col",
                 name: "ep_matrix",
                 cornerLabel: "",
@@ -1060,12 +1096,155 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
       },
 
       // =========================
+      // INTERVENTION
+      // =========================
+      {
+        title: null,
+        fields: [
+          {
+            type: "accordion",
+            name: "intervention_section",
+            label: "Intervention",
+            defaultOpen: false,
+            children: [
+              {
+                name: "auditory_interventions",
+               
+                type: "checkbox-group",
+                options: [
+                  { label: "Hearing aids/assistive devices", value: "hearing_aids" },
+                  { label: "Ear monitoring", value: "ear_monitoring" },
+                  { label: "Fine tuning of hearing device", value: "fine_tuning" },
+                  { label: "Auditory training", value: "auditory_training" },
+                  { label: "Hearing device counselling", value: "hearing_device_counselling" },
+                  { label: "Communication strategies Counselling", value: "communication_strategies" }
+                ]
+              },
+              {
+                type: "refraction-12col",
+                name: "auditory_intervention_matrix",
+                cornerLabel: "Intervention",
+                cornerLikeGroupHeader: false,
+                showColumnHeaders: true,
+                groups: [{
+                  label: "",
+                  columns: [
+                    { key: "Yes / No" },
+                    { key: "Remarks" }
+                  ]
+                }],
+                rows: (formValues) => {
+                  const selected = formValues.auditory_interventions || [];
+                  const allRows = [
+                    {
+                      value: "hearing_aids",
+                      label: "Hearing aids/assistive devices",
+                      columns: [
+                        {
+                          type: "select",
+                          options: [
+                            { label: "No", value: 0 },
+                            { label: "Yes", value: 1 }
+                          ]
+                        },
+                        { type: "input" }
+                      ]
+                    },
+                    {
+                      value: "ear_monitoring",
+                      label: "Ear monitoring",
+                      columns: [
+                        {
+                          type: "select",
+                          options: [
+                            { label: "No", value: 0 },
+                            { label: "Yes", value: 1 }
+                          ]
+                        },
+                        { type: "input" }
+                      ]
+                    },
+                    {
+                      value: "fine_tuning",
+                      label: "Fine tuning of hearing device",
+                      columns: [
+                        {
+                          type: "select",
+                          options: [
+                            { label: "No", value: 0 },
+                            { label: "Yes", value: 1 }
+                          ]
+                        },
+                        { type: "input" }
+                      ]
+                    },
+                    {
+                      value: "auditory_training",
+                      label: "Auditory training",
+                      columns: [
+                        {
+                          type: "select",
+                          options: [
+                            { label: "No", value: 0 },
+                            { label: "Yes", value: 1 }
+                          ]
+                        },
+                        { type: "input" }
+                      ]
+                    },
+                    {
+                      value: "hearing_device_counselling",
+                      label: "Hearing device counselling",
+                      columns: [
+                        {
+                          type: "select",
+                          options: [
+                            { label: "No", value: 0 },
+                            { label: "Yes", value: 1 }
+                          ]
+                        },
+                        { type: "input" }
+                      ]
+                    },
+                    {
+                      value: "communication_strategies",
+                      label: "Communication strategies Counselling",
+                      columns: [
+                        {
+                          type: "select",
+                          options: [
+                            { label: "No", value: 0 },
+                            { label: "Yes", value: 1 }
+                          ]
+                        },
+                        { type: "input" }
+                      ]
+                    }
+                  ];
+
+                  return allRows.filter((row) => selected.includes(row.value));
+                }
+              }
+            ]
+          }
+        ]
+      },
+
+      // =========================
       // SPECIAL TEST
       // =========================
       {
-        title: "Special Test",
+        title: null,
         fields: [
-          { name: "special_test", label: "Details", type: "input" }
+          {
+            type: "accordion",
+            name: "special_test_section",
+            label: "Special Test",
+            defaultOpen: false,
+            children: [
+              { name: "special_test", label: "Details", type: "input" }
+            ]
+          }
         ]
       }
     ]

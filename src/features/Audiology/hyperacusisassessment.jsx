@@ -8,43 +8,55 @@ export function HyperacusisAdvancedForm({ onBack, mode }) {
   const [khalfaScoresVisible, setKhalfaScoresVisible] = useState(true);
 
   const HQ_QUESTIONS = [
-    "Do you ever use ear-plugs or ear-muffs to reduce your noise perception (do not consider use during high exposure)?",
+    "Do you ever use ear-plugs or ear-muffs to reduce your noise perception (Do not consider the use of hearing protection during abnormally high exposure situations)?",
     "Do you find it harder to ignore sounds around you in everyday situations?",
     "Do you have trouble reading in a noisy or loud environment?",
     "Do you have trouble concentrating in noisy surroundings?",
     "Do you have difficulty listening to conversations in noisy places?",
-    "Has anyone told you that you tolerate noise or certain sounds badly?",
+    "Has anyone you know ever told you that you tolerate noise or certain kinds of sound badly?",
     "Are you particularly sensitive to or bothered by street noise?",
-    "Do you find noise unpleasant in social situations (clubs, concerts, etc.)?",
-    "When someone suggests going out, do you think about the noise you will face?",
-    "Do you turn down invitations because of noise?",
-    "Do noises bother you more in a quiet place than in a slightly noisy room?",
+    "Do you find the noise unpleasant in certain social situations (e.g., night-clubs, pubs or bars, concerts, firework displays, cocktail receptions)?",
+    "When someone suggests doing something (going out, to the cinema, to a concert, etc.), do you immediately think about the noise you are going to have to put up with?",
+    "Do you ever turn down an invitation or not go out because of the noise you would have to face?",
+    "Do noises or particular sounds bother you more in a quiet place than in a slightly noisy room?",
     "Do stress and tiredness reduce your ability to concentrate in noise?",
-    "Are you less able to concentrate in noise toward the end of the day?",
+    "Are you less able to concentrate in noise towards the end of the day?",
     "Do noise and certain sounds cause you stress and irritation?"
+  ];
+
+  const HQ_DOMAIN_GROUPS = [
+    { label: "Attentional", questionNumbers: [1, 2, 3, 4] },
+    { label: "Social", questionNumbers: [5, 6, 7, 8, 9, 10] },
+    { label: "Emotional", questionNumbers: [11, 12, 13, 14] }
   ];
 
   const KHALFA_QUESTIONS = [
     "Do you have trouble concentrating in a noisy or loud environment?",
     "Do you have trouble reading in a noisy or loud environment?",
-    "Do you use earplugs or earmuffs to reduce noise perception?",
-    "Do you find it harder to ignore sounds in everyday situations?",
-    "Do you find it difficult to listen to announcements (airport, airplane)?",
-    "Are you sensitive to or bothered by street noise?",
-    "Do you automatically cover your ears with louder sounds?",
-    "Do you think about noise when planning outings?",
-    "Do you avoid going out because of noise?",
-    "Do you find noise unpleasant in social situations?",
-    "Has anyone told you that you tolerate noise poorly?",
-    "Are you bothered by sounds others are not?",
-    "Are you afraid of sounds others are not?",
-    "Do noise and sounds cause stress and irritation?",
-    "Are you less able to concentrate in noise later in the day?",
-    "Do stress and tiredness reduce concentration in noise?",
-    "Do sounds annoy you but not others?",
-    "Are you emotionally drained by daily sounds?",
-    "Do daily sounds have emotional impact?",
-    "Are you irritated by sounds that others tolerate?"
+    "Do you ever use earplugs or earmuffs to reduce your noise perception? (Do not consider hearing protection during abnormally high exposure situations.)",
+    "Do you find it harder to ignore sounds around you in everyday situations?",
+    "Do you find it difficult to listen to speaker announcements (such as airports, airplane)?",
+    "Are you particularly sensitive to or bothered by street noise?",
+    "Do you automatically cover your ears in the presence of somewhat louder sounds?",
+    "When someone suggests doing something (going out to the cinema, a concert, etc.), do you immediately think about the noise you are going to have to put up with?",
+    "Do you ever turn down an invitation or not go out because of the noise you would have to face?",
+    "Do you find noise unpleasant in certain social situations (e.g. nightclubs, pubs or bars, concerts, firework displays, cocktail receptions)?",
+    "Has anyone you know ever told you that you tolerate noise or certain kinds of sounds badly?",
+    "Are you particularly bothered by sounds others do not find bothersome?",
+    "Are you afraid of sounds that others do not fear?",
+    "Do noise and certain sounds cause you stress and irritation?",
+    "Are you less able to concentrate in noise toward the end of the day?",
+    "Do stress and tiredness reduce your ability to concentrate in noise?",
+    "Do you find sounds annoy you and not others?",
+    "Are you emotionally drained by having to put up with all-day sounds?",
+    "Do you find daily sounds having an emotional impact on you?",
+    "Are you irritated by sounds that do not bother others?"
+  ];
+
+  const KHALFA_DOMAIN_GROUPS = [
+    { label: "Functional Subscale", questionNumbers: [1, 2, 3, 4, 5, 6, 7] },
+    { label: "Social Subscale", questionNumbers: [8, 9, 10, 11, 12, 13] },
+    { label: "Emotional Subscale", questionNumbers: [14, 15, 16, 17, 18, 19, 20] }
   ];
 
   /* ── Calculations ── */
@@ -196,12 +208,17 @@ export function HyperacusisAdvancedForm({ onBack, mode }) {
     sections: [{
       title: null,
       fields: [
-        ...HQ_QUESTIONS.map((q, i) => ({
-          name: `hq_${i + 1}`, label: `${i + 1}. ${q}`, type: "radio-matrix",
-          options: hqScoresVisible
-            ? [{ label: "No (0)", value: 0 }, { label: "A little (1)", value: 1 }, { label: "Quite a lot (2)", value: 2 }, { label: "A lot (3)", value: 3 }]
-            : [{ label: "No",     value: 0 }, { label: "A little",     value: 1 }, { label: "Quite a lot",     value: 2 }, { label: "A lot",     value: 3 }]
-        })),
+        ...HQ_DOMAIN_GROUPS.flatMap((group) => [
+          { type: "subheading", label: group.label },
+          ...group.questionNumbers.map((questionNumber) => ({
+            name: `hq_${questionNumber}`,
+            label: `${questionNumber}. ${HQ_QUESTIONS[questionNumber - 1]}`,
+            type: "radio-matrix",
+            options: hqScoresVisible
+              ? [{ label: "No (0)", value: 0 }, { label: "A little (1)", value: 1 }, { label: "Quite a lot (2)", value: 2 }, { label: "A lot (3)", value: 3 }]
+              : [{ label: "No", value: 0 }, { label: "A little", value: 1 }, { label: "Quite a lot", value: 2 }, { label: "A lot", value: 3 }]
+          }))
+        ]),
         ...(hqScoresVisible ? [
           { name: "hq_att",   label: "Attentional", type: "score-box" },
           { name: "hq_soc",   label: "Social",      type: "score-box" },
@@ -222,12 +239,17 @@ export function HyperacusisAdvancedForm({ onBack, mode }) {
     sections: [{
       title: null,
       fields: [
-        ...KHALFA_QUESTIONS.map((q, i) => ({
-          name: `khalfa_${i + 1}`, label: `${i + 1}. ${q}`, type: "radio-matrix",
-          options: khalfaScoresVisible
-            ? [{ label: "No (0)", value: 0 }, { label: "Sometimes (2)", value: 2 }, { label: "Yes (4)", value: 4 }]
-            : [{ label: "No",     value: 0 }, { label: "Sometimes",     value: 2 }, { label: "Yes",     value: 4 }]
-        })),
+        ...KHALFA_DOMAIN_GROUPS.flatMap((group) => [
+          { type: "subheading", label: group.label },
+          ...group.questionNumbers.map((questionNumber) => ({
+            name: `khalfa_${questionNumber}`,
+            label: `${questionNumber}. ${KHALFA_QUESTIONS[questionNumber - 1]}`,
+            type: "radio-matrix",
+            options: khalfaScoresVisible
+              ? [{ label: "No (0)", value: 0 }, { label: "Sometimes (2)", value: 2 }, { label: "Yes (4)", value: 4 }]
+              : [{ label: "No", value: 0 }, { label: "Sometimes", value: 2 }, { label: "Yes", value: 4 }]
+          }))
+        ]),
         ...(khalfaScoresVisible ? [
           { name: "khalfa_func",  label: "Functional", type: "score-box" },
           { name: "khalfa_soc",   label: "Social",     type: "score-box" },
@@ -380,13 +402,13 @@ export function HyperacusisAdvancedFormObj({ onBack }) {
         ]
       },
       {
-        type: "subheading",
-        label: "Special Test"
-      },
-      {
-        name: "special_test",
-        label: "Details",
-        type: "input"
+        type: "accordion",
+        name: "special_test_section",
+        label: "Special Test",
+        defaultOpen: false,
+        children: [
+          { name: "special_test", label: "Details", type: "input" }
+        ]
       },
       {
         type: "accordion",
