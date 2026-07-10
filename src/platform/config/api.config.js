@@ -47,6 +47,9 @@ const API_URL = {
         BASE_API + `codes/icd/${encodeURIComponent(department)}/`,
     ICD_ALL: BASE_API + 'codes/icd/all/',
 
+    // ICHI codes
+    ICHI_ALL: BASE_API + 'codes/ichi/all',
+
     // Patients apis
     PATIENT: BASE_API + 'patient/',
     PATIENTS_LIST: RMS_API + 'patients/',
