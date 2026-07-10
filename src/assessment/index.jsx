@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, createContext } from "react";
+import { useEffect, useState, useCallback, useRef, createContext } from "react";
 
 // Common Form Builder
 import CommonFormBuilder from "../features/CommonComponenets/FormBuilder.jsx";
@@ -87,6 +87,9 @@ export default function AssessmentLoader({ patient, department }) {
     plan: {},
   });
 
+  // Ref to store pending ICF data from form fetch — populated on save, not on select
+  const pendingFormIcfRef = useRef({});
+
   // OCR & Otoscopic processing state
   const [processingOCR, setProcessingOCR] = useState(false);
   const [isOtoscopicLoading, setIsOtoscopicLoading] = useState(false);
@@ -171,13 +174,18 @@ useEffect(() => {
     try {
       const map = {};
       const subAssessment = {};
-      const data = await forms.fetch(department);      
+      const data = await forms.fetch(department);
       if (!data || data.length === 0) {
         setError(true);
         return;
       }
+
+      // Capture the assessment form ID separately — the icf data lives on the
+      // assessment form, and we need to pass it to both assessment & plan tabs.
+      let assessmentFormId = null;
+
       data.forEach((template) => {
-        const key = template.assessment_type?.toLowerCase();        
+        const key = template.assessment_type?.toLowerCase();
         // MAIN ASSESSMENT
         if (TABS.includes(key)) {
           let processedTemplate = {
@@ -186,6 +194,11 @@ useEffect(() => {
             name: template.name,
             actions: actions.ACTIONS_BUTTON,
           };
+          
+          // Remember the assessment form ID for sharing with the plan tab
+          if (key === "assessment") {
+            assessmentFormId = template.id;
+          }
           
           // ✨ ADD ICD COMPONENTS FOR SPECIFIC DEPARTMENTS AND TABS
           if ((department === "Audiology" || department === "Optometry") && (key === "assessment" || key === "plan")) {
@@ -196,15 +209,16 @@ useEffect(() => {
             if (processedTemplate.sections && processedTemplate.sections[0] && processedTemplate.sections[0].fields) {
               if (key === "assessment") {
                 // Add ICD selection + ICF display to Assessment tab
+                // ICF/ICHI data comes from values.assessment_form_icf (set when sub-assessment is selected)
                 processedTemplate.sections[0].fields.push({
                   type: "custom",
                   name: "icd_icf_ichi_section",
                   render: ({ values, onChange }) => {
                     return (
-                      <ICDComponent 
-                        values={values} 
-                        onChange={onChange} 
-                        mode="icd-icf" 
+                      <ICDComponent
+                        values={values}
+                        onChange={onChange}
+                        mode="icd-icf"
                       />
                     );
                   }
@@ -217,13 +231,13 @@ useEffect(() => {
                 
                 const ichiComponent = {
                   type: "custom",
-                  name: "ichi_section", 
+                  name: "ichi_section",
                   render: ({ values, onChange }) => {
                     return (
-                      <ICDComponent 
-                        values={values} 
-                        onChange={onChange} 
-                        mode="plan" 
+                      <ICDComponent
+                        values={values}
+                        onChange={onChange}
+                        mode="plan"
                       />
                     );
                   }
@@ -642,6 +656,15 @@ useEffect(() => {
               [activeTab]: updated,
             };
           });
+
+          // Store ICF data in ref — only populate assessment_form_icf on save
+          if (tm?.data?.icf && Array.isArray(tm.data.icf)) {
+            const formName = tm.data.name || tm.data.id;
+            pendingFormIcfRef.current = {
+              ...pendingFormIcfRef.current,
+              [formName]: tm.data.icf,
+            };
+          }
         } catch (e) {
           setToast({
             message: "Sub Assessment form loading failed",
@@ -704,6 +727,32 @@ useEffect(() => {
         await extractTympanogramValues(value).catch((error) => {
           console.error("Tympanogram extraction failed", error);
         });
+        return;
+      }
+
+      // =========================
+      // SUB ASSESSMENT SAVED — populate ICF data only after save
+      // =========================
+      if (name === "__sub_assessment_saved__" && typeof value === "object" && value?.name) {
+        const formName = value.name;
+        const icfData = pendingFormIcfRef.current?.[formName];
+        if (icfData && Array.isArray(icfData)) {
+          setAssessmentsValues((v) => {
+            const newValues = { ...v };
+            ["subjective", "objective", "assessment", "plan"].forEach(tab => {
+              const existing = newValues[tab]?.assessment_form_icf || {};
+              newValues[tab] = {
+                ...newValues[tab],
+                assessment_form_icf: {
+                  ...existing,
+                  [formName]: icfData,
+                },
+              };
+            });
+            return newValues;
+          });
+        }
+        // Don't persist this to main assessment values
         return;
       }
 

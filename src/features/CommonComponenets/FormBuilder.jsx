@@ -1589,6 +1589,12 @@ const subAssessmentData = Object.fromEntries(
                         subAssessmentData
                       );
 
+                      // Notify parent — used by AssessmentLoader to populate ICF on save
+                      onChange?.("__sub_assessment_saved__", {
+                        id: selectedAssessment.id,
+                        name: selectedAssessment.name,
+                      });
+
                       console.log(
                         "Sub Assessment Saved",
                         selectedAssessment.name
