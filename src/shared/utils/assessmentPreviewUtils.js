@@ -663,6 +663,158 @@ const SOAP_TAB_LABELS = {
   plan: "Plan",
 };
 
+const SOAP_TAB_ORDER = ["subjective", "objective", "assessment", "plan"];
+
+const SOAP_FORM_TEMPLATE_TAB_BY_ID = {
+  "dd34f6da-cf4f-4531-9eaf-06ec1ffd3685": "subjective",
+  "f3947691-f5b4-4499-b926-40031157677d": "objective",
+  "68725b04-4225-40fa-bc3b-172c7a56d8c9": "assessment",
+  "7709d6f8-c3c3-4349-a2e2-54438cb6558f": "plan",
+};
+
+function isParentAssessment(item) {
+  const val = item?.is_parent;
+  return (
+    val === true ||
+    val === "True" ||
+    val === "true" ||
+    val === 1 ||
+    val === "1"
+  );
+}
+
+function normalizeTabKey(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function resolveAssessmentTabKey(item) {
+  if (!item) return null;
+
+  const formId = String(
+    item.form || item.form_id || item.template || item.template_id || "",
+  );
+  if (SOAP_FORM_TEMPLATE_TAB_BY_ID[formId]) {
+    return SOAP_FORM_TEMPLATE_TAB_BY_ID[formId];
+  }
+
+  const directCandidates = [item.type, item.form_type].map(normalizeTabKey);
+  for (const key of directCandidates) {
+    if (SOAP_TAB_ORDER.includes(key)) return key;
+  }
+
+  const name = normalizeTabKey(item.name);
+  if (SOAP_TAB_ORDER.includes(name)) return name;
+
+  for (const tab of SOAP_TAB_ORDER) {
+    if (name.includes(tab)) return tab;
+  }
+
+  return null;
+}
+
+function groupAssessmentsByTab(assessmentItems = []) {
+  const grouped = {};
+
+  assessmentItems.forEach((item) => {
+    const tab = resolveAssessmentTabKey(item);
+    if (!tab) return;
+    if (!grouped[tab]) grouped[tab] = [];
+    grouped[tab].push(item);
+  });
+
+  return grouped;
+}
+
+function extractAssessmentValues(raw) {
+  if (!raw || typeof raw !== "object") return {};
+  if (raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)) {
+    return raw.data;
+  }
+  return raw.form_data ?? raw.values ?? {};
+}
+
+function normalizeFetchedSchema(body) {
+  if (!body) return null;
+
+  let parsed = body;
+  if (typeof body === "string") {
+    try {
+      parsed = JSON.parse(body);
+    } catch {
+      return null;
+    }
+  }
+
+  if (Array.isArray(parsed)) {
+    return normalizeReportSchema({ sections: parsed });
+  }
+
+  return normalizeReportSchema(parsed);
+}
+
+function resolveFormId(item, rawPayload) {
+  return (
+    rawPayload?.form ||
+    item?.form ||
+    item?.form_id ||
+    item?.template ||
+    item?.template_id ||
+    null
+  );
+}
+
+function valuesHaveContent(values = {}) {
+  return Object.values(values).some((value) => hasContent(value));
+}
+
+function buildFallbackReportEntries(values = {}) {
+  const entries = [];
+
+  Object.entries(values).forEach(([key, value]) => {
+    if (!hasContent(value)) return;
+    if (key.endsWith("_remarks")) return;
+
+    const rendered =
+      formatReportValue(value, {}) ||
+      (Array.isArray(value)
+        ? value.join(", ")
+        : typeof value === "object"
+          ? JSON.stringify(value)
+          : String(value));
+
+    entries.push({
+      kind: "row",
+      label: String(key).replaceAll("_", " "),
+      value: rendered,
+    });
+  });
+
+  return entries;
+}
+
+function buildTabReportEntries(schema, values, registry, options = {}) {
+  if (schema) {
+    const structured = buildAssessmentReportEntries(
+      schema,
+      values,
+      registry,
+      options,
+    );
+    if (structured.some((entry) => entry.kind === "row" && entry.value)) {
+      return structured;
+    }
+  }
+
+  return buildFallbackReportEntries(values);
+}
+
+function resolveSupplementaryAppender(departmentName = "") {
+  const department = String(departmentName).toLowerCase();
+  if (department.includes("audiology")) return appendAudiologySoapSupplements;
+  if (department.includes("optometry")) return appendOptometrySoapSupplements;
+  return null;
+}
+
 export function appendOptometrySoapSupplements(entries, tab, values = {}) {
   if (tab === "assessment") {
     if (values.selected_icds?.length) {
@@ -720,6 +872,52 @@ export function appendOptometrySoapSupplements(entries, tab, values = {}) {
   }
 }
 
+export function appendAudiologySoapSupplements(entries, tab, values = {}) {
+  if (tab === "assessment") {
+    if (values.selected_icds?.length) {
+      entries.push({
+        kind: "row",
+        label: "Selected ICDs",
+        value: values.selected_icds.join(", "),
+      });
+    }
+
+    const icfItems = Object.values(values.icf_data || {}).flat();
+    if (icfItems.length) {
+      entries.push({
+        kind: "row",
+        label: "ICF Items",
+        value: icfItems
+          .map((item) => `${item.code || ""}: ${item.name || item.label || ""}`.trim())
+          .filter(Boolean)
+          .join("\n"),
+      });
+    }
+  }
+
+  if (tab === "plan") {
+    const ichiItems = Object.values(values.ichi_data || {}).flat();
+    if (ichiItems.length) {
+      entries.push({
+        kind: "row",
+        label: "ICHI Interventions",
+        value: ichiItems
+          .map((item) => `${item.code || ""}: ${item.name || ""}`.trim())
+          .filter(Boolean)
+          .join("\n"),
+      });
+    }
+
+    if (values.selected_additional_ichi?.length) {
+      entries.push({
+        kind: "row",
+        label: "Additional ICHI",
+        value: values.selected_additional_ichi.join(", "),
+      });
+    }
+  }
+}
+
 export function buildFullSoapReportEntries({
   tabs = [],
   templates = {},
@@ -736,6 +934,7 @@ export function buildFullSoapReportEntries({
     entries.push({
       kind: "section",
       label: SOAP_TAB_LABELS[tab] || tab.charAt(0).toUpperCase() + tab.slice(1),
+      variant: "soap",
     });
 
     const tabEntries = buildAssessmentReportEntries(
@@ -824,6 +1023,168 @@ export function formatAssessmentReportText(entries, { title } = {}) {
   });
 
   return lines.join("\n").trim();
+}
+
+/**
+ * Load structured SOAP report entries for a saved session (RAP session report).
+ */
+export async function loadSessionSoapReportEntries({
+  session,
+  fetchFormData,
+  fetchFormTemplate,
+}) {
+  const assessmentItems = Array.isArray(session?.assessment_ids)
+    ? session.assessment_ids
+    : [];
+
+  if (!assessmentItems.length) return [];
+
+  const groupedByTab = groupAssessmentsByTab(assessmentItems);
+  const supplementaryAppender = resolveSupplementaryAppender(session?.department_name);
+  const entries = [];
+  const bundleCache = new Map();
+  const matchedIds = new Set();
+
+  const loadAssessmentBundle = async (item) => {
+    if (!item?.id) return null;
+    if (bundleCache.has(item.id)) return bundleCache.get(item.id);
+
+    const promise = (async () => {
+      const dataRes = await fetchFormData(item.id);
+      const raw = dataRes?.data ?? dataRes ?? {};
+      const values = extractAssessmentValues(raw);
+      const formId = resolveFormId(item, raw);
+
+      if (!formId) return { values, schema: null, formId: null };
+
+      const templateRes = await fetchFormTemplate(formId);
+      const schema = normalizeFetchedSchema(
+        templateRes?.data?.body ?? templateRes?.data,
+      );
+
+      return { values, schema, formId };
+    })();
+
+    bundleCache.set(item.id, promise);
+    return promise;
+  };
+
+  const buildRegistryForTab = async (tabChildren) => {
+    const registry = {};
+
+    await Promise.all(
+      tabChildren.map(async (child) => {
+        const bundle = await loadAssessmentBundle(child);
+        if (!bundle?.schema) return;
+
+        const registryKey = child.name || child.id;
+        const templateId = child.form || bundle.formId;
+
+        registry[registryKey] = {
+          ...bundle.schema,
+          id: templateId,
+          value: templateId || child.id,
+          name: child.name || registryKey,
+          session_id: child.id,
+          title: bundle.schema.title || child.name,
+        };
+      }),
+    );
+
+    return registry;
+  };
+
+  const mergeTabValues = async (primaryValues, tabItems) => {
+    const merged = { ...(primaryValues || {}) };
+
+    await Promise.all(
+      tabItems.map(async (item) => {
+        const bundle = await loadAssessmentBundle(item);
+        if (!bundle?.values) return;
+        Object.assign(merged, bundle.values);
+      }),
+    );
+
+    return merged;
+  };
+
+  const appendTabSection = async (tab, tabItems) => {
+    if (!tabItems?.length) return;
+
+    tabItems.forEach((item) => {
+      if (item?.id) matchedIds.add(item.id);
+    });
+
+    const primaryItem = tabItems.find(isParentAssessment) ?? tabItems[0];
+    const tabChildren = tabItems.filter((item) => item.id !== primaryItem.id);
+    const primaryBundle = await loadAssessmentBundle(primaryItem);
+
+    if (!primaryBundle) return;
+
+    const registry = await buildRegistryForTab(tabChildren);
+    const mergedValues = await mergeTabValues(primaryBundle.values, tabItems);
+    const tabEntries = buildTabReportEntries(
+      primaryBundle.schema,
+      mergedValues,
+      registry,
+      { excludeSubAssessments: false },
+    );
+
+    const hasRows = tabEntries.some((entry) => entry.kind === "row" && entry.value);
+    if (!hasRows && !valuesHaveContent(mergedValues) && !supplementaryAppender) {
+      return;
+    }
+
+    entries.push({
+      kind: "section",
+      label: SOAP_TAB_LABELS[tab],
+      variant: "soap",
+    });
+
+    if (hasRows) {
+      tabEntries.forEach((entry) => entries.push(entry));
+    } else {
+      buildFallbackReportEntries(mergedValues).forEach((entry) => entries.push(entry));
+    }
+
+    if (supplementaryAppender) {
+      supplementaryAppender(entries, tab, mergedValues);
+    }
+  };
+
+  for (const tab of SOAP_TAB_ORDER) {
+    await appendTabSection(tab, groupedByTab[tab]);
+  }
+
+  const unmatchedItems = assessmentItems.filter((item) => !matchedIds.has(item.id));
+  for (const item of unmatchedItems) {
+    const bundle = await loadAssessmentBundle(item);
+    if (!bundle) continue;
+
+    const tabEntries = buildTabReportEntries(
+      bundle.schema,
+      bundle.values || {},
+      {},
+      { excludeSubAssessments: false },
+    );
+
+    const hasRows = tabEntries.some((entry) => entry.kind === "row" && entry.value);
+    if (!hasRows && !valuesHaveContent(bundle.values)) continue;
+
+    entries.push({
+      kind: "section",
+      label: item.name || item.type || item.form_type || "Assessment",
+      variant: "soap",
+    });
+
+    if (hasRows) {
+      tabEntries.forEach((entry) => entries.push(entry));
+    } else {
+      buildFallbackReportEntries(bundle.values).forEach((entry) => entries.push(entry));
+    }
+  }
+
+  return entries;
 }
 
 export { shouldUseValuePrefix, normalizeSubAssessmentSchema };

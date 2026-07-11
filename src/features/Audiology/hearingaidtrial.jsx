@@ -189,7 +189,7 @@ export function Hearingaidtrial({ onBack }) {
             },
           ],
         },
-        { name: "trial_result", label: "Trial Result", type: "input" },
+    { name: "trial_result", label: "Trial Result", type: "input" },
       ],
     },
 
@@ -232,8 +232,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "a) Type of Hearing Loss",
                 defaultOpen: false,
                 children: [
-                  { name: "hl_type_r", label: "Right ear", type: "radio", labelAbove: true, options: opts(HL_TYPE_W, HL_TYPE) },
-                  { name: "hl_type_l", label: "Left ear",  type: "radio", labelAbove: true, options: opts(HL_TYPE_W, HL_TYPE) },
+          { name: "hl_type_r", label: "Right ear", type: "radio", labelAbove: true, options: opts(HL_TYPE_W, HL_TYPE) },
+          { name: "hl_type_l", label: "Left ear",  type: "radio", labelAbove: true, options: opts(HL_TYPE_W, HL_TYPE) },
                 ],
               },
               {
@@ -242,8 +242,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "b) Degree",
                 defaultOpen: false,
                 children: [
-                  { name: "degree_r", label: "Right ear", type: "input" },
-                  { name: "degree_l", label: "Left ear",  type: "input" },
+          { name: "degree_r", label: "Right ear", type: "input" },
+          { name: "degree_l", label: "Left ear",  type: "input" },
                 ],
               },
               {
@@ -252,8 +252,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "c) Model of Hearing Aid",
                 defaultOpen: false,
                 children: [
-                  { name: "ha_model_r", label: "Right ear", type: "input" },
-                  { name: "ha_model_l", label: "Left ear",  type: "input" },
+          { name: "ha_model_r", label: "Right ear", type: "input" },
+          { name: "ha_model_l", label: "Left ear",  type: "input" },
                 ],
               },
             ],
@@ -293,16 +293,16 @@ export function Hearingaidtrial({ onBack }) {
             label: "Part E: Verification (Objective Assessment)",
             defaultOpen: false,
             children: [
-              { name: "verif_pdf", label: "Attach Verification PDF", type: "file-upload-modal" },
+          { name: "verif_pdf", label: "Attach Verification PDF", type: "file-upload-modal" },
               {
                 type: "accordion",
                 name: "part_e_rem_section",
                 label: "Real Ear Measurement (REM)",
                 defaultOpen: false,
                 children: [
-                  { name: "rem",  label: "Real Ear Measurement (REM) upload", type: "attach-file" },
-                  { name: "rem_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
-                  { name: "rem_remarks", label: "Remarks",         type: "input" },
+          { name: "rem",  label: "Real Ear Measurement (REM) upload", type: "attach-file" },
+          { name: "rem_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
+          { name: "rem_remarks", label: "Remarks",         type: "input" },
                 ],
               },
               {
@@ -312,8 +312,8 @@ export function Hearingaidtrial({ onBack }) {
                 defaultOpen: false,
                 children: [
                   { name: "Visible", label: "Visible Speech Mapping upload", type: "attach-file" },
-                  { name: "vsm_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
-                  { name: "vsm_remarks", label: "Remarks",         type: "input" },
+          { name: "vsm_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
+          { name: "vsm_remarks", label: "Remarks",         type: "input" },
                 ],
               },
               {
@@ -323,8 +323,8 @@ export function Hearingaidtrial({ onBack }) {
                 defaultOpen: false,
                 children: [
                   { name: "mpo", label: "Maximum Power Output upload", type: "attach-file" },
-                  { name: "mpo_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(MPO_W, MPO) },
-                  { name: "mpo_remarks", label: "Remarks",         type: "input" },
+          { name: "mpo_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(MPO_W, MPO) },
+          { name: "mpo_remarks", label: "Remarks",         type: "input" },
                 ],
               },
               {
@@ -334,8 +334,8 @@ export function Hearingaidtrial({ onBack }) {
                 defaultOpen: false,
                 children: [
                   { name: "fb", label: "Feedback Test upload", type: "attach-file" },
-                  { name: "fb_test",     label: "Result",  type: "radio", labelAbove: true, options: opts(FB_TEST_W, FB_TEST) },
-                  { name: "fb_remarks",  label: "Remarks", type: "input" },
+          { name: "fb_test",     label: "Result",  type: "radio", labelAbove: true, options: opts(FB_TEST_W, FB_TEST) },
+          { name: "fb_remarks",  label: "Remarks", type: "input" },
                 ],
               },
               {
@@ -344,8 +344,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "Aided Response",
                 defaultOpen: false,
                 children: [
-                  { name: "aided_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
-                  { name: "aided_remarks", label: "Remarks",         type: "input" },
+          { name: "aided_target",  label: "Target Achieved", type: "radio", labelAbove: true, options: opts(TARGET_W, TARGET) },
+          { name: "aided_remarks", label: "Remarks",         type: "input" },
                 ],
               },
             ],
@@ -369,8 +369,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "COSI (Client Oriented Scale of Improvement)",
                 defaultOpen: false,
                 children: [
-                  { name: "cosi_result",         label: "Result",         type: "input", readOnly:true },
-                  { name: "cosi_interpretation", label: "Interpretation", type: "input" },
+          { name: "cosi_result",         label: "Result",         type: "input", readOnly:true },
+          { name: "cosi_interpretation", label: "Interpretation", type: "input" },
                 ],
               },
               {
@@ -379,8 +379,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "HHIA / HHIE (Hearing Handicap Inventory)",
                 defaultOpen: false,
                 children: [
-                  { name: "hhia_result",         label: "Result",         type: "input" },
-                  { name: "hhia_interpretation", label: "Interpretation", type: "input" },
+          { name: "hhia_result",         label: "Result",         type: "input" },
+          { name: "hhia_interpretation", label: "Interpretation", type: "input" },
                 ],
               },
               {
@@ -389,9 +389,9 @@ export function Hearingaidtrial({ onBack }) {
                 label: "Speech Perception (Quiet)",
                 defaultOpen: false,
                 children: [
-                  { name: "sp_quiet_unaided", label: "Unaided (%)", type: "input" },
-                  { name: "sp_quiet_aided",   label: "Aided (%)",   type: "input" },
-                  { name: "sp_quiet_outcome", label: "Outcome",     type: "radio", labelAbove: true, options: opts(OUTCOME_W, OUTCOME) },
+          { name: "sp_quiet_unaided", label: "Unaided (%)", type: "input" },
+          { name: "sp_quiet_aided",   label: "Aided (%)",   type: "input" },
+          { name: "sp_quiet_outcome", label: "Outcome",     type: "radio", labelAbove: true, options: opts(OUTCOME_W, OUTCOME) },
                 ],
               },
               {
@@ -400,9 +400,9 @@ export function Hearingaidtrial({ onBack }) {
                 label: "Speech Perception (Noise)",
                 defaultOpen: false,
                 children: [
-                  { name: "sp_noise_unaided", label: "Unaided (%)", type: "input" },
-                  { name: "sp_noise_aided",   label: "Aided (%)",   type: "input" },
-                  { name: "sp_noise_outcome", label: "Outcome",     type: "radio", labelAbove: true, options: opts(OUTCOME_W, OUTCOME) },
+          { name: "sp_noise_unaided", label: "Unaided (%)", type: "input" },
+          { name: "sp_noise_aided",   label: "Aided (%)",   type: "input" },
+          { name: "sp_noise_outcome", label: "Outcome",     type: "radio", labelAbove: true, options: opts(OUTCOME_W, OUTCOME) },
                 ],
               },
               {
@@ -411,8 +411,8 @@ export function Hearingaidtrial({ onBack }) {
                 label: "Overall Satisfaction",
                 defaultOpen: false,
                 children: [
-                  { name: "satisfaction",       label: "Rating",   type: "radio", labelAbove: true, options: opts(SATISF_W, SATISF) },
-                  { name: "satisfaction_notes", label: "Comments", type: "input" },
+          { name: "satisfaction",       label: "Rating",   type: "radio", labelAbove: true, options: opts(SATISF_W, SATISF) },
+          { name: "satisfaction_notes", label: "Comments", type: "input" },
                 ],
               },
               {
@@ -421,17 +421,17 @@ export function Hearingaidtrial({ onBack }) {
                 label: "Subjective Rating Scales (Hearing Loss)",
                 defaultOpen: false,
                 children: [
-                  { name: "vas_emotional", label: "Analogue Scale: Emotional (0–10)",           type: "scale-slider", min: 0, max: 10 },
-                  { name: "vas_social",    label: "Analogue Scale: Social / Situational (0–10)", type: "scale-slider", min: 0, max: 10 },
-                  { name: "hhia_score",    label: "Hearing Handicap Inventory for Adults (HHIA)", type: "input" },
-                  { name: "cosi_score",    label: "Client Oriented Scale of Improvement (COSI)",  type: "input" },
+          { name: "vas_emotional", label: "Analogue Scale: Emotional (0–10)",           type: "scale-slider", min: 0, max: 10 },
+          { name: "vas_social",    label: "Analogue Scale: Social / Situational (0–10)", type: "scale-slider", min: 0, max: 10 },
+          { name: "hhia_score",    label: "Hearing Handicap Inventory for Adults (HHIA)", type: "input" },
+          { name: "cosi_score",    label: "Client Oriented Scale of Improvement (COSI)",  type: "input" },
                 ],
               },
 
-              /* Doctor-view scores for Part F */
-              ...score("f_satisfaction_score", "Satisfaction Score"),
-              ...score("f_speech_quiet_score", "Speech Perception (Quiet) Score"),
-              ...score("f_speech_noise_score", "Speech Perception (Noise) Score"),
+          /* Doctor-view scores for Part F */
+          ...score("f_satisfaction_score", "Satisfaction Score"),
+          ...score("f_speech_quiet_score", "Speech Perception (Quiet) Score"),
+          ...score("f_speech_noise_score", "Speech Perception (Noise) Score"),
             ],
           },
         ]
@@ -449,7 +449,7 @@ export function Hearingaidtrial({ onBack }) {
           { name: "recommendation", label: "Recommendation",         type: "score-box" },
         ]
       }] : []),
-      {
+       {
       
       fields: [
         {
@@ -458,48 +458,48 @@ export function Hearingaidtrial({ onBack }) {
           label: "Hearing Aid Orientation",
           defaultOpen: false,
           children: [
-            {
-              name: "topics_discussed",
-              label: "Topics discussed",
-              type: "checkbox-group",
-              options: [
-                { label: "None", value: 0 },
-                { label: "Nature of hearing loss and expected benefit", value: 1 },
-                { label: "Realistic communication goals", value: 2 },
-                { label: "Care, cleaning, and maintenance", value: 3 },
-                { label: "Battery / charger handling", value: 4 },
-                { label: "Wearing schedule and adaptation timeline", value: 5 },
-                { label: "Communication strategies", value: 6 },
-                { label: "Family education and support", value: 7 },
-                { label: "Maintain stable hearing thresholds", value: 8 }
-              ]
-            },
-            {
-              name: "client_understanding",
-              label: "Client’s understanding",
-              type: "radio",
-              options: [
-                { label: "Good", value: 0 },
-                { label: "Partial", value: 1 },
-                { label: "Poor", value: 2 }
-              ]
-            },
-            {
-              name: "motivation",
-              label: "Motivation to use device",
-              type: "radio",
-              options: [
-                { label: "High", value: 0 },
-                { label: "Moderate", value: 1 },
-                { label: "Low", value: 2 }
-              ]
+        {
+          name: "topics_discussed",
+          label: "Topics discussed",
+          type: "checkbox-group",
+          options: [
+            { label: "None", value: 0 },
+            { label: "Nature of hearing loss and expected benefit", value: 1 },
+            { label: "Realistic communication goals", value: 2 },
+            { label: "Care, cleaning, and maintenance", value: 3 },
+            { label: "Battery / charger handling", value: 4 },
+            { label: "Wearing schedule and adaptation timeline", value: 5 },
+            { label: "Communication strategies", value: 6 },
+            { label: "Family education and support", value: 7 },
+            { label: "Maintain stable hearing thresholds", value: 8 }
+          ]
+        },
+        {
+          name: "client_understanding",
+          label: "Client’s understanding",
+          type: "radio",
+          options: [
+            { label: "Good", value: 0 },
+            { label: "Partial", value: 1 },
+            { label: "Poor", value: 2 }
+          ]
+        },
+        {
+          name: "motivation",
+          label: "Motivation to use device",
+          type: "radio",
+          options: [
+            { label: "High", value: 0 },
+            { label: "Moderate", value: 1 },
+            { label: "Low", value: 2 }
+          ]
             }
           ],
         }
       ]
     },
 
-  {
+   {
  
   fields: [
     {
@@ -508,28 +508,28 @@ export function Hearingaidtrial({ onBack }) {
       label: "Auditory Training",
       defaultOpen: false,
       children: [
-        {
-          type: "row",
-          cols: 2,
-          fields: [
-            { name: "detection", label: "Detection", type: "input" },
-            { name: "discrimination", label: "Discrimination", type: "input" }
-          ]
-        },
-        {
-          type: "row",
-          cols: 2,
-          fields: [
-            { name: "identification", label: "Identification", type: "input" },
-            { name: "comprehension", label: "Comprehension", type: "input" }
-          ]
-        },
-        {
-          type: "row",
-          cols: 1,
-          fields: [
-            { name: "speech_tracking", label: "Speech Tracking", type: "input" }
-          ]
+    {
+      type: "row",
+      cols: 2,
+      fields: [
+        { name: "detection", label: "Detection", type: "input" },
+        { name: "discrimination", label: "Discrimination", type: "input" }
+      ]
+    },
+    {
+      type: "row",
+      cols: 2,
+      fields: [
+        { name: "identification", label: "Identification", type: "input" },
+        { name: "comprehension", label: "Comprehension", type: "input" }
+      ]
+    },
+    {
+      type: "row",
+      cols: 1,
+      fields: [
+        { name: "speech_tracking", label: "Speech Tracking", type: "input" }
+      ]
         }
       ],
     }

@@ -89,7 +89,7 @@ function filterIcdOption(option, inputValue) {
   );
 }
 
-function IcdDiagnosisSelect({ label, value, onChange, placeholder }) {
+function IcdDiagnosisSelect({ label, value, displayLabel, onChange, placeholder }) {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -164,7 +164,7 @@ function IcdDiagnosisSelect({ label, value, onChange, placeholder }) {
 
   const selectedOption =
     options.find((option) => option.value === value) ||
-    (value ? { value, label: value } : null);
+    (value ? { value, label: displayLabel || value } : null);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -174,7 +174,16 @@ function IcdDiagnosisSelect({ label, value, onChange, placeholder }) {
           placeholder={loading ? "Loading diagnoses..." : placeholder}
           options={options}
           value={selectedOption}
-          onChange={(selected) => onChange(selected?.value || "")}
+          onChange={(selected) =>
+            onChange(
+              selected
+                ? {
+                    code: selected.value,
+                    label: selected.label || selected.value,
+                  }
+                : null,
+            )
+          }
           onMenuScrollToBottom={handleLoadMore}
           onLoadMore={handleLoadMore}
           isLoadingMore={loadingMore}
@@ -266,8 +275,10 @@ function MultiSelectDropdown({ options, selected, setSelected }) {
 
 function IcdDiagnosisFields({
   primaryICD,
+  primaryICDLabel,
   onPrimaryICDChange,
   secondaryICD,
+  secondaryICDLabel,
   onSecondaryICDChange,
 }) {
   const [showSecondary, setShowSecondary] = useState(false);
@@ -283,6 +294,7 @@ function IcdDiagnosisFields({
       <IcdDiagnosisSelect
         label="Primary diagnosis"
         value={primaryICD}
+        displayLabel={primaryICDLabel}
         onChange={onPrimaryICDChange}
         placeholder="Search primary diagnosis"
       />
@@ -312,6 +324,7 @@ function IcdDiagnosisFields({
         <IcdDiagnosisSelect
           label="Secondary diagnosis"
           value={secondaryICD}
+          displayLabel={secondaryICDLabel}
           onChange={onSecondaryICDChange}
           placeholder="Search secondary diagnosis"
         />
@@ -402,7 +415,13 @@ export function DoctorsInitialAssessmentForm({ patient, onUpdatePatient }) {
   const [activeTab, setActiveTab] = useState(0);
   const scrollRef = useRef(null);
   const [primaryICD, setPrimaryICD] = useState(() => patient?.doctor_primary_icd || "");
+  const [primaryICDLabel, setPrimaryICDLabel] = useState(
+    () => patient?.doctor_primary_icd_label || "",
+  );
   const [secondaryICD, setSecondaryICD] = useState(() => patient?.doctor_secondary_icd || "");
+  const [secondaryICDLabel, setSecondaryICDLabel] = useState(
+    () => patient?.doctor_secondary_icd_label || "",
+  );
 
   /* --------- Store Assessment Data for Report --------- */
   const [swallowingData, setSwallowingData] = useState(null);
@@ -484,7 +503,9 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
     setDoctorGoals(patient?.doctor_goals || "");
     setDoctorPlan(patient?.doctor_plan || "");
     setPrimaryICD(patient?.doctor_primary_icd || "");
+    setPrimaryICDLabel(patient?.doctor_primary_icd_label || "");
     setSecondaryICD(patient?.doctor_secondary_icd || "");
+    setSecondaryICDLabel(patient?.doctor_secondary_icd_label || "");
   }, [patient?.id]);
 
   useEffect(() => {
@@ -520,12 +541,14 @@ const [SkinAssessmentData, setSkinAssessmentData] = useState(null);
     const updated = {
       ...existing,
       doctor_primary_icd: primaryICD || "",
+      doctor_primary_icd_label: primaryICDLabel || "",
       doctor_secondary_icd: secondaryICD || "",
+      doctor_secondary_icd_label: secondaryICDLabel || "",
     };
 
     localStorage.setItem(patientKey, JSON.stringify(updated));
     onUpdatePatient?.(updated);
-  }, [patient?.id, primaryICD, secondaryICD]);
+  }, [patient?.id, primaryICD, primaryICDLabel, secondaryICD, secondaryICDLabel]);
   /* --------- Tabs --------- */
   const tabs = [
     "Cognitive",
@@ -939,9 +962,17 @@ const handleSubmitReferral = () => {
         {/* </div> */}
         <IcdDiagnosisFields
           primaryICD={primaryICD}
-          onPrimaryICDChange={setPrimaryICD}
+          primaryICDLabel={primaryICDLabel}
+          onPrimaryICDChange={(selection) => {
+            setPrimaryICD(selection?.code || "");
+            setPrimaryICDLabel(selection?.label || "");
+          }}
           secondaryICD={secondaryICD}
-          onSecondaryICDChange={setSecondaryICD}
+          secondaryICDLabel={secondaryICDLabel}
+          onSecondaryICDChange={(selection) => {
+            setSecondaryICD(selection?.code || "");
+            setSecondaryICDLabel(selection?.label || "");
+          }}
         />
         {/* REFER TO DEPARTMENTS DROPDOWN */}
         <MultiSelectDropdown

@@ -302,6 +302,7 @@ export function mapPatientDetailsFromApi(data) {
     marital_status: formatEnumLabel(data.marital_status),
     language_preference: data.language_preference,
     diagnosis_history: data.case?.diagnosis || null,
+    referral_diagnosis: data.case?.diagnosis || null,
     icd: data.case?.diagnosis || null,
     secondary_diagnosis: data.case?.referral_details || null,
     scheme:
