@@ -4,66 +4,8 @@ import EmptyState from "../../shared/ui/EmptyState";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import { API_URL } from "../../platform/config/api.config";
 import React, { useEffect, useMemo, useState } from "react";
-import pdfLogo from "../../assets/pdf logo.webp";
-
-/**
- * Resolve a scale-table row label that may be a plain string or a bilingual object { en, ms }.
- */
-function resolveRowLabel(rowLabel) {
-  if (!rowLabel) return "";
-  if (typeof rowLabel === "string") return rowLabel;
-  if (typeof rowLabel === "object" && !Array.isArray(rowLabel)) {
-    return rowLabel.en || rowLabel.ms || Object.values(rowLabel)[0] || "";
-  }
-  return String(rowLabel);
-}
-
-/**
- * Build a flat map of scale-table field keys → human-readable row labels
- * from a single schema definition. e.g. { "ssi_0": "Dizziness", … }
- */
-function buildScaleTableLabelMap(schema) {
-  const map = {};
-  if (!schema?.sections) return map;
-  for (const section of schema.sections) {
-    if (!section?.fields) continue;
-    for (const field of section.fields) {
-      if (field?.type !== "scale-table" || !field.name || !Array.isArray(field.rows)) continue;
-      field.rows.forEach((rowLabel, rIdx) => {
-        const key = `${field.name}_${rIdx}`;
-        if (!(key in map)) {
-          map[key] = resolveRowLabel(rowLabel);
-        }
-      });
-    }
-  }
-  return map;
-}
-
-/** In-memory cache: form template ID → label map, to avoid duplicate API calls */
-const schemaLabelMapCache = new Map();
-
-/**
- * Fetch the form template body for a given formId and build a scale-table label map.
- * Results are cached so the same template is only fetched once.
- */
-async function fetchScaleTableLabelMap(formId) {
-  if (!formId) return {};
-  if (schemaLabelMapCache.has(formId)) return schemaLabelMapCache.get(formId);
-  try {
-    const res = await api.get(`${API_URL.ASSESSMENT}form/${formId}/`);
-    const body = res?.data?.body;
-    if (body) {
-      const map = buildScaleTableLabelMap(body);
-      schemaLabelMapCache.set(formId, map);
-      return map;
-    }
-  } catch { /* ignore */ }
-  schemaLabelMapCache.set(formId, {});
-  return {};
-}
-
-
+import AssessmentReportDocument from "../../shared/ui/AssessmentReportDocument";
+import { loadSessionSoapReportEntries } from "../../shared/utils/assessmentPreviewUtils";
 const ASSESSMENT_GRID_COLUMNS = "1.8fr 1.1fr 1.1fr 1fr 1fr 1fr 1.2fr";
 
 
@@ -288,7 +230,7 @@ export default function SOAPSession({
     const [sessionData, setSessionData] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const [selectedAssessmentSession, setSelectedAssessmentSession] = useState(null);
-    const [combinedSessionContent, setCombinedSessionContent] = useState([]);
+    const [sessionReportEntries, setSessionReportEntries] = useState([]);
     const [reportLoading, setReportLoading] = useState(false);
 
     useEffect(() => {
@@ -351,58 +293,22 @@ export default function SOAPSession({
             : [];
 
         if (assessmentItems.length === 0) {
-            setCombinedSessionContent([]);
+            setSessionReportEntries([]);
             return;
         }
 
         setReportLoading(true);
         try {
-            const responses = await Promise.all(
-                assessmentItems
-                    .map((item) => item?.id)
-                    .filter(Boolean)
-                    .map(async (assessmentId) => {
-                        const dataRes = await api.get(API_URL.assessmentFormData(assessmentId)).catch(() => null);
-                        if (!dataRes) return { data: null, labelMap: {} };
-                        // Attempt to get the form template ID from the data response
-                        // so we can fetch its schema for label resolution
-                        const formId = dataRes?.data?.form;
-                        const labelMap = formId ? await fetchScaleTableLabelMap(formId) : {};
-                        return { data: dataRes, labelMap };
-                    }),
-            );
-
-            const merged = [];
-            responses.forEach(({ data: res, labelMap }, idx) => {
-                const payload = res?.data?.data;
-                if (!payload || typeof payload !== "object") return;
-
-                const source =
-                    assessmentItems[idx]?.name ||
-                    assessmentItems[idx]?.type ||
-                    `Assessment ${idx + 1}`;
-
-                Object.entries(payload).forEach(([key, value]) => {
-                    if (value === null || value === undefined || value === "") return;
-                    const renderedValue = Array.isArray(value)
-                        ? value.join(", ")
-                        : typeof value === "object"
-                            ? JSON.stringify(value)
-                            : String(value);
-
-                    // Resolve scale-table keys (e.g. "ssi_0" → "Dizziness") using the dynamically-fetched label map
-                    const resolvedLabel = labelMap[key];
-                    const displayKey = resolvedLabel || String(key).replaceAll("_", " ");
-
-                    merged.push({
-                        source,
-                        key: displayKey,
-                        value: renderedValue,
-                    });
-                });
+            const entries = await loadSessionSoapReportEntries({
+                session,
+                fetchFormData: (assessmentId) =>
+                    api.get(API_URL.assessmentFormData(assessmentId)),
+                fetchFormTemplate: (formId) =>
+                    api.get(`${API_URL.ASSESSMENT}form/${formId}/`),
             });
-
-            setCombinedSessionContent(merged);
+            setSessionReportEntries(entries);
+        } catch {
+            setSessionReportEntries([]);
         } finally {
             setReportLoading(false);
         }
@@ -732,7 +638,7 @@ export default function SOAPSession({
                                 borderBottom: "1px solid #e2e8f0",
                             }}
                         >
-                            <strong style={{ color: "#0f172a" }}>Session Report (PDF View)</strong>
+                            <strong style={{ color: "#0f172a" }}>Session Report</strong>
                             <div style={{ display: "flex", gap: 8 }}>
                                 <button
                                     type="button"
@@ -764,107 +670,15 @@ export default function SOAPSession({
                         </div>
 
                         <div className="rap-pdf-page-wrap" style={{ padding: 24, background: "#f8fafc" }}>
-                            <div
-                                className="rap-pdf-page"
-                                style={{
-                                    width: "100%",
-                                    maxWidth: 800,
-                                    margin: "0 auto",
-                                    background: "#fff",
-                                    border: "1px solid #dbe5f0",
-                                    
-                                    padding: 24,
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        marginBottom: 16,
-                                        borderBottom: "1px solid #111827",
-                                        paddingBottom: 12,
-                                    }}
-                                >
-                                    <img
-                                        src={pdfLogo}
-                                        alt="PDF Logo"
-                                        style={{ height: 110, objectFit: "contain", marginBottom: 6 }}
-                                    />
-                                    <div style={{ textAlign: "center", fontSize: 18, fontWeight: 800, color: "#111827" }}>
-                                       SESSION REPORT
-                                    </div>
-                                </div>
-                                <div style={{ textAlign: "right", fontSize: 14, fontWeight: 700, marginBottom: 18 }}>
-                                    {new Date().toLocaleDateString("en-GB", {
-                                        day: "numeric",
-                                        month: "long",
-                                        year: "numeric",
-                                    })}
-                                </div>
-
-                                <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 22 }}>
-                                    <tbody>
-                                        {[
-                                            ["Name", patient?.name || patient?.patient_name || "—"],
-                                            ["IC number/ Passport number", patient?.ic_number || patient?.ic || "—"],
-                                            ["Diagnosis", patient?.diagnosis || patient?.diagnosis_history || patient?.icd || "—"],
-                                            ["Date of admission", patient?.admission_date || "—"],
-                                            ["Date of discharge", patient?.discharge_date || "—"],
-                                        ].map(([label, value]) => (
-                                            <tr key={label}>
-                                                <th
-                                                    style={{
-                                                        textAlign: "left",
-                                                        width: "28%",
-                                                        border: "1px solid #111827",
-                                                        padding: "8px 10px",
-                                                        background: "#fff",
-                                                        color: "#111827",
-                                                        fontWeight: 700,
-                                                    }}
-                                                >
-                                                    {label}
-                                                </th>
-                                                <td style={{ border: "1px solid #111827", padding: "8px 10px" }}>{value}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
-                                <div style={{ fontWeight: 800, textDecoration: "underline", marginBottom: 8 }}>
-                                    SESSION COMBINED CONTENT
-                                </div>
-                                {reportLoading ? (
-                                    <div style={{ fontSize: 13, color: "#475569", marginBottom: 12 }}>
-                                        Loading combined session content...
-                                    </div>
-                                ) : combinedSessionContent.length === 0 ? (
-                                    <div style={{ fontSize: 13, color: "#475569", marginBottom: 12 }}>
-                                        No report content found inside this session.
-                                    </div>
-                                ) : (
-                                    <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 18 }}>
-                                        <thead>
-                                            <tr>
-                                                {/* <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Report</th> */}
-                                                <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px", width: "24%" }}>Field</th>
-                                                <th style={{ textAlign: "left", border: "1px solid #111827", padding: "8px 10px" }}>Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {combinedSessionContent.map((row, idx) => (
-                                                <tr key={`${row.source}-${row.key}-${idx}`}>
-                                                    {/* <td style={{ border: "1px solid #111827", padding: "8px 10px", fontWeight: 600 }}>{row.source}</td> */}
-                                                    <td style={{ border: "1px solid #111827", padding: "8px 10px" }}>{row.key}</td>
-                                                    <td style={{ border: "1px solid #111827", padding: "8px 10px", whiteSpace: "pre-wrap" }}>{row.value}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                )}
-                            </div>
+                            <AssessmentReportDocument
+                                title="Session Report"
+                                patient={patient}
+                                patientDisplay="medical-table"
+                                soapSectionStyle="medical"
+                                rowLayout="medical-table"
+                                entries={sessionReportEntries}
+                                loading={reportLoading}
+                            />
                         </div>
 
                         <style>{`

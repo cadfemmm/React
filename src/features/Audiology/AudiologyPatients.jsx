@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import AudiologyAssessment, {
-  ADULT_AGE_THRESHOLD,
-  getAudiologyPatientAge,
-} from "./AudiologyAssessment";
+import AudiologyAssessment from "./AudiologyAssessment";
 import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
 import { fetchPatientsList } from "../../shared/api/patientsList";
+import AssessmentLoader from "../../assessment";
 
 /* ── Assessment type cards ── */
 const OPTION_CARDS = [
@@ -55,6 +53,15 @@ export default function AudiologyPatients({ onBack }) {
 
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentView) {
+    if (assessmentView === "initial") {
+      return (
+        <AssessmentLoader
+          department="Audiology"
+          patient={selectedPatient}
+        />
+      );
+    }
+
     if (assessmentView === "progress") {
       return (
         <AudiologyProgressAssessmentForm
@@ -77,8 +84,6 @@ export default function AudiologyPatients({ onBack }) {
 
   /* ── Step 2: Assessment type cards ── */
   if (selectedPatient) {
-    const age     = getAudiologyPatientAge(selectedPatient);
-    const isAdult = age >= ADULT_AGE_THRESHOLD;
     const initial = (selectedPatient.name || selectedPatient.email || "P")
       .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
     const avatarBg = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];
@@ -101,20 +106,6 @@ export default function AudiologyPatients({ onBack }) {
                 ].filter(Boolean).join("  ·  ")}
               </div>
             </div>
-          </div>
-          {/* Age-based routing indicator */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            background: isAdult ? "#EFF6FF" : "#F0FDF4",
-            border: `1px solid ${isAdult ? "#BFDBFE" : "#BBF7D0"}`,
-            borderRadius: 999, padding: "6px 14px",
-            fontSize: 12, fontWeight: 700,
-            color: isAdult ? "#1D4ED8" : "#15803D"
-          }}>
-            {isAdult ? "🧑 Adult Assessment" : "👶 Pediatric Assessment"}
-            <span style={{ fontWeight: 400, opacity: 0.7 }}>
-              (Age {selectedPatient.age})
-            </span>
           </div>
         </div>
 
@@ -201,8 +192,6 @@ export default function AudiologyPatients({ onBack }) {
           </div>
         ) : (
           filtered.map((p, idx) => {
-            const age     = getAudiologyPatientAge(p);
-            const isAdult = age >= ADULT_AGE_THRESHOLD;
             const initial = ((p.name || p.email || "P")[0] || "P").toUpperCase();
             return (
               <div
@@ -226,19 +215,8 @@ export default function AudiologyPatients({ onBack }) {
                 {/* MRN / ICD */}
                 <div style={S.tdMuted}>{p.mrn || p.icd || "—"}</div>
 
-                {/* Age + routing badge */}
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={S.tdName}>{p.age ? `${p.age} yrs` : "—"}</span>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, padding: "2px 7px",
-                    borderRadius: 999,
-                    background: isAdult ? "#EFF6FF" : "#F0FDF4",
-                    color: isAdult ? "#1D4ED8" : "#15803D",
-                    border: `1px solid ${isAdult ? "#BFDBFE" : "#BBF7D0"}`
-                  }}>
-                    {isAdult ? "Adult" : "Pediatric"}
-                  </span>
-                </div>
+                {/* Age */}
+                <div style={S.tdName}>{p.age ? `${p.age} yrs` : "—"}</div>
 
                 {/* Status */}
                 <div><StatusPill status={p.status} /></div>

@@ -24,6 +24,7 @@ import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreview
 import {
   buildFullSoapReportEntries,
   appendOptometrySoapSupplements,
+  appendAudiologySoapSupplements,
 } from "../shared/utils/assessmentPreviewUtils";
 
 // Schema Load
@@ -52,6 +53,329 @@ const setIfPresent = (target, key, value) => {
   }
 };
 
+/** Audiology Initial Adult SOAP — fixed backend template IDs (no age routing). */
+const AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB = {
+  subjective: "dd34f6da-cf4f-4531-9eaf-06ec1ffd3685",
+  objective: "f3947691-f5b4-4499-b926-40031157677d",
+  assessment: "68725b04-4225-40fa-bc3b-172c7a56d8c9",
+  plan: "7709d6f8-c3c3-4349-a2e2-54438cb6558f",
+};
+
+const getTemplateSubAssessments = (template) =>
+  template?.sub_assessment ??
+  template?.sub_assessments ??
+  [];
+
+const SOAP_SESSION_TABS = ["subjective", "objective", "assessment", "plan"];
+
+const isParentSessionItem = (item) => {
+  const val = item?.is_parent;
+  return (
+    val === true ||
+    val === "True" ||
+    val === "true" ||
+    val === 1 ||
+    val === "1"
+  );
+};
+
+const resolveSessionAssessmentTab = (item) => {
+  const typeKey = String(item?.type || "").trim().toLowerCase();
+  if (SOAP_SESSION_TABS.includes(typeKey)) return typeKey;
+
+  const formId = String(
+    item?.form || item?.form_id || item?.template || item?.template_id || "",
+  );
+  const tabFromFormId = Object.entries(
+    AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB,
+  ).find(([, id]) => formId && id === formId)?.[0];
+  if (tabFromFormId) return tabFromFormId;
+
+  const name = String(item?.name || "").trim().toLowerCase();
+  for (const tab of SOAP_SESSION_TABS) {
+    if (name.includes(tab)) return tab;
+  }
+
+  const altType = String(
+    item?.form_type || item?.assessment_type || "",
+  )
+    .trim()
+    .toLowerCase();
+  if (SOAP_SESSION_TABS.includes(altType)) return altType;
+
+  return null;
+};
+
+const getSessionItemFormTemplateId = (sessionItem) =>
+  sessionItem?.form ??
+  sessionItem?.form_id ??
+  sessionItem?.template ??
+  sessionItem?.template_id ??
+  null;
+
+const buildSessionSubIdMap = (assessmentIds = []) => {
+  const byFormId = {};
+  const byName = {};
+
+  assessmentIds.forEach((item) => {
+    if (isParentSessionItem(item)) return;
+
+    const dataInstanceId = item?.id;
+    if (!dataInstanceId) return;
+
+    const formTemplateId = getSessionItemFormTemplateId(item);
+    if (formTemplateId) {
+      byFormId[String(formTemplateId)] = dataInstanceId;
+    }
+
+    const normalizedName = normalizeLauncherText(item?.name);
+    if (normalizedName) {
+      byName[normalizedName] = dataInstanceId;
+    }
+  });
+
+  return { byFormId, byName };
+};
+
+const resolveSubAssessmentSessionId = (subTemplate, sessionMaps) => {
+  if (!subTemplate || !sessionMaps) return null;
+
+  const formTemplateId = subTemplate?.id;
+  if (formTemplateId && sessionMaps.byFormId?.[String(formTemplateId)]) {
+    return sessionMaps.byFormId[String(formTemplateId)];
+  }
+
+  const normalizedName = normalizeLauncherText(subTemplate?.name);
+  if (normalizedName && sessionMaps.byName?.[normalizedName]) {
+    return sessionMaps.byName[normalizedName];
+  }
+
+  return null;
+};
+
+const applySessionIdsToSubRegistry = (registry = {}, sessionMaps) => {
+  if (!sessionMaps) return registry;
+
+  const next = { ...registry };
+  let changed = false;
+
+  Object.entries(registry).forEach(([key, subTemplate]) => {
+    if (!subTemplate || typeof subTemplate !== "object" || subTemplate.$$typeof) {
+      return;
+    }
+
+    const sessionId =
+      subTemplate.session_id ||
+      resolveSubAssessmentSessionId(subTemplate, sessionMaps);
+
+    if (!sessionId || subTemplate.session_id === sessionId) return;
+
+    next[key] = {
+      ...subTemplate,
+      session_id: sessionId,
+    };
+    changed = true;
+  });
+
+  return changed ? next : registry;
+};
+
+const subTemplateMatchesSessionItem = (subTemplate, registryKey, sessionItem) => {
+  const formTemplateId = getSessionItemFormTemplateId(sessionItem);
+
+  if (
+    formTemplateId &&
+    (String(subTemplate?.id) === String(formTemplateId) ||
+      String(registryKey) === String(formTemplateId))
+  ) {
+    return true;
+  }
+
+  const sessionName = sessionItem?.name;
+  if (!sessionName) return false;
+
+  if (subTemplate?.name === sessionName || registryKey === sessionName) {
+    return true;
+  }
+
+  const left = normalizeLauncherText(subTemplate?.name);
+  const right = normalizeLauncherText(sessionName);
+  return (
+    !!left &&
+    !!right &&
+    (left === right || left.includes(right) || right.includes(left))
+  );
+};
+
+const normalizeTemplateBody = (body) => {
+  if (!body) return {};
+  if (Array.isArray(body)) {
+    return { sections: body };
+  }
+  if (typeof body === "object") {
+    return body;
+  }
+  return {};
+};
+
+const withPrimarySection = (schema) => {
+  if (Array.isArray(schema.sections) && schema.sections.length > 0) {
+    return schema;
+  }
+  if (Array.isArray(schema.fields) && schema.fields.length > 0) {
+    return {
+      ...schema,
+      sections: [{ title: null, fields: schema.fields }],
+    };
+  }
+  return schema;
+};
+
+const buildSubAssessmentEntry = (sub) => ({
+  ...sub,
+  ...withPrimarySection(normalizeTemplateBody(sub?.body)),
+  id: sub.id,
+  name: sub.name,
+  type: sub.type,
+  score: sub.score ?? null,
+  actions: actions.ACTIONS_BUTTON,
+  session_id: null,
+});
+
+const subAssessmentHasSchema = (template) =>
+  (Array.isArray(template?.sections) && template.sections.length > 0) ||
+  (Array.isArray(template?.fields) && template.fields.length > 0) ||
+  (Array.isArray(template?.body) && template.body.length > 0);
+
+const getUniqueSubAssessments = (registry = {}) => {
+  const seen = new Set();
+  return Object.values(registry).filter((sub) => {
+    const id = sub?.id;
+    if (!id || seen.has(String(id))) return false;
+    seen.add(String(id));
+    return true;
+  });
+};
+
+const normalizeLauncherText = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** Legacy launcher option tokens -> sub_assessment.name patterns */
+const LAUNCHER_LEGACY_OPTION_PATTERNS = {
+  tinnitus_form: /tinnitus/,
+  tinnitus_form_obj: /tinnitus/,
+  loudness_form: /hyperacusis|loudness/,
+  loudness_form_obj: /hyperacusis|loudness/,
+  hearing_form: /auditory|hearing(?!\s*aid|\s*device|\s*trial)/,
+  hearing_form_obj: /auditory|hearing(?!\s*aid|\s*device|\s*trial)/,
+  vestibular_form: /vestibular/,
+  vestibular_form_obj: /vestibular/,
+  industrial_form_obj: /industrial/,
+  hearingaidtrial_form_obj: /hearing\s*aid|device\s*trial/,
+  VISUAL_FUNCTION: /visual function/,
+  LVQOL: /lvqol|low vision quality/,
+  BRAIN_VISION: /brain injury|bivss/,
+  BVDQ: /binocular vision dysfunction|bvdq/,
+  BV_QUESTIONNAIRE: /binocular vision questionnaire/,
+  BINOCULAR_VISION: /binocular vision/,
+  REFRACTION: /refraction/,
+  VISION_DRIVING: /vision for driving|driving/,
+  OCULAR_HEALTH: /ocular health/,
+  SPECIAL_DIAGNOSTIC: /special diagnostic/,
+  LOW_VISION_ASSESSMENT: /low vision/,
+};
+
+const matchSubToLauncherOption = (sub, opt) => {
+  const subId = String(sub?.id ?? "");
+  const optValue = String(opt?.value ?? opt?.id ?? "");
+  const optLabel = normalizeLauncherText(opt?.label);
+  const subName = normalizeLauncherText(sub?.name);
+
+  if (subId && optValue && subId === optValue) return true;
+
+  if (optLabel && subName) {
+    if (subName === optLabel) return true;
+    const strippedLabel = optLabel
+      .replace(/^additional\s+/, "")
+      .replace(/\s+profile$/, "")
+      .trim();
+    if (strippedLabel && subName.includes(strippedLabel)) return true;
+    if (strippedLabel && strippedLabel.includes(subName)) return true;
+  }
+
+  const legacyPattern = LAUNCHER_LEGACY_OPTION_PATTERNS[optValue];
+  return legacyPattern ? legacyPattern.test(subName) : false;
+};
+
+const resolveSubForLauncherOption = (subAssessments, opt) => {
+  if (!Array.isArray(subAssessments) || !opt) return null;
+  return subAssessments.find((sub) => matchSubToLauncherOption(sub, opt)) ?? null;
+};
+
+const walkLauncherFields = (fields, subAssessments) => {
+  if (!Array.isArray(fields)) return fields;
+
+  return fields.map((field) => {
+    if (!field || typeof field !== "object") return field;
+
+    let next = { ...field };
+
+    if (next.type === "assessment-launcher" && Array.isArray(next.options)) {
+      next = {
+        ...next,
+        options: next.options
+          .map((opt) => {
+            const sub = resolveSubForLauncherOption(subAssessments, opt);
+            if (!sub?.id) return opt;
+            return {
+              ...opt,
+              value: sub.id,
+              id: sub.id,
+              label: opt.label ?? sub.name,
+            };
+          })
+          .filter(Boolean),
+      };
+    }
+
+    if (Array.isArray(next.children)) {
+      next.children = walkLauncherFields(next.children, subAssessments);
+    }
+    if (Array.isArray(next.fields)) {
+      next.fields = walkLauncherFields(next.fields, subAssessments);
+    }
+
+    return next;
+  });
+};
+
+/** Rewrite launcher option values to backend sub_assessment UUIDs (Optometry-style). */
+const injectLauncherSubAssessmentIds = (schema, subAssessments) => {
+  if (!schema || !subAssessments?.length) return schema;
+
+  if (Array.isArray(schema.sections)) {
+    return {
+      ...schema,
+      sections: schema.sections.map((section) => ({
+        ...section,
+        fields: walkLauncherFields(section.fields, subAssessments),
+      })),
+    };
+  }
+
+  if (Array.isArray(schema.fields)) {
+    return {
+      ...schema,
+      fields: walkLauncherFields(schema.fields, subAssessments),
+    };
+  }
+
+  return schema;
+};
+
 /**
  * This component is responsible for fetching the assessment forms
  * for the given department and rendering the appropriate tab
@@ -77,6 +401,10 @@ export default function AssessmentLoader({ patient, department }) {
   const [isConfirmModal, setIsConfirmModal] = useState(false);
   const [isReferralModal, setIsReferralModal] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const [sessionSubAssessmentIds, setSessionSubAssessmentIds] = useState({
+    byFormId: {},
+    byName: {},
+  });
   const [assessmentsValues, setAssessmentsValues] = useState(() => {
     return { subjective: {}, objective: {}, assessment: {}, plan: {} };
   });
@@ -129,6 +457,7 @@ export default function AssessmentLoader({ patient, department }) {
   const [sectionPreview, setSectionPreview] = useState(null);
   const isPsychology = department === "Psychology";
   const isOptometry = department === "Optometry";
+  const isAudiology = department === "Audiology";
 
 useEffect(() => {
   if (!patient || !department) return;
@@ -184,74 +513,145 @@ useEffect(() => {
       // assessment form, and we need to pass it to both assessment & plan tabs.
       let assessmentFormId = null;
 
-      data.forEach((template) => {
-        const key = template.assessment_type?.toLowerCase();
-        // MAIN ASSESSMENT
-        if (TABS.includes(key)) {
-          let processedTemplate = {
-            ...template.body,
-            id: template.id,
-            name: template.name,
-            actions: actions.ACTIONS_BUTTON,
-          };
-          
-          // Remember the assessment form ID for sharing with the plan tab
-          if (key === "assessment") {
-            assessmentFormId = template.id;
-          }
-          
-          // ✨ ADD ICD COMPONENTS FOR SPECIFIC DEPARTMENTS AND TABS
-          if ((department === "Audiology" || department === "Optometry") && (key === "assessment" || key === "plan")) {
-            
-            // Choose the right component based on department
-            const ICDComponent = department === "Optometry" ? OptometryICDSection : AudiologyICDSection;
-            
-            if (processedTemplate.sections && processedTemplate.sections[0] && processedTemplate.sections[0].fields) {
-              if (key === "assessment") {
-                // Add ICD selection + ICF display to Assessment tab
-                // ICF/ICHI data comes from values.assessment_form_icf (set when sub-assessment is selected)
-                processedTemplate.sections[0].fields.push({
-                  type: "custom",
-                  name: "icd_icf_ichi_section",
-                  render: ({ values, onChange }) => {
-                    return (
-                      <ICDComponent
-                        values={values}
-                        onChange={onChange}
-                        mode="icd-icf"
-                      />
-                    );
-                  }
-                });
-              } else if (key === "plan") {
-                // Add ICHI display to Plan tab (insert after intervention_plan if it exists)
-                const fields = processedTemplate.sections[0].fields;
-                
-                const interventionIndex = fields.findIndex(f => f.name === "intervention_plan");
-                
-                const ichiComponent = {
-                  type: "custom",
-                  name: "ichi_section",
-                  render: ({ values, onChange }) => {
-                    return (
-                      <ICDComponent
-                        values={values}
-                        onChange={onChange}
-                        mode="plan"
-                      />
-                    );
-                  }
-                };
-                
-                if (interventionIndex !== -1) {
-                  // Insert after intervention_plan
-                  fields.splice(interventionIndex + 1, 0, ichiComponent);
-                } else {
-                  // If no intervention_plan field, add at the end
-                  fields.push(ichiComponent);
-                }
+      const resolveFullTemplate = async (template) => {
+        if (!template?.id) return template;
 
-                if (department === "Optometry") {
+        try {
+          const res = await forms.fetchById(template.id);
+          const detail = res?.data;
+          if (!detail) return template;
+
+          return {
+            ...template,
+            ...detail,
+            body: detail.body ?? template.body,
+            sub_assessment: getTemplateSubAssessments(detail).length
+              ? getTemplateSubAssessments(detail)
+              : getTemplateSubAssessments(template),
+          };
+        } catch {
+          return template;
+        }
+      };
+
+      const registerSubAssessments = async (template, tabKey) => {
+        const subs = getTemplateSubAssessments(template);
+        if (!subs.length) return;
+
+        const registry = { ...(subAssessment[tabKey] || {}) };
+
+        await Promise.all(
+          subs.map(async (sub) => {
+            if (!sub?.id) return;
+
+            let entry = buildSubAssessmentEntry(sub);
+            if (!subAssessmentHasSchema(entry)) {
+              try {
+                const res = await forms.fetchById(sub.id);
+                entry = buildSubAssessmentEntry({ ...sub, ...res?.data });
+              } catch {
+                /* keep list payload */
+              }
+            }
+
+            registry[sub.id] = entry;
+            if (sub.name) registry[sub.name] = entry;
+          }),
+        );
+
+        const linkLauncherOptions = (fields) => {
+          (fields || []).forEach((field) => {
+            if (field?.type === "assessment-launcher" && field.options) {
+              field.options.forEach((opt) => {
+                const sub = resolveSubForLauncherOption(subs, opt);
+                if (!sub?.id) return;
+                const entry = registry[sub.id] || buildSubAssessmentEntry(sub);
+                registry[sub.id] = entry;
+                if (sub.name) registry[sub.name] = entry;
+
+                const legacyKey = opt?.value ?? opt?.id;
+                if (legacyKey) registry[legacyKey] = entry;
+              });
+            }
+            linkLauncherOptions(field.fields);
+            linkLauncherOptions(field.children);
+          });
+        };
+
+        const sourceBody = normalizeTemplateBody(template.body);
+        (sourceBody.sections || []).forEach((section) =>
+          linkLauncherOptions(section.fields),
+        );
+        linkLauncherOptions(sourceBody.fields);
+
+        subAssessment[tabKey] = registry;
+      };
+
+      const buildProcessedTemplate = (template, tabKey) => {
+        let processedTemplate = {
+          ...withPrimarySection(normalizeTemplateBody(template.body)),
+          id: template.id,
+          name: template.name,
+          actions: actions.ACTIONS_BUTTON,
+        };
+
+        if (tabKey === "assessment") {
+          assessmentFormId = template.id;
+        }
+
+        if (
+          (department === "Audiology" || department === "Optometry") &&
+          (tabKey === "assessment" || tabKey === "plan")
+        ) {
+          const ICDComponent =
+            department === "Optometry" ? OptometryICDSection : AudiologyICDSection;
+
+          if (
+            processedTemplate.sections?.[0]?.fields
+          ) {
+            if (tabKey === "assessment") {
+              processedTemplate.sections[0].fields.push({
+                type: "custom",
+                name: "icd_icf_ichi_section",
+                render: ({ values, onChange }) => (
+                  <ICDComponent
+                    values={values}
+                    onChange={onChange}
+                    mode="icd-icf"
+                  />
+                ),
+              });
+            } else if (tabKey === "plan") {
+              const fields = processedTemplate.sections[0].fields;
+              const interventionIndex = fields.findIndex(
+                (f) => f.name === "intervention_plan",
+              );
+
+              const ichiComponent = {
+                type: "custom",
+                name: "ichi_section",
+                render: ({ values, onChange }) => (
+                  <ICDComponent
+                    values={values}
+                    onChange={onChange}
+                    mode="plan"
+                  />
+                ),
+              };
+
+              if (interventionIndex !== -1) {
+                fields.splice(interventionIndex + 1, 0, ichiComponent);
+              } else {
+                fields.push(ichiComponent);
+              }
+
+              if (department === "Optometry") {
+                const hasMedications = fields.some(
+                  (field) =>
+                    field?.name === "medications" &&
+                    typeof field.render === "function",
+                );
+                if (!hasMedications) {
                   fields.push({
                     type: "subheading",
                     label: "Medication",
@@ -272,28 +672,37 @@ useEffect(() => {
               }
             }
           }
-          
-          map[key] = processedTemplate;
         }
-        // SUB ASSESSMENTS
-        if (template?.sub_assessment?.length) {
-          subAssessment[key] = template.sub_assessment.reduce((acc, sub) => {
-            const body =
-              sub.body && typeof sub.body === "object" ? sub.body : {};
-            acc[sub.name] = {
-              ...sub,
-              ...body,
-              id: sub.id,
-              name: sub.name,
-              type: sub.type,
-              score: sub.score ?? null,
-              actions: actions.ACTIONS_BUTTON,
-              session_id: null,
-            };
-            return acc;
-          }, {});
+
+        if (getTemplateSubAssessments(template).length) {
+          processedTemplate = injectLauncherSubAssessmentIds(
+            processedTemplate,
+            getTemplateSubAssessments(template),
+          );
         }
-      });
+
+        return processedTemplate;
+      };
+
+      if (department === "Audiology") {
+        for (const tab of TABS) {
+          const templateId = AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB[tab];
+          const template = data.find((item) => String(item.id) === templateId);
+          if (!template) continue;
+          const fullTemplate = await resolveFullTemplate(template);
+          map[tab] = buildProcessedTemplate(fullTemplate, tab);
+          await registerSubAssessments(fullTemplate, tab);
+        }
+      } else {
+        for (const template of data) {
+          const key = template.assessment_type?.toLowerCase();
+          if (!TABS.includes(key)) continue;
+          const fullTemplate = await resolveFullTemplate(template);
+          map[key] = buildProcessedTemplate(fullTemplate, key);
+          await registerSubAssessments(fullTemplate, key);
+        }
+      }
+
       setTemplates(map);
       setSubAssessmentTemplate(subAssessment);
     } catch (e) {
@@ -332,32 +741,41 @@ useEffect(() => {
         false,
       );
       setSessionId(response.data.id);
-      response?.data?.assessment_ids.forEach((template) => {
-        const tab = template.type.toLowerCase();
+      const sessionMaps = buildSessionSubIdMap(
+        response?.data?.assessment_ids || [],
+      );
+      setSessionSubAssessmentIds(sessionMaps);
 
-        // MAIN ASSESSMENT
-        if (template.is_parent === "True") {
+      response?.data?.assessment_ids.forEach((template) => {
+        if (isParentSessionItem(template)) {
+          const tab = resolveSessionAssessmentTab(template);
+          if (!tab || !TABS.includes(tab)) return;
+
           setTemplates((prev) => ({
             ...prev,
-
             [tab]: {
               ...prev[tab],
               id: template.id,
             },
           }));
+          return;
         }
-        // SUB ASSESSMENT
-        else {
-          const SOAP_TABS = ["subjective", "objective", "assessment", "plan"];
 
-          // Helper to update session_id for a matching sub-template in a given tab
-          const updateSessionId = (prev, targetTab) => {
+        setSubAssessmentTemplate((prev) => {
+          const targetTabHint = resolveSessionAssessmentTab(template);
+          const tabsToSearch = targetTabHint
+            ? [
+                targetTabHint,
+                ...SOAP_SESSION_TABS.filter((t) => t !== targetTabHint),
+              ]
+            : SOAP_SESSION_TABS;
+
+          for (const soapTab of tabsToSearch) {
             let matched = false;
-            const newEntries = Object.entries(prev[targetTab] || {}).map(
+            const newEntries = Object.entries(prev[soapTab] || {}).map(
               ([key, subTemplate]) => {
                 if (
-                  subTemplate.name === template.name ||
-                  key === template.name
+                  subTemplateMatchesSessionItem(subTemplate, key, template)
                 ) {
                   matched = true;
                   return [
@@ -373,39 +791,40 @@ useEffect(() => {
                 return [key, subTemplate];
               },
             );
+
             if (matched) {
               return {
                 ...prev,
-                [targetTab]: Object.fromEntries(newEntries),
+                [soapTab]: Object.fromEntries(newEntries),
               };
             }
-            return null;
-          };
+          }
 
-          setSubAssessmentTemplate((prev) => {
-            // First try the derived tab (original logic)
-            const result = updateSessionId(prev, tab);
-            if (result) return result;
-
-            // Fallback: search ALL soap tabs for a matching sub-template name
-            for (const soapTab of SOAP_TABS) {
-              if (soapTab === tab) continue; // already tried above
-              const fallbackResult = updateSessionId(prev, soapTab);
-              if (fallbackResult) {
-                console.log(
-                  `[Start] Matched sub-template "${template.name}" in soap tab "${soapTab}" (fallback from "${tab}")`,
-                );
-                return fallbackResult;
-              }
-            }
-
-            console.warn(
-              `[Start] Could not match sub-template "${template.name}" in any tab`,
-            );
-            return prev;
-          });
-        }
+          console.warn(
+            `[Start] Could not match sub-template "${template.name}" in any tab`,
+          );
+          return prev;
+        });
       });
+
+      setSubAssessmentTemplate((prev) => {
+        const next = { ...prev };
+        let changed = false;
+
+        SOAP_SESSION_TABS.forEach((tab) => {
+          const updatedRegistry = applySessionIdsToSubRegistry(
+            next[tab] || {},
+            sessionMaps,
+          );
+          if (updatedRegistry !== next[tab]) {
+            next[tab] = updatedRegistry;
+            changed = true;
+          }
+        });
+
+        return changed ? next : prev;
+      });
+
       setIsSessionActive(true);
       setIsSubmitted(false);
       setToast({ message: "Assessment session started", variant: "success" });
@@ -436,6 +855,7 @@ useEffect(() => {
         setSessionId(null);
         setIsSubmitted(true);
         setIsSessionActive(false);
+        setSessionSubAssessmentIds({ byFormId: {}, byName: {} });
         setToast({
           message: "Assessment submitted and session ended",
           variant: "success",
@@ -539,7 +959,7 @@ useEffect(() => {
         if (!templateDataId) return;
         try {
           // ALL SUB ASSESSMENT FIELD NAMES
-          const subAssessmentFieldNames = Object.values(
+          const subAssessmentFieldNames = getUniqueSubAssessments(
             subAssessmentTemplate?.[activeTab] || {},
           ).flatMap((sub) => {
             const names = [];
@@ -604,8 +1024,41 @@ useEffect(() => {
       // =========================
       // SUB ASSESSMENT HANDLING
       // =========================
-      if (name === "active_assessment_id") {
-        // CLOSE ACTIVE SUB ASSESSMENT
+      const loadSubAssessmentTemplate = async (templateId) => {
+        const tm = await forms.fetchById(templateId);
+        setSubAssessmentTemplate((prev) => {
+          const currentTab = prev[activeTab] || {};
+          const updated = { ...currentTab };
+          Object.entries(updated).forEach(([key, item]) => {
+            const matches =
+              String(item?.id) === String(templateId) ||
+              String(key) === String(templateId) ||
+              item?.name === tm?.data?.name ||
+              key === tm?.data?.name;
+            if (!matches) return;
+
+            updated[key] = {
+              ...item,
+              ...withPrimarySection(normalizeTemplateBody(tm?.data?.body)),
+              actions: actions.ACTIONS_BUTTON,
+              session_id:
+                item.session_id ||
+                resolveSubAssessmentSessionId(item, sessionSubAssessmentIds),
+              id: item.id ?? templateId,
+              name: tm.data.name,
+              type: tm.data.type,
+              score: tm.data.score,
+              loaded: true,
+            };
+          });
+          return {
+            ...prev,
+            [activeTab]: updated,
+          };
+        });
+      };
+
+      if (name.endsWith("_active")) {
         if (!value) {
           setAssessmentsValues((v) => ({
             ...v,
@@ -618,7 +1071,10 @@ useEffect(() => {
         }
 
         try {
-          const tm = await forms.fetchById(value);
+          const registry = subAssessmentTemplate[activeTab] || {};
+          const registryEntry = registry[value];
+          const templateIdToFetch = registryEntry?.id ?? value;
+          const tm = await forms.fetchById(templateIdToFetch);
           setSubAssessmentTemplate((prev) => {
             const currentTab = prev[activeTab] || {};
             const updated = Object.fromEntries(
@@ -626,6 +1082,7 @@ useEffect(() => {
                 // MATCH SELECTED ASSESSMENT
                 if (
                   String(template.id) === String(value) ||
+                  String(key) === String(value) ||
                   template.name === tm?.data?.name ||
                   key === tm?.data?.name
                 ) {
@@ -633,13 +1090,14 @@ useEffect(() => {
                     key,
                     {
                       ...template,
-                      // IMPORTANT
-                      ...tm.data.body,
-                      // KEEP ACTIONS
+                      ...withPrimarySection(normalizeTemplateBody(tm?.data?.body)),
                       actions: actions.ACTIONS_BUTTON,
-                      // KEEP SESSION INSTANCE ID
-                      session_id: template.session_id,
-                      // KEEP ORIGINAL FORM TEMPLATE ID
+                      session_id:
+                        template.session_id ||
+                        resolveSubAssessmentSessionId(
+                          template,
+                          sessionSubAssessmentIds,
+                        ),
                       id: template.id,
                       name: tm.data.name,
                       type: tm.data.type,
@@ -670,6 +1128,7 @@ useEffect(() => {
             message: "Sub Assessment form loading failed",
             variant: "error",
           });
+          return;
         }
       }
       
@@ -767,7 +1226,7 @@ useEffect(() => {
         },
       }));
     },
-    [activeTab, sessionId],
+    [activeTab, sessionId, subAssessmentTemplate, sessionSubAssessmentIds],
   );
 
   // ── Otoscopic Extract Handler ──────────────────────────────────────────────
@@ -1106,6 +1565,7 @@ useEffect(() => {
           values={sectionPreview.values}
           assessmentRegistry={sectionPreview.assessmentRegistry}
           entries={sectionPreview.entries}
+          patient={patient}
           excludeSubAssessments={!sectionPreview.entries}
           onClose={() => setSectionPreview(null)}
         />
@@ -1320,9 +1780,10 @@ useEffect(() => {
                     onAction={handleAction}
                     schema={activeSchema}
                     values={assessmentsValues[activeTab] || {}}
-                    assessmentRegistry={Object.values(
-                      subAssessmentTemplate[activeTab] || {},
-                    )}
+                    assessmentRegistry={
+                      subAssessmentTemplate[activeTab] || {}
+                    }
+                    sessionSubAssessmentIds={sessionSubAssessmentIds}
                     parentSections={templates?.[activeTab]?.sections || []}
                     enableSectionPreview={isPsychology}
                   >
@@ -1355,16 +1816,15 @@ useEffect(() => {
                               title: `Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
                               schema: activeSchema,
                               values: assessmentsValues[activeTab] || {},
-                              assessmentRegistry: Object.values(
+                              assessmentRegistry:
                                 subAssessmentTemplate[activeTab] || {},
-                              ),
                             })
                           }
                         >
                           Preview
                         </button>
                       )}
-                      {isOptometry && activeTab === "plan" && (
+                      {(isOptometry || isAudiology) && activeTab === "plan" && (
                         <button
                           type="button"
                           style={S.previewBtn}
@@ -1384,7 +1844,9 @@ useEffect(() => {
                                 templates,
                                 assessmentsValues,
                                 subAssessmentTemplate,
-                                supplementaryAppender: appendOptometrySoapSupplements,
+                                supplementaryAppender: isOptometry
+                                  ? appendOptometrySoapSupplements
+                                  : appendAudiologySoapSupplements,
                               }),
                             })
                           }

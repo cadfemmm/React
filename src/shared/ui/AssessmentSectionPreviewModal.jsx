@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useState, useCallback } from "react";
 import ReactDOM from "react-dom";
 import AssessmentReportView from "./AssessmentReportView";
+import AssessmentReportDocument from "./AssessmentReportDocument";
 import {
   buildAssessmentReportEntries,
   formatAssessmentReportText,
@@ -22,6 +23,7 @@ const AssessmentSectionPreviewModal = memo(function AssessmentSectionPreviewModa
   values = {},
   assessmentRegistry = {},
   entries: providedEntries,
+  patient,
   valuePrefix,
   excludeSubAssessments = false,
   onClose,
@@ -94,7 +96,15 @@ const AssessmentSectionPreviewModal = memo(function AssessmentSectionPreviewModa
         </div>
 
         <div style={S.body}>
-          <AssessmentReportView entries={reportEntries} />
+          {patient ? (
+            <AssessmentReportDocument
+              title={title}
+              patient={patient}
+              entries={reportEntries}
+            />
+          ) : (
+            <AssessmentReportView entries={reportEntries} />
+          )}
         </div>
 
         <div style={S.footer}>

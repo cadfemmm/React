@@ -4,12 +4,27 @@ import { API_URL } from "../platform/config/api.config";
 
 const fetch = async (department) => {
     try {
-        const response = await api.get(
-            API_URL.fetchTemplate(department)
-        )
-        return response.data.results
+        let url = API_URL.fetchTemplate(department);
+        const all = [];
+
+        while (url) {
+            const response = await api.get(url);
+            const payload = response.data;
+
+            if (Array.isArray(payload)) {
+                return payload;
+            }
+
+            if (Array.isArray(payload?.results)) {
+                all.push(...payload.results);
+            }
+
+            url = payload?.next || null;
+        }
+
+        return all;
     } catch (e) {
-        return []
+        return [];
     }
 }
 

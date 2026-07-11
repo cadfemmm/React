@@ -10,6 +10,11 @@ import {
   resolveSubFormPreviewSchema,
   shouldUseValuePrefix,
 } from "../../shared/utils/assessmentPreviewUtils";
+import {
+  computeAudiologyDerivedScores,
+  resolveScoreBoxDisplay,
+  shouldDeriveAudiologyScores,
+} from "../../shared/utils/audiologyScoreComputes";
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -234,6 +239,7 @@ export default function CommonFormBuilder({
   submitted,
   onAction,
   assessmentRegistry = {},
+  sessionSubAssessmentIds = null,
   children,
   layout = "root",
   language,
@@ -242,6 +248,8 @@ export default function CommonFormBuilder({
   enableSectionPreview = false,
   parentSections = [],
 }) {
+  const [internalSectionScores, setInternalSectionScores] = useState({});
+
   if (!schema) {
     return null;
   }
@@ -255,6 +263,32 @@ export default function CommonFormBuilder({
     showScores,
     enableSectionPreview,
     parentSections,
+    sessionSubAssessmentIds,
+  };
+
+  const handleSectionScoreToggle = (sectionKey) => {
+    onAction?.("toggle-show-scores", { sectionKey });
+    if (showScores == null) {
+      setInternalSectionScores((prev) => ({
+        ...prev,
+        [sectionKey]: !resolveSectionShowScores(showScores, sectionKey, prev),
+      }));
+    }
+  };
+
+  const handleFieldChange = (name, value) => {
+    onChange?.(name, value);
+
+    if (!onChange || !shouldDeriveAudiologyScores(name)) return;
+
+    const merged = { ...values, [name]: value };
+    const derived = computeAudiologyDerivedScores(merged);
+
+    Object.entries(derived).forEach(([key, derivedValue]) => {
+      if (values[key] !== derivedValue) {
+        onChange(key, derivedValue);
+      }
+    });
   };
 
   return (
@@ -339,23 +373,93 @@ export default function CommonFormBuilder({
               /* ===== SECTION-LEVEL VISIBILITY ===== */
               if (section.showIf && !evaluateShowIf(section.showIf, values)) return null;
 
+              const sectionKey = getSectionKey(section, sIdx);
+              const sectionShowScores = resolveSectionShowScores(
+                showScores,
+                sectionKey,
+                internalSectionScores,
+              );
+              const sectionRenderFieldConfig = {
+                ...renderFieldConfig,
+                showScores: sectionShowScores,
+              };
+              const sectionToggleActions = (section.actions || []).filter(
+                (action) =>
+                  action.type === "toggle-show-scores" &&
+                  (section.enableScoreToggle ?? true),
+              );
+              const sectionButtonActions = (section.actions || []).filter(
+                (action) => action.type !== "toggle-show-scores",
+              );
+              const hasSectionHeader =
+                section.title ||
+                sectionToggleActions.length > 0 ||
+                sectionButtonActions.length > 0;
+
               return (
                 <div
                   key={sIdx}
                   className={layout === "root" ? "fb-section" : "fb-section-nested"}
                 >
 
-                  {section.title && (
-                    <div className="fb-section-title">
-                      {t(section.title, supportsLanguage ? (language || "en") : "en")}
+                  {hasSectionHeader && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 12,
+                        marginBottom: "1rem",
+                        paddingBottom: 8,
+                        borderBottom: "2px solid var(--bs-border-color, #e5e7eb)",
+                      }}
+                    >
+                      {section.title ? (
+                        <div
+                          className="fb-section-title"
+                          style={{ marginBottom: 0, borderBottom: "none", paddingBottom: 0, flex: 1 }}
+                        >
+                          {t(section.title, supportsLanguage ? (language || "en") : "en")}
+                        </div>
+                      ) : (
+                        <div style={{ flex: 1 }} />
+                      )}
+
+                      {(sectionToggleActions.length > 0 || sectionButtonActions.length > 0) && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                          {sectionToggleActions.map((action) => (
+                            <ScoresToggle
+                              key={`${sectionKey}-${action.type}`}
+                              label={
+                                section.scoreToggleLabel ||
+                                action.label ||
+                                "Doctor View"
+                              }
+                              enabled={sectionShowScores !== false}
+                              onToggle={() => handleSectionScoreToggle(sectionKey)}
+                            />
+                          ))}
+                          {sectionButtonActions.map((action) => (
+                            <button
+                              key={`${sectionKey}-${action.type}`}
+                              type="button"
+                              className="fb-btn-ghost"
+                              onClick={() => onAction?.(action.type, { sectionKey })}
+                            >
+                              {t(action.label, supportsLanguage ? (language || "en") : "en")}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {(() => {
-                    const firstMatrixField = section.fields.find(f => f.type === "radio-matrix");
+                    const sectionFields = Array.isArray(section?.fields) ? section.fields : [];
+                    const firstMatrixField = sectionFields.find(f => f.type === "radio-matrix");
                     // Check if there's a grid-header before the first radio-matrix
-                    const hasGridHeader = section.fields.some((f, idx) => {
-                      const matrixIdx = section.fields.findIndex(f2 => f2.type === "radio-matrix");
+                    const hasGridHeader = sectionFields.some((f, idx) => {
+                      const matrixIdx = sectionFields.findIndex(f2 => f2.type === "radio-matrix");
                       return f.type === "grid-header" && matrixIdx !== -1 && idx < matrixIdx;
                     });
                     const matrixColumnWidth = firstMatrixField?.options?.length
@@ -363,7 +467,7 @@ export default function CommonFormBuilder({
                       : 110;
                     const getPrevVisibleField = (idx) => {
                       for (let i = idx - 1; i >= 0; i--) {
-                        const f = section.fields[i];
+                        const f = sectionFields[i];
                         if (f.showIf && !evaluateShowIf(f.showIf, values)) continue;
                         return { field: f, idx: i };
                       }
@@ -375,7 +479,10 @@ export default function CommonFormBuilder({
                     };
                     const renderScaleBeforeSubheading = (field, idx) => {
                       if (field.type !== "subheading" || hasGridHeader) return null;
-                      const nextMatrix = section.fields[idx + 1];
+                      const nextMatrix = mapFieldForDoctorView(
+                        sectionFields[idx + 1],
+                        sectionShowScores,
+                      );
                       if (nextMatrix?.type !== "radio-matrix" || !nextMatrix?.options?.length) return null;
                       const questionColumnWidth = 200; // Fixed width for question column
                       const optionsCount = nextMatrix.options?.length || 4;
@@ -388,7 +495,7 @@ export default function CommonFormBuilder({
                         <div key={`scale-${idx}`} style={headerStyle}>
                           <div className="form-label form-label--matrix">
                             {nextMatrix.matrixHeaderLabel || "Scale"}
-                            {nextMatrix.info && (showScores !== false) && <InfoTooltip info={nextMatrix.info} />}
+                            {nextMatrix.info && (sectionShowScores !== false) && <InfoTooltip info={nextMatrix.info} />}
                           </div>
                           <div style={styles.matrixOptions}>
                             {nextMatrix.options?.map((opt) => (
@@ -403,16 +510,19 @@ export default function CommonFormBuilder({
                     const shouldShowScaleBeforeMatrix = (field, idx) => {
                       if (field.type !== "radio-matrix" || !field.options?.length || hasGridHeader) return false;
                       const prev = getPrevVisibleField(idx);
-                      const scaleAlreadyBeforeSubheading = prev?.field?.type === "subheading" && section.fields[prev.idx + 1]?.type === "radio-matrix";
+                      const scaleAlreadyBeforeSubheading = prev?.field?.type === "subheading" && sectionFields[prev.idx + 1]?.type === "radio-matrix";
                       if (scaleAlreadyBeforeSubheading) return false;
                       const prevMatrix = prev?.field?.type === "radio-matrix" ? prev.field : null;
                       return !prevMatrix || !optionsEqual(prevMatrix.options, field.options);
                     };
                     return (
                       <>
-                        {section.fields.map((field, idx) => {
+                        {sectionFields.map((field, idx) => {
 
                           if (field.showIf && !evaluateShowIf(field.showIf, values)) return null;
+
+                          const fieldForRender = mapFieldForDoctorView(field, sectionShowScores);
+                          if (!fieldForRender) return null;
 
                           const value = values[field.name];
                           const error = submitted
@@ -424,8 +534,9 @@ export default function CommonFormBuilder({
                             <React.Fragment key={fieldKey}>
                               {renderScaleBeforeSubheading(field, idx)}
                               {shouldShowScaleBeforeMatrix(field, idx) && (() => {
+                                const matrixField = mapFieldForDoctorView(field, sectionShowScores) || field;
                                 const questionColumnWidth = 200; // Fixed width for question column
-                                const optionsCount = field.options?.length || 4;
+                                const optionsCount = matrixField.options?.length || 4;
                                 const headerStyle = {
                                   ...styles.matrixHeader,
                                   marginBottom: 12,
@@ -434,11 +545,11 @@ export default function CommonFormBuilder({
                                 return (
                                   <div style={headerStyle}>
                                     <div className="form-label form-label--matrix">
-                                      {field.matrixHeaderLabel || "Scale"}
-                                      {field.info && (showScores !== false) && <InfoTooltip info={field.info} />}
+                                      {matrixField.matrixHeaderLabel || "Scale"}
+                                      {matrixField.info && (sectionShowScores !== false) && <InfoTooltip info={matrixField.info} />}
                                     </div>
                                     <div style={styles.matrixOptions}>
-                                      {field.options?.map((opt) => (
+                                      {matrixField.options?.map((opt) => (
                                         <div key={opt.value} style={styles.matrixHeaderCell}>
                                           {t(opt.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
                                         </div>
@@ -450,71 +561,71 @@ export default function CommonFormBuilder({
                               <div
                                 className={[
                                   "fb-field",
-                                  field.compact ? "mb-1" : layout === "nested" ? "mb-2.5" : "mb-[18px]",
+                                  fieldForRender.compact ? "mb-1" : layout === "nested" ? "mb-2.5" : "mb-[18px]",
                                 ].join(" ")}
                               >
 
 
                                 {/* RADIO stays special (side layout) */}
                                 {/* RADIO: labelAbove = label on one line, options on next line */}
-                                {field.type === "radio" && !field.inRow && field.labelAbove ? (
+                                {fieldForRender.type === "radio" && !fieldForRender.inRow && fieldForRender.labelAbove ? (
                                   <div style={{ marginBottom: 16 }}>
-                                    {(field.label || field.info) && (
+                                    {(fieldForRender.label || fieldForRender.info) && (
                                      <label className="form-label whitespace-pre-line">
-                                        {t(field.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
-                                        {field.info && <InfoTooltip info={field.info} />}
+                                        {t(fieldForRender.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
+                                        {fieldForRender.info && <InfoTooltip info={fieldForRender.info} />}
                                       </label>
                                     )}
                                     <div style={{ marginTop: 6 }}>
-                                      {renderField(field,
+                                      {renderField(fieldForRender,
                                         value,
                                         values,
-                                        onChange,
+                                        handleFieldChange,
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
-                                        renderFieldConfig
+                                        sectionRenderFieldConfig
                                       )}
                                     </div>
                                   </div>
-                                ) : field.type === "radio" && !field.inRow ? (
+                                ) : fieldForRender.type === "radio" && !fieldForRender.inRow ? (
                                   <div className="fb-radio-row">
-                                    {(field.label || field.info) && (
+                                    {(fieldForRender.label || fieldForRender.info) && (
                                       <div className="form-label mb-0">
-                                        {t(field.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
-                                        {field.info && <InfoTooltip info={field.info} />}
+                                        {t(fieldForRender.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
+                                        {fieldForRender.info && <InfoTooltip info={fieldForRender.info} />}
                                       </div>
                                     )}
                                     <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 16 }}>
                                       {renderField(
-                                        field,
+                                        fieldForRender,
                                         value,
                                         values,
-                                        onChange,
+                                        handleFieldChange,
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
-                                        renderFieldConfig
+                                        sectionRenderFieldConfig
                                       )}
                                     </div>
                                   </div>
 
 
-                                ) : field.type === "subheading" || field.type === "optional-section-toggle" ? (
+                                ) : fieldForRender.type === "subheading" || fieldForRender.type === "optional-section-toggle" ? (
 
-                                  renderField(field, value, values, onChange, onAction, assessmentRegistry, formReadOnly, renderFieldConfig)
-                                ) : field.type === "row" ? (
+                                  renderField(fieldForRender, value, values, handleFieldChange, onAction, assessmentRegistry, formReadOnly, sectionRenderFieldConfig)
+                                ) : fieldForRender.type === "row" ? (
                                   /* ✅ ROW FIELDS → Render directly without extra wrapper */
                                   renderField(
-                                    field,
+                                    fieldForRender,
                                     value,
                                     values,
-                                    onChange,
+                                    handleFieldChange,
                                     onAction,
                                     assessmentRegistry,
                                     formReadOnly,
                                     {
-                                      ...renderFieldConfig,
+                                      ...sectionRenderFieldConfig,
                                       matrixColumnWidth,
                                     }
                                   )
@@ -522,29 +633,29 @@ export default function CommonFormBuilder({
                                   <div style={{ marginBottom: 16 }}>
 
                                     <>
-                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion", "dynamic-table", "custom"].includes(field.type)
-                                        && field.type !== "checkbox-group"
+                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion", "dynamic-table", "custom"].includes(fieldForRender.type)
+                                        && fieldForRender.type !== "checkbox-group"
                                         && (
                                           <label
                                             className="form-label"
                                             style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}
                                           >
-                                            {t(field.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
-                                            {field.info && <InfoTooltip info={field.info} />}
+                                            {t(fieldForRender.label, schema?.enableLanguageToggle ? (language || "en") : "en")}
+                                            {fieldForRender.info && <InfoTooltip info={fieldForRender.info} />}
                                           </label>
                                         )}
 
 
                                       {renderField(
-                                        field,
+                                        fieldForRender,
                                         value,
                                         values,
-                                        onChange,
+                                        handleFieldChange,
                                         onAction,
                                         assessmentRegistry,
                                         formReadOnly,
                                         {
-                                          ...renderFieldConfig,
+                                          ...sectionRenderFieldConfig,
                                           matrixColumnWidth,
                                         }
                                       )}
@@ -552,7 +663,7 @@ export default function CommonFormBuilder({
 
                                     {field.helper && (
                                       <div className="fb-helper">
-                                        {field.helper}
+                                        {fieldForRender.helper}
                                       </div>
                                     )}
                                   </div>
@@ -876,10 +987,70 @@ const t = (text, lang) => {
   return String(text);
 };
 
-function ScoresToggle({ enabled, onToggle }) {
+function getSectionKey(section, index) {
+  if (section?.key != null && section.key !== "") return String(section.key);
+  if (section?.title) return String(section.title);
+  return `section-${index}`;
+}
+
+function resolveSectionShowScores(showScores, sectionKey, internalSectionScores = {}) {
+  if (showScores != null) {
+    if (typeof showScores === "boolean") return showScores;
+    if (typeof showScores === "object" && !Array.isArray(showScores)) {
+      if (Object.prototype.hasOwnProperty.call(showScores, sectionKey)) {
+        return showScores[sectionKey] !== false;
+      }
+      return true;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(internalSectionScores, sectionKey)) {
+    return internalSectionScores[sectionKey] !== false;
+  }
+
+  return true;
+}
+
+function stripScoreFromLabel(label = "") {
+  return String(label).replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+function mapFieldForDoctorView(field, showScores) {
+  if (!field) return null;
+
+  if (field.type === "score-box") {
+    return showScores !== false ? field : null;
+  }
+
+  if (field.type === "info-text") {
+    const text = Array.isArray(field.text) ? field.text.join(" ") : String(field.text || "");
+    if (/scoring/i.test(text)) {
+      return showScores !== false ? field : null;
+    }
+  }
+
+  if (field.type === "radio-matrix" && field.options) {
+    return {
+      ...field,
+      options: field.options.map((opt) => ({
+        ...opt,
+        label:
+          showScores !== false
+            ? opt.label
+            : stripScoreFromLabel(
+                typeof opt.label === "string" ? opt.label : String(opt.label ?? ""),
+              ),
+      })),
+    };
+  }
+
+  return field;
+}
+
+function ScoresToggle({ enabled, onToggle, label = "Doctor View" }) {
   return (
     <div style={langSwitch.wrap}>
-      <span style={langSwitch.label}>Doctor View</span>
+      <span style={langSwitch.label}>{label}</span>
       <div
         style={{
           ...langSwitch.track,
@@ -1002,7 +1173,7 @@ function MultiSelectDropdown({ field, value, onChange, languageConfig }) {
 
       {open && (
         <div style={styles.multiSelectMenu}>
-          {field.options.map(opt => (
+          {(field.options || []).map(opt => (
             <label key={opt.value} className="form-check-label form-check" style={styles.multiSelectItem}>
               <input
                 type="checkbox"
@@ -1224,21 +1395,95 @@ function FileUploadModal({ field, value, onChange }) {
 }
 
 
+function sanitizeFormField(field) {
+  if (!field || typeof field !== "object") return field;
+
+  const next = { ...field };
+
+  switch (next.type) {
+    case "accordion":
+      next.children = Array.isArray(next.children)
+        ? next.children.map(sanitizeFormField)
+        : [];
+      break;
+    case "row":
+      next.fields = Array.isArray(next.fields)
+        ? next.fields.map(sanitizeFormField)
+        : [];
+      break;
+    case "dynamic-section":
+      next.fields = Array.isArray(next.fields) ? next.fields : [];
+      break;
+    case "refraction-12col":
+    case "refraction-col":
+      next.rows = Array.isArray(next.rows) ? next.rows : [];
+      next.groups = Array.isArray(next.groups)
+        ? next.groups.map((group) => ({
+            ...group,
+            columns: Array.isArray(group?.columns) ? group.columns : [],
+          }))
+        : [];
+      break;
+    case "refraction-table":
+    case "refraction-table-full":
+      next.rows = Array.isArray(next.rows) ? next.rows : [];
+      break;
+    case "radio-matrix":
+    case "checkbox-group":
+    case "radio":
+    case "select":
+    case "multi-select":
+    case "paired-select":
+      next.options = Array.isArray(next.options) ? next.options : [];
+      break;
+    case "grid-header":
+    case "grid-row":
+      next.cols = Array.isArray(next.cols) ? next.cols : [];
+      break;
+    case "grid-table-flat":
+    case "grid-table-advanced":
+    case "checkbox-table-form":
+    case "scale-table":
+      next.headers = Array.isArray(next.headers) ? next.headers : [];
+      next.rows = Array.isArray(next.rows) ? next.rows : [];
+      next.columns = Array.isArray(next.columns) ? next.columns : [];
+      break;
+    case "milestone-grid":
+      next.rows = Array.isArray(next.rows) ? next.rows : [];
+      break;
+    case "paired-text":
+      next.pairs = Array.isArray(next.pairs) ? next.pairs : [];
+      break;
+    case "nested":
+      next.fields = Array.isArray(next.fields)
+        ? next.fields.map(sanitizeFormField)
+        : [];
+      break;
+    default:
+      break;
+  }
+
+  return next;
+}
+
 function normalizeSubAssessmentSchema(assessment) {
   if (!assessment) return null;
 
-  const source =
-    assessment.sections || assessment.fields
-      ? assessment
-      : assessment.body && typeof assessment.body === "object"
-        ? assessment.body
-        : assessment;
+  let source = assessment;
+  if (!Array.isArray(assessment.sections) && !Array.isArray(assessment.fields)) {
+    if (Array.isArray(assessment.body)) {
+      source = { sections: assessment.body };
+    } else if (assessment.body && typeof assessment.body === "object") {
+      source = assessment.body;
+    }
+  }
 
-  const sections =
-    source.sections ||
-    (Array.isArray(source.fields) && source.fields.length
-      ? [{ title: null, fields: source.fields }]
-      : null);
+  const sections = Array.isArray(source)
+    ? source
+    : source.sections ||
+      (Array.isArray(source.fields) && source.fields.length
+        ? [{ title: null, fields: source.fields }]
+        : null);
 
   if (!sections) return null;
 
@@ -1246,7 +1491,12 @@ function normalizeSubAssessmentSchema(assessment) {
     ...assessment,
     ...source,
     title: source.title || assessment.title || assessment.name,
-    sections,
+    sections: sections.map((section) => ({
+      ...section,
+      fields: (Array.isArray(section?.fields) ? section.fields : []).map(
+        sanitizeFormField,
+      ),
+    })),
   };
 }
 
@@ -1255,6 +1505,7 @@ function AssessmentLauncher({
   values,
   onChange,
   assessmentRegistry,
+  sessionSubAssessmentIds = null,
   languageConfig,
   parentSections,
   enableSectionPreview = false,
@@ -1267,11 +1518,7 @@ function AssessmentLauncher({
     typeof assessmentRegistry === "object" &&
     !registryIsArray;
   const usesOptionRegistry = Array.isArray(field.options) && field.options.length > 0;
-  const activeKey =
-    field.activeKey ||
-    (registryIsArray
-      ? "active_assessment_id"
-      : `${field.name}_active`);
+  const activeKey = field.activeKey || `${field.name}_active`;
   const active = values[activeKey];
   const isRegistryComponent = item =>
     typeof item === "function" ||
@@ -1283,8 +1530,116 @@ function AssessmentLauncher({
     b !== null &&
     String(a) === String(b);
 
+  const resolveSubAssessmentSessionId = (assessment) => {
+    if (!assessment || typeof assessment !== "object") return null;
+    if (assessment.session_id) return assessment.session_id;
+
+    const formTemplateId = assessment.id ?? assessment.value;
+    if (
+      formTemplateId &&
+      sessionSubAssessmentIds?.byFormId?.[String(formTemplateId)]
+    ) {
+      return sessionSubAssessmentIds.byFormId[String(formTemplateId)];
+    }
+
+    const normalizedName = String(assessment.name || assessment.label || "")
+      .trim()
+      .toLowerCase();
+    if (
+      normalizedName &&
+      sessionSubAssessmentIds?.byName?.[normalizedName]
+    ) {
+      return sessionSubAssessmentIds.byName[normalizedName];
+    }
+
+    return null;
+  };
+
+  const findRegistryItemForOption = (opt) => {
+    const optionId = opt?.value ?? opt?.id;
+    if (registryIsObject && optionId != null && assessmentRegistry?.[optionId]) {
+      return assessmentRegistry[optionId];
+    }
+
+    const optionLabel = String(opt?.label ?? "")
+      .trim()
+      .toLowerCase();
+
+    if (registryIsObject) {
+      for (const [key, item] of Object.entries(assessmentRegistry || {})) {
+        if (!item || isRegistryComponent(item)) continue;
+
+        if (optionId != null && isSameId(item.id, optionId)) return item;
+        if (optionId != null && isSameId(key, optionId)) return item;
+
+        const itemName = String(item.name ?? item.label ?? "")
+          .trim()
+          .toLowerCase();
+        if (optionLabel && itemName && itemName === optionLabel) return item;
+      }
+    }
+
+    return null;
+  };
+
   const registryOptions = (() => {
     if (registryIsArray) {
+      if (usesOptionRegistry) {
+        const subsById = new Map(
+          assessmentRegistry
+            .filter((sub) => sub?.id != null)
+            .map((sub) => [String(sub.id), sub]),
+        );
+
+        const findRegistryItem = (opt) => {
+          const optionId = opt?.value ?? opt?.id;
+          if (optionId == null) return null;
+
+          const direct = subsById.get(String(optionId));
+          if (direct) return direct;
+
+          const optionLabel = String(opt?.label ?? "").trim().toLowerCase();
+          return (
+            assessmentRegistry.find((sub) => {
+              const subName = String(sub?.name ?? sub?.label ?? "")
+                .trim()
+                .toLowerCase();
+              if (!subName || !optionLabel) return false;
+              return (
+                subName === optionLabel ||
+                subName.includes(optionLabel) ||
+                optionLabel.includes(subName)
+              );
+            }) || null
+          );
+        };
+
+        return field.options
+          .map((opt) => {
+            const registryItem = findRegistryItem(opt);
+            if (!registryItem) {
+              const optionId = opt?.value ?? opt?.id;
+              if (optionId == null) return null;
+              return {
+                id: optionId,
+                value: optionId,
+                label: opt?.label ?? optionId,
+              };
+            }
+
+            return {
+              ...registryItem,
+              id: registryItem.id,
+              value: registryItem.id,
+              label: opt?.label ?? registryItem.name ?? registryItem.id,
+              session_id:
+                registryItem.session_id ||
+                resolveSubAssessmentSessionId(registryItem),
+            };
+          })
+          .filter(Boolean);
+      }
+
       return assessmentRegistry
         .filter(opt => opt && opt.id !== undefined && opt.id !== null)
         .map(opt => ({
@@ -1297,19 +1652,29 @@ function AssessmentLauncher({
 
     if (usesOptionRegistry) {
       return field.options
-        .map(opt => {
-          const id = opt?.value ?? opt?.id;
-          const registryItem = registryIsObject ? assessmentRegistry?.[id] : null;
+        .map((opt) => {
+          const registryItem = findRegistryItemForOption(opt);
+          const id = opt?.value ?? opt?.id ?? registryItem?.id;
 
           return {
-            ...(isRegistryComponent(registryItem) ? { Component: registryItem } : registryItem || {}),
+            ...(isRegistryComponent(registryItem)
+              ? { Component: registryItem }
+              : registryItem || {}),
             id,
             value: id,
             name: opt?.label ?? registryItem?.name ?? id,
-            label: opt?.label ?? registryItem?.label ?? registryItem?.name ?? id,
+            label:
+              opt?.label ?? registryItem?.label ?? registryItem?.name ?? id,
+            session_id:
+              registryItem?.session_id ||
+              resolveSubAssessmentSessionId({
+                id,
+                name: opt?.label ?? registryItem?.name,
+                label: opt?.label ?? registryItem?.label,
+              }),
           };
         })
-        .filter(opt => opt.id !== undefined && opt.id !== null);
+        .filter((opt) => opt.id !== undefined && opt.id !== null);
     }
 
     if (registryIsObject) {
@@ -1319,6 +1684,13 @@ function AssessmentLauncher({
         value: item?.value ?? item?.id ?? key,
         name: item?.name ?? item?.label ?? key,
         label: item?.label ?? item?.name ?? key,
+        session_id:
+          item?.session_id ||
+          resolveSubAssessmentSessionId({
+            id: item?.id ?? item?.value ?? key,
+            name: item?.name ?? item?.label ?? key,
+            label: item?.label ?? item?.name ?? key,
+          }),
       }));
     }
 
@@ -1338,6 +1710,9 @@ function AssessmentLauncher({
             isSameId(o.key, active)
           )
     )
+  );
+  const selectedAssessmentSessionId = resolveSubAssessmentSessionId(
+    selectedAssessment,
   );
 
   // Remarks key
@@ -1476,6 +1851,7 @@ function AssessmentLauncher({
               values={values}
               onChange={onChange}
               assessmentRegistry={assessmentRegistry}
+              sessionSubAssessmentIds={sessionSubAssessmentIds}
               layout="nested"
             />
 
@@ -1492,7 +1868,7 @@ function AssessmentLauncher({
                 </button>
               )}
 
-              {selectedAssessment.session_id ? (
+              {selectedAssessmentSessionId ? (
                 <button
                   type="button"
                   className="fb-btn-ghost"
@@ -1502,7 +1878,7 @@ function AssessmentLauncher({
                     try {
 
                       const templateDataId =
-                        selectedAssessment.session_id;
+                        selectedAssessmentSessionId;
 
                       if (!templateDataId) {
                         throw new Error(
@@ -1712,7 +2088,7 @@ function RadioMatrixRow({ field, value, onChange, columnWidth, showScores, langu
 
 
       <div style={styles.matrixOptions}>
-        {field.options.map((opt) => (
+        {(field.options || []).map((opt) => (
           <label key={opt.value} className="form-check-label form-check" style={styles.matrixCell}>
             <input
               type="radio"
@@ -1866,7 +2242,7 @@ function renderField(
         <div>
           <div className="fb-subheading">{t(field.heading, languageConfig?.enabled ? languageConfig.lang : "en")}</div>
 
-          {field.rows.map((row, idx) => (
+          {(field.rows || []).map((row, idx) => (
             <div
               key={idx}
               style={{
@@ -1909,6 +2285,9 @@ function renderField(
       );
 
     case "custom":
+      if (typeof field.render !== "function") {
+        return null;
+      }
       return field.render({ values, onChange });
 
     case "dynamic-goals": {
@@ -2111,7 +2490,7 @@ function renderField(
               </button>
 
               {/* Render Child Fields */}
-              {field.fields.map(child => {
+              {(field.fields || []).map(child => {
 
                 // Handle showIf inside block
                 if (child.showIf) {
@@ -2437,7 +2816,9 @@ function renderField(
     }
 
      case "grid-table-flat": {
-      const colCount = field.headers.length;
+      const headers = field.headers || [];
+      const tableRows = field.rows || [];
+      const colCount = headers.length;
 
       // Optional per-cell hiding logic:
       // - field.hiddenCells can be:
@@ -2478,7 +2859,7 @@ function renderField(
           >
             <div></div>
 
-            {field.headers.map(h => (
+            {headers.map(h => (
               <div key={h} style={styles.tableHeaderCell}>
                 {h}
               </div>
@@ -2486,7 +2867,7 @@ function renderField(
           </div>
 
           {/* Rows */}
-          {field.rows.map(row => (
+          {tableRows.map(row => (
             <div
               key={row.key}
               style={{
@@ -2508,16 +2889,16 @@ function renderField(
                   }}
                 >
                   <input
-                  key={row.key+'_'+field.headers[0]}
+                  key={row.key+'_'+headers[0]}
                   style={{
                     ...styles.tableInput,
                     width: field.boxWidth || "100%"
                   }}
-                  value={values[field.name+'_'+row.key+'_'+field.headers[0]] || ""}
-                  onChange={e => onChange(field.name+'_'+row.key+'_'+field.headers[0], e.target.value)}
+                  value={values[field.name+'_'+row.key+'_'+headers[0]] || ""}
+                  onChange={e => onChange(field.name+'_'+row.key+'_'+headers[0], e.target.value)}
                 />
                 </div>
-                 ):(field.headers.map(h => {
+                 ):(headers.map(h => {
                 row.colSpan = row.colSpan - 1
                 const cellKey = `${row.key}_${h}`;
                 if (isHidden(row.key, h)) {
@@ -2564,7 +2945,10 @@ function renderField(
       );
     }
 
-    case "info-text":
+    case "info-text": {
+      const text = Array.isArray(field.text) ? field.text.join(" ") : String(field.text || "");
+      if (/scoring/i.test(text) && languageConfig?.showScores === false) return null;
+
       return (
         <div
           style={{ fontSize: 13, lineHeight: 1.6, color: "#0F172A", whiteSpace: "pre-line" }}>
@@ -2573,9 +2957,13 @@ function renderField(
             : field.text}
         </div>
       );
+    }
 
 
 case "grid-table-advanced": {
+
+  const tableHeaders = field.headers || [];
+  const tableRows = field.rows || [];
 
   const tableStyle = {
     width: "100%",
@@ -2612,7 +3000,7 @@ case "grid-table-advanced": {
   };
 
   // 🔥 dynamic total
-  const total = field.rows.reduce((sum, row) => {
+  const total = tableRows.reduce((sum, row) => {
     return sum + (Number(values[`${field.name}_${row.key}_indicator`]) || 0);
   }, 0);
 
@@ -2622,7 +3010,7 @@ case "grid-table-advanced": {
       {/* HEADER */}
       <thead>
         <tr>
-          {field.headers.map((h, i) => (
+          {tableHeaders.map((h, i) => (
             <th key={i} style={thStyle}>{h}</th>
           ))}
         </tr>
@@ -2631,7 +3019,7 @@ case "grid-table-advanced": {
       {/* BODY */}
       <tbody>
 
-        {field.rows.map(row => (
+        {tableRows.map(row => (
           <tr key={row.key}>
 
             {/* LABEL */}
@@ -2647,7 +3035,7 @@ case "grid-table-advanced": {
                 }
               >
                 <option value="">Select</option>
-                {row.options.map(opt => (
+                {(row.options || []).map(opt => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -2675,7 +3063,7 @@ case "grid-table-advanced": {
         {/* TOTAL */}
         <tr>
           <td
-            colSpan={field.headers.length - 1}
+            colSpan={Math.max(tableHeaders.length - 1, 1)}
             style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}
           >
             TOTAL SCORE
@@ -2697,8 +3085,8 @@ case "grid-table-advanced": {
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: "45%" }} />
-            {field.columns.map((_, i) => (
-              <col key={i} style={{ width: `${55 / field.columns.length}%` }} />
+            {(field.columns || []).map((_, i) => (
+              <col key={i} style={{ width: `${55 / Math.max((field.columns || []).length, 1)}%` }} />
             ))}
           </colgroup>
           <thead>
@@ -2707,7 +3095,7 @@ case "grid-table-advanced": {
                 {field.label || ""}
                 {field.info && <InfoTooltip info={field.info} />}
               </th>
-              {field.columns.map(col => (
+              {(field.columns || []).map(col => (
                 <th key={col.value} style={styles.th}>
                   {t(col.label, languageConfig?.enabled ? languageConfig.lang : "en")}
                 </th>
@@ -2715,13 +3103,13 @@ case "grid-table-advanced": {
             </tr>
           </thead>
           <tbody>
-            {field.rows.map((rowLabel, rIdx) => {
+            {(field.rows || []).map((rowLabel, rIdx) => {
               const rowKey = `${field.name}_${rIdx}`;
               return (
                 <tr key={rowKey}>
                   <td style={styles.tdLabel}>
                     {t(rowLabel, languageConfig?.enabled ? languageConfig.lang : "en")}</td>
-                  {field.columns.map(col => (
+                  {(field.columns || []).map(col => (
                     <td key={col.value} style={styles.td}>
                       <input
                         type="radio"
@@ -2741,22 +3129,26 @@ case "grid-table-advanced": {
 
     case "refraction-col": {
       const rows = field.rows || [];
-      const groups = field.groups || [];
+      const groups = (field.groups || []).map((group) => ({
+        ...group,
+        columns: Array.isArray(group?.columns) ? group.columns : [],
+      }));
 
       // Build flat columns with group boundaries
       const groupMeta = [];
       let cursor = 0;
 
       groups.forEach((g, gi) => {
+        const groupColumns = g.columns || [];
         groupMeta.push({
           groupIndex: gi,
           start: cursor,
-          length: g.columns.length
+          length: groupColumns.length,
         });
-        cursor += g.columns.length;
+        cursor += groupColumns.length;
       });
 
-      const flatCols = groups.flatMap(g => g.columns);
+      const flatCols = groups.flatMap((g) => g.columns || []);
 
       return (
         <div style={styles.refraction12Wrapper}>
@@ -3050,12 +3442,13 @@ case "grid-table-advanced": {
       );
 
     case "score-box": {
+      if (languageConfig?.showScores === false) return null;
+
       const labelText = t(field.label, languageConfig?.enabled ? languageConfig.lang : "en");
       const infoText = field.info
         ? t(field.info, languageConfig?.enabled ? languageConfig.lang : "en")
         : null;
-      const displayValue =
-        typeof field.compute === "function" ? field.compute(values) : (value ?? 0);
+      const displayValue = resolveScoreBoxDisplay(field, values, value);
 
       const renderedLabel = infoText ? (
         <InfoTooltip
@@ -3093,7 +3486,8 @@ case "grid-table-advanced": {
       );
 
     case "grid-header": {
-      const colsCount = field.cols.length;
+      const cols = field.cols || [];
+      const colsCount = cols.length;
       // Use custom template if provided, otherwise default
       const template = field.template || (field.wideLabel ? `400px repeat(${colsCount}, 80px)` : `180px repeat(${colsCount}, 1fr)`);
 
@@ -3103,7 +3497,7 @@ case "grid-table-advanced": {
             {t(field.label, languageConfig?.enabled ? languageConfig.lang : "en") || ""}
             {field.info && <InfoTooltip info={field.info} />}
           </div>
-          {field.cols.map(col => (
+          {cols.map(col => (
             <div key={col} style={styles.gridHeaderCell}>
               {languageConfig?.enabled ? t(col, languageConfig.lang) : col}
             </div>
@@ -3123,13 +3517,14 @@ case "grid-table-advanced": {
       )
     }
     case "grid-row": {
-      const colsCount = field.cols.length;
+      const cols = field.cols || [];
+      const colsCount = cols.length;
       const template = field.template || `180px repeat(${colsCount}, 1fr)`;
 
       return (
         <div style={{ ...styles.gridRow, gridTemplateColumns: template }}>
           <div className="form-label mb-0">{t(field.label, languageConfig?.enabled ? languageConfig.lang : "en")}</div>
-          {field.cols.map((col, idx) => {
+          {cols.map((col, idx) => {
             const fieldKey = (typeof col === "object" && col.name) ? col.name : `${field.name}_${idx}`;
 
             // Handle object column type (e.g., single-select with options)
@@ -3357,12 +3752,13 @@ if (typeof col === "object" && col.type === "radio") {
         <CommonFormBuilder
           schema={{
             title: field.title,
-            fields: field.fields
+            fields: field.fields || [],
           }}
           values={values}
           onChange={onChange}
           onAction={onAction}
           assessmentRegistry={assessmentRegistry}
+          sessionSubAssessmentIds={languageConfig?.sessionSubAssessmentIds}
           layout="nested"
         />
       );
@@ -3390,7 +3786,7 @@ if (typeof col === "object" && col.type === "radio") {
               }
             >
               <option value="">Select</option>
-              {field.options.map(opt => (
+              {(field.options || []).map(opt => (
                 <option key={opt.value} value={opt.value}>
                   {t(opt.label, languageConfig?.enabled ? languageConfig.lang : "en")}
                 </option>
@@ -3405,7 +3801,7 @@ if (typeof col === "object" && col.type === "radio") {
               }
             >
               <option value="">Select</option>
-              {field.options.map(opt => (
+              {(field.options || []).map(opt => (
                 <option key={opt.value} value={opt.value}>
                   {t(opt.label, languageConfig?.enabled ? languageConfig.lang : "en")}
                 </option>
@@ -3651,6 +4047,7 @@ if (typeof col === "object" && col.type === "radio") {
           values={values}                 // ✅ FIX
           onChange={onChange}
           assessmentRegistry={assessmentRegistry} // ✅ FIX
+          sessionSubAssessmentIds={languageConfig?.sessionSubAssessmentIds}
           languageConfig={languageConfig}
           parentSections={languageConfig?.parentSections || field.sections || []}
           enableSectionPreview={languageConfig?.enableSectionPreview}
@@ -4116,14 +4513,18 @@ if (typeof col === "object" && col.type === "radio") {
 
 
     case "refraction-12col": {
-      const rows = typeof field.rows === "function"
-        ? field.rows(values)
-        : field.rows;
-      const groups = field.groups || [];
+      const rows =
+        typeof field.rows === "function"
+          ? field.rows(values) || []
+          : field.rows || [];
+      const groups = (field.groups || []).map((group) => ({
+        ...group,
+        columns: Array.isArray(group?.columns) ? group.columns : [],
+      }));
       const cornerLabel = field.cornerLabel || "";
       const cornerLikeGroupHeader = field.cornerLikeGroupHeader === true;
 
-      const flatCols = groups.flatMap(g => g.columns);
+      const flatCols = groups.flatMap((g) => g.columns);
       const colCount = flatCols.length;
       const showColumnHeaders = field.showColumnHeaders !== false;
       const showGroupHeaders = field.showGroupHeaders !== false;
@@ -4371,12 +4772,14 @@ if (typeof col === "object" && col.type === "radio") {
         />
       );
     case "checkbox-table-form": {
+        const tableColumns = field.columns || [];
+        const tableRows = field.rows || [];
         return (
           <div style={styles.refraction12Wrapper}>
             <table style={{ width: "100%", tableLayout: "fixed", fontSize: "9px", borderCollapse: "collapse" }}>
               {/* Top header */}
               <tr>
-                {field.columns.map(col => {
+                {tableColumns.map(col => {
                   if (col.rowSpan) {
                     return (
                       <th rowSpan={col.rowSpan} style={styles.tableContentOverflow}>
@@ -4396,7 +4799,7 @@ if (typeof col === "object" && col.type === "radio") {
                 })}
               </tr>
               <tr>
-                {field.columns.map((col) => 
+                {tableColumns.map((col) => 
                   col.groups &&
                      col.groups.map((group) => (
                       <th
@@ -4410,7 +4813,7 @@ if (typeof col === "object" && col.type === "radio") {
                 )}
               </tr>
               <tr>
-                {field.columns.map(col =>
+                {tableColumns.map(col =>
                   col.groups &&
                     col.groups.map(group => (
                       group.labels || []
@@ -4424,14 +4827,14 @@ if (typeof col === "object" && col.type === "radio") {
                 )}
               </tr>
               <tbody>
-                {field.rows.map(row => (
+                {tableRows.map(row => (
                   <tr key={row}>
                     <td style={styles.tableContentOverflow}>
                       {row}
                     </td>
-                    {field.columns.map(col => 
+                    {tableColumns.map(col => 
                       col.groups && col.groups.map(group => 
-                        group.options.map(option => 
+                        (group.options || []).map(option => 
                           cell(values, row, option, onChange)
                         )
                       )

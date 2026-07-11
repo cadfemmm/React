@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { localDateTimeString } from "../utils/dateFormatter";
 import { fetchPatientDetails } from "../api/patientsList";
+import { fetchIcdCodesPage } from "../api/icdCodes";
 
 const PRIMARY_ROW_COUNT = 2;
 const COLS = 3;
@@ -20,15 +21,37 @@ function getIcNumber(patient) {
   );
 }
 
-function buildPrimaryDiagnosis(patient) {
-  const baseDiagnosis = patient.diagnosis_history || patient.icd || "";
-  const doctorPrimary = patient.doctor_primary_icd || "";
+function buildReferralDiagnosis(patient) {
+  return (
+    patient.referral_diagnosis ||
+    patient.diagnosis_history ||
+    patient.icd ||
+    null
+  );
+}
 
-  if (!baseDiagnosis) return doctorPrimary || null;
-  if (!doctorPrimary) return baseDiagnosis;
-  if (String(baseDiagnosis).includes(doctorPrimary)) return baseDiagnosis;
+function buildPrimaryDiagnosis(patient, resolvedLabel) {
+  return (
+    patient.doctor_primary_icd_label ||
+    resolvedLabel ||
+    patient.doctor_primary_icd ||
+    null
+  );
+}
 
-  return `${baseDiagnosis}, ${doctorPrimary}`;
+async function resolveIcdLabelFromCode(code) {
+  if (!code) return null;
+  if (String(code).includes(" - ")) return code;
+
+  try {
+    const { items } = await fetchIcdCodesPage({ search: code, limit: 20 });
+    const match = items.find(
+      (item) => item.code === code || item.value === code,
+    );
+    return match?.label || code;
+  } catch {
+    return code;
+  }
 }
 
 function mergeLocalPatientExtras(patient) {
@@ -45,7 +68,7 @@ function mergeLocalPatientExtras(patient) {
   }
 }
 
-function buildDemographics(patient) {
+function buildDemographics(patient, resolvedPrimaryIcdLabel) {
   const livingEnv =
     patient.living_environment === "Other" && patient.living_environment_other
       ? patient.living_environment_other
@@ -59,7 +82,8 @@ function buildDemographics(patient) {
   return [
     { key: "dob", label: "Date of birth", value: localDateTimeString(patient.dob || patient.date_of_birth) },
     { key: "age_gender", label: "Age / gender", value: [patient.age ? `${patient.age} yrs` : null, patient.sex || patient.gender].filter(Boolean).join(" · ") || null },
-    { key: "primary_dx", label: "Primary diagnosis", value: buildPrimaryDiagnosis(patient) },
+    { key: "referral_dx", label: "Referral diagnosis", value: buildReferralDiagnosis(patient) },
+    { key: "primary_dx", label: "Primary diagnosis", value: buildPrimaryDiagnosis(patient, resolvedPrimaryIcdLabel) },
     { key: "marital", label: "Marital status", value: patient.marital_status },
     { key: "secondary_dx", label: "Secondary diagnosis", value: patient.medical_history || patient.secondary_diagnosis },
     { key: "living", label: "Living environment", value: livingEnv },
@@ -101,6 +125,7 @@ export default function PatientCard({
   const [details, setDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [showReports, setShowReports] = useState(false);
+  const [resolvedPrimaryIcdLabel, setResolvedPrimaryIcdLabel] = useState(null);
 
   useEffect(() => {
     if (!fetchDetails || !patient) {
@@ -139,6 +164,33 @@ export default function PatientCard({
     [patient, details],
   );
 
+  useEffect(() => {
+    const storedLabel = displayPatient?.doctor_primary_icd_label;
+    const code = displayPatient?.doctor_primary_icd;
+
+    if (storedLabel) {
+      setResolvedPrimaryIcdLabel(storedLabel);
+      return;
+    }
+
+    if (!code) {
+      setResolvedPrimaryIcdLabel(null);
+      return;
+    }
+
+    let cancelled = false;
+    resolveIcdLabelFromCode(code).then((label) => {
+      if (!cancelled) setResolvedPrimaryIcdLabel(label);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    displayPatient?.doctor_primary_icd,
+    displayPatient?.doctor_primary_icd_label,
+  ]);
+
   const doctorHistoryForReports = useMemo(() => {
     const id = displayPatient?.id || displayPatient?.patient_id;
     if (!id) return { medical_history: "", family_medical_history: "" };
@@ -160,8 +212,8 @@ export default function PatientCard({
   }, [displayPatient?.id, displayPatient?.patient_id, displayPatient?.medical_history, displayPatient?.family_medical_history]);
 
   const demographics = useMemo(
-    () => (displayPatient ? buildDemographics(displayPatient) : []),
-    [displayPatient],
+    () => (displayPatient ? buildDemographics(displayPatient, resolvedPrimaryIcdLabel) : []),
+    [displayPatient, resolvedPrimaryIcdLabel],
   );
 
   const primaryCount = PRIMARY_ROW_COUNT * COLS;
