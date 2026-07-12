@@ -1837,6 +1837,20 @@ function AssessmentLauncher({
           return null;
         }
 
+        // Namespace each launched sub-form's values by the active sub id so two
+        // sub-forms that share field names don't overwrite each other. The
+        // sub-form still sees raw field names; storage keys are `${active}_${name}`.
+        const scopePrefix = `${active}_`;
+        const scopedValues = {};
+        Object.entries(values || {}).forEach(([key, val]) => {
+          if (key.startsWith(scopePrefix)) {
+            scopedValues[key.slice(scopePrefix.length)] = val;
+          }
+        });
+        const scopedOnChange = (name, value) => {
+          onChange(`${scopePrefix}${name}`, value);
+        };
+
         return (
           <div style={{ marginTop: 20 }}>
 
@@ -1848,8 +1862,8 @@ function AssessmentLauncher({
                 // REMOVE INTERNAL ACTION BUTTONS
                 actions: []
               }}
-              values={values}
-              onChange={onChange}
+              values={scopedValues}
+              onChange={scopedOnChange}
               assessmentRegistry={assessmentRegistry}
               sessionSubAssessmentIds={sessionSubAssessmentIds}
               layout="nested"
@@ -1886,79 +1900,23 @@ function AssessmentLauncher({
                         );
                       }
 
-const parentFieldNames = [];
+// Sub-form values are namespaced as `${active}_${fieldName}`. Collect only the
+// current sub-assessment's keys and strip the scope prefix so the backend
+// receives raw field names.
+const scopePrefix = `${active}_`;
+const subAssessmentData = {};
 
-// MAIN SOAP FIELDS
-(parentSections || []).forEach(section => {
+Object.entries(values || {}).forEach(([key, val]) => {
+  if (!key.startsWith(scopePrefix)) return;
 
-  (section.fields || []).forEach(field => {
+  // remove remarks (stored as `${active}_remarks`)
+  if (key.endsWith("_remarks")) return;
 
-    // direct field
-    if (field.name) {
-      parentFieldNames.push(field.name);
-    }
+  const rawName = key.slice(scopePrefix.length);
+  if (!rawName) return;
 
-    // cols field
-    if (field.cols?.length) {
-
-      field.cols.forEach(col => {
-
-        if (col.name) {
-          parentFieldNames.push(col.name);
-        }
-
-      });
-
-    }
-
-  });
-
+  subAssessmentData[rawName] = val;
 });
-
-// REMOVE SOAP FIELDS ONLY
-const subPrefixes = [];
-
-// DETECT PREFIXES FROM SUBASSESSMENT
-(normalizedSchema.sections || []).forEach(section => {
-
-  (section.fields || []).forEach(field => {
-
-    const fieldName =
-      field.name ||
-      field.key;
-
-    if (!fieldName) return;
-
-    // prefix before first _
-    const prefix =
-      fieldName.split("_")[0];
-
-    if (prefix) {
-      subPrefixes.push(prefix + "_");
-    }
-
-  });
-
-});
-
-// UNIQUE PREFIXES
-const uniquePrefixes = [...new Set(subPrefixes)];
-
-const subAssessmentData = Object.fromEntries(
-
-  Object.entries(values || {}).filter(
-    ([key]) =>
-
-      // ONLY CURRENT SUBASSESSMENT PREFIXES
-      uniquePrefixes.some(
-        prefix => key.startsWith(prefix)
-      )
-
-      // remove remarks
-      && !key.endsWith("_remarks")
-  )
-
-);
 
                       await forms.save(
                         templateDataId,
@@ -2005,8 +1963,7 @@ const subAssessmentData = Object.fromEntries(
               <AssessmentSectionPreviewModal
                 title={previewTitle}
                 schema={previewSchema}
-                values={values}
-                valuePrefix={previewValuePrefix}
+                values={scopedValues}
                 assessmentRegistry={assessmentRegistry}
                 onClose={() => setSubPreviewOpen(false)}
               />
