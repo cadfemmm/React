@@ -109,8 +109,10 @@ function resolveFieldValue(values, fieldName, valuePrefix) {
 function shouldUseValuePrefix(activeId) {
   if (activeId === undefined || activeId === null) return undefined;
   const id = String(activeId);
-  if (!id || id.includes("-")) return undefined;
-  if (/^\d+$/.test(id)) return undefined;
+  if (!id) return undefined;
+  // Sub-assessment values are namespaced by the active sub id (`${id}_${field}`)
+  // so each launched sub-form keeps its own isolated values. The report reader
+  // falls back to this prefix when a raw field name isn't present.
   return id;
 }
 
@@ -326,12 +328,16 @@ function collectSchemaFieldNames(fields = [], names = []) {
   return names;
 }
 
-function subAssessmentHasFilledValues(values, sections = []) {
+function subAssessmentHasFilledValues(values, sections = [], valuePrefix) {
   const fieldNames = collectSchemaFieldNames(
     sections.flatMap((section) => section.fields || []),
   );
 
-  return fieldNames.some((fieldName) => hasContent(values?.[fieldName]));
+  return fieldNames.some(
+    (fieldName) =>
+      hasContent(values?.[fieldName]) ||
+      (valuePrefix && hasContent(values?.[`${valuePrefix}_${fieldName}`])),
+  );
 }
 
 function getLauncherRegistryItems(field, assessmentRegistry) {
@@ -392,7 +398,9 @@ function resolveLauncherAssessments(field, values, assessmentRegistry) {
   registryItems.forEach((item) => {
     const subSchema = normalizeSubAssessmentSchema(item);
     if (!subSchema?.sections) return;
-    if (!subAssessmentHasFilledValues(values, subSchema.sections)) return;
+    const itemPrefix = item?.id ?? item?.value ?? item?.key;
+    if (!subAssessmentHasFilledValues(values, subSchema.sections, itemPrefix))
+      return;
     addAssessment(item);
   });
 
@@ -454,7 +462,9 @@ function appendFieldEntries(entries, field, values, assessmentRegistry, options 
       });
       appendSections(entries, subSchema.sections, values, assessmentRegistry, {
         ...options,
-        valuePrefix: shouldUseValuePrefix(selected.value ?? activeId) || valuePrefix,
+        valuePrefix:
+          shouldUseValuePrefix(selected.id ?? selected.value ?? activeId) ||
+          valuePrefix,
       });
 
       const remarksKeys = [

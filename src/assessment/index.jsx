@@ -1785,7 +1785,7 @@ useEffect(() => {
                     }
                     sessionSubAssessmentIds={sessionSubAssessmentIds}
                     parentSections={templates?.[activeTab]?.sections || []}
-                    enableSectionPreview={isPsychology}
+                    enableSectionPreview={false}
                   >
                     <div style={S.actionRow}>
                       {activeTab === "plan" && (
@@ -1799,61 +1799,39 @@ useEffect(() => {
                           Book Appointment
                         </button>
                       )}
-                      {isPsychology && (
-                        <button
-                          type="button"
-                          style={S.previewBtn}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "#f1f5f9";
-                            e.currentTarget.style.borderColor = "#94a3b8";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "#fff";
-                            e.currentTarget.style.borderColor = "#cbd5e1";
-                          }}
-                          onClick={() =>
-                            setSectionPreview({
-                              title: `Preview: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
-                              schema: activeSchema,
-                              values: assessmentsValues[activeTab] || {},
-                              assessmentRegistry:
-                                subAssessmentTemplate[activeTab] || {},
-                            })
-                          }
-                        >
-                          Preview
-                        </button>
-                      )}
-                      {(isOptometry || isAudiology) && activeTab === "plan" && (
-                        <button
-                          type="button"
-                          style={S.previewBtn}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "#f1f5f9";
-                            e.currentTarget.style.borderColor = "#94a3b8";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "#fff";
-                            e.currentTarget.style.borderColor = "#cbd5e1";
-                          }}
-                          onClick={() =>
-                            setSectionPreview({
-                              title: "Full Assessment Preview",
-                              entries: buildFullSoapReportEntries({
-                                tabs: TABS,
-                                templates,
-                                assessmentsValues,
-                                subAssessmentTemplate,
-                                supplementaryAppender: isOptometry
-                                  ? appendOptometrySoapSupplements
-                                  : appendAudiologySoapSupplements,
-                              }),
-                            })
-                          }
-                        >
-                          Preview
-                        </button>
-                      )}
+                      {(isOptometry || isAudiology || isPsychology) &&
+                        activeTab === "plan" && (
+                          <button
+                            type="button"
+                            style={S.previewBtn}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = "#f1f5f9";
+                              e.currentTarget.style.borderColor = "#94a3b8";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = "#fff";
+                              e.currentTarget.style.borderColor = "#cbd5e1";
+                            }}
+                            onClick={() =>
+                              setSectionPreview({
+                                title: "Full Assessment Preview",
+                                entries: buildFullSoapReportEntries({
+                                  tabs: TABS,
+                                  templates,
+                                  assessmentsValues,
+                                  subAssessmentTemplate,
+                                  supplementaryAppender: isOptometry
+                                    ? appendOptometrySoapSupplements
+                                    : isAudiology
+                                      ? appendAudiologySoapSupplements
+                                      : undefined,
+                                }),
+                              })
+                            }
+                          >
+                            Preview
+                          </button>
+                        )}
                       <button
                         style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
                         onMouseLeave={(e) =>
