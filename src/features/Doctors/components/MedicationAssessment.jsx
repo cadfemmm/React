@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
 import { API_URL } from "../../../platform/config/api.config";
+import { getCookie } from "../../../shared/api/apiClient";
 
 export default function MedicationAssessment({patient, onSubmit, onBack}) {
     const [formData, setFormData] = useState({})
@@ -26,8 +27,7 @@ export default function MedicationAssessment({patient, onSubmit, onBack}) {
 
         const fetchMedicationMasters = async () => {
         try {
-            const token =
-            localStorage.getItem("access_token");
+            const token = getCookie("access_token");
 
             const response = await fetch(
             API_URL.MEDICATION_MASTER,

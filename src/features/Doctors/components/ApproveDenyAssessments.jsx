@@ -4,10 +4,11 @@ import { ShimmerRow } from "../../../shared/ui/Shimmer";
 import EmptyState from "../../../shared/ui/EmptyState";
 import { Eye } from "lucide-react";
 import { updatePatientApprovalStatus } from "../../../shared/api/patientsList";
+import { getCookie } from "../../../shared/api/apiClient";
 
 const externalApi = axios.create();
 externalApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+  const token = getCookie("access_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

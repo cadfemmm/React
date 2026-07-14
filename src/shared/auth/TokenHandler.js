@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { setAccessToken } from "../api/apiClient";
+import { setAccessToken, clearAccessToken } from "../api/apiClient";
 import api from "../api/apiClient";
 import { API_URL } from "../../platform/config/api.config";
 
@@ -52,9 +52,8 @@ export default function TokenHandler() {
         localStorage.setItem("user_id", user.id)
       })
       .catch(() => {
-        // Token invalid — clear it
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("access_token_expiry");
+        // Token invalid — clear cookies + redirect
+        clearAccessToken();
         history.replace("/");  // back to login
       });
 
