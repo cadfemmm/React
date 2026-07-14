@@ -50,7 +50,7 @@ function App() {
   try {
     return (
       <div className="App">
-        <Router basename="">
+        <Router basename="/react">
           {/*
             TokenHandler sits inside Router so it has access to location/history.
             It runs on every page — if ?token= is in the URL it auto-authenticates
