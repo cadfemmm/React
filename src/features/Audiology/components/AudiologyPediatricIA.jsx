@@ -8,7 +8,7 @@ import { AuditoryAdvancedForm, AuditoryAdvancedFormObj } from "../auditoryassess
 import { VestibularAdvancedForm, VestibularAdvancedFormObj } from "../vestibularassessment";
 import PatientCard from "../../../shared/cards/PatientCard";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
-import api from "../../../shared/api/apiClient";
+import api, { getCookie } from "../../../shared/api/apiClient";
 import { BookAppointmentModal } from "../../book-appointment-modal/BookAppointmentModal"
 
 /* ===================== OPTIONS ===================== */
@@ -290,7 +290,7 @@ const handleOtoscopicUpload = async (file) => {
     const formData = new FormData();
     formData.append("file", pdfFile);
 
-    const token = localStorage.getItem("access_token");
+    const token = getCookie("access_token");
     console.log('[handleOtoscopicUpload] Sending to', OTOSCOPIC_EXTRACT_URL, 'with auth token:', !!token);
     const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
       method: "POST",
