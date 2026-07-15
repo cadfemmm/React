@@ -1090,7 +1090,7 @@ const submitAndSave = () => {
             ]}
           ]},
           { name: "anthro_remarks", label: "Remarks", type: "input" },
-          
+             {name:"forever_young_uplaod", label:'For Ever Young Report',type:'attach-file'},
           { 
             type: "accordion", 
             name: "vital_signs_accordion",
@@ -1107,7 +1107,7 @@ const submitAndSave = () => {
                 { name: "pain", label: "Pain Score", type: "input", readOnly: true },
                
                 {name:"vital_signs_others",label:"Others",type:"input"},
-                {name:"vital_signs_upload",label:"upload",type:"attach-file"}
+                
                 
               ]}
             ]

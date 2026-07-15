@@ -899,13 +899,14 @@ const submitAndSave = () => {
           },
 
           { name: "fluid_intake_details", label: "Fluid Intake", type: "input", showIf: { field: "current_diet_intake_type", oneOf: ["oral_enteral", "enteral"] } },
+           { name: "ons_regime", label: "Oral Nutrition Supplement Regime", type: "input" },
           {
             name: "ffq_assessment",
             label: "Food Frequency Questionnaire (FFQ)",
             type: "assessment-launcher",
             options: [{ label: "Food Frequency Questionnaire (FFQ)", value: "FFQ" }],
           },
-          { name: "ons_regime", label: "Oral Nutrition Supplement Regime", type: "input" }
+         
         ]
       }
     ]
@@ -950,6 +951,7 @@ const submitAndSave = () => {
             ]}
           ]},
           { name: "anthro_remarks", label: "Remarks", type: "input" },
+          {name:"forever_young_uplaod", label:'For Ever Young Report',type:'attach-file'},
           { type: "subheading", label: "Vital Signs & Measurements" },
           { type: "row", fields: [
             { name: "bp", label: "Blood Pressure", type: "input", readOnly: true },
@@ -960,7 +962,7 @@ const submitAndSave = () => {
             { name: "rbs", label: "Random Blood Sugar", type: "input", readOnly: true },
             { name: "pain", label: "Pain Score", type: "input", readOnly: true },
             {name:"vital_others",label:'Others',type:'input'},
-            {name:"vital_uplaod", label:'Upload',type:'attach-file'}
+            
           ]},
           { name: "diet_prognosis", label: "Diet Prognosis", type: "single-select", options: [
             { label: "Excellent", value: "excellent" },
