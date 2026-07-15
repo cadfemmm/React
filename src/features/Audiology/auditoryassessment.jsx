@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import CommonFormBuilder from "../CommonComponenets/FormBuilder";
 import {TYMPANOGRAM_EXTRACT_URL} from "../../platform/config/api.config"
-import { getCookie } from "../../shared/api/apiClient"
 
 const valueToText = (value) =>
   value === undefined || value === null ? "" : String(value);
@@ -582,7 +581,7 @@ export function AuditoryAdvancedFormObj({ onBack, mode  }) {
 
     const formData = new FormData();
     formData.append("file", file);
-const token = getCookie("access_token");
+const token = localStorage.getItem("access_token");
     const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
