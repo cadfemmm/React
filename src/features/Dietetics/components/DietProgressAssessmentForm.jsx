@@ -637,8 +637,7 @@ const submitAndSave = () => {
     sections: [
         {
         fields: [
-          { name: "chief_complaint", label: "Chief Complaint", type: "input" },
-          { name: "hpi", label: "History of Presenting Illness (HPI)", type: "input" },
+          
             {
             name: "session_for",
             label: "Session For",
@@ -678,7 +677,7 @@ const submitAndSave = () => {
     includes: "yes"
   }
 },
-            { name: "case_overview", label: "Case Overview", type: "input" },
+           
 
 
             // { name: "new_complaints", label: "New Complaints", type: "input" },
@@ -722,21 +721,8 @@ const submitAndSave = () => {
     sections: [
         {
         fields: [
-           
- {
-            name: "objectives",
-            label: "Objective(s)",
-            type: "dynamic-section",
-            fields: [
-              {
-                name: "objective",
-                label: "Objective",
-                type: "input"
-              }
-            ]
-          },
            { name: "case_overview", label: "Case Overview", type: "input" },
-           {
+                      {
   type: "radio",
   name: "modalities",
   label: "Modalities",
@@ -779,17 +765,24 @@ const submitAndSave = () => {
     includes: "others"
   }
 },
+ {
+            name: "objectives",
+            label: "Objective(s)",
+            type: "dynamic-section",
+            fields: [
+              {
+                name: "objective",
+                label: "Objective",
+                type: "input"
+              }
+            ]
+          },
+          
+
 {
             name: "strateggies_activities",
             label: "Strateggies/Activities",
-            type: "checkbox-group",
-            options: [
-                { label: "Medical Nutrition Therapy", value: "mnt" },
-                { label: "Therapeutic Diet Preparation", value: "tdp" },
-                { label: "Nutrition Support", value: "nutrition_support" },
-                { label: "Dietary Education", value: "dietary_education" },
-                
-            ]
+            type: "input"
             },
             
 {
@@ -833,11 +826,8 @@ const DIET_ASSESSMENT_SCHEMA = {
   sections: [
     {
       fields: [
-        { type: "input", label: "Clinical Impression" },
-        {
-          type: "subheading",
-          label: "A – ANALYSIS / ASSESSMENT / ACTION"
-        },
+       
+        
 
         {
           name: "tasks",
@@ -878,18 +868,10 @@ const DIET_ASSESSMENT_SCHEMA = {
     sections: [
         {
         fields: [
-          { type: "subheading", label: "Short-Term Goals (2–4 weeks)" },
-        {
-            type: "dynamic-goals",
-            name: "short_term_goals"
-          },
-          { type: "subheading", label: "Long-Term Goals (6–12 weeks)" },
-          {
-            type: "dynamic-goals",
-            name: "long_term_goals"
-          },
+     
             { name: "plan", label: "Plan", type: "input" },
             { name: "comment", label: "Comment", type: "input" },
+            { name: "remarks", label: "Remarks", type: "input" },
         ]
         }
     ]
@@ -972,7 +954,10 @@ const activeTabIdx = tabOrder.indexOf(activeTab);
     
   }                 
 
-
+console.log (DIET_SUBJECTIVE_SCHEMA);
+console.log (DIET_OBJECTIVE_SCHEMA);
+console.log (DIET_ASSESSMENT_SCHEMA);
+console.log (DIET_PLAN_SCHEMA);
 
 return (
   <div style={dietOuterWrap}>

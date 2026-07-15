@@ -28,6 +28,7 @@ import NursingGroupIntervention from "../Nursing/components/GroupIntervention";
 import POGroupIntervention from "../Prosthetics & Orthotics/GroupIntervention";
 import AudiologyGroupAssessmentForm from "../Audiology/components/AudiologyGroup";
 import OptometryGroupIntervention from "../Optometry/components/OptometryGroup";
+import DietGroupIntervention from "../Dietetics/components/DietGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
 
 const ASSESSMENT_MAP = {
@@ -50,6 +51,7 @@ const GROUP_INTERVENTION_MAP = {
   "Prosthetics & Orthotics": POGroupIntervention,
   "Audiology": AudiologyGroupAssessmentForm,
   "Optometry": OptometryGroupIntervention,
+  "Dietetics": DietGroupIntervention,
 };
 
 const DEPARTMENT_APPOINTMENT_SLUGS = {

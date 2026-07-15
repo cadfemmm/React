@@ -2,12 +2,15 @@ import React from "react";
 import InitialAssessmentForm from "../components/DietInitialAssessmentForm";
 import DietFollowupAssessmentForm from "../components/DietFollowupAssessmentForm";
 import DietProgressAssessmentForm from "../components/DietProgressAssessmentForm";
+import DietGroupIntervention from "../components/DietGroup";
 
 export default function DietPatientspage({
   patient,
+  selectedPatients = [],
+  patients = [],
   mode,
   onBack,
-  onSubmit
+  onSubmit,
 }) {
   switch (mode) {
     case "followup":
@@ -30,10 +33,13 @@ export default function DietPatientspage({
 
     case "group":
       return (
-        <div style={{ padding: 40 }}>
-          <h2>Group Intervention</h2>
-          <button onClick={onBack}>← Back</button>
-        </div>
+        <DietGroupIntervention
+          patient={patient}
+          selectedPatients={selectedPatients}
+          patients={patients}
+          onBack={onBack}
+          onSubmit={onSubmit}
+        />
       );
 
     default:
