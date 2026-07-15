@@ -19,13 +19,12 @@ import latest from "./pages/Carddisplay.js";
 // import PatientDetails from "./features/Psychology/components/PatientDetails.jsx";
 import DeptEntry from "./pages/DeptEntry";
 import TokenHandler from "./shared/auth/TokenHandler";
+import { getCookie } from "./shared/api/apiClient";
 
 // ── Auth check ──────────────────────────────────────────────────────────────
 function isAuthenticated() {
-  const token  = localStorage.getItem("access_token");
-  const expiry = localStorage.getItem("access_token_expiry");
+  const token = getCookie("access_token");
   if (!token) return false;
-  if (expiry && new Date(expiry) <= new Date()) return false;
   return true;
 }
 
@@ -51,7 +50,7 @@ function App() {
   try {
     return (
       <div className="App">
-        <Router basename="">
+        <Router basename="/react">
           {/*
             TokenHandler sits inside Router so it has access to location/history.
             It runs on every page — if ?token= is in the URL it auto-authenticates

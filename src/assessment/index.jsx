@@ -34,6 +34,7 @@ import { OTOSCOPIC_EXTRACT_URL, TYMPANOGRAM_EXTRACT_URL } from "../platform/conf
 // API calls
 import forms from "./forms.js";
 import session from "./session.js";
+import { getCookie } from "../shared/api/apiClient";
 
 // ICD Components
 import AudiologyICDSection from "../features/Audiology/components/AudiologyICDSection";
@@ -1244,7 +1245,7 @@ useEffect(() => {
       const pdfFile = new File([pdfBlob], file.filename, { type: file.type });
       const formData = new FormData();
       formData.append("file", pdfFile);
-      const token = localStorage.getItem("access_token");
+      const token = getCookie("access_token");
       const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
         method: "POST",
         headers: token ? { "Authorization": `Bearer ${token}` } : {},
@@ -1481,7 +1482,7 @@ useEffect(() => {
 
       const formData = new FormData();
       formData.append("file", file);
-      const token = localStorage.getItem("access_token");
+      const token = getCookie("access_token");
 
       const response = await fetch(TYMPANOGRAM_EXTRACT_URL, {
         method: "POST",
