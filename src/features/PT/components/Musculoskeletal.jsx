@@ -9,6 +9,11 @@ import PatientCard from "../../../shared/cards/PatientCard";
 import generalImg from "../../../assets/General.png";
 import upperLimbImg from "../../../assets/Upper Limb.png";
 import lowerLimbImg from "../../../assets/LowerLimb.png";
+import ODIForm from "./ODI";
+import NDIForm from "./NDI";
+import MLTForm from "./MLT";
+import NeurodynamicTestsForm from "./NDT";
+import PaivmForm from "./Paivm";
 
 
 const YES_NO_OPTIONS = [
@@ -70,6 +75,11 @@ const MUSCULOSKELETAL_ASSESSMENT_REGISTRY = {
   brat: BRATForm,
   lefs: LEFSForm,
   isometric: IsometricTestForm,
+  oswestry: ODIForm,
+  neck_disability: NDIForm,
+  muscle_length: MLTForm,
+  neurodynamic_test: NeurodynamicTestsForm,
+  paivm: PaivmForm
 }
 
 const MSK_CONTAINER_SCHEMA = {
@@ -593,7 +603,7 @@ const OBJECTIVE_SCHEMA = {
           type: "assessment-launcher",
           options: [
             { label: "Oswestry Disability Index",           value: "oswestry",   regions: ["spine_general"] },
-            { label: "Neck Disability Index",               value: "ndi",        regions: ["spine_general"] },
+            { label: "Neck Disability Index",               value: "neck_disability",        regions: ["spine_general"] },
             { label: "Lower Extremity Functional Scale (LEFS)", value: "lefs",   regions: ["lower_limb"] },
             { label: "Upper Limb Functional Scale (ULFS)",  value: "ulfs",       regions: ["spine_general", "upper_limb"] },
             { label: "Brachial Assessment Tool (BRAT)",     value: "brat",       regions: ["spine_general", "upper_limb"] },
@@ -614,7 +624,7 @@ const OBJECTIVE_SCHEMA = {
           options: [
             { label: "Muscle Length Test",                                        value: "muscle_length",        regions: [] },
             { label: "Balance Test",                                              value: "balance_test",         regions: [] },
-            { label: "Neurodynamic Test",                                         value: "neurodynamic",         regions: ["spine_general"] },
+            { label: "Neurodynamic Test",                                         value: "neurodynamic_test",         regions: ["spine_general"] },
             { label: "PAIVM",                                                     value: "paivm",                regions: ["spine_general"] },
             { label: "Compression / Distraction Test",                            value: "compression",          regions: ["spine_general"] },
             { label: "Lower Limb Discrepancy Test",                               value: "lld_general",          regions: ["spine_general"] },
