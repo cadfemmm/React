@@ -3507,6 +3507,18 @@ case "grid-table-advanced": {
                 </select>
               );
             }
+if (typeof col === "object" && col.type === "checkbox") {
+  return (
+    <div key={fieldKey} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <input
+        type="checkbox"
+        checked={!!values[fieldKey]}
+        onChange={e => onChange(fieldKey, e.target.checked)}
+        style={{ width: 18, height: 18, cursor: "pointer" }}
+      />
+    </div>
+  );
+}
 if (typeof col === "object" && col.type === "radio") {
   return (
     <div key={fieldKey} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
