@@ -10,6 +10,7 @@ import PatientCard from "../../../shared/cards/PatientCard";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
 import api from "../../../shared/api/apiClient";
 import { BookAppointmentModal } from "../../book-appointment-modal/BookAppointmentModal"
+import { fetchBookingQueue } from "../../book-appointment-modal/bookingQueueService.jsx";
 
 /* ===================== OPTIONS ===================== */
 
@@ -52,8 +53,9 @@ export default function AudiologyDepartmentPediatricPage({ patient, onUpdatePati
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [bookedEquipmentIds, setBookedEquipmentIds] = useState([]);
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const [bookingQueueRow, setBookingQueueRow] = useState(null);
   const bookingRow = {
-    id: patient?.id,
+    id: bookingQueueRow?.booking_id || bookingQueueRow?.id,
     patient: patient?.full_name || patient?.name || "",
     refId: patient?.referral_id || "",
     department: "Audiology",
@@ -126,6 +128,30 @@ export default function AudiologyDepartmentPediatricPage({ patient, onUpdatePati
 
   /* ---------------- EQUIPMENT LIST FROM API ---------------- */
   const departmentId = "5d5a96c5-4d06-41f4-8a66-9f8bccbc0f98";
+  useEffect(() => {
+    const loadBookingQueue = async () => {
+      try {
+        const data = await fetchBookingQueue({
+          department_id: departmentId,
+          limit: 100,
+        });
+
+        const patientName = (patient?.full_name || patient?.name || "").trim().toLowerCase();
+        const row = data.rows.find(
+          (r) => (r.patient_name || "").trim().toLowerCase() === patientName,
+        );
+
+        setBookingQueueRow(row || null);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (patient) {
+      loadBookingQueue();
+    }
+  }, [patient, departmentId]);
+
   useEffect(() => {
     const fetchEquipmentList = async () => {
       try {
@@ -1750,7 +1776,13 @@ const OBJECTIVE_SCHEMA = {
           <div style={{ marginTop: "8px" }}>
           <button
             type="button"
-            onClick={() => setAppointmentModalOpen(true)}
+            onClick={() => {
+              if (!bookingRow.id) {
+                console.error("Missing booking ID");
+                return;
+              }
+              setAppointmentModalOpen(true);
+            }}
             style={{
               backgroundColor: "#0d6efd",
               color: "#fff",

@@ -481,19 +481,35 @@ useEffect(() => {
           (r.patient_name || "")
             .trim()
             .toLowerCase() === patientName &&
-          (r.department || "")
+          (r.department || r.department_name || r.configuration_details?.department_name || "")
             .trim()
             .toLowerCase() === departmentName
+      );
+
+      const fallbackRow = data.rows?.find(
+        (r) =>
+          (r.patient_name || "")
+            .trim()
+            .toLowerCase() === patientName,
       );
 
       // console.log("department:", department);
       // console.log("patient:", patientName);
       // console.log("matched booking row:", row);
 
-      setBookingQueueRow(row || null);
+      setBookingQueueRow(row || fallbackRow || null);
     })
-    .catch(console.error);
+    .catch((error) => {
+      console.error(error);
+      setBookingQueueRow(null);
+    });
 }, [patient, department]);
+
+  const bookingQueueId =
+    bookingQueueRow?.booking_id ||
+    bookingQueueRow?.id ||
+    bookingQueueRow?.bookingId ||
+    bookingQueueRow?.booking_queue_id;
 
   // Mapping template to the schema registry
   const loadTemplates = async () => {
@@ -1794,7 +1810,16 @@ useEffect(() => {
                           style={S.bookAppointmentBtn}
                           onMouseEnter={(e) => (e.currentTarget.style.background = "#0b4fd4")}
                           onMouseLeave={(e) => (e.currentTarget.style.background = "#0d6efd")}
-                          onClick={() => setAppointmentModalOpen(true)}
+                          onClick={() => {
+                            if (!bookingQueueId) {
+                              setToast({
+                                message: "Booking queue ID not found for this patient.",
+                                variant: "error",
+                              });
+                              return;
+                            }
+                            setAppointmentModalOpen(true);
+                          }}
                         >
                           Book Appointment
                         </button>
@@ -1929,9 +1954,9 @@ useEffect(() => {
         <AudiologySttFloatingMic onToast={setToast} />
       )}
       <BookAppointmentModal
-        open={appointmentModalOpen}
+        open={appointmentModalOpen && !!bookingQueueId}
         row={{
-          id: bookingQueueRow?.booking_id,
+          id: bookingQueueId,
           patient: patient?.full_name || patient?.name || "",
           refId: patient?.referral_id || "",
           department,

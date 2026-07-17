@@ -254,6 +254,7 @@ export const BookAppointmentModal = ({ open, row, initialMode = 'doctor', onClos
     }, [reservation === null || reservation === void 0 ? void 0 : reservation.reservation_expires_at]);
     if (!open || !row)
         return null;
+    const bookingId = row.id || row.booking_id || row.bookingId || row.booking_queue_id;
     const closeAndReset = () => {
         setStep(1);
         setSelectedSlots([]);
@@ -272,13 +273,13 @@ export const BookAppointmentModal = ({ open, row, initialMode = 'doctor', onClos
     const handleConfirmBooking = async () => {
         if (!row || !reservation || !primarySlot)
             return;
-        if (!row.id) {
+        if (!bookingId) {
             toast.error('Missing booking ID');
             return;
         }
         setConfirming(true);
         try {
-            const data = await confirmBooking(row.id, {
+            const data = await confirmBooking(bookingId, {
                 booking_mode: reservation.service_details.booking_mode,
                 slot_date: toApiDate(reservation.slot_resource.selected_date),
                 start_time: reservation.slot_resource.start_time,
@@ -301,13 +302,13 @@ export const BookAppointmentModal = ({ open, row, initialMode = 'doctor', onClos
         var _a, _b;
         if (!row || !primarySlot)
             return;
-        if (!row.id) {
+        if (!bookingId) {
             toast.error('Missing booking ID');
             return;
         }
         setReserving(true);
         try {
-            const data = await reserveBooking(row.id, {
+            const data = await reserveBooking(bookingId, {
                 booking_mode: (_a = primarySlot.booking_mode) !== null && _a !== void 0 ? _a : MODE_LABELS[mode],
                 slot_date: toApiDate(primarySlot.slot_date),
                 start_time: primarySlot.start_time,
@@ -344,13 +345,13 @@ export const BookAppointmentModal = ({ open, row, initialMode = 'doctor', onClos
     const handleContinueToSlots = async () => {
         if (!row)
             return;
-        if (!row.id) {
+        if (!bookingId) {
             toast.error('Missing booking ID');
             return;
         }
         setSlotsLoading(true);
         try {
-            const data = await continueSlots(row.id, {
+            const data = await continueSlots(bookingId, {
                 booking_mode: MODE_LABELS[mode],
                 date_from: toApiDate(fromDate),
                 date_to: toApiDate(toDate),
