@@ -30,6 +30,7 @@ import AudiologyGroupAssessmentForm from "../Audiology/components/AudiologyGroup
 import OptometryGroupIntervention from "../Optometry/components/OptometryGroup";
 import DietGroupIntervention from "../Dietetics/components/DietGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
+import SpeechGroupIntervention from "../SpeechandLanguage/Speechandlanguagegroup";
 
 const ASSESSMENT_MAP = {
   "Nursing":                  NursingPatientDetails,
@@ -52,6 +53,7 @@ const GROUP_INTERVENTION_MAP = {
   "Audiology": AudiologyGroupAssessmentForm,
   "Optometry": OptometryGroupIntervention,
   "Dietetics": DietGroupIntervention,
+  "Speech & Language Therapy": SpeechGroupIntervention,
 };
 
 const DEPARTMENT_APPOINTMENT_SLUGS = {
