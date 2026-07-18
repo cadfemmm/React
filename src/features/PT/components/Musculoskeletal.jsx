@@ -14,6 +14,7 @@ import NDIForm from "./NDI";
 import MLTForm from "./MLT";
 import NeurodynamicTestsForm from "./NDT";
 import PaivmForm from "./Paivm";
+import ULFSForm from "./ULFS";
 
 
 const YES_NO_OPTIONS = [
@@ -79,7 +80,8 @@ const MUSCULOSKELETAL_ASSESSMENT_REGISTRY = {
   neck_disability: NDIForm,
   muscle_length: MLTForm,
   neurodynamic_test: NeurodynamicTestsForm,
-  paivm: PaivmForm
+  paivm: PaivmForm,
+  ulfs: ULFSForm
 }
 
 const MSK_CONTAINER_SCHEMA = {
