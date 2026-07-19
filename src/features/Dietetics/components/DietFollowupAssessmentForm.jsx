@@ -5,10 +5,6 @@ import { DIET_ASSESSMENT_REGISTRY } from "./DietAssessmentWrapper";
 import FFQAssessment from "./FFQAssessment";
 import GrowthChartAssessment from "./GrowthChart";
 import dietImage from "../../../assets/diet_image.png";
-import NewSGAForm from "./NewSGAForm";
-
-
-
 const ET_OPTIONS = {
   "increased_energy_expenditure": [
     { label: "Voluntary or involuntary physical activity/movement", value: "voluntary_activity" },
@@ -45,7 +41,6 @@ export default function DietFollowupAssessmentForm({ patient, onSubmit, onBack }
     ...DIET_ASSESSMENT_REGISTRY,
     "Growth Chart": DietGrowthChartAssessment,
     FFQ: FFQAssessment,
-    NewSGA: NewSGAForm,
   };
 
   const [form, setForm] = useState({
@@ -1125,11 +1120,13 @@ const submitAndSave = () => {
 
   const DIET_ASSESSMENT_SCHEMA = {
     actions: DIET_ACTIONS,
-    sections: [{ fields: [
-
-    
-      { type: "input", label: "Clinical Impression" }
-    ] }]
+    sections: [{
+      fields: [{
+        name: "clinical_impression",
+        label: "Clinical Impression",
+        type: "textarea",
+      }],
+    }],
   };
 
   const DIET_MEAL_PLAN_OPTIONS = [
@@ -1305,7 +1302,6 @@ const submitAndSave = () => {
       ...diagnosisComputedValues(form.diagnosis_problems)
   }
 
-     
         
   return (
     <div style={dietOuterWrap}>

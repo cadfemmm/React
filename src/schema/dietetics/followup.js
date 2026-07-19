@@ -856,7 +856,8 @@ const ASSESSMENT = {
     {
       "fields": [
         {
-          "type": "input",
+          "type": "textarea",
+          "name": "clinical_impression",
           "label": "Clinical Impression"
         }
       ]

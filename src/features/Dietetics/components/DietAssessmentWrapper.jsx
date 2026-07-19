@@ -1,5 +1,9 @@
 import React from "react";
 import AssessmentRenderer from "./AssessmentRenderer";
+import { NRS_REGISTRY_ENTRY } from "../../../schema/dietetics/NRS";
+import { MST_REGISTRY_ENTRY } from "./MST";
+import { BIA_REGISTRY_ENTRY } from "./BIA";
+import { NEWSGA_REGISTRY_ENTRY } from "./NewSGAForm";
 
 /**
  * Creates a wrapper component for Diet assessments that adapts them to the
@@ -31,10 +35,11 @@ function createDietAssessmentWrapper(assessmentKey) {
 }
 
 export const DIET_ASSESSMENT_REGISTRY = {
-  NRS: createDietAssessmentWrapper("NRS"),
+  NRS: NRS_REGISTRY_ENTRY,
+  MST: MST_REGISTRY_ENTRY,
+  BIA: BIA_REGISTRY_ENTRY,
+  NewSGA: NEWSGA_REGISTRY_ENTRY,
   "Growth Chart": createDietAssessmentWrapper("Growth Chart"),
   "PG-SGA-Metric-version": createDietAssessmentWrapper("PG-SGA-Metric-version"),
-  MST: createDietAssessmentWrapper("MST"),
-  BIA: createDietAssessmentWrapper("BIA"),
-  SGA: createDietAssessmentWrapper("SGA")
+  SGA: createDietAssessmentWrapper("SGA"),
 };

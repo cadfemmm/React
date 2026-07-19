@@ -1,38 +1,82 @@
-// AssessmentRenderer.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import PGSGAMetric from "../components/PGSGAMetric";
-import MST from "../components/MST";
-import NRS from "../components/NRS";
-import BIA from "../components/BIA";
 import GrowthChartAssessment from "../components/GrowthChart";
 import SGAForm from "../components/SGAForm";
+import { NRS_REGISTRY_ENTRY } from "../../../schema/dietetics/NRS";
+import { MST_REGISTRY_ENTRY } from "./MST";
+import { BIA_REGISTRY_ENTRY } from "./BIA";
+import { NEWSGA_REGISTRY_ENTRY } from "./NewSGAForm";
 
 const AssessmentComponents = {
   "PG-SGA-Metric-version": PGSGAMetric,
-  "MST": MST,
-  "NRS": NRS,
   "Growth Chart": GrowthChartAssessment,
-  "BIA": BIA,
-  "SGA": SGAForm
+  SGA: SGAForm,
 };
 
-export default function AssessmentRenderer({ selected, onSave,onBack, initialFormData }) {
+const SchemaAssessments = {
+  NRS: NRS_REGISTRY_ENTRY,
+  MST: MST_REGISTRY_ENTRY,
+  BIA: BIA_REGISTRY_ENTRY,
+  NewSGA: NEWSGA_REGISTRY_ENTRY,
+};
+
+const isSchemaAssessment = (entry) =>
+  entry &&
+  typeof entry === "object" &&
+  typeof entry !== "function" &&
+  !entry.$$typeof &&
+  (Array.isArray(entry.sections) || Array.isArray(entry.fields));
+
+export default function AssessmentRenderer({
+  selected,
+  onSave,
+  onBack,
+  initialFormData,
+}) {
+  const schemaEntry = selected ? SchemaAssessments[selected] : null;
+  const useSchema = isSchemaAssessment(schemaEntry);
+  const [values, setValues] = useState(initialFormData || {});
+
+  useEffect(() => {
+    setValues(initialFormData || {});
+  }, [selected, initialFormData]);
+
   if (!selected) return <p>Select an assessment</p>;
+
+  if (useSchema) {
+    const handleChange = (name, value) => {
+      setValues((prev) => {
+        const next = { ...prev, [name]: value };
+        onSave?.(selected, next);
+        return next;
+      });
+    };
+
+    return (
+      <CommonFormBuilder
+        schema={schemaEntry}
+        values={values}
+        onChange={handleChange}
+        layout="nested"
+      />
+    );
+  }
+
   const Component = AssessmentComponents[selected];
   if (!Component) return <p>No component for {selected}</p>;
 
-  // provide both onSave and onSubmit for the inner component (some components call onSubmit)
   const handleOnSubmit = (payload) => {
-    // If the component gives a full payload, convert to the (assessmentName, formData) contract expected by PatientDetails:
-    // keep the payload object as formData (you can adapt later if you want to extract notes/score)
     if (onSave) onSave(selected, payload);
   };
 
-  return <Component
-           onSave={(name, data) => onSave && onSave(name, data)}
-           onSubmit={handleOnSubmit}
-           assessmentName={selected}
-           initialFormData={initialFormData}
-            onBack={onBack} 
-         />;
+  return (
+    <Component
+      onSave={(name, data) => onSave && onSave(name, data)}
+      onSubmit={handleOnSubmit}
+      assessmentName={selected}
+      initialFormData={initialFormData}
+      onBack={onBack}
+    />
+  );
 }

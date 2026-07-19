@@ -1,38 +1,60 @@
 import React, { useState, useCallback, useMemo } from "react";
-import AudiologyAssessment from "./AudiologyAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
-import AssessmentLoader from "../../assessment";
 import { formatAppointmentDateTime } from "../../shared/api/patientsList";
 import SOAPSession from "../Rap/session";
 
-/* ── Option cards ───────────────────────────────────────────────────────── */
-const OPTION_CARDS = [
+const DEFAULT_OPTION_CARDS = [
   {
-    id: "initial",  title: "Initial Assessment",
+    id: "initial",
+    title: "Initial Assessment",
     desc: "Comprehensive SOAP assessment for new patient visit",
-    icon: "📋", accent: "#1D4ED8",
-    tag: "New Patient", tagColor: "#dbeafe", tagText: "#1d4ed8",
+    icon: "📋",
+    accent: "#1D4ED8",
+    tag: "New Patient",
+    tagColor: "#dbeafe",
+    tagText: "#1d4ed8",
   },
   {
-    id: "followup", title: "Follow-up Visit",
+    id: "followup",
+    title: "Follow-up Visit",
     desc: "Review progress, update findings and adjust treatment plan",
-    icon: "🔄", accent: "#059669",
-    tag: "Returning", tagColor: "#d1fae5", tagText: "#065f46",
+    icon: "🔄",
+    accent: "#059669",
+    tag: "Returning",
+    tagColor: "#d1fae5",
+    tagText: "#065f46",
   },
   {
-    id: "progress", title: "Progress Intervention",
+    id: "progress",
+    title: "Progress Intervention",
     desc: "Document clinical interventions and track patient outcomes",
-    icon: "📈", accent: "#7C3AED",
-    tag: "Ongoing Care", tagColor: "#ede9fe", tagText: "#5b21b6",
+    icon: "📈",
+    accent: "#7C3AED",
+    tag: "Ongoing Care",
+    tagColor: "#ede9fe",
+    tagText: "#5b21b6",
   },
 ];
 
-export default function AudiologyPatients({
+/**
+ * Shared patients list UI (same as Optometry / Audiology):
+ * Patient | Date & Time | Reports | Begin Assessment
+ *
+ * Props:
+ *   department   - "Dietetics" | "Psychology" | …
+ *   queueLabel   - subtitle under Patients heading
+ *   renderAssessment({ patient, assessmentView, onBackToCards })
+ */
+export default function DepartmentAppointmentPatients({
   onBack,
   patients: patientsProp = [],
   totalPatients: totalPatientsProp,
   loading: loadingProp = false,
+  department,
+  queueLabel = "Today's appointment queue",
+  optionCards = DEFAULT_OPTION_CARDS,
+  renderAssessment,
 }) {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [reportsPatient, setReportsPatient] = useState(null);
@@ -61,7 +83,6 @@ export default function AudiologyPatients({
     });
   }, []);
 
-  /* Deep-link: auto-select patient once list is loaded */
   React.useEffect(() => {
     if (!patients.length) return;
     if (selectedPatient) return;
@@ -69,7 +90,6 @@ export default function AudiologyPatients({
     const params = new URLSearchParams(window.location.search);
     const patientId = params.get("patient_id");
     const assessment = params.get("assessment") || "initial";
-
     if (!patientId) return;
 
     const found = patients.find(
@@ -83,19 +103,16 @@ export default function AudiologyPatients({
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    const base = patients;
-    return !q
-      ? base
-      : base.filter(
-          (p) =>
-            (p.name || p.patient_name || "").toLowerCase().includes(q) ||
-            (p.email || "").toLowerCase().includes(q) ||
-            (p.mrn || p.ic || "").toLowerCase().includes(q) ||
-            (p.icd || "").toLowerCase().includes(q),
-        );
+    if (!q) return patients;
+    return patients.filter(
+      (p) =>
+        (p.name || p.patient_name || "").toLowerCase().includes(q) ||
+        (p.email || "").toLowerCase().includes(q) ||
+        (p.mrn || p.ic || "").toLowerCase().includes(q) ||
+        (p.icd || "").toLowerCase().includes(q),
+    );
   }, [patients, search]);
 
-  /* ── Patient reports (RAP session reports, Audiology only) ── */
   if (reportsPatient) {
     return (
       <div style={S.page}>
@@ -120,43 +137,21 @@ export default function AudiologyPatients({
         <SOAPSession
           patient={reportsPatient}
           onBack={handleBackFromReports}
-          department="Audiology"
+          department={department}
         />
       </div>
     );
   }
 
-  /* ── Assessment views ── */
-  if (selectedPatient && assessmentView === "initial") {
-    return (
-      <AssessmentLoader
-        department="Audiology"
-        patient={selectedPatient}
-        visitType="INITIAL"
-      />
-    );
-  }
-  if (selectedPatient && assessmentView === "followup") {
-    return (
-      <AudiologyAssessment
-        patient={selectedPatient}
-        mode="followup"
-        onSubmit={() => setAssessmentView(null)}
-        onBack={handleBackToCards}
-      />
-    );
-  }
-  if (selectedPatient && assessmentView === "progress") {
-    return (
-      <AssessmentLoader
-        department="Audiology"
-        patient={selectedPatient}
-        visitType="PROGRESS"
-      />
-    );
+  if (selectedPatient && assessmentView && renderAssessment) {
+    return renderAssessment({
+      patient: selectedPatient,
+      assessmentView,
+      onBackToCards: handleBackToCards,
+      onBackToPatients: handleBackToPatients,
+    });
   }
 
-  /* ── Assessment type selection ── */
   if (selectedPatient) {
     const initials = ((selectedPatient.name || selectedPatient.email || "P")
       .split(" ")
@@ -206,7 +201,7 @@ export default function AudiologyPatients({
 
         <div style={S.selectionBody}>
           <div style={S.cardsGrid}>
-            {OPTION_CARDS.map((card) => (
+            {optionCards.map((card) => (
               <AssessmentCard
                 key={card.id}
                 card={card}
@@ -219,7 +214,6 @@ export default function AudiologyPatients({
     );
   }
 
-  /* ── Patient list ── */
   return (
     <div style={S.page}>
       <div style={S.headerRow}>
@@ -229,7 +223,7 @@ export default function AudiologyPatients({
           </button>
           <div>
             <h1 style={S.pageTitle}>Patients</h1>
-            <p style={S.pageSub}>Today&apos;s audiology appointment queue</p>
+            <p style={S.pageSub}>{queueLabel}</p>
           </div>
         </div>
 

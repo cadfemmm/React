@@ -4,6 +4,7 @@ const AI_SERVICE_TARGET =
     process.env.REACT_APP_AI_SERVICE_TARGET || "https://ai.dev.rehab-software.com";
 const TYMPANOGRAM_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/tympanogram`;
 const OTOSCOPIC_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/otoscopic`;
+const SECA_BMI_EXTRACT_URL = `${AI_SERVICE_TARGET}/api/extract/seca-bmi`;
 // Dev: same-origin /new-stt via setupProxy.js. Prod: call AI service directly (or override via env).
 const STT_API_BASE =
     process.env.REACT_APP_STT_API_BASE ||
@@ -75,6 +76,7 @@ const API_URL = {
         RMS_API + `booking-queue/${encodeURIComponent(bookingId)}/book/confirm/`,
     DEPARTMENT_APPOINTMENTS: (departmentSlug) =>
         RMS_API + `appointment/appmts/${encodeURIComponent(departmentSlug)}/`,
+    DEPARTMENT_APPOINTMENTS_ROOT: RMS_API + "appointment/appmts/",
     // Billing price
     BILLING: (
         dept,
@@ -92,6 +94,7 @@ export {
     RMS_API,
     TYMPANOGRAM_EXTRACT_URL,
     OTOSCOPIC_EXTRACT_URL,
+    SECA_BMI_EXTRACT_URL,
     STT_SESSION_START_URL,
     STT_API_BASE,
     sttWebspeechUrl,

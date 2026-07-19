@@ -15,6 +15,14 @@ import {
   resolveScoreBoxDisplay,
   shouldDeriveAudiologyScores,
 } from "../../shared/utils/audiologyScoreComputes";
+import { resolveCustomFieldComponent } from "./customFieldRegistry";
+
+function isReactComponentType(candidate) {
+  return (
+    typeof candidate === "function" ||
+    (candidate && typeof candidate === "object" && candidate.$$typeof)
+  );
+}
 
 function DrawCanvasField({ field, value, onChange }) {
   const canvasRef = useRef(null);
@@ -247,6 +255,7 @@ export default function CommonFormBuilder({
   showScores,
   enableSectionPreview = false,
   parentSections = [],
+  patient = null,
 }) {
   const [internalSectionScores, setInternalSectionScores] = useState({});
 
@@ -264,6 +273,7 @@ export default function CommonFormBuilder({
     enableSectionPreview,
     parentSections,
     sessionSubAssessmentIds,
+    patient,
   };
 
   const handleSectionScoreToggle = (sectionKey) => {
@@ -1400,6 +1410,30 @@ function sanitizeFormField(field) {
 
   const next = { ...field };
 
+  // Backend / schema fields sometimes have a label but no `name`; inputs cannot bind without one.
+  if (
+    !next.name &&
+    next.type &&
+    !["subheading", "heading", "info-text", "row", "accordion"].includes(next.type)
+  ) {
+    const fromLabel = String(next.label || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+    if (fromLabel) next.name = fromLabel;
+  }
+
+  // Backend BIA upload field — use modal upload so file `data` is available for OCR
+  // (same approach as otoscopic / tympanogram report fields).
+  if (
+    next.type === "file-upload" &&
+    (next.name === "uploadedReport" ||
+      String(next.label || "").toLowerCase().includes("seca"))
+  ) {
+    next.type = "file-upload-modal";
+    next.accept = next.accept || "application/pdf,.pdf";
+  }
+
   switch (next.type) {
     case "accordion":
       next.children = Array.isArray(next.children)
@@ -1478,6 +1512,15 @@ function normalizeSubAssessmentSchema(assessment) {
     }
   }
 
+  // Single custom field stored as the whole body / assessment payload
+  if (
+    source?.type &&
+    !Array.isArray(source.sections) &&
+    !Array.isArray(source.fields)
+  ) {
+    source = { fields: [source] };
+  }
+
   const sections = Array.isArray(source)
     ? source
     : source.sections ||
@@ -1491,6 +1534,9 @@ function normalizeSubAssessmentSchema(assessment) {
     ...assessment,
     ...source,
     title: source.title || assessment.title || assessment.name,
+    // Avoid leaking schema string component onto the schema root
+    component: undefined,
+    Component: undefined,
     sections: sections.map((section) => ({
       ...section,
       fields: (Array.isArray(section?.fields) ? section.fields : []).map(
@@ -1773,9 +1819,14 @@ function AssessmentLauncher({
           return null;
         }
 
-        const SelectedComponent =
-          selectedAssessment.Component ||
-          selectedAssessment.component;
+        // Only a real React component (function). Schema strings like
+        // component: "growth-chart" belong on FIELD definitions inside the
+        // fetched form body — FormBuilder resolves those via customFieldRegistry.
+        const rawComponent =
+          selectedAssessment.Component || selectedAssessment.component;
+        const SelectedComponent = isReactComponentType(rawComponent)
+          ? rawComponent
+          : null;
 
         const normalizedSchema = normalizeSubAssessmentSchema(selectedAssessment);
         const previewSchema = resolveSubFormPreviewSchema(
@@ -1798,6 +1849,7 @@ function AssessmentLauncher({
                 layout="nested"
                 field={field}
                 assessmentKey={active}
+                patient={languageConfig?.patient}
               />
 
               {enableSectionPreview && previewSchema && (
@@ -1864,6 +1916,7 @@ function AssessmentLauncher({
               }}
               values={scopedValues}
               onChange={scopedOnChange}
+              patient={languageConfig?.patient}
               assessmentRegistry={assessmentRegistry}
               sessionSubAssessmentIds={sessionSubAssessmentIds}
               layout="nested"
@@ -2172,6 +2225,45 @@ function renderField(
 ) {
   const readOnly = formReadOnly || field.readOnly;
 
+  // type: "custom" + name → CUSTOM_FIELD_REGISTRY[name]
+  if (String(field.type) === "custom") {
+    const RegisteredCustom = resolveCustomFieldComponent(field);
+    if (RegisteredCustom) {
+      const objectValue =
+        value && typeof value === "object" && !Array.isArray(value)
+          ? value
+          : {};
+      const componentOnChange = (subNameOrData, subValue) => {
+        if (!field.name) {
+          onChange(subNameOrData, subValue);
+          return;
+        }
+        // Full replace: onChange({ ...allFields })
+        if (
+          subValue === undefined &&
+          subNameOrData &&
+          typeof subNameOrData === "object" &&
+          !Array.isArray(subNameOrData)
+        ) {
+          onChange(field.name, subNameOrData);
+          return;
+        }
+        // Field update: onChange("ageMonths", "12")
+        onChange(field.name, { ...objectValue, [subNameOrData]: subValue });
+      };
+      return (
+        <RegisteredCustom
+          field={field}
+          value={value}
+          values={field.name ? objectValue : values}
+          onChange={field.name ? componentOnChange : onChange}
+          patient={languageConfig?.patient}
+          readOnly={readOnly}
+        />
+      );
+    }
+  }
+
   switch (field.type) {
     case "input":
       return (
@@ -2242,10 +2334,14 @@ function renderField(
       );
 
     case "custom":
-      if (typeof field.render !== "function") {
-        return null;
+      if (typeof field.render === "function") {
+        return field.render({
+          values,
+          onChange,
+          patient: languageConfig?.patient,
+        });
       }
-      return field.render({ values, onChange });
+      return null;
 
     case "dynamic-goals": {
       const rows = values[field.name] || [];
@@ -4288,14 +4384,28 @@ if (typeof col === "object" && col.type === "radio") {
             accept={field.accept || "image/*,.pdf"}
             onChange={e => {
               const file = e.target.files?.[0];
-              if (file) {
-                onChange(field.name, {
-                  filename: file.name,
-                  size: file.size,
-                  type: file.type,
-                  lastModified: file.lastModified
-                });
+              if (!file) return;
+
+              const baseValue = {
+                filename: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+              };
+
+              if (field.storeFileData || field.extractOnUpload) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  onChange(field.name, {
+                    ...baseValue,
+                    data: reader.result,
+                  });
+                };
+                reader.readAsDataURL(file);
+                return;
               }
+
+              onChange(field.name, baseValue);
             }}
             style={{
               flex: 1,
