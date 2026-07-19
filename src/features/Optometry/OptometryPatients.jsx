@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useMemo } from "react";
 import OptometryFollowUpAssessment from "./components/OptometryFollowUpAssessment";
-import OptometryProgressAssessment from "./components/OptometryProgressAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
 import AssessmentLoader from "../../assessment";
 import { formatAppointmentDateTime } from "../../shared/api/patientsList";
+import SOAPSession from "../Rap/session";
 
 /* ── Option cards ───────────────────────────────────────────────────────── */
 const OPTION_CARDS = [
@@ -35,6 +35,7 @@ export default function OptometryPatients({
   loading: loadingProp = false,
 }) {
   const [selectedPatient,      setSelectedPatient]      = useState(null);
+  const [reportsPatient,       setReportsPatient]       = useState(null);
   const [assessmentView,       setAssessmentView]       = useState(null);
   const [submittedAssessments, setSubmittedAssessments] = useState({});
   const [submittedFollowups,   setSubmittedFollowups]   = useState({});
@@ -45,8 +46,17 @@ export default function OptometryPatients({
 
   const handleBackToPatients = useCallback(() => { setSelectedPatient(null); setAssessmentView(null); }, []);
   const handleBackToCards    = useCallback(() => { setAssessmentView(null); }, []);
+  const handleBackFromReports = useCallback(() => { setReportsPatient(null); }, []);
   const handleInitialSubmit  = useCallback((v) => setSubmittedAssessments(p => ({ ...p, [selectedPatient.id]: v })), [selectedPatient]);
   const handleFollowupSubmit = useCallback((v) => setSubmittedFollowups(p => ({ ...p, [selectedPatient.id]: v })), [selectedPatient]);
+
+  const openPatientReports = useCallback((p) => {
+    setReportsPatient({
+      ...p,
+      id: p.id ?? p.patient_id,
+      name: p.name || p.patient_name || p.email,
+    });
+  }, []);
 
   /* Deep-link: auto-select patient once list is loaded */
   React.useEffect(() => {
@@ -82,13 +92,38 @@ export default function OptometryPatients({
         );
   }, [patients, search]);
 
+  /* ── Patient reports (same RAP session reports, by patient id) ── */
+  if (reportsPatient) {
+    return (
+      <div style={S.page}>
+        <div style={S.headerRow}>
+          <div style={S.headerTitleRow}>
+            <button type="button" style={S.headerBackBtn} onClick={handleBackFromReports}>←</button>
+            <div>
+              <h1 style={S.pageTitle}>Reports</h1>
+              <p style={S.pageSub}>
+                {reportsPatient.name || reportsPatient.email || "Patient"}
+                {reportsPatient.id ? ` · ID ${reportsPatient.id}` : ""}
+              </p>
+            </div>
+          </div>
+        </div>
+        <SOAPSession
+          patient={reportsPatient}
+          onBack={handleBackFromReports}
+          department="Optometry"
+        />
+      </div>
+    );
+  }
+
   /* ── Assessment views ── */
   if (selectedPatient && assessmentView === "initial") {
-    const saved = submittedAssessments[selectedPatient.id] ?? null;
     return (
       <AssessmentLoader
         department="Optometry"
         patient={selectedPatient}
+        visitType="INITIAL"
       />
     );
   }
@@ -106,10 +141,10 @@ export default function OptometryPatients({
   }
   if (selectedPatient && assessmentView === "progress") {
     return (
-      <OptometryProgressAssessment
+      <AssessmentLoader
+        department="Optometry"
         patient={selectedPatient}
-        onSubmit={handleFollowupSubmit}
-        onBack={handleBackToCards}
+        visitType="PROGRESS"
       />
     );
   }
@@ -208,6 +243,7 @@ export default function OptometryPatients({
         <div style={S.thead}>
           <div style={S.th}>Patient</div>
           <div style={S.th}>Date &amp; Time</div>
+          <div style={S.th}>Reports</div>
           <div style={{ ...S.th, textAlign: "right" }}>Action</div>
         </div>
 
@@ -227,6 +263,7 @@ export default function OptometryPatients({
               patient={p}
               idx={idx}
               onStart={() => setSelectedPatient(p)}
+              onViewReports={() => openPatientReports(p)}
             />
           ))
         )}
@@ -263,7 +300,7 @@ function PageHeader({ title, sub, onBack, backLabel }) {
   );
 }
 
-function PatientRow({ patient: p, idx, onStart }) {
+function PatientRow({ patient: p, idx, onStart, onViewReports }) {
   const [hovered, setHovered] = useState(false);
   const initial = ((p.name || p.email || "P")[0] || "P").toUpperCase();
   return (
@@ -290,6 +327,13 @@ function PatientRow({ patient: p, idx, onStart }) {
 
       {/* Appointment date & time */}
       <div style={S.tdSchedule}>{formatAppointmentDateTime(p)}</div>
+
+      {/* Reports — same RAP session reports for this patient id */}
+      <div>
+        <button type="button" style={S.actionLink} onClick={onViewReports}>
+          View Reports
+        </button>
+      </div>
 
       {/* Action */}
       <div style={{ textAlign: "right" }}>
@@ -428,13 +472,13 @@ const S = {
     boxShadow: "0 24px 80px rgba(15,23,42,0.08)",
   },
   thead:      {
-    display: "grid", gridTemplateColumns: "2.5fr 1.5fr 1fr",
+    display: "grid", gridTemplateColumns: "2.2fr 1.5fr 1fr 1fr",
     padding: "18px 24px", background: "#F8FAFC",
     borderBottom: "1px solid #E6E8F0",
   },
   th:         { fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.18em" },
   tr:         {
-    display: "grid", gridTemplateColumns: "2.5fr 1.5fr 1fr",
+    display: "grid", gridTemplateColumns: "2.2fr 1.5fr 1fr 1fr",
     padding: "14px 20px", alignItems: "center",
     borderBottom: "1px solid #F1F5F9",
     transition: "background .15s, transform .15s",

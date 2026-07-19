@@ -288,6 +288,11 @@ const FFQ_SCHEMA = {
     },
   ],
 };
+export const FFQ_REGISTRY_ENTRY = {
+  id: "FFQ",
+  name: "Food Frequency Questionnaire (FFQ)",
+  ...FFQ_SCHEMA,
+};
 
 export default function FFQAssessment({ values, onChange }) {
   return (

@@ -51,6 +51,8 @@ import SpeechPatients from "../features/SpeechandLanguage/SpeechandlanguagePatie
 import GlobalVitalsOverlay from "../components/GlobalVitalsOverlay";
 import SpeechAndLanguage from "../features/SpeechandLanguage/SpeechandlanguageDashboard"
 import OptometryPatients from "../features/Optometry/OptometryPatients";
+import DieteticsPatients from "../features/Dietetics/DieteticsPatients";
+import PsychologyPatients from "../features/Psychology/PsychologyPatients";
 import ProstheticsPatients from "../features/Prosthetics & Orthotics/ProstheticsAndOrthoticsPatients";
 import NursingDepartmentPage from "../features/Nursing/pages/NursingPatientspage";
 import OtDepartmentPage from "../features/OT/pages/Patientspage";
@@ -635,7 +637,7 @@ export function MainContent({
       return <GenericDepartmentDashboard departmentName="Work & Vocational Rehab Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Psychology":
-      return <GenericDepartmentDashboard departmentName="Psychology Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
+      return <GenericDepartmentDashboard departmentName="Psychology Department" patients={patients} PatientsComponent={PsychologyPatients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Optometry":
       return <GenericDepartmentDashboard departmentName="Optometry Department" patients={patients} PatientsComponent={OptometryPatients} updatePatientInMainList={updatePatientInMainList} />;
@@ -647,7 +649,7 @@ export function MainContent({
       return <GenericDepartmentDashboard departmentName="Speech & Language Therapy Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Dietetics":
-      return <GenericDepartmentDashboard departmentName="Dietetics Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
+      return <GenericDepartmentDashboard departmentName="Dietetics Department" patients={patients} PatientsComponent={DieteticsPatients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Audiology":
       return <GenericDepartmentDashboard departmentName="Audiology Department" patients={patients} PatientsComponent={AudiologyPatients} updatePatientInMainList={updatePatientInMainList} />;

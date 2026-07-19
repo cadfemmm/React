@@ -29,7 +29,7 @@ import {
 
 // Schema Load
 import actions from "../schema/actions.js";
-import { OTOSCOPIC_EXTRACT_URL, TYMPANOGRAM_EXTRACT_URL } from "../platform/config/api.config";
+import { OTOSCOPIC_EXTRACT_URL, TYMPANOGRAM_EXTRACT_URL, SECA_BMI_EXTRACT_URL } from "../platform/config/api.config";
 
 // API calls
 import forms from "./forms.js";
@@ -61,12 +61,183 @@ const AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB = {
   plan: "7709d6f8-c3c3-4349-a2e2-54438cb6558f",
 };
 
+/** Audiology Progress Intervention SOAP — fixed backend form IDs. */
+const AUDIOLOGY_SOAP_TEMPLATES = {
+  PROGRESS: {
+    subjective: "56d61533-3b4e-4e0e-9123-397f071473d4",
+    objective: "a68254cb-15ac-4cba-a685-818267703dac",
+    assessment: "1859b807-d40f-4855-8192-4a39d42146b4",
+    plan: "7d5c24b1-666b-446e-86c8-036823a71af2",
+  },
+};
+
+/**
+ * Prefer screening_type matching for Dietetics. Hard-coded IDs are a fallback
+ * only when the department list has no usable screening_type on SOAP tabs.
+ */
+const DIETETICS_SOAP_TEMPLATES = {
+  FOLLOWUP: {
+    subjective: "dc27be73-1488-4aab-a9d3-b0c9631cbfd5",
+    objective: "f13be1e1-0db9-49fb-842e-ff807b27db3a",
+    assessment: "fb982377-7687-4ea4-a08a-f73f88e47041",
+    plan: "f2436d0f-ce73-407c-96ed-0db1afe4c570",
+  },
+  PROGRESS: {
+    subjective: "e0db3fb1-51d7-459c-9386-a330749e593e",
+    objective: "2d8c91dd-91c8-443b-99dc-a2d58d8dfd6c",
+    assessment: "dc92d608-7f58-4857-a2d9-af29700aae7e",
+    plan: "68d6f7d9-28c9-4b88-b108-b9758adde1f6",
+  },
+  GROUP: {
+    subjective: "23e5f383-948e-4b4f-a0db-79fbe72000da",
+    objective: "c98a8139-c671-49f3-b517-9167da1922e2",
+    assessment: "18cc8fcb-98c3-43f3-b43b-24d57f048c83",
+    plan: "17167976-3ae0-4dbf-8479-d33140e6d9ef",
+  },
+};
+
+/** Optometry SOAP templates by screening / visit type (backend form IDs). */
+const OPTOMETRY_SOAP_TEMPLATES = {
+  PROGRESS: {
+    subjective: "614dfc90-7814-41bb-a182-8a0eb72eda94",
+    objective: "f4b1d16f-76ab-4336-a56b-225c8843b1c8",
+    assessment: "1261f20f-9e60-4db8-904b-773dd6485a30",
+    plan: "45d3d73a-fbaf-473c-b2f7-1c71b7a1f940",
+  },
+};
+
+const normalizeVisitType = (visitType) => {
+  const key = String(visitType || "INITIAL")
+    .toUpperCase()
+    .replace(/[\s_-]+/g, "");
+  if (key === "FOLLOWUP" || key === "FOLLOWUPS") return "FOLLOWUP";
+  if (key === "PROGRESS" || key === "PROGRESSINTERVENTION") return "PROGRESS";
+  if (key === "GROUP" || key === "GROUPINTERVENTION" || key === "GROUPINTERVENTIONS")
+    return "GROUP";
+  return "INITIAL";
+};
+
+/** Value sent to session.start `visit_type` (backend expects GROUP_INTERVENTIONS). */
+const toSessionVisitType = (visitType) => {
+  const resolved = normalizeVisitType(visitType);
+  if (resolved === "GROUP") return "GROUP_INTERVENTIONS";
+  return resolved;
+};
+
+const getTemplateScreeningType = (template) => {
+  const raw =
+    template?.screening_type ||
+    template?.screeningType ||
+    template?.form_screening_type ||
+    template?.screening ||
+    template?.visit_type ||
+    "";
+
+  const value =
+    typeof raw === "object" && raw !== null
+      ? raw.name || raw.label || raw.value || raw.screening_type || ""
+      : raw;
+
+  return String(value)
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+};
+
+const matchesDieteticsScreeningType = (template, visit) => {
+  const screening = getTemplateScreeningType(template);
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+
+  if (visit === "INITIAL") {
+    // Exact "initial" — do not treat Progress / Group names as Initial.
+    return screening === "initial";
+  }
+  if (visit === "FOLLOWUP") {
+    return (
+      screening === "follow up" ||
+      screening === "followup" ||
+      screening.includes("follow up") ||
+      /^followup[_\s]/.test(String(template?.name || "").toLowerCase())
+    );
+  }
+  if (visit === "PROGRESS") {
+    // Backend uses screening_type "PROGRESS" / names like "Progress Intervention …"
+    if (screening) {
+      return screening === "progress" || screening.includes("progress");
+    }
+    return name.includes("progress intervention") || name.startsWith("progress ");
+  }
+  if (visit === "GROUP") {
+    // Backend label: "Group Interventions" (also Group / Group Intervention)
+    if (screening) {
+      return (
+        screening === "group" ||
+        screening.includes("group intervention") ||
+        screening.startsWith("group ")
+      );
+    }
+    // List API sometimes omits screening_type — match Group_* form names
+    return (
+      /^group[_\s]/.test(String(template?.name || "").toLowerCase()) ||
+      name.includes("group intervention")
+    );
+  }
+  return false;
+};
+
+const SOAP_SESSION_TABS = ["subjective", "objective", "assessment", "plan"];
+
+const getDietSoapTabKey = (template) => {
+  const typeKey = String(template?.assessment_type || template?.type || "")
+    .trim()
+    .toLowerCase();
+  if (SOAP_SESSION_TABS.includes(typeKey)) return typeKey;
+
+  const name = String(template?.name || "")
+    .trim()
+    .toLowerCase();
+  for (const tab of SOAP_SESSION_TABS) {
+    if (name.endsWith(tab) || name.includes(`_${tab}`) || name.includes(` ${tab}`)) {
+      return tab;
+    }
+  }
+  return null;
+};
+
+const collectAssessmentLauncherFields = (fields, acc = []) => {
+  (fields || []).forEach((field) => {
+    if (field?.type === "assessment-launcher") acc.push(field);
+    collectAssessmentLauncherFields(field.fields, acc);
+    collectAssessmentLauncherFields(field.children, acc);
+  });
+  return acc;
+};
+
+const getDieteticsTemplateIdMap = (visit) =>
+  DIETETICS_SOAP_TEMPLATES[visit] || null;
+
+const findTemplateIdInMaps = (formId) => {
+  if (!formId) return null;
+  const id = String(formId);
+  for (const map of [
+    ...Object.values(AUDIOLOGY_SOAP_TEMPLATES),
+    ...Object.values(DIETETICS_SOAP_TEMPLATES),
+    ...Object.values(OPTOMETRY_SOAP_TEMPLATES),
+  ]) {
+    for (const [tab, templateId] of Object.entries(map)) {
+      if (templateId === id) return tab;
+    }
+  }
+  return null;
+};
+
 const getTemplateSubAssessments = (template) =>
   template?.sub_assessment ??
   template?.sub_assessments ??
   [];
-
-const SOAP_SESSION_TABS = ["subjective", "objective", "assessment", "plan"];
 
 const isParentSessionItem = (item) => {
   const val = item?.is_parent;
@@ -90,6 +261,9 @@ const resolveSessionAssessmentTab = (item) => {
     AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB,
   ).find(([, id]) => formId && id === formId)?.[0];
   if (tabFromFormId) return tabFromFormId;
+
+  const dietTabFromFormId = findTemplateIdInMaps(formId);
+  if (dietTabFromFormId) return dietTabFromFormId;
 
   const name = String(item?.name || "").trim().toLowerCase();
   for (const tab of SOAP_SESSION_TABS) {
@@ -207,15 +381,88 @@ const subTemplateMatchesSessionItem = (subTemplate, registryKey, sessionItem) =>
   );
 };
 
+const slugifyFieldName = (label, fallback = "field") => {
+  const slug = String(label || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return slug || fallback;
+};
+
+/** Backend templates sometimes ship labeled fields without a `name`; FormBuilder needs a name to bind values. */
+const ensureFieldNames = (fields, path = "field") => {
+  if (!Array.isArray(fields)) return fields;
+
+  return fields.map((field, index) => {
+    if (!field || typeof field !== "object") return field;
+
+    const next = { ...field };
+    if (!next.name && next.type && !["subheading", "heading", "info-text", "row", "accordion"].includes(next.type)) {
+      next.name = slugifyFieldName(next.label, `${path}_${index}`);
+    }
+
+    if (Array.isArray(next.fields)) {
+      next.fields = ensureFieldNames(next.fields, next.name || `${path}_${index}`);
+    }
+    if (Array.isArray(next.children)) {
+      next.children = ensureFieldNames(next.children, next.name || `${path}_${index}`);
+    }
+
+    return next;
+  });
+};
+
 const normalizeTemplateBody = (body) => {
   if (!body) return {};
+
+  let normalized;
   if (Array.isArray(body)) {
-    return { sections: body };
+    normalized = { sections: body };
+  } else if (typeof body === "object") {
+    normalized = body;
+  } else {
+    return {};
   }
-  if (typeof body === "object") {
-    return body;
+
+  // Backend sometimes stores a single field object as the whole body, e.g.
+  // { type: "custom", component: "growth-chart", name: "growth_chart" }
+  const looksLikeField =
+    normalized?.type &&
+    !Array.isArray(normalized.sections) &&
+    !Array.isArray(normalized.fields) &&
+    !Array.isArray(normalized.body);
+  if (looksLikeField) {
+    normalized = { fields: [normalized] };
   }
-  return {};
+
+  if (Array.isArray(normalized.sections)) {
+    return {
+      ...normalized,
+      sections: normalized.sections.map((section, sIdx) => ({
+        ...section,
+        fields: ensureFieldNames(section?.fields, `section_${sIdx}`),
+      })),
+    };
+  }
+
+  if (Array.isArray(normalized.fields)) {
+    return {
+      ...normalized,
+      fields: ensureFieldNames(normalized.fields, "field"),
+    };
+  }
+
+  return normalized;
+};
+
+/** Keep React component refs; ignore schema string props like component: "growth-chart". */
+const pickReactComponent = (entry) => {
+  const candidate = entry?.Component || entry?.component;
+  if (typeof candidate === "function") return candidate;
+  if (candidate && typeof candidate === "object" && candidate.$$typeof) {
+    return candidate;
+  }
+  return undefined;
 };
 
 const withPrimarySection = (schema) => {
@@ -231,16 +478,23 @@ const withPrimarySection = (schema) => {
   return schema;
 };
 
-const buildSubAssessmentEntry = (sub) => ({
-  ...sub,
-  ...withPrimarySection(normalizeTemplateBody(sub?.body)),
-  id: sub.id,
-  name: sub.name,
-  type: sub.type,
-  score: sub.score ?? null,
-  actions: actions.ACTIONS_BUTTON,
-  session_id: null,
-});
+const buildSubAssessmentEntry = (sub) => {
+  const bodySchema = withPrimarySection(normalizeTemplateBody(sub?.body));
+  return {
+    ...sub,
+    ...bodySchema,
+    // Schema field keys (type/component/name) must not overwrite form metadata
+    // or be mistaken for a React component by AssessmentLauncher.
+    id: sub.id,
+    name: sub.name,
+    type: sub.type,
+    score: sub.score ?? null,
+    component: pickReactComponent(sub),
+    Component: pickReactComponent(sub),
+    actions: actions.ACTIONS_BUTTON,
+    session_id: null,
+  };
+};
 
 const subAssessmentHasSchema = (template) =>
   (Array.isArray(template?.sections) && template.sections.length > 0) ||
@@ -286,7 +540,39 @@ const LAUNCHER_LEGACY_OPTION_PATTERNS = {
   OCULAR_HEALTH: /ocular health/,
   SPECIAL_DIAGNOSTIC: /special diagnostic/,
   LOW_VISION_ASSESSMENT: /low vision/,
+  NRS: /nrs|nrs-?2002|nutritional risk/,
+  MST: /mst|malnutrition screening/,
+  BIA: /bia|body composition|seca/,
+  NewSGA: /\bnew\b.*\bsga\b|\bnewsga\b/,
+  SGA: /^(?!.*\bnew\b).*(\bsga\b|subjective global assessment)/,
+  "PG-SGA-Metric-version": /pg-?sga|patient[-\s]?generated/,
+  "Growth Chart": /growth chart/,
+  FFQ: /ffq|food frequency/,
 };
+
+/**
+ * Known Dietetics questionnaire form IDs (backend).
+ * Launcher always prefers these UUIDs so the correct form is fetched.
+ */
+const DIETETICS_KNOWN_QUESTIONNAIRE_IDS = {
+  "Growth Chart": "8ca3c955-5558-4c9b-8c22-c950a7d45ef3",
+  SGA: "bcb45af4-0664-431d-beb9-a8fdc7cbb4a5",
+  "PG-SGA": "3cea9115-b908-41f3-a1f9-766602ee7719",
+  // Launcher option value used in Diet SOAP Objective
+  "PG-SGA-Metric-version": "3cea9115-b908-41f3-a1f9-766602ee7719",
+};
+
+const isNewSgaSubName = (subName) =>
+  /\bnew\b/.test(subName) && /\bsga\b/.test(subName);
+
+const isClassicSgaSubName = (subName) =>
+  !isNewSgaSubName(subName) &&
+  !/pg-?sga/.test(subName) &&
+  (subName === "sga" ||
+    /\bsga\b/.test(subName) ||
+    /subjective global assessment/.test(subName));
+
+const isPgSgaSubName = (subName) => /pg-?sga/.test(subName);
 
 const matchSubToLauncherOption = (sub, opt) => {
   const subId = String(sub?.id ?? "");
@@ -295,6 +581,23 @@ const matchSubToLauncherOption = (sub, opt) => {
   const subName = normalizeLauncherText(sub?.name);
 
   if (subId && optValue && subId === optValue) return true;
+
+  if (optValue === "NewSGA" || optLabel === "newsga") {
+    return isNewSgaSubName(subName);
+  }
+
+  if (
+    optValue === "PG-SGA-Metric-version" ||
+    optValue === "PG-SGA" ||
+    optLabel === "pg-sga" ||
+    optLabel === "pg sga"
+  ) {
+    return isPgSgaSubName(subName);
+  }
+
+  if (optValue === "SGA" || optLabel === "sga") {
+    return isClassicSgaSubName(subName);
+  }
 
   if (optLabel && subName) {
     if (subName === optLabel) return true;
@@ -387,9 +690,14 @@ const injectLauncherSubAssessmentIds = (schema, subAssessments) => {
  * @param {String} department - The department for which the assessment forms are to be fetched
  */
 
-export default function AssessmentLoader({ patient, department }) {
+export default function AssessmentLoader({
+  patient,
+  department,
+  visitType = "INITIAL",
+}) {
   // Extract Tab
   const TABS = actions.ASSESSMENT_TABS;
+  const resolvedVisitType = normalizeVisitType(visitType);
   // Set up state to track which assessment is active and its values
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(false); //formsError, setFormsError
@@ -420,6 +728,7 @@ export default function AssessmentLoader({ patient, department }) {
 
   // OCR & Otoscopic processing state
   const [processingOCR, setProcessingOCR] = useState(false);
+  const [ocrStatusMessage, setOcrStatusMessage] = useState("");
   const [isOtoscopicLoading, setIsOtoscopicLoading] = useState(false);
 
   // Equipment booking state
@@ -458,6 +767,7 @@ export default function AssessmentLoader({ patient, department }) {
   const isPsychology = department === "Psychology";
   const isOptometry = department === "Optometry";
   const isAudiology = department === "Audiology";
+  const isDietetics = department === "Dietetics";
 
 useEffect(() => {
   if (!patient || !department) return;
@@ -616,7 +926,8 @@ useEffect(() => {
         }
 
         if (
-          (department === "Audiology" || department === "Optometry") &&
+          ((department === "Audiology" && resolvedVisitType === "INITIAL") ||
+            (department === "Optometry" && resolvedVisitType === "INITIAL")) &&
           (tabKey === "assessment" || tabKey === "plan")
         ) {
           const ICDComponent =
@@ -701,13 +1012,330 @@ useEffect(() => {
       };
 
       if (department === "Audiology") {
-        for (const tab of TABS) {
-          const templateId = AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB[tab];
-          const template = data.find((item) => String(item.id) === templateId);
-          if (!template) continue;
+        if (resolvedVisitType === "INITIAL") {
+          // Adult Initial — fixed backend template IDs
+          for (const tab of TABS) {
+            const templateId = AUDIOLOGY_INITIAL_ADULT_TEMPLATE_BY_TAB[tab];
+            const template = data.find((item) => String(item.id) === templateId);
+            if (!template) continue;
+            const fullTemplate = await resolveFullTemplate(template);
+            map[tab] = buildProcessedTemplate(fullTemplate, tab);
+            await registerSubAssessments(fullTemplate, tab);
+          }
+        } else {
+          const audiologyIdMap =
+            AUDIOLOGY_SOAP_TEMPLATES[resolvedVisitType] || null;
+
+          const loadAudiologyTemplateForTab = async (tab, template) => {
+            if (!template?.id) return;
+            const fullTemplate = await resolveFullTemplate(template);
+            map[tab] = buildProcessedTemplate(fullTemplate, tab);
+            await registerSubAssessments(fullTemplate, tab);
+          };
+
+          // Progress: load the four explicitly configured backend forms first.
+          if (audiologyIdMap) {
+            for (const tab of TABS) {
+              const templateId = audiologyIdMap[tab];
+              if (!templateId) continue;
+
+              let template =
+                data.find(
+                  (item) => String(item.id) === String(templateId),
+                ) || null;
+
+              if (!template) {
+                try {
+                  const res = await forms.fetchById(templateId);
+                  if (res?.data) {
+                    template = { id: templateId, ...res.data };
+                  }
+                } catch {
+                  /* leave tab missing; screening lookup below may recover it */
+                }
+              }
+
+              if (template) {
+                await loadAudiologyTemplateForTab(tab, template);
+              }
+            }
+          }
+
+          // Group / Follow-up and any missing Progress tabs: screening_type.
+          const byScreening = data.filter((template) =>
+            matchesDieteticsScreeningType(template, resolvedVisitType),
+          );
+
+          for (const template of byScreening) {
+            const tab = getDietSoapTabKey(template);
+            if (!tab || !TABS.includes(tab)) continue;
+            if (map[tab]) continue;
+
+            await loadAudiologyTemplateForTab(tab, template);
+          }
+        }
+      } else if (department === "Dietetics") {
+        const dietIdMap = getDieteticsTemplateIdMap(resolvedVisitType);
+
+        const loadDietTemplateForTab = async (tab, template) => {
+          if (!template?.id) return;
           const fullTemplate = await resolveFullTemplate(template);
           map[tab] = buildProcessedTemplate(fullTemplate, tab);
           await registerSubAssessments(fullTemplate, tab);
+
+          const linkedSubs = getUniqueSubAssessments(subAssessment[tab] || {});
+          if (linkedSubs.length && map[tab]) {
+            map[tab] = injectLauncherSubAssessmentIds(map[tab], linkedSubs);
+          }
+        };
+
+        // For GROUP: load known Group_* form UUIDs first (reliable even if list
+        // payload omits screening_type), then fill any gaps via screening match.
+        if (resolvedVisitType === "GROUP" && dietIdMap) {
+          for (const tab of TABS) {
+            const templateId = dietIdMap[tab];
+            if (!templateId) continue;
+
+            let template =
+              data.find((item) => String(item.id) === String(templateId)) ||
+              null;
+
+            if (!template) {
+              try {
+                const res = await forms.fetchById(templateId);
+                if (res?.data) {
+                  template = { id: templateId, ...res.data };
+                }
+              } catch {
+                /* try screening path below */
+              }
+            }
+
+            if (template) {
+              await loadDietTemplateForTab(tab, template);
+            }
+          }
+        }
+
+        // Primary for other visits / fill missing GROUP tabs: screening_type
+        // (backend uses "Group Interventions" for Dietetics group SOAP forms)
+        const byScreening = data.filter((template) =>
+          matchesDieteticsScreeningType(template, resolvedVisitType),
+        );
+
+        for (const template of byScreening) {
+          const tab = getDietSoapTabKey(template);
+          if (!tab || !TABS.includes(tab)) continue;
+          if (map[tab]) continue;
+          await loadDietTemplateForTab(tab, template);
+        }
+
+        // Fallback UUIDs for Follow-up / Progress (and any still-missing tab)
+        if (dietIdMap && resolvedVisitType !== "GROUP") {
+          for (const tab of TABS) {
+            if (map[tab]) continue;
+            const templateId = dietIdMap[tab];
+            if (!templateId) continue;
+
+            let template =
+              data.find((item) => String(item.id) === String(templateId)) ||
+              null;
+
+            if (!template) {
+              try {
+                const res = await forms.fetchById(templateId);
+                if (res?.data) {
+                  template = { id: templateId, ...res.data };
+                }
+              } catch {
+                continue;
+              }
+            }
+
+            if (
+              template &&
+              getTemplateScreeningType(template) &&
+              !matchesDieteticsScreeningType(template, resolvedVisitType)
+            ) {
+              continue;
+            }
+
+            await loadDietTemplateForTab(tab, template);
+          }
+        }
+
+        // If GROUP tabs still missing after ID + screening, try name Group_*
+        if (resolvedVisitType === "GROUP") {
+          for (const template of data) {
+            const tab = getDietSoapTabKey(template);
+            if (!tab || !TABS.includes(tab) || map[tab]) continue;
+            if (!matchesDieteticsScreeningType(template, "GROUP")) continue;
+            await loadDietTemplateForTab(tab, template);
+          }
+        }
+
+        const registerDieteticsLauncherSubsFromDepartment = async () => {
+          const soapTabIds = new Set(
+            Object.values(map)
+              .map((template) => template?.id)
+              .filter(Boolean)
+              .map(String),
+          );
+
+          const departmentSubForms = data.filter((form) => {
+            if (!form?.id || soapTabIds.has(String(form.id))) return false;
+            const screening = getTemplateScreeningType(form);
+            if (
+              screening &&
+              !matchesDieteticsScreeningType(form, resolvedVisitType)
+            ) {
+              return false;
+            }
+            return true;
+          });
+
+          for (const tab of TABS) {
+            if (!map[tab]) continue;
+
+            const registry = { ...(subAssessment[tab] || {}) };
+            const launcherFields = [];
+            (map[tab].sections || []).forEach((section) =>
+              collectAssessmentLauncherFields(section.fields, launcherFields),
+            );
+            collectAssessmentLauncherFields(map[tab].fields, launcherFields);
+
+            const launcherOptions = launcherFields.flatMap(
+              (field) => field.options || [],
+            );
+            if (!launcherOptions.length) continue;
+
+            for (const opt of launcherOptions) {
+              const legacyKey = opt?.value ?? opt?.id;
+              if (
+                legacyKey &&
+                registry[legacyKey] &&
+                subAssessmentHasSchema(registry[legacyKey])
+              ) {
+                continue;
+              }
+
+              // Prefer known backend UUIDs (Growth Chart / SGA / PG-SGA)
+              let matched = null;
+              const knownId =
+                (legacyKey && DIETETICS_KNOWN_QUESTIONNAIRE_IDS[legacyKey]) ||
+                (opt?.label &&
+                  DIETETICS_KNOWN_QUESTIONNAIRE_IDS[String(opt.label).trim()]);
+
+              if (knownId) {
+                matched =
+                  data.find((form) => String(form.id) === String(knownId)) ||
+                  { id: knownId, name: String(opt?.label || legacyKey) };
+              }
+
+              if (!matched) {
+                matched = departmentSubForms.find((form) =>
+                  matchSubToLauncherOption(
+                    { id: form.id, name: form.name },
+                    opt,
+                  ),
+                );
+              }
+
+              if (!matched) continue;
+
+              let entry = buildSubAssessmentEntry(matched);
+              if (!subAssessmentHasSchema(entry)) {
+                try {
+                  const res = await forms.fetchById(matched.id);
+                  entry = buildSubAssessmentEntry({ ...matched, ...res?.data });
+                } catch {
+                  continue;
+                }
+              }
+
+              registry[String(matched.id)] = entry;
+              if (matched.name) registry[matched.name] = entry;
+              if (legacyKey) registry[legacyKey] = entry;
+              if (opt?.label) registry[String(opt.label).trim()] = entry;
+            }
+
+            subAssessment[tab] = registry;
+
+            const linkedSubs = getUniqueSubAssessments(registry);
+            if (linkedSubs.length && map[tab]) {
+              map[tab] = injectLauncherSubAssessmentIds(map[tab], linkedSubs);
+            }
+          }
+        };
+
+        // 3) Link launcher sub-forms from department list (FFQ / Growth Chart / NRS, etc.)
+        // Backend form is fetched; schema custom fields (component: "growth-chart")
+        // are rendered by FormBuilder from the frontend custom field registry.
+        await registerDieteticsLauncherSubsFromDepartment();
+      } else if (department === "Optometry") {
+        const optoIdMap = OPTOMETRY_SOAP_TEMPLATES[resolvedVisitType] || null;
+
+        const loadOptoTemplateForTab = async (tab, template) => {
+          if (!template?.id) return;
+          const fullTemplate = await resolveFullTemplate(template);
+          map[tab] = buildProcessedTemplate(fullTemplate, tab);
+          await registerSubAssessments(fullTemplate, tab);
+        };
+
+        // Progress (and any visit with a fixed ID map): load known UUIDs first
+        if (optoIdMap) {
+          for (const tab of TABS) {
+            const templateId = optoIdMap[tab];
+            if (!templateId) continue;
+
+            let template =
+              data.find((item) => String(item.id) === String(templateId)) ||
+              null;
+
+            if (!template) {
+              try {
+                const res = await forms.fetchById(templateId);
+                if (res?.data) {
+                  template = { id: templateId, ...res.data };
+                }
+              } catch {
+                /* fall through to screening */
+              }
+            }
+
+            if (template) {
+              await loadOptoTemplateForTab(tab, template);
+            }
+          }
+        }
+
+        // Fill / load by screening_type (PROGRESS, Initial, etc.)
+        const byScreening = data.filter((template) =>
+          matchesDieteticsScreeningType(template, resolvedVisitType),
+        );
+
+        for (const template of byScreening) {
+          const tab = getDietSoapTabKey(template);
+          if (!tab || !TABS.includes(tab)) continue;
+          if (map[tab]) continue;
+          await loadOptoTemplateForTab(tab, template);
+        }
+
+        // Initial fallback: assessment_type only, skip Progress / Group forms
+        if (resolvedVisitType === "INITIAL") {
+          for (const template of data) {
+            const tab = getDietSoapTabKey(template);
+            if (!tab || !TABS.includes(tab) || map[tab]) continue;
+            if (matchesDieteticsScreeningType(template, "PROGRESS")) continue;
+            if (matchesDieteticsScreeningType(template, "GROUP")) continue;
+            if (
+              getTemplateScreeningType(template) &&
+              !matchesDieteticsScreeningType(template, "INITIAL")
+            ) {
+              continue;
+            }
+            await loadOptoTemplateForTab(tab, template);
+          }
         }
       } else {
         for (const template of data) {
@@ -728,12 +1356,12 @@ useEffect(() => {
     }
   };
 
-  // Load template on department
+  // Load template on department / visit type
   useEffect(() => {
     if (!sessionId) {
       loadTemplates();
     }
-  }, [department, sessionId]);
+  }, [department, sessionId, resolvedVisitType]);
 
   // Start session handler
   const handleStartSession = useCallback(async () => {
@@ -752,7 +1380,7 @@ useEffect(() => {
         doctorId,
         patient.id,
         department,
-        "INITIAL",
+        toSessionVisitType(resolvedVisitType),
         0,
         false,
       );
@@ -853,7 +1481,7 @@ useEffect(() => {
       setToast({ message: msg, variant: "error" });
       setIsSessionActive(false);
     }
-  }, [patient, templates]);
+  }, [patient, templates, department, resolvedVisitType]);
 
   // End session handler
   const handleEndSession = useCallback(async () => {
@@ -1089,16 +1717,23 @@ useEffect(() => {
         try {
           const registry = subAssessmentTemplate[activeTab] || {};
           const registryEntry = registry[value];
-          const templateIdToFetch = registryEntry?.id ?? value;
+          const templateIdToFetch =
+            registryEntry?.id ||
+            DIETETICS_KNOWN_QUESTIONNAIRE_IDS[value] ||
+            value;
           const tm = await forms.fetchById(templateIdToFetch);
           setSubAssessmentTemplate((prev) => {
             const currentTab = prev[activeTab] || {};
+            const bodySchema = withPrimarySection(
+              normalizeTemplateBody(tm?.data?.body),
+            );
             const updated = Object.fromEntries(
               Object.entries(currentTab).map(([key, template]) => {
                 // MATCH SELECTED ASSESSMENT
                 if (
                   String(template.id) === String(value) ||
                   String(key) === String(value) ||
+                  String(template.id) === String(templateIdToFetch) ||
                   template.name === tm?.data?.name ||
                   key === tm?.data?.name
                 ) {
@@ -1106,7 +1741,7 @@ useEffect(() => {
                     key,
                     {
                       ...template,
-                      ...withPrimarySection(normalizeTemplateBody(tm?.data?.body)),
+                      ...bodySchema,
                       actions: actions.ACTIONS_BUTTON,
                       session_id:
                         template.session_id ||
@@ -1114,10 +1749,13 @@ useEffect(() => {
                           template,
                           sessionSubAssessmentIds,
                         ),
-                      id: template.id,
+                      id: template.id || tm?.data?.id || templateIdToFetch,
                       name: tm.data.name,
                       type: tm.data.type,
                       score: tm.data.score,
+                      // Never keep schema string "component" (e.g. "growth-chart")
+                      component: pickReactComponent(template),
+                      Component: pickReactComponent(template),
                       loaded: true,
                     },
                   ];
@@ -1125,6 +1763,31 @@ useEffect(() => {
                 return [key, template];
               }),
             );
+
+            // If option was not pre-registered, add it from the fetched backend form
+            if (
+              !Object.values(updated).some(
+                (template) =>
+                  String(template?.id) === String(templateIdToFetch) ||
+                  template?.name === tm?.data?.name,
+              )
+            ) {
+              const entry = {
+                ...buildSubAssessmentEntry({
+                  id: templateIdToFetch,
+                  ...tm?.data,
+                }),
+                ...bodySchema,
+                actions: actions.ACTIONS_BUTTON,
+                component: undefined,
+                Component: undefined,
+                loaded: true,
+              };
+              updated[value] = entry;
+              if (tm?.data?.name) updated[tm.data.name] = entry;
+              updated[String(templateIdToFetch)] = entry;
+            }
+
             return {
               ...prev,
               [activeTab]: updated,
@@ -1179,6 +1842,31 @@ useEffect(() => {
       // =========================
       if (name === "otoscopic_report" && value?.data) {
         await handleOtoscopicUpload(value);
+        return;
+      }
+
+      // =========================
+      // BIA / SECA EXTRACT INTERCEPT (same pattern as tympanogram / otoscopic)
+      // =========================
+      if (
+        (name === "uploadedReport" || name.endsWith("_uploadedReport")) &&
+        value?.data
+      ) {
+        setAssessmentsValues((v) => ({
+          ...v,
+          [activeTab]: {
+            ...(v[activeTab] || {}),
+            [name]: value,
+          },
+        }));
+
+        await handleSecaBiaUpload(name, value).catch((error) => {
+          console.error("SECA BIA extraction failed", error);
+          setToast({
+            message: "Failed to read SECA report. Please enter values manually.",
+            variant: "error",
+          });
+        });
         return;
       }
 
@@ -1456,11 +2144,145 @@ useEffect(() => {
     return null;
   };
 
+  // Same FormData + Bearer fetch pattern as tympanogram / otoscopic
+  const SECA_BIA_FIELD_MAP = {
+    weight: ["weight", "weight_kg", "body_weight"],
+    height: ["height", "height_cm", "body_height"],
+    bmi: ["bmi", "body_mass_index"],
+    fatMass: ["fat_mass", "fatmass", "fm_kg"],
+    fatMassPercent: ["fat_mass_percent", "fm_percent", "body_fat_percent"],
+    fmi: ["fmi", "fat_mass_index"],
+    ffmi: ["ffmi", "fat_free_mass_index"],
+    fatFreeMass: ["fat_free_mass", "ffm", "lean_mass"],
+    vat: ["vat", "visceral_adipose_tissue", "visceral_fat"],
+    waistCircumference: ["waist_circumference", "waist", "waist_cm"],
+    smm: ["smm", "skeletal_muscle_mass", "muscle_mass"],
+    smmPercent: ["smm_percent", "skeletal_muscle_mass_percent"],
+    smi: ["smi", "skeletal_muscle_index"],
+    smmOverAge: ["smm_over_age", "skeletal_muscle_mass_over_age"],
+    phaseAngle: ["phase_angle", "pha"],
+    appendicularSmm: ["appendicular_skeletal_muscle_mass", "appendicular_smm", "asm"],
+    asmi: ["asmi", "appendicular_skeletal_muscle_index"],
+    tbwPercent: ["tbw_percent", "total_body_water_percent", "total_body_water", "tbw"],
+    ecwPercent: ["ecw_percent", "extracellular_water_percent", "ecw"],
+    ecwTbwRatio: ["ecw_tbw_ratio", "ecw_tbw", "water_ratio"],
+    segmentRightArm: ["segment_right_arm", "right_arm", "smm_right_arm"],
+    segmentLeftArm: ["segment_left_arm", "left_arm", "smm_left_arm"],
+    segmentTorso: ["segment_torso", "torso", "smm_torso"],
+    segmentRightLeg: ["segment_right_leg", "right_leg", "smm_right_leg"],
+    segmentLeftLeg: ["segment_left_leg", "left_leg", "smm_left_leg"],
+    segmentTotalSmm: ["segment_total_smm", "total_smm", "total_skeletal_muscle_mass"],
+    bivaResistance: ["biva_resistance", "resistance"],
+    bivaReactance: ["biva_reactance", "reactance"],
+    ree: ["ree", "resting_energy_expenditure"],
+    tee: ["tee", "total_energy_expenditure"],
+    reeTeeRatio: ["ree_tee_ratio", "ree_tee"],
+    pal: ["pal", "physical_activity_level"],
+    muscleScore: ["muscle_score"],
+    fatScore: ["fat_score"],
+    truBodyScore: ["tru_body_score", "overall_tru_body_score"],
+  };
+
+  const flattenSecaPayload = (input, prefix = "", acc = {}) => {
+    if (input == null) return acc;
+    if (Array.isArray(input)) {
+      input.forEach((item, i) => flattenSecaPayload(item, `${prefix}_${i}`, acc));
+      return acc;
+    }
+    if (typeof input !== "object") {
+      if (prefix) acc[prefix] = input;
+      return acc;
+    }
+    Object.entries(input).forEach(([key, value]) => {
+      const nextKey = prefix
+        ? `${prefix}_${String(key).toLowerCase().replace(/[^a-z0-9]+/g, "_")}`
+        : String(key).toLowerCase().replace(/[^a-z0-9]+/g, "_");
+      if (value && typeof value === "object") {
+        flattenSecaPayload(value, nextKey, acc);
+      } else if (value !== undefined && value !== null && value !== "") {
+        acc[nextKey] = value;
+      }
+    });
+    return acc;
+  };
+
+  const applySecaBiaResult = (uploadFieldName, payload) => {
+    const root = payload?.data || payload?.result || payload || {};
+    const flat = flattenSecaPayload(root);
+    const mapped = {};
+
+    Object.entries(SECA_BIA_FIELD_MAP).forEach(([fieldName, aliases]) => {
+      for (const [key, raw] of Object.entries(flat)) {
+        const hit = aliases.some(
+          (alias) => key === alias || key.endsWith(`_${alias}`) || key.includes(alias),
+        );
+        if (hit) {
+          mapped[fieldName] = valueToText(raw);
+          break;
+        }
+      }
+    });
+
+    const scopePrefix = uploadFieldName.endsWith("_uploadedReport")
+      ? uploadFieldName.slice(0, -"_uploadedReport".length)
+      : "";
+
+    setAssessmentsValues((prev) => {
+      const tabValues = { ...(prev[activeTab] || {}) };
+      Object.entries(mapped).forEach(([fieldName, fieldValue]) => {
+        tabValues[scopePrefix ? `${scopePrefix}_${fieldName}` : fieldName] = fieldValue;
+      });
+      return { ...prev, [activeTab]: tabValues };
+    });
+
+    if (Object.keys(mapped).length) {
+      setToast({
+        message: `SECA report processed — ${Object.keys(mapped).length} field(s) auto-filled.`,
+        variant: "success",
+      });
+    } else {
+      setToast({
+        message:
+          "SECA report uploaded, but no matching BIA values were found. Enter values manually.",
+        variant: "warning",
+      });
+    }
+  };
+
+  const handleSecaBiaUpload = async (uploadFieldName, value) => {
+    const file = buildTympanogramUploadFile(value);
+    if (!file) return;
+
+    setProcessingOCR(true);
+    setOcrStatusMessage("Reading SECA report and auto-filling BIA values...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(SECA_BMI_EXTRACT_URL, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("SECA report extraction failed");
+      }
+
+      applySecaBiaResult(uploadFieldName, await response.json());
+    } finally {
+      setProcessingOCR(false);
+      setOcrStatusMessage("");
+    }
+  };
+
   const extractTympanogramValues = async (value) => {
     const file = buildTympanogramUploadFile(value);
     if (!file) return;
 
     setProcessingOCR(true);
+    setOcrStatusMessage("Fetching tympanogram values... Please wait");
     try {
       const fetchingFields = {
         peak_pressure: {
@@ -1513,6 +2335,7 @@ useEffect(() => {
       applyTympanogramResult(result);
     } finally {
       setProcessingOCR(false);
+      setOcrStatusMessage("");
     }
   };
 
@@ -1558,7 +2381,7 @@ useEffect(() => {
                   },
                   {
                     label: "Visit Type",
-                    value: "INITIAL",
+                    value: toSessionVisitType(resolvedVisitType),
                   },
                   {
                     label: "Date",
@@ -1786,7 +2609,7 @@ useEffect(() => {
                       fontWeight: 600,
                       textAlign: "center"
                     }}>
-                      Fetching tympanogram values... Please wait
+                      {ocrStatusMessage || "Processing report... Please wait"}
                     </div>
                   )}
                   <CommonFormBuilder
@@ -1796,6 +2619,7 @@ useEffect(() => {
                     onAction={handleAction}
                     schema={activeSchema}
                     values={assessmentsValues[activeTab] || {}}
+                    patient={patient}
                     assessmentRegistry={
                       subAssessmentTemplate[activeTab] || {}
                     }
@@ -1824,7 +2648,7 @@ useEffect(() => {
                           Book Appointment
                         </button>
                       )}
-                      {(isOptometry || isAudiology || isPsychology) &&
+                      {(isOptometry || isAudiology || isPsychology || isDietetics) &&
                         activeTab === "plan" && (
                           <button
                             type="button"
@@ -1845,11 +2669,14 @@ useEffect(() => {
                                   templates,
                                   assessmentsValues,
                                   subAssessmentTemplate,
-                                  supplementaryAppender: isOptometry
-                                    ? appendOptometrySoapSupplements
-                                    : isAudiology
-                                      ? appendAudiologySoapSupplements
-                                      : undefined,
+                                  supplementaryAppender:
+                                    isOptometry &&
+                                    resolvedVisitType === "INITIAL"
+                                      ? appendOptometrySoapSupplements
+                                      : isAudiology &&
+                                          resolvedVisitType === "INITIAL"
+                                        ? appendAudiologySoapSupplements
+                                        : undefined,
                                 }),
                               })
                             }

@@ -220,9 +220,34 @@ function SessionRow({ sessionData, idx, onViewReport, onOpenAssessment }) {
     );
 }
 
+function sessionMatchesDepartment(session, department) {
+    if (!department) return true;
+    const needle = String(department).trim().toLowerCase();
+    if (!needle) return true;
+
+    const haystack = [
+        session?.department_name,
+        session?.department,
+        session?.department_label,
+        session?.dept,
+    ]
+        .filter(Boolean)
+        .map((v) => String(v).trim().toLowerCase());
+
+    if (haystack.length === 0) return false;
+
+    return haystack.some(
+        (name) =>
+            name === needle ||
+            name.includes(needle) ||
+            needle.includes(name.replace(/\s+department$/, ""))
+    );
+}
+
 export default function SOAPSession({
     patient,
     onBack,
+    department,
 }) {
     const [search, setSearch] = useState("");
     const [error, setError] = useState(null);
@@ -250,8 +275,11 @@ export default function SOAPSession({
                     API_URL.patientAssessments(patient.id)
                 );
 
+                const results = response?.data?.results || [];
                 setSessionData(
-                    response?.data?.results || []
+                    department
+                        ? results.filter((s) => sessionMatchesDepartment(s, department))
+                        : results
                 );
             } catch (e) {
                 setSessionData([]);
@@ -264,7 +292,7 @@ export default function SOAPSession({
         };
 
         fetchSessions();
-    }, [patient]);
+    }, [patient, department]);
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -550,11 +578,15 @@ export default function SOAPSession({
                         title={
                             search
                                 ? "No SOAP sessions match your search"
+                                : department
+                                ? `No ${department} SOAP sessions found`
                                 : "No SOAP sessions found"
                         }
                         message={
                             search
                                 ? "Try a different SOAP session id or form type."
+                                : department
+                                ? `This patient has no ${department} SOAP sessions recorded yet.`
                                 : "This patient has no SOAP sessions recorded yet."
                         }
                     />

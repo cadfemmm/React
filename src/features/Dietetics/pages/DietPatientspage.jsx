@@ -1,9 +1,9 @@
 import React from "react";
-import InitialAssessmentForm from "../components/DietInitialAssessmentForm";
-import DietFollowupAssessmentForm from "../components/DietFollowupAssessmentForm";
-import DietProgressAssessmentForm from "../components/DietProgressAssessmentForm";
-import DietGroupIntervention from "../components/DietGroup";
+import AssessmentLoader from "../../../assessment";
 
+/**
+ * Dietetics assessment entry — all SOAP visit types load form content from the backend.
+ */
 export default function DietPatientspage({
   patient,
   selectedPatients = [],
@@ -12,43 +12,31 @@ export default function DietPatientspage({
   onBack,
   onSubmit,
 }) {
-  switch (mode) {
-    case "followup":
-      return (
-        <DietFollowupAssessmentForm
-          patient={patient}
-          onBack={onBack}
-          onSubmit={onSubmit}
-        />
-      );
+  const participants = selectedPatients.length ? selectedPatients : patients;
+  const primaryPatient = patient || participants[0] || null;
 
-    case "progress":
-      return (
-        <DietProgressAssessmentForm
-          patient={patient}
-          onBack={onBack}
-          onSubmit={onSubmit}
-        />
-      );
-
-    case "group":
-      return (
-        <DietGroupIntervention
-          patient={patient}
-          selectedPatients={selectedPatients}
-          patients={patients}
-          onBack={onBack}
-          onSubmit={onSubmit}
-        />
-      );
-
-    default:
-      return (
-        <InitialAssessmentForm
-          patient={patient}
-          onBack={onBack}
-          onSubmit={onSubmit}
-        />
-      );
+  if (!primaryPatient) {
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "#6b7280" }}>
+        No patient selected.
+      </div>
+    );
   }
+
+  const visitTypeByMode = {
+    followup: "FOLLOWUP",
+    progress: "PROGRESS",
+    group: "GROUP",
+    initial: "INITIAL",
+  };
+
+  const visitType = visitTypeByMode[mode] || "INITIAL";
+
+  return (
+    <AssessmentLoader
+      department="Dietetics"
+      patient={primaryPatient}
+      visitType={visitType}
+    />
+  );
 }

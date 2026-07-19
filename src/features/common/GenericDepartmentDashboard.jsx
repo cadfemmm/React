@@ -56,9 +56,13 @@ const GROUP_INTERVENTION_MAP = {
   "Speech & Language Therapy": SpeechGroupIntervention,
 };
 
-const DEPARTMENT_APPOINTMENT_SLUGS = {
-  Optometry: "optometry",
-};
+/** Departments that load Today's Patients from the appointments API */
+const DEPARTMENT_APPOINTMENT_DEPTS = new Set([
+  "Optometry",
+  "Audiology",
+  "Dietetics",
+  "Psychology",
+]);
 
 function formatAppointmentTime(value) {
   if (!value) return "—";
@@ -128,17 +132,19 @@ export default function GenericDepartmentDashboard({
   };
   const deptRaw = departmentName.replace(" Department", "").trim();
   const dept = deptRaw === "Nursing & MA" ? "Nursing" : deptRaw;
-  const appointmentSlug = DEPARTMENT_APPOINTMENT_SLUGS[dept];
+  const usesAppointmentQueue = DEPARTMENT_APPOINTMENT_DEPTS.has(dept);
   const AssessmentComponent = ASSESSMENT_MAP[dept] || null;
   const isPO = dept === "Prosthetics & Orthotics";
   const GroupInterventionComponent =
     GROUP_INTERVENTION_MAP[dept] || NursingGroupIntervention;
 
   useEffect(() => {
-    if (!appointmentSlug) return;
+    if (!usesAppointmentQueue) return;
 
     setTodayPatientsLoading(true);
-    fetchDepartmentAppointments(appointmentSlug, { page: 1, limit: 10 })
+    // Pass display name so Dietetics/Psychology can resolve department UUID
+    // when the RMS path alias (e.g. "dietetics") is not registered.
+    fetchDepartmentAppointments(dept, { page: 1, limit: 10 })
       .then(({ patients: list, meta }) => {
         setTodayPatients(list);
         setTodayPatientsTotal(meta.total ?? list.length);
@@ -149,15 +155,15 @@ export default function GenericDepartmentDashboard({
         setTodayPatientsTotal(0);
       })
       .finally(() => setTodayPatientsLoading(false));
-  }, [appointmentSlug, dept]);
+  }, [usesAppointmentQueue, dept]);
 
   const dashboardAppointments = useMemo(
     () => mapPatientsToDashboardAppointments(todayPatients),
     [todayPatients],
   );
 
-  const patientsForList = appointmentSlug ? todayPatients : patients;
-  const patientsListLoading = appointmentSlug ? todayPatientsLoading : false;
+  const patientsForList = usesAppointmentQueue ? todayPatients : patients;
+  const patientsListLoading = usesAppointmentQueue ? todayPatientsLoading : false;
 
   if (showGroupPatientPicker) {
     return (
@@ -285,10 +291,10 @@ export default function GenericDepartmentDashboard({
       kpiCards={[
         {
           label: "Today's Patients",
-          value: appointmentSlug
+          value: usesAppointmentQueue
             ? (todayPatientsLoading ? "…" : String(todayPatientsTotal || todayPatients.length))
             : "20",
-          sub: appointmentSlug ? "Scheduled for today" : "10 new · 10 follow-up",
+          sub: usesAppointmentQueue ? "Scheduled for today" : "10 new · 10 follow-up",
           icon: <FaUserInjured size={16} />,
           accent: "#2563eb",
           trend: "up",
@@ -328,7 +334,7 @@ export default function GenericDepartmentDashboard({
         ],
       }]}
       appointments={
-        appointmentSlug
+        usesAppointmentQueue
           ? dashboardAppointments
           : [
         { time: "08:30", name: "Ahmad Razali",  type: "Initial Assessment",  status: "Completed",   va: "—" },

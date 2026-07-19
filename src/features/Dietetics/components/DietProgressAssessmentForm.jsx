@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PatientCard from "../../../shared/cards/PatientCard"
 import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import { DIET_ASSESSMENT_REGISTRY } from "./DietAssessmentWrapper";
 import FFQAssessment from "./FFQAssessment";
 import GrowthChartAssessment from "./GrowthChart";
+import Toast from "../../../shared/ui/Toast";
+import ConfirmModal from "../../../shared/ui/ConfirmModal";
+import ReferralModal from "../../../shared/ui/ReferralModal";
+import { localDateTimeString } from "../../../shared/utils/dateFormatter";
+import session from "../../../assessment/session";
 
 const ET_OPTIONS = {
   "increased_energy_expenditure": [
@@ -35,6 +40,11 @@ const ET_OPTIONS = {
 export default function DietProgressAssessmentForm({ patient, onSubmit, onBack }) {
     const [submitted, setSubmitted] = useState(false);
     const [values, setValues] = useState({});
+  const [sessionId, setSessionId] = useState(null);
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isReferralModal, setIsReferralModal] = useState(false);
+  const [isConfirmModal, setIsConfirmModal] = useState(false);
+  const [toast, setToast] = useState(null);
   const DietGrowthChartAssessment = (props) => (
     <GrowthChartAssessment {...props} patient={patient} />
   );
@@ -500,7 +510,55 @@ const submitAndSave = () => {
 
   // existing callback
   onSubmit(form);
+  setSubmitted(true);
 };
+
+  const handleStartSession = useCallback(async () => {
+    if (!patient?.id || sessionId || isSessionActive || submitted) return;
+
+    const doctorId = localStorage.getItem("user_id");
+    if (!doctorId) {
+      setToast({
+        message: "Could not identify logged on doctor. Please re-login.",
+        variant: "error",
+      });
+      return;
+    }
+
+    setIsSessionActive(true);
+    try {
+      const response = await session.start(
+        doctorId,
+        patient.id,
+        "Dietetics",
+        "PROGRESS",
+        0,
+        false,
+      );
+      setSessionId(response?.data?.id || `local_${Date.now()}`);
+      setToast({ message: "Progress session started", variant: "success" });
+    } catch (e) {
+      setSessionId(`local_${Date.now()}`);
+      setToast({
+        message: "Session started locally (backend unavailable)",
+        variant: "success",
+      });
+    } finally {
+      setIsSessionActive(false);
+    }
+  }, [patient, sessionId, isSessionActive, submitted]);
+
+  const handleEndSession = useCallback(async () => {
+    if (sessionId && !String(sessionId).startsWith("local_")) {
+      try {
+        await session.end(sessionId, {});
+      } catch (e) {
+        /* ignore end failures for local UX */
+      }
+    }
+    setSessionId(null);
+    setIsSessionActive(false);
+  }, [sessionId]);
 
   /* ----------------------------------------
      HANDLE ACTION (Back, Clear, Save) - Psychology style
@@ -954,14 +1012,128 @@ const activeTabIdx = tabOrder.indexOf(activeTab);
     
   }                 
 
-console.log (DIET_SUBJECTIVE_SCHEMA);
-console.log (DIET_OBJECTIVE_SCHEMA);
-console.log (DIET_ASSESSMENT_SCHEMA);
-console.log (DIET_PLAN_SCHEMA);
+
 
 return (
   <div style={dietOuterWrap}>
+    {isReferralModal && (
+      <ReferralModal
+        patient={patient}
+        activeDepartment="Dietetics"
+        onClose={() => setIsReferralModal(false)}
+      />
+    )}
+    {toast && (
+      <Toast
+        message={toast.message}
+        variant={toast.variant}
+        onClose={() => setToast(null)}
+      />
+    )}
+    {isConfirmModal && (
+      <ConfirmModal
+        variant="submit"
+        title="Submit Progress Intervention?"
+        confirmLabel="Submit Progress"
+        onConfirm={async () => {
+          setIsConfirmModal(false);
+          submitAndSave();
+          await handleEndSession();
+        }}
+        onCancel={() => setIsConfirmModal(false)}
+        message="You are about to finalise and submit this dietetics progress intervention."
+        meta={
+          patient
+            ? [
+                {
+                  label: "Patient",
+                  value: patient.email || patient.name || "—",
+                },
+                { label: "Visit Type", value: "Progress Intervention" },
+                {
+                  label: "Date",
+                  value: localDateTimeString(new Date()),
+                },
+              ]
+            : []
+        }
+        checklist={[
+          "All SOAP sections have been reviewed",
+          "Assessment data is accurate and complete",
+          "Submission cannot be edited after confirmation",
+        ]}
+      />
+    )}
+
     <div style={dietFormBox}>
+
+      {/* Start / Referral — same pattern as Optometry */}
+      <div style={dietActionBar}>
+        <button
+          type="button"
+          style={{
+            opacity: isSessionActive ? 0.7 : 1,
+            transition: "background .15s, opacity .15s",
+            color: submitted ? "#6b7280" : sessionId ? "#0369a1" : "#fff",
+            cursor:
+              isSessionActive || submitted || sessionId
+                ? "not-allowed"
+                : "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            background: submitted
+              ? "#e5e7eb"
+              : sessionId
+                ? "#e0f2fe"
+                : "#0284c7",
+            border: sessionId && !submitted ? "1.5px solid #bae6fd" : "none",
+            borderRadius: 6,
+            padding: "6px 16px",
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+          disabled={isSessionActive || !!sessionId || submitted}
+          onClick={
+            !sessionId && !isSessionActive ? handleStartSession : undefined
+          }
+          title={
+            submitted
+              ? "Session ended"
+              : sessionId
+                ? `Session active: ${sessionId}`
+                : "Start a new progress session"
+          }
+        >
+          {sessionId
+            ? "✓ Started"
+            : isSessionActive
+              ? "Starting..."
+              : "Start"}
+        </button>
+        <button
+          type="button"
+          style={{
+            border: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            borderRadius: 6,
+            padding: "6px 14px",
+            fontSize: 12,
+            background: sessionId || submitted ? "#0284c7" : "#d1d5db",
+            fontWeight: 600,
+            color: sessionId || submitted ? "#fff" : "#6b7280",
+            cursor: sessionId || submitted ? "pointer" : "not-allowed",
+            transition: "background .15s",
+          }}
+          disabled={!(sessionId || submitted)}
+          onClick={
+            sessionId || submitted ? () => setIsReferralModal(true) : undefined
+          }
+        >
+          Referral
+        </button>
+      </div>
 
       {/* PATIENT INFO */}
       
@@ -999,7 +1171,18 @@ return (
                 Next
               </button>
             ) : (
-              <button style={submitBtn} onClick={handleSubmit}>
+              <button
+                style={{
+                  ...submitBtn,
+                  opacity: sessionId && !submitted ? 1 : 0.55,
+                  cursor: sessionId && !submitted ? "pointer" : "not-allowed",
+                }}
+                disabled={!sessionId || submitted}
+                onClick={() => {
+                  if (!sessionId || submitted) return;
+                  setIsConfirmModal(true);
+                }}
+              >
                 Submit
               </button>
             )}
@@ -1098,6 +1281,12 @@ const patientGrid = {
 
 /* Layout - full width, plain */
 const dietOuterWrap = { width: "100%" };
+const dietActionBar = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 8,
+  marginBottom: 10,
+};
 const dietFormBox = {};
 const dietSection = { marginBottom: 24 };
 const dietPatientGrid = {

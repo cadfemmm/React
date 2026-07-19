@@ -186,14 +186,39 @@ export function formatAppointmentDateTime(patient) {
   return [dateLabel, timeLabel].filter(Boolean).join(" · ");
 }
 
-export async function fetchDepartmentAppointments(departmentSlug, options = {}) {
+/**
+ * Optometry / Audiology use path aliases:
+ *   GET appointment/appmts/{slug}/
+ * Dietetics / Psychology use department_id query:
+ *   GET appointment/appmts/?department_id={uuid}
+ */
+const DEPARTMENT_APPOINTMENT_PATH_SLUGS = {
+  Optometry: "optometry",
+  Audiology: "audiology",
+};
+
+const DEPARTMENT_APPOINTMENT_IDS = {
+  Dietetics: "d04eda05-115c-4799-b440-4af90029056a",
+  Psychology: "107e1212-a881-408d-a2bc-6d9b4488d2c1",
+};
+
+function normalizeDepartmentKey(name) {
+  const raw = String(name || "").trim().replace(/\s+department$/i, "");
+  const match = Object.keys({
+    ...DEPARTMENT_APPOINTMENT_PATH_SLUGS,
+    ...DEPARTMENT_APPOINTMENT_IDS,
+  }).find((k) => k.toLowerCase() === raw.toLowerCase());
+  return match || raw;
+}
+
+async function fetchAppointmentsByPathKey(pathKey, options = {}) {
   const limit = options.limit ?? 10;
   const params = {
     page: options.page ?? 1,
     limit,
   };
 
-  const res = await api.get(API_URL.DEPARTMENT_APPOINTMENTS(departmentSlug), {
+  const res = await api.get(API_URL.DEPARTMENT_APPOINTMENTS(pathKey), {
     params,
     headers: { accept: "application/json" },
   });
@@ -213,6 +238,63 @@ export async function fetchDepartmentAppointments(departmentSlug, options = {}) 
       hasPrevious: meta.has_previous ?? false,
     },
   };
+}
+
+async function fetchAppointmentsByDepartmentId(departmentId, options = {}) {
+  const limit = options.limit ?? 10;
+  const params = {
+    department_id: departmentId,
+    page: options.page ?? 1,
+    limit,
+  };
+
+  const res = await api.get(API_URL.DEPARTMENT_APPOINTMENTS_ROOT, {
+    params,
+    headers: { accept: "application/json" },
+  });
+
+  const rows = sortAppointmentsByLatest(
+    extractAppointmentArray(res.data).map(mapAppointmentToPatient),
+  ).slice(0, limit);
+  const meta = res.data?.meta ?? {};
+
+  return {
+    patients: normalizePatientList(rows),
+    meta: {
+      page: meta.page ?? params.page,
+      limit,
+      total: meta.total_record_count ?? meta.total ?? rows.length,
+      hasNext: meta.has_next ?? false,
+      hasPrevious: meta.has_previous ?? false,
+    },
+  };
+}
+
+/**
+ * Load today's appointments for a department.
+ * @param {string} departmentSlugOrName - slug ("optometry") or display name ("Dietetics")
+ */
+export async function fetchDepartmentAppointments(departmentSlugOrName, options = {}) {
+  const raw = String(departmentSlugOrName || "").trim();
+  if (!raw) {
+    return { patients: [], meta: { page: 1, limit: options.limit ?? 10, total: 0 } };
+  }
+
+  const deptKey = normalizeDepartmentKey(raw);
+  const departmentId = DEPARTMENT_APPOINTMENT_IDS[deptKey];
+  if (departmentId) {
+    return fetchAppointmentsByDepartmentId(departmentId, options);
+  }
+
+  const pathSlug =
+    DEPARTMENT_APPOINTMENT_PATH_SLUGS[deptKey] ||
+    (/^[a-z0-9_-]+$/i.test(raw) ? raw.toLowerCase() : null);
+
+  if (!pathSlug) {
+    throw new Error(`No appointments endpoint configured for ${raw}`);
+  }
+
+  return fetchAppointmentsByPathKey(pathSlug, options);
 }
 
 export async function fetchPatientsList(options = {}) {
