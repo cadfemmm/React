@@ -15,7 +15,7 @@ import TAPESForm from "./TAPESForm";
 import { AMPProAssessment, AMPNoProAssessment} from "./AMPpro_nopro";
 import PatientCard from "../../../shared/cards/PatientCard";
 import FiveTimesSTSForm from "./Fivetimessts";
-
+import LCI from "./LCI";
 
 /* ROM wrapper — shows only UL or LL sections based on amp_region */
 /* ── helpers ── */
@@ -887,7 +887,7 @@ const OBJECTIVE_SCHEMA = {
             { label: "5× Sit-to-Stand Test (5xSTS)",          value: "five_times_sts"     },
             { label: "6-Minute Walk Test (6MWT)",             value: "sixmwt"    },
             { label: "Functional Gait Assessment (FGA)",      value: "fga"       },
-            { label: "Locomotor Capabilities Index-5 (LCI-5)",value: "lci5"      },
+            { label: "Locomotor Capabilities Index-5 (LCI-5)",value: "lci"      },
             { label: "TAPES",                                 value: "tapes"     },
             { label: "Timed Up and Go (TUG)",                 value: "tug"       },
             { label: "L-Test",                                value: "ltest"     },
@@ -1240,6 +1240,7 @@ const AMPUTEE_ASSESSMENT_REGISTRY = {
   fga:       FGAForm,
   tapes:     TAPESForm,
   five_times_sts: FiveTimesSTSForm,
+  lci:       LCI,
 };
 
 
