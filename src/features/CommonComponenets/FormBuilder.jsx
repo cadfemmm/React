@@ -4191,10 +4191,22 @@ if (typeof col === "object" && col.type === "radio") {
       }
 
       /* DEFAULT BEHAVIOUR (label on top) */
+      const fieldLabelText = t(field.label, languageConfig?.enabled ? languageConfig.lang : "en");
+      const fieldLabelWithTooltip = field.tooltip ? (
+        <InfoTooltip
+          info={{ title: fieldLabelText, content: [field.tooltip] }}
+          showIcon={false}
+        >
+          {fieldLabelText}
+        </InfoTooltip>
+      ) : (
+        fieldLabelText
+      );
+
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {field.label ? (
-            <label className="form-label">{t(field.label, languageConfig?.enabled ? languageConfig.lang : "en")}</label>
+            <label className="form-label">{fieldLabelWithTooltip}</label>
           ) : null}
 
           <div className="fb-inline-group">
@@ -4256,13 +4268,26 @@ if (typeof col === "object" && col.type === "radio") {
     return <SubheadingWithImage field={field} languageConfig={languageConfig} />;
   }
 
+  // Support tooltip on subheading
+  const subheadingLabelText = t(
+    field.label,
+    languageConfig?.enabled ? languageConfig.lang : "en"
+  );
+  const subheadingLabelWithTooltip = field.tooltip ? (
+    <InfoTooltip
+      info={{ title: subheadingLabelText, content: [field.tooltip] }}
+      showIcon={false}
+    >
+      {subheadingLabelText}
+    </InfoTooltip>
+  ) : (
+    subheadingLabelText
+  );
+
   // Otherwise, render simple subheading
   return (
     <div className="fb-subheading">
-      {t(
-        field.label,
-        languageConfig?.enabled ? languageConfig.lang : "en"
-      )}
+      {subheadingLabelWithTooltip}
     </div>
   );
 
