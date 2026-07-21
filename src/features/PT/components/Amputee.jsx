@@ -16,6 +16,7 @@ import { AMPProAssessment, AMPNoProAssessment} from "./AMPpro_nopro";
 import PatientCard from "../../../shared/cards/PatientCard";
 import FiveTimesSTSForm from "./Fivetimessts";
 import LCI from "./LCI";
+import NineHolePegTestForm from "./Nineholepegtest";
 
 /* ROM wrapper — shows only UL or LL sections based on amp_region */
 /* ── helpers ── */
@@ -1241,6 +1242,7 @@ const AMPUTEE_ASSESSMENT_REGISTRY = {
   tapes:     TAPESForm,
   five_times_sts: FiveTimesSTSForm,
   lci:       LCI,
+  nine_hole_peg: NineHolePegTestForm,
 };
 
 

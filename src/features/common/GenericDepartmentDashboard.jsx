@@ -31,6 +31,7 @@ import OptometryGroupIntervention from "../Optometry/components/OptometryGroup";
 import DietGroupIntervention from "../Dietetics/components/DietGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
 import SpeechGroupIntervention from "../SpeechandLanguage/Speechandlanguagegroup";
+import SpeechTherapyPaedSOAP from "../SpeechandLanguage/Speechandlanguageprogress";
 
 const ASSESSMENT_MAP = {
   "Nursing":                  NursingPatientDetails,
@@ -54,6 +55,12 @@ const GROUP_INTERVENTION_MAP = {
   "Optometry": OptometryGroupIntervention,
   "Dietetics": DietGroupIntervention,
   "Speech & Language Therapy": SpeechGroupIntervention,
+};
+
+/** Departments that override the default "Progress Intervention" card with a
+ *  dedicated component (e.g. SpeechTherapyPaedSOAP for paediatric SOAP notes). */
+const PROGRESS_INTERVENTION_MAP = {
+  "Speech & Language Therapy": SpeechTherapyPaedSOAP,
 };
 
 /** Departments that load Today's Patients from the appointments API */
@@ -137,6 +144,7 @@ export default function GenericDepartmentDashboard({
   const isPO = dept === "Prosthetics & Orthotics";
   const GroupInterventionComponent =
     GROUP_INTERVENTION_MAP[dept] || NursingGroupIntervention;
+  const ProgressInterventionComponent = PROGRESS_INTERVENTION_MAP[dept] || null;
 
   useEffect(() => {
     if (!usesAppointmentQueue) return;
@@ -267,6 +275,7 @@ export default function GenericDepartmentDashboard({
         department={dept}
         onBack={() => setShowPatients(false)}
         AssessmentComponent={AssessmentComponent}
+        ProgressInterventionComponent={ProgressInterventionComponent}
         updatePatientInMainList={updatePatientInMainList}
       />
     );
