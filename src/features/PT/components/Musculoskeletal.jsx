@@ -15,6 +15,7 @@ import MLTForm from "./MLT";
 import NeurodynamicTestsForm from "./NDT";
 import PaivmForm from "./Paivm";
 import ULFSForm from "./ULFS";
+import BalanceTestForm from "./Balancetest";
 
 
 const YES_NO_OPTIONS = [
@@ -81,7 +82,8 @@ const MUSCULOSKELETAL_ASSESSMENT_REGISTRY = {
   muscle_length: MLTForm,
   neurodynamic_test: NeurodynamicTestsForm,
   paivm: PaivmForm,
-  ulfs: ULFSForm
+  ulfs: ULFSForm,
+  balance_test: BalanceTestForm
 }
 
 const MSK_CONTAINER_SCHEMA = {
