@@ -106,6 +106,16 @@ const OPTOMETRY_SOAP_TEMPLATES = {
   },
 };
 
+/** Speech & Language SOAP templates by visit type (backend form IDs). */
+const SPEECH_SOAP_TEMPLATES = {
+  PROGRESS: {
+    subjective: "1025cb12-a8ca-4b90-9b65-4d0d6063bcf5",
+    objective: "d1fe7cfe-af97-4ef9-b286-5fd4a8ca6707",
+    assessment: "d380b67f-da3a-4c5d-96d1-f32e1c767067",
+    plan: "0bc0b50e-5ada-495d-b4e0-fe9eefb169eb",
+  },
+};
+
 const normalizeVisitType = (visitType) => {
   const key = String(visitType || "INITIAL")
     .toUpperCase()
@@ -188,6 +198,64 @@ const matchesDieteticsScreeningType = (template, visit) => {
   return false;
 };
 
+/** P&O stream from dashboard card: "orthotics" | "prosthetics". */
+const normalizePOStream = (stream) => {
+  const key = String(stream || "")
+    .trim()
+    .toLowerCase();
+  if (key.startsWith("orthotic")) return "orthotics";
+  if (key.startsWith("prosthetic")) return "prosthetics";
+  return "";
+};
+
+/**
+ * Match backend form names like:
+ *   "subjective initial orthotics"
+ *   "objective followup prosthetics"
+ *   "objective progress p&o" (shared progress — no stream suffix)
+ */
+const matchesPOStream = (template, stream, visit) => {
+  const resolvedStream = normalizePOStream(stream);
+  if (!resolvedStream) return true;
+
+  // Progress / Group forms are shared across Orthotics & Prosthetics.
+  if (visit === "PROGRESS" || visit === "GROUP") return true;
+
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+
+  if (resolvedStream === "orthotics") {
+    return name.includes("orthotics");
+  }
+  // prosthetics — avoid matching "orthotics"
+  return name.includes("prosthetics");
+};
+
+const matchesPOVisit = (template, visit) => {
+  if (matchesDieteticsScreeningType(template, visit)) return true;
+
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+
+  if (visit === "INITIAL") {
+    return name.includes("initial") && !name.includes("progress");
+  }
+  if (visit === "FOLLOWUP") {
+    return name.includes("followup") || name.includes("follow up");
+  }
+  if (visit === "PROGRESS") {
+    return name.includes("progress");
+  }
+  if (visit === "GROUP") {
+    return name.includes("group");
+  }
+  return false;
+};
+
 const SOAP_SESSION_TABS = ["subjective", "objective", "assessment", "plan"];
 
 const getDietSoapTabKey = (template) => {
@@ -206,6 +274,118 @@ const getDietSoapTabKey = (template) => {
   }
   return null;
 };
+
+/**
+ * Speech backend often mis-tags domain forms (Voice Plan → assessment_type Subjective).
+ * Prefer the SOAP word in the form name over assessment_type.
+ */
+const getSpeechSoapTabKey = (template) => {
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+  for (const tab of SOAP_SESSION_TABS) {
+    if (
+      name.endsWith(` ${tab}`) ||
+      name.endsWith(tab) ||
+      name.includes(` ${tab} `)
+    ) {
+      return tab;
+    }
+  }
+  return getDietSoapTabKey(template);
+};
+
+/** Voice / Tracheostomy / Swallowing / Communication — launcher sub-forms, not main SOAP. */
+const isSpeechDomainForm = (template) => {
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+  if (!name) return false;
+  // Main visit shells
+  if (
+    /^(initial|follow\s*up|followup)\b/.test(name) ||
+    /^s\s*&\s*l\s*progress\b/.test(name) ||
+    /^progress\b/.test(name) ||
+    /^group\b/.test(name)
+  ) {
+    return false;
+  }
+  return /\b(voice|tracheostomy|trach|swallowing|swallow|communication)\b/.test(
+    name,
+  );
+};
+
+/** Main Speech SOAP shells: "Initial Subjective", "Progress Intervention Objective", etc. */
+const isSpeechMainSoapForm = (template, visit) => {
+  if (!template || isSpeechDomainForm(template)) return false;
+
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+  const screening = getTemplateScreeningType(template);
+  const tab = getSpeechSoapTabKey(template);
+  if (!tab) return false;
+
+  if (visit === "PROGRESS") {
+    // Explicit Progress Intervention shells (backend naming)
+    if (name.includes("progress intervention")) return true;
+    if (screening === "progress" || screening.includes("progress")) {
+      // Avoid domain forms that happen to have progress screening
+      return !isSpeechDomainForm(template);
+    }
+    return (
+      name.includes("s&l progress") ||
+      name.startsWith("progress ") ||
+      name.includes(" progress ")
+    );
+  }
+
+  if (!matchesDieteticsScreeningType(template, visit)) {
+    if (visit === "INITIAL" && !name.includes("initial")) return false;
+    if (visit === "FOLLOWUP" && !name.includes("follow")) return false;
+    if (visit === "GROUP" && !name.includes("group")) return false;
+  }
+  return true;
+};
+
+/** Prefer Progress Intervention / Initial shells over older aliases. */
+const speechMainFormScore = (template, visit) => {
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+  if (visit === "PROGRESS") {
+    if (name.includes("progress intervention")) return 0;
+    if (name.includes("s&l progress")) return 1;
+    if (name.includes("progress")) return 2;
+    return 3;
+  }
+  if (visit === "INITIAL") {
+    if (name.startsWith("initial ")) return 0;
+    if (name.includes("initial")) return 1;
+    return 2;
+  }
+  if (visit === "FOLLOWUP") {
+    if (name.includes("follow")) return 0;
+    return 1;
+  }
+  return 1;
+};
+
+/** Presenting-complaint flags selected on Subjective must drive launchers on O/A/P. */
+const SPEECH_SHARED_PROBLEM_FIELDS = new Set([
+  "swallowingProblems",
+  "voiceProblems",
+  "communicationProblems",
+  "tracheostomyProblems",
+  "swallowing_problems",
+  "voice_problems",
+  "communication_problems",
+  "tracheostomy_problems",
+]);
 
 const collectAssessmentLauncherFields = (fields, acc = []) => {
   (fields || []).forEach((field) => {
@@ -226,6 +406,7 @@ const findTemplateIdInMaps = (formId) => {
     ...Object.values(AUDIOLOGY_SOAP_TEMPLATES),
     ...Object.values(DIETETICS_SOAP_TEMPLATES),
     ...Object.values(OPTOMETRY_SOAP_TEMPLATES),
+    ...Object.values(SPEECH_SOAP_TEMPLATES),
   ]) {
     for (const [tab, templateId] of Object.entries(map)) {
       if (templateId === id) return tab;
@@ -412,14 +593,198 @@ const ensureFieldNames = (fields, path = "field") => {
   });
 };
 
+/**
+ * Backend P&O (and similar) schemas nest groups as:
+ *   { "title": "Functional Status", "fields": [ ... ] }
+ * without a `type`. FormBuilder only renders typed fields, so expand these
+ * into a subheading + flat child fields.
+ *
+ * Also normalizes `showif` → `showIf` and preserves group-level `showIf`.
+ */
+const combineShowIf = (parentShowIf, childShowIf) => {
+  if (!parentShowIf) return childShowIf;
+  if (!childShowIf) return parentShowIf;
+  return { ...parentShowIf, and: childShowIf };
+};
+
+const applyGroupShowIf = (fields, groupShowIf) => {
+  if (!groupShowIf || !Array.isArray(fields)) return fields;
+  return fields.map((field) => {
+    if (!field || typeof field !== "object") return field;
+    const next = { ...field };
+    const existing = next.showIf || next.showif;
+    delete next.showif;
+    const combined = combineShowIf(groupShowIf, existing);
+    if (combined) next.showIf = combined;
+    if (Array.isArray(next.fields)) {
+      next.fields = applyGroupShowIf(next.fields, groupShowIf);
+    }
+    if (Array.isArray(next.children)) {
+      next.children = applyGroupShowIf(next.children, groupShowIf);
+    }
+    return next;
+  });
+};
+
+const flattenTitledFieldGroups = (fields = []) => {
+  if (!Array.isArray(fields)) return [];
+
+  const result = [];
+  fields.forEach((field, index) => {
+    if (!field || typeof field !== "object") return;
+
+    const next = { ...field };
+    if (next.showif && !next.showIf) {
+      next.showIf = next.showif;
+    }
+    delete next.showif;
+
+    const nested = Array.isArray(next.fields) ? next.fields : null;
+    const isUntitledGroup =
+      nested &&
+      nested.length > 0 &&
+      !next.type &&
+      (next.title || next.label);
+
+    if (isUntitledGroup) {
+      const groupShowIf = next.showIf;
+      result.push({
+        type: "subheading",
+        label: next.title || next.label,
+        ...(groupShowIf ? { showIf: groupShowIf } : {}),
+      });
+      const flattenedNested = flattenTitledFieldGroups(nested);
+      result.push(
+        ...(groupShowIf
+          ? applyGroupShowIf(flattenedNested, groupShowIf)
+          : flattenedNested),
+      );
+      return;
+    }
+
+    if (nested && nested.length > 0) {
+      next.fields = flattenTitledFieldGroups(nested);
+    }
+    if (Array.isArray(next.children) && next.children.length > 0) {
+      next.children = flattenTitledFieldGroups(next.children);
+    }
+
+    result.push(next);
+  });
+  return result;
+};
+
+const PO_ASSIGNMENT_FIELD = "assignment_type";
+
+const isPOAssignmentSelectorField = (field) => {
+  if (!field || typeof field !== "object") return false;
+  if (field.name === PO_ASSIGNMENT_FIELD) return true;
+  const label = String(field.label || "").trim().toLowerCase();
+  return label.includes("what do you want to perform");
+};
+
+/** Drop showIf gates tied to Orthotics/Prosthetics picker (dashboard picks the stream). */
+const stripAssignmentShowIf = (showIf) => {
+  if (!showIf || typeof showIf !== "object") return undefined;
+  if (showIf.field === PO_ASSIGNMENT_FIELD) return undefined;
+
+  if ("and" in showIf) {
+    const { and, ...rest } = showIf;
+    const strippedAnd = stripAssignmentShowIf(and);
+    const strippedRest = stripAssignmentShowIf(rest);
+    if (strippedAnd && strippedRest) return { ...strippedRest, and: strippedAnd };
+    return strippedAnd || strippedRest;
+  }
+
+  if ("or" in showIf) {
+    const conditions = (Array.isArray(showIf.or) ? showIf.or : [showIf.or])
+      .map(stripAssignmentShowIf)
+      .filter(Boolean);
+    if (!conditions.length) return undefined;
+    if (conditions.length === 1) return conditions[0];
+    return { or: conditions };
+  }
+
+  return showIf;
+};
+
+const preparePOSchemaFields = (fields = []) => {
+  if (!Array.isArray(fields)) return [];
+
+  return fields
+    .filter((field) => !isPOAssignmentSelectorField(field))
+    .map((field) => {
+      if (!field || typeof field !== "object") return field;
+      const next = { ...field };
+      const condition = next.showIf || next.showif;
+      delete next.showif;
+      const stripped = stripAssignmentShowIf(condition);
+      if (stripped) next.showIf = stripped;
+      else delete next.showIf;
+
+      if (Array.isArray(next.fields)) {
+        next.fields = preparePOSchemaFields(next.fields);
+      }
+      if (Array.isArray(next.children)) {
+        next.children = preparePOSchemaFields(next.children);
+      }
+      return next;
+    });
+};
+
+const preparePOSchema = (schema) => {
+  if (!schema || typeof schema !== "object") return schema;
+  return {
+    ...schema,
+    sections: Array.isArray(schema.sections)
+      ? schema.sections.map((section) => {
+          const next = { ...section };
+          const sectionCondition = next.showIf || next.showif;
+          delete next.showif;
+          const strippedSection = stripAssignmentShowIf(sectionCondition);
+          if (strippedSection) next.showIf = strippedSection;
+          else delete next.showIf;
+          next.fields = preparePOSchemaFields(section?.fields);
+          return next;
+        })
+      : schema.sections,
+    fields: Array.isArray(schema.fields)
+      ? preparePOSchemaFields(schema.fields)
+      : schema.fields,
+  };
+};
+
 const normalizeTemplateBody = (body) => {
   if (!body) return {};
 
+  let raw = body;
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+
+  if (raw?.body && typeof raw.body === "object") {
+    const nested = raw.body;
+    if (Array.isArray(nested.sections) || Array.isArray(nested.fields)) {
+      raw = nested;
+    }
+  }
+
   let normalized;
-  if (Array.isArray(body)) {
-    normalized = { sections: body };
-  } else if (typeof body === "object") {
-    normalized = body;
+  if (Array.isArray(raw)) {
+    const isSectionList = raw.every(
+      (item) =>
+        item &&
+        Array.isArray(item.fields) &&
+        !item.name &&
+        !item.type,
+    );
+    normalized = isSectionList ? { sections: raw } : { fields: raw };
+  } else if (typeof raw === "object") {
+    normalized = raw;
   } else {
     return {};
   }
@@ -440,7 +805,10 @@ const normalizeTemplateBody = (body) => {
       ...normalized,
       sections: normalized.sections.map((section, sIdx) => ({
         ...section,
-        fields: ensureFieldNames(section?.fields, `section_${sIdx}`),
+        fields: ensureFieldNames(
+          flattenTitledFieldGroups(section?.fields),
+          `section_${sIdx}`,
+        ),
       })),
     };
   }
@@ -448,7 +816,7 @@ const normalizeTemplateBody = (body) => {
   if (Array.isArray(normalized.fields)) {
     return {
       ...normalized,
-      fields: ensureFieldNames(normalized.fields, "field"),
+      fields: ensureFieldNames(flattenTitledFieldGroups(normalized.fields), "field"),
     };
   }
 
@@ -492,6 +860,7 @@ const buildSubAssessmentEntry = (sub) => {
     component: pickReactComponent(sub),
     Component: pickReactComponent(sub),
     actions: actions.ACTIONS_BUTTON,
+    fieldsFlattened: true,
     session_id: null,
   };
 };
@@ -548,6 +917,23 @@ const LAUNCHER_LEGACY_OPTION_PATTERNS = {
   "PG-SGA-Metric-version": /pg-?sga|patient[-\s]?generated/,
   "Growth Chart": /growth chart/,
   FFQ: /ffq|food frequency/,
+  // Speech & Language domain launchers (legacy option values)
+  swallow_subjective: /swallow/,
+  swallow_objective: /swallow/,
+  swallow_assessment: /swallow/,
+  swallow_plan: /swallow/,
+  voice_subjective: /\bvoice\b/,
+  voice_objective: /\bvoice\b/,
+  voice_assessment: /\bvoice\b/,
+  voice_plan: /\bvoice\b/,
+  trach_subjective: /trach/,
+  trach_objective: /trach/,
+  trach_assessment: /trach/,
+  trach_plan: /trach/,
+  comm_subjective: /communication|speech\s*&\s*language|speech and language/,
+  comm_objective: /communication|speech\s*&\s*language|speech and language/,
+  comm_assessment: /communication|speech\s*&\s*language|speech and language/,
+  comm_plan: /communication|speech\s*&\s*language|speech and language/,
 };
 
 /**
@@ -694,10 +1080,12 @@ export default function AssessmentLoader({
   patient,
   department,
   visitType = "INITIAL",
+  stream = "",
 }) {
   // Extract Tab
   const TABS = actions.ASSESSMENT_TABS;
   const resolvedVisitType = normalizeVisitType(visitType);
+  const resolvedPOStream = normalizePOStream(stream);
   // Set up state to track which assessment is active and its values
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(false); //formsError, setFormsError
@@ -768,6 +1156,13 @@ export default function AssessmentLoader({
   const isOptometry = department === "Optometry";
   const isAudiology = department === "Audiology";
   const isDietetics = department === "Dietetics";
+  const isSpeech =
+    department === "Speech & Language Therapy" ||
+    department === "SpeechAndLanguage" ||
+    department === "Speech";
+  const isPO =
+    department === "Prosthetics & Orthotics" ||
+    department === "ProstheticsAndOrthotics";
 
 useEffect(() => {
   if (!patient || !department) return;
@@ -919,7 +1314,13 @@ useEffect(() => {
           id: template.id,
           name: template.name,
           actions: actions.ACTIONS_BUTTON,
+          fieldsFlattened: true,
         };
+
+        // Orthotics / Prosthetics: dashboard picks stream — hide assignment picker only.
+        if (resolvedPOStream) {
+          processedTemplate = preparePOSchema(processedTemplate);
+        }
 
         if (tabKey === "assessment") {
           assessmentFormId = template.id;
@@ -1280,6 +1681,11 @@ useEffect(() => {
           const fullTemplate = await resolveFullTemplate(template);
           map[tab] = buildProcessedTemplate(fullTemplate, tab);
           await registerSubAssessments(fullTemplate, tab);
+
+          const linkedSubs = getUniqueSubAssessments(subAssessment[tab] || {});
+          if (linkedSubs.length && map[tab]) {
+            map[tab] = injectLauncherSubAssessmentIds(map[tab], linkedSubs);
+          }
         };
 
         // Progress (and any visit with a fixed ID map): load known UUIDs first
@@ -1337,6 +1743,242 @@ useEffect(() => {
             await loadOptoTemplateForTab(tab, template);
           }
         }
+      } else if (isSpeech) {
+        // Speech: main SOAP shells only (Initial Subjective / Progress Intervention …)
+        // Voice / Tracheostomy / Swallowing / Communication are launcher sub-forms.
+        const loadSpeechTemplateForTab = async (tab, template) => {
+          if (!template?.id) return;
+          const fullTemplate = await resolveFullTemplate(template);
+          map[tab] = buildProcessedTemplate(fullTemplate, tab);
+          await registerSubAssessments(fullTemplate, tab);
+
+          const linkedSubs = getUniqueSubAssessments(subAssessment[tab] || {});
+          if (linkedSubs.length && map[tab]) {
+            map[tab] = injectLauncherSubAssessmentIds(map[tab], linkedSubs);
+          }
+        };
+
+        const speechIdMap = SPEECH_SOAP_TEMPLATES[resolvedVisitType] || null;
+
+        // Known Progress Intervention (and other) UUIDs first
+        if (speechIdMap) {
+          for (const tab of TABS) {
+            const templateId = speechIdMap[tab];
+            if (!templateId) continue;
+
+            let template =
+              data.find((item) => String(item.id) === String(templateId)) ||
+              null;
+
+            if (!template) {
+              try {
+                const res = await forms.fetchById(templateId);
+                if (res?.data) {
+                  template = { id: templateId, ...res.data };
+                }
+              } catch {
+                /* fall through to name / screening match */
+              }
+            }
+
+            if (template) {
+              await loadSpeechTemplateForTab(tab, template);
+            }
+          }
+        }
+
+        const speechMains = data.filter((template) =>
+          isSpeechMainSoapForm(template, resolvedVisitType),
+        );
+
+        const preferMainOrder = (a, b) =>
+          speechMainFormScore(a, resolvedVisitType) -
+          speechMainFormScore(b, resolvedVisitType);
+
+        for (const template of [...speechMains].sort(preferMainOrder)) {
+          const tab = getSpeechSoapTabKey(template);
+          if (!tab || !TABS.includes(tab)) continue;
+
+          // Prefer Progress Intervention / better-scored shells over older aliases
+          if (map[tab]) {
+            const existing = data.find(
+              (item) => String(item?.id) === String(map[tab]?.id),
+            ) || { name: map[tab]?.name, id: map[tab]?.id };
+            if (
+              speechMainFormScore(template, resolvedVisitType) >=
+              speechMainFormScore(existing, resolvedVisitType)
+            ) {
+              continue;
+            }
+          }
+
+          await loadSpeechTemplateForTab(tab, template);
+        }
+
+        // Progress fallback: any remaining PROGRESS-screening SOAP tabs by type/name
+        if (resolvedVisitType === "PROGRESS") {
+          for (const template of data) {
+            if (isSpeechDomainForm(template)) continue;
+            const tab = getSpeechSoapTabKey(template);
+            if (!tab || !TABS.includes(tab) || map[tab]) continue;
+            const name = String(template?.name || "")
+              .toLowerCase()
+              .replace(/[_-]+/g, " ");
+            const screening = getTemplateScreeningType(template);
+            if (
+              !(
+                screening.includes("progress") ||
+                name.includes("progress intervention") ||
+                name.includes("progress")
+              )
+            ) {
+              continue;
+            }
+            await loadSpeechTemplateForTab(tab, template);
+          }
+        }
+
+        // Wire Voice / Swallowing / Tracheostomy / Communication into launchers
+        const registerSpeechLauncherSubsFromDepartment = async () => {
+          const domainForms = data.filter(isSpeechDomainForm);
+
+          for (const tab of TABS) {
+            if (!map[tab]) continue;
+
+            const registry = { ...(subAssessment[tab] || {}) };
+            const tabDomainForms = domainForms.filter(
+              (form) => getSpeechSoapTabKey(form) === tab,
+            );
+
+            const launcherFields = [];
+            (map[tab].sections || []).forEach((section) =>
+              collectAssessmentLauncherFields(section.fields, launcherFields),
+            );
+            collectAssessmentLauncherFields(map[tab].fields, launcherFields);
+            const launcherOptions = launcherFields.flatMap(
+              (field) => field.options || [],
+            );
+
+            const ensureEntry = async (form) => {
+              if (!form?.id) return null;
+              const existing = registry[String(form.id)];
+              if (existing && subAssessmentHasSchema(existing)) return existing;
+
+              let entry = buildSubAssessmentEntry(form);
+              if (!subAssessmentHasSchema(entry)) {
+                try {
+                  const res = await forms.fetchById(form.id);
+                  entry = buildSubAssessmentEntry({ ...form, ...res?.data });
+                } catch {
+                  return null;
+                }
+              }
+              registry[String(form.id)] = entry;
+              if (form.name) registry[form.name] = entry;
+              return entry;
+            };
+
+            for (const form of tabDomainForms) {
+              const entry = await ensureEntry(form);
+              if (!entry) continue;
+              const domainKey = String(form.name || "")
+                .toLowerCase()
+                .replace(/[_-]+/g, " ")
+                .replace(
+                  /\b(subjective|objective|assessment|plan|questionnaires?)\b/g,
+                  "",
+                )
+                .replace(/\s+/g, " ")
+                .trim();
+              if (domainKey) {
+                registry[domainKey] = entry;
+                registry[`${domainKey}_${tab}`] = entry;
+                registry[`${domainKey.replace(/\s+/g, "_")}_${tab}`] = entry;
+              }
+            }
+
+            for (const opt of launcherOptions) {
+              const legacyKey = opt?.value ?? opt?.id;
+              if (
+                legacyKey &&
+                registry[legacyKey] &&
+                subAssessmentHasSchema(registry[legacyKey])
+              ) {
+                continue;
+              }
+
+              const matched =
+                tabDomainForms.find((form) =>
+                  matchSubToLauncherOption(
+                    { id: form.id, name: form.name },
+                    opt,
+                  ),
+                ) ||
+                domainForms.find((form) =>
+                  matchSubToLauncherOption(
+                    { id: form.id, name: form.name },
+                    opt,
+                  ),
+                );
+
+              if (!matched) continue;
+              const entry = await ensureEntry(matched);
+              if (!entry) continue;
+              if (legacyKey) registry[legacyKey] = entry;
+              if (opt?.label) {
+                registry[String(opt.label).trim().toLowerCase()] = entry;
+              }
+            }
+
+            subAssessment[tab] = registry;
+            const linkedSubs = getUniqueSubAssessments(registry);
+            if (linkedSubs.length) {
+              map[tab] = injectLauncherSubAssessmentIds(map[tab], linkedSubs);
+            }
+          }
+        };
+
+        await registerSpeechLauncherSubsFromDepartment();
+      } else if (
+        (department === "Prosthetics & Orthotics" ||
+          department === "ProstheticsAndOrthotics") &&
+        resolvedPOStream
+      ) {
+        // Orthotics / Prosthetics dashboard stream → backend SOAP by form name
+        // e.g. "subjective initial orthotics", "objective followup prosthetics"
+        const loadPOTemplateForTab = async (tab, template) => {
+          if (!template?.id) return;
+          const fullTemplate = await resolveFullTemplate(template);
+          map[tab] = buildProcessedTemplate(fullTemplate, tab);
+          await registerSubAssessments(fullTemplate, tab);
+
+          const linkedSubs = getUniqueSubAssessments(subAssessment[tab] || {});
+          if (linkedSubs.length && map[tab]) {
+            map[tab] = injectLauncherSubAssessmentIds(map[tab], linkedSubs);
+          }
+        };
+
+        const poCandidates = data.filter(
+          (template) =>
+            matchesPOVisit(template, resolvedVisitType) &&
+            matchesPOStream(template, resolvedPOStream, resolvedVisitType),
+        );
+
+        for (const template of poCandidates) {
+          const tab = getDietSoapTabKey(template);
+          if (!tab || !TABS.includes(tab) || map[tab]) continue;
+          await loadPOTemplateForTab(tab, template);
+        }
+
+        // Progress fallback: shared p&o progress forms if stream filter left gaps
+        if (resolvedVisitType === "PROGRESS") {
+          for (const template of data) {
+            const tab = getDietSoapTabKey(template);
+            if (!tab || !TABS.includes(tab) || map[tab]) continue;
+            if (!matchesPOVisit(template, "PROGRESS")) continue;
+            await loadPOTemplateForTab(tab, template);
+          }
+        }
       } else {
         for (const template of data) {
           const key = template.assessment_type?.toLowerCase();
@@ -1356,12 +1998,12 @@ useEffect(() => {
     }
   };
 
-  // Load template on department / visit type
+  // Load template on department / visit type / P&O stream
   useEffect(() => {
     if (!sessionId) {
       loadTemplates();
     }
-  }, [department, sessionId, resolvedVisitType]);
+  }, [department, sessionId, resolvedVisitType, resolvedPOStream]);
 
   // Start session handler
   const handleStartSession = useCallback(async () => {
@@ -1685,6 +2327,7 @@ useEffect(() => {
               ...item,
               ...withPrimarySection(normalizeTemplateBody(tm?.data?.body)),
               actions: actions.ACTIONS_BUTTON,
+              fieldsFlattened: true,
               session_id:
                 item.session_id ||
                 resolveSubAssessmentSessionId(item, sessionSubAssessmentIds),
@@ -1743,6 +2386,7 @@ useEffect(() => {
                       ...template,
                       ...bodySchema,
                       actions: actions.ACTIONS_BUTTON,
+                      fieldsFlattened: true,
                       session_id:
                         template.session_id ||
                         resolveSubAssessmentSessionId(
@@ -1922,6 +2566,24 @@ useEffect(() => {
       // =========================
       // MAIN ASSESSMENT VALUES
       // =========================
+      // Speech: Subjective Yes/No for Voice / Swallowing / etc. must drive
+      // assessment-launcher options on Objective / Assessment / Plan.
+      if (isSpeech && SPEECH_SHARED_PROBLEM_FIELDS.has(name)) {
+        const normalized =
+          typeof value === "string" ? value.trim().toLowerCase() : value;
+        setAssessmentsValues((v) => {
+          const next = { ...v };
+          SOAP_SESSION_TABS.forEach((tab) => {
+            next[tab] = {
+              ...(next[tab] || {}),
+              [name]: normalized,
+            };
+          });
+          return next;
+        });
+        return;
+      }
+
       setAssessmentsValues((v) => ({
         ...v,
         [activeTab]: {
@@ -1930,7 +2592,13 @@ useEffect(() => {
         },
       }));
     },
-    [activeTab, sessionId, subAssessmentTemplate, sessionSubAssessmentIds],
+    [
+      activeTab,
+      sessionId,
+      subAssessmentTemplate,
+      sessionSubAssessmentIds,
+      isSpeech,
+    ],
   );
 
   // ── Otoscopic Extract Handler ──────────────────────────────────────────────
@@ -2596,6 +3264,25 @@ useEffect(() => {
                   };
                 }
 
+                // Speech launchers on O/A/P read Yes/No flags set on Subjective
+                const tabValues = assessmentsValues[activeTab] || {};
+                let formValues = tabValues;
+                if (isSpeech) {
+                  const inherited = {};
+                  SPEECH_SHARED_PROBLEM_FIELDS.forEach((key) => {
+                    if (tabValues[key] != null && tabValues[key] !== "") return;
+                    for (const tab of SOAP_SESSION_TABS) {
+                      const v = assessmentsValues[tab]?.[key];
+                      if (v != null && v !== "") {
+                        inherited[key] =
+                          typeof v === "string" ? v.toLowerCase() : v;
+                        break;
+                      }
+                    }
+                  });
+                  formValues = { ...inherited, ...tabValues };
+                }
+
                 return (
                   <>
                   {processingOCR && (
@@ -2613,12 +3300,13 @@ useEffect(() => {
                     </div>
                   )}
                   <CommonFormBuilder
+                    key={activeTab}
                     readOnly={false}
                     onChange={onChange}
                     submitted={isSubmitted}
                     onAction={handleAction}
                     schema={activeSchema}
-                    values={assessmentsValues[activeTab] || {}}
+                    values={formValues}
                     patient={patient}
                     assessmentRegistry={
                       subAssessmentTemplate[activeTab] || {}
@@ -2648,7 +3336,12 @@ useEffect(() => {
                           Book Appointment
                         </button>
                       )}
-                      {(isOptometry || isAudiology || isPsychology || isDietetics) &&
+                      {(isOptometry ||
+                        isAudiology ||
+                        isPsychology ||
+                        isDietetics ||
+                        isSpeech ||
+                        (isPO && resolvedPOStream)) &&
                         activeTab === "plan" && (
                           <button
                             type="button"

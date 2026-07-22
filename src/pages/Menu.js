@@ -646,7 +646,7 @@ export function MainContent({
       return <GenericDepartmentDashboard departmentName="Prosthetics & Orthotics Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Speech & Language Therapy":
-      return <GenericDepartmentDashboard departmentName="Speech & Language Therapy Department" patients={patients} updatePatientInMainList={updatePatientInMainList} />;
+      return <GenericDepartmentDashboard departmentName="Speech & Language Therapy Department" patients={patients} PatientsComponent={SpeechPatients} updatePatientInMainList={updatePatientInMainList} />;
 
     case "Dietetics":
       return <GenericDepartmentDashboard departmentName="Dietetics Department" patients={patients} PatientsComponent={DieteticsPatients} updatePatientInMainList={updatePatientInMainList} />;

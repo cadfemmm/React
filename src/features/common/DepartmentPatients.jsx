@@ -266,6 +266,7 @@ export default function DepartmentPatients({
   department,
   onBack,
   AssessmentComponent,
+  ProgressInterventionComponent, // optional: overrides AssessmentComponent for "progress" mode
   loading: loadingProp = false,
   showAllPatients = false,
   hideBack = false,
@@ -596,6 +597,17 @@ export default function DepartmentPatients({
         />
       );
     }
+    // Progress Intervention — use dedicated component if provided (e.g. SpeechTherapyPaedSOAP for Speech & Language)
+    if (assessmentView === "progress" && ProgressInterventionComponent) {
+      return (
+        <ProgressInterventionComponent
+          patient={selectedPatient}
+          onBack={handleBackToCards}
+          onSubmit={handleBackToCards}
+        />
+      );
+    }
+
     if (AssessmentComponent) {
       return (
         <AssessmentComponent
