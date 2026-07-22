@@ -195,12 +195,12 @@ export function formatAppointmentDateTime(patient) {
 const DEPARTMENT_APPOINTMENT_PATH_SLUGS = {
   Optometry: "optometry",
   Audiology: "audiology",
-  "Speech & Language Therapy": "speech",
 };
 
 const DEPARTMENT_APPOINTMENT_IDS = {
   Dietetics: "d04eda05-115c-4799-b440-4af90029056a",
-  Psychology: "107e1212-a881-408d-a2bc-6d9b4488d2c1",
+  Psychology: "a700d94c-dbd0-45fc-ae64-6544b1bc403d",
+  "Speech & Language Therapy": "af441a63-7ffb-452f-b42a-11d53790e86b",
 };
 
 function normalizeDepartmentKey(name) {

@@ -23,6 +23,7 @@ import ReferralModal from "../shared/ui/ReferralModal";
 import AssessmentSectionPreviewModal from "../shared/ui/AssessmentSectionPreviewModal";
 import {
   buildFullSoapReportEntries,
+  buildAssessmentReportEntries,
   appendOptometrySoapSupplements,
   appendAudiologySoapSupplements,
 } from "../shared/utils/assessmentPreviewUtils";
@@ -115,6 +116,9 @@ const SPEECH_SOAP_TEMPLATES = {
     plan: "0bc0b50e-5ada-495d-b4e0-fe9eefb169eb",
   },
 };
+
+/** Speech & Language Group Intervention — single unified form (not SOAP-segregated). */
+const SPEECH_GROUP_TEMPLATE_ID = "f986a57b-a67a-40e8-9bed-192b78d5c9af";
 
 const normalizeVisitType = (visitType) => {
   const key = String(visitType || "INITIAL")
@@ -254,6 +258,21 @@ const matchesPOVisit = (template, visit) => {
     return name.includes("group");
   }
   return false;
+};
+
+const isSpeechGroupForm = (template) => {
+  if (!template?.id) return false;
+  if (String(template.id) === SPEECH_GROUP_TEMPLATE_ID) return true;
+  if (!matchesDieteticsScreeningType(template, "GROUP")) return false;
+  const name = String(template?.name || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .trim();
+  return (
+    name.includes("speech and lang group") ||
+    name.includes("speech and language group") ||
+    (name.includes("group") && name.includes("speech"))
+  );
 };
 
 const SOAP_SESSION_TABS = ["subjective", "objective", "assessment", "plan"];
@@ -1160,6 +1179,7 @@ export default function AssessmentLoader({
     department === "Speech & Language Therapy" ||
     department === "SpeechAndLanguage" ||
     department === "Speech";
+  const isSpeechGroup = isSpeech && resolvedVisitType === "GROUP";
   const isPO =
     department === "Prosthetics & Orthotics" ||
     department === "ProstheticsAndOrthotics";
@@ -1744,6 +1764,29 @@ useEffect(() => {
           }
         }
       } else if (isSpeech) {
+        // Group Intervention: one backend form — not split into SOAP tabs.
+        if (resolvedVisitType === "GROUP") {
+          let groupTemplate =
+            data.find((item) => String(item.id) === SPEECH_GROUP_TEMPLATE_ID) ||
+            data.find(isSpeechGroupForm) ||
+            null;
+
+          if (!groupTemplate) {
+            try {
+              const res = await forms.fetchById(SPEECH_GROUP_TEMPLATE_ID);
+              if (res?.data) {
+                groupTemplate = { id: SPEECH_GROUP_TEMPLATE_ID, ...res.data };
+              }
+            } catch {
+              /* fall through to empty state */
+            }
+          }
+
+          if (groupTemplate) {
+            const fullTemplate = await resolveFullTemplate(groupTemplate);
+            map.subjective = buildProcessedTemplate(fullTemplate, "subjective");
+          }
+        } else {
         // Speech: main SOAP shells only (Initial Subjective / Progress Intervention …)
         // Voice / Tracheostomy / Swallowing / Communication are launcher sub-forms.
         const loadSpeechTemplateForTab = async (tab, template) => {
@@ -1939,6 +1982,7 @@ useEffect(() => {
         };
 
         await registerSpeechLauncherSubsFromDepartment();
+        }
       } else if (
         (department === "Prosthetics & Orthotics" ||
           department === "ProstheticsAndOrthotics") &&
@@ -3058,11 +3102,18 @@ useEffect(() => {
                 ]
               : []
           }
-          checklist={[
-            "All SOAP sections have been reviewed",
-            "Assessment data is accurate and complete",
-            "Submission cannot be edited after confirmation",
-          ]}
+          checklist={
+            isSpeechGroup
+              ? [
+                  "Group intervention data is accurate and complete",
+                  "Submission cannot be edited after confirmation",
+                ]
+              : [
+                  "All SOAP sections have been reviewed",
+                  "Assessment data is accurate and complete",
+                  "Submission cannot be edited after confirmation",
+                ]
+          }
         />
       )}
       {sectionPreview && (
@@ -3172,7 +3223,8 @@ useEffect(() => {
         </div>
         {/* Assessment Tabs */}
         <div style={S.soapShell}>
-          {/* Tab Buttons UI */}
+          {/* Tab Buttons UI — hidden for Speech Group (single unified form) */}
+          {!isSpeechGroup && (
           <div style={S.tabBar}>
             {TABS.map((tab) => {
               const isActive = activeTab === tab;
@@ -3206,6 +3258,7 @@ useEffect(() => {
               );
             })}
           </div>
+          )}
           {/* Tab Content UI */}
           <div style={S.tabContent}>
             {isLoading ? (
@@ -3226,7 +3279,11 @@ useEffect(() => {
                 <EmptyState
                   icon="📋"
                   title="No form available"
-                  message={`The ${activeTab} section hasn't been configured yet.`}
+                  message={
+                    isSpeechGroup
+                      ? "The group intervention form hasn't been configured yet."
+                      : `The ${activeTab} section hasn't been configured yet.`
+                  }
                 />
               </div>
             ) : (
@@ -3342,7 +3399,7 @@ useEffect(() => {
                         isDietetics ||
                         isSpeech ||
                         (isPO && resolvedPOStream)) &&
-                        activeTab === "plan" && (
+                        (activeTab === "plan" || isSpeechGroup) && (
                           <button
                             type="button"
                             style={S.previewBtn}
@@ -3355,40 +3412,56 @@ useEffect(() => {
                               e.currentTarget.style.borderColor = "#cbd5e1";
                             }}
                             onClick={() =>
-                              setSectionPreview({
-                                title: "Full Assessment Preview",
-                                entries: buildFullSoapReportEntries({
-                                  tabs: TABS,
-                                  templates,
-                                  assessmentsValues,
-                                  subAssessmentTemplate,
-                                  supplementaryAppender:
-                                    isOptometry &&
-                                    resolvedVisitType === "INITIAL"
-                                      ? appendOptometrySoapSupplements
-                                      : isAudiology &&
-                                          resolvedVisitType === "INITIAL"
-                                        ? appendAudiologySoapSupplements
-                                        : undefined,
-                                }),
-                              })
+                              isSpeechGroup
+                                ? setSectionPreview({
+                                    title: "Group Intervention Preview",
+                                    entries: buildAssessmentReportEntries(
+                                      templates.subjective,
+                                      assessmentsValues.subjective || {},
+                                      subAssessmentTemplate.subjective || {},
+                                      { excludeSubAssessments: false },
+                                    ),
+                                  })
+                                : setSectionPreview({
+                                    title: "Full Assessment Preview",
+                                    entries: buildFullSoapReportEntries({
+                                      tabs: TABS,
+                                      templates,
+                                      assessmentsValues,
+                                      subAssessmentTemplate,
+                                      supplementaryAppender:
+                                        isOptometry &&
+                                        resolvedVisitType === "INITIAL"
+                                          ? appendOptometrySoapSupplements
+                                          : isAudiology &&
+                                              resolvedVisitType === "INITIAL"
+                                            ? appendAudiologySoapSupplements
+                                            : undefined,
+                                    }),
+                                  })
                             }
                           >
                             Preview
                           </button>
                         )}
                       <button
-                        style={activeTab === "plan" ? S.submitBtn : S.nextBtn}
+                        style={
+                          activeTab === "plan" || isSpeechGroup
+                            ? S.submitBtn
+                            : S.nextBtn
+                        }
                         onMouseLeave={(e) =>
                           (e.currentTarget.style.background = "#2563eb")
                         }
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.background =
-                            activeTab === "plan" ? "#1d4ed8" : "#1a6fc4")
+                            activeTab === "plan" || isSpeechGroup
+                              ? "#1d4ed8"
+                              : "#1a6fc4")
                         }
                         onClick={() => {
                           // FINAL STEP
-                          if (activeTab === "plan") {
+                          if (activeTab === "plan" || isSpeechGroup) {
                             setIsConfirmModal(true);
 
                             return;
@@ -3398,8 +3471,10 @@ useEffect(() => {
                           handleAction("next");
                         }}
                       >
-                        {activeTab === "plan"
-                          ? "Submit Assessment"
+                        {activeTab === "plan" || isSpeechGroup
+                          ? isSpeechGroup
+                            ? "Submit Group Intervention"
+                            : "Submit Assessment"
                           : (() => {
                               const currentIndex = TABS.indexOf(activeTab);
 

@@ -1,385 +1,100 @@
-import React, { useState } from "react";
-import CommonFormBuilder from "../CommonComponenets/FormBuilder";
+import React from "react";
+import AssessmentLoader from "../../assessment";
 
-const SPEECHANDLANGUAGEGROUP_SCHEMA = {
-  title: "Group Intervention",
-    actions: [
-    {
-      type: "back",
-      label: "Back"
-    }
-  ],
-  sections: [
-    {
-      title: "SESSION",
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "session_type",
-          label: "Select Session Type",
-          options: [
-            { label: "Swallowing", value: "swallowing" },
-            { label: "Breathing", value: "breathing" },
-            { label: "Voicing", value: "voicing" },
-            { label: "Receptive Language", value: "receptive" },
-            { label: "Expressive Language", value: "expressive" },
-            { label: "Speech", value: "speech" },
-            { label: "Others", value: "others" },
-          ],
-        },
-      ],
-    },
+/**
+ * Speech & Language Group Intervention — single unified form from backend
+ * (not split into SOAP tabs). Includes Start, Submit, and Preview.
+ */
+export default function SpeechGroupIntervention({
+  patient,
+  selectedPatients = [],
+  patients = [],
+  onBack,
+}) {
+  const participants = selectedPatients.length ? selectedPatients : patients;
+  const primaryPatient = patient || participants[0] || null;
 
-    {
-      title: "SWALLOWING",
-      showIf: {
-    field: "session_type",
-    includes: "swallowing",
-  },
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "swallowing_interventions",
-          label: "Interventions",
-          options: [
-            {
-              label:
-                "Education about ingestion functions",
-              value: "ktb_pm",
-            },
-            {
-              label:
-                "Interview in relation to swallowing",
-              value: "ktc_an",
-            },
-            {
-              label:
-                "Assisting and leading exercise in relation to swallowing",
-              value: "ktc_pg",
-            },
-            {
-              label:
-                "Education about swallowing",
-              value: "ktc_pm",
-            },
-            {
-              label:
-                "Advising about swallowing",
-              value: "ktc_pn",
-            },
-          ],
-        },
-      ],
-    },
-
-    {
-      title: "BREATHING",
-      showIf: {
-  field: "session_type",
-  includes: "breathing",
-},
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "breathing_interventions",
-          label: "Interventions",
-          options: [
-            {
-              label:
-                "Assisting and leading exercise for respiration function",
-              value: "jtb_pg",
-            },
-            {
-              label:
-                "Education about respiration function",
-              value: "jtb_pm",
-            },
-          ],
-        },
-      ],
-    },
-
-    {
-      title: "VOICING",
-      showIf: {
-  field: "session_type",
-  includes: "voicing",
-},
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "voicing_interventions",
-          label: "Interventions",
-          options: [
-            {
-              label:
-                "Assisting and leading exercise for voice functions",
-              value: "jub_pg",
-            },
-            {
-              label:
-                "Education about voice functions",
-              value: "jub_pm",
-            },
-          ],
-        },
-      ],
-    },
-
-    {
-      title: "RECEPTIVE LANGUAGE",
-      showIf: {
-  field: "session_type",
-  includes: "receptive",
-},
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "receptive_interventions",
-          label: "Interventions",
-          options: [
-            {
-              label:
-                "Training in receiving spoken messages",
-              value: "sea_ph",
-            },
-            {
-              label:
-                "Education about receiving spoken messages",
-              value: "sea_pm",
-            },
-            {
-              label:
-                "Advising about receiving spoken messages",
-              value: "sea_pn",
-            },
-          ],
-        },
-      ],
-    },
-
-    {
-      title: "EXPRESSIVE LANGUAGE",
-      showIf: {
-  field: "session_type",
-  includes: "expressive",
-},
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "expressive_interventions",
-          label: "Interventions",
-          options: [
-            {
-              label: "Observation of speaking",
-              value: "sfa_am",
-            },
-            {
-              label: "Training in speaking",
-              value: "sfa_ph",
-            },
-            {
-              label: "Education about speaking",
-              value: "sfa_pm",
-            },
-            {
-              label: "Advising about speaking",
-              value: "sfa_pn",
-            },
-            {
-              label: "Observation of having a conversation",
-              value: "sga_am",
-            },
-            {
-              label: "Training in having a conversation",
-              value: "sga_ph",
-            },
-            {
-              label: "Advising about having a conversation",
-              value: "sga_pn",
-            },
-            {
-              label: "Counselling about having a conversation",
-              value: "sga_pp",
-            },
-          ],
-        },
-      ],
-    },
-
-    {
-      title: "SPEECH",
-      showIf: {
-  field: "session_type",
-  includes: "speech",
-},
-      fields: [
-        {
-          type: "checkbox-group",
-          name: "speech_interventions",
-          label: "Interventions",
-          options: [
-            {
-              label:
-                "Observation of articulation functions",
-              value: "jud_am",
-            },
-            {
-              label:
-                "Assisting and leading exercise for articulation functions",
-              value: "jud_pg",
-            },
-            {
-              label:
-                "Training of articulation functions",
-              value: "jud_ph",
-            },
-            {
-              label:
-                "Education about articulation functions",
-              value: "jud_pm",
-            },
-            {
-              label:
-                "Observation of fluency and rhythm of speech functions",
-              value: "juf_am",
-            },
-            {
-              label:
-                "Assisting and leading exercise for fluency and rhythm of speech functions",
-              value: "juf_pg",
-            },
-            {
-              label:
-                "Training of fluency and rhythm of speech functions",
-              value: "juf_ph",
-            },
-            {
-              label:
-                "Education about fluency and rhythm of speech functions",
-              value: "juf_pm",
-            },
-          ],
-        },
-      ],
-    },
-{
-  title: "OTHERS",
-  showIf: {
-    field: "session_type",
-    includes: "others",
-  },
-  fields: [
-    {
-      type: "textarea",
-      name: "others",
-      label: "Others",
-      placeholder: "Enter intervention details...",
-    },
-  ],
-},
-    {
-      title: "",
-      fields: [
-      
-        {
-      type: "radio",
-      name: "complications",
-      label: "Complications",
-      options: [
-        { label: "Yes", value: "Yes" },
-        { label: "No", value: "No" },
-      ],
-    },
-    {
-      type: "input",
-      name: "complication_details",
-      label: "Complication Details",
-      showIf: {
-        field: "complications",
-        equals: "Yes",
-      },
-    },
-        
-        {
-  type: "checkbox-group",
-  name: "requires_option",
-  label: "Requires",
-  options: [
-    { label: "Maximum cues", value: "maximum" },
-    { label: "Moderate cues", value: "moderate" },
-    { label: "Minimal cues", value: "minimal" },
-    { label: "Independent performance", value: "independent" },
-  ],
-},
-        {
-          type: "textarea",
-          name: "remarks",
-          label: "Remarks / Additional Notes",
-        },
-      ],
-    },
-  ],
-};
-console.log(SPEECHANDLANGUAGEGROUP_SCHEMA)
-export default function SpeechandlanguagegroupForm({ patient, onBack, selectedPatients = [] }) {
-  const [values, setValues] = useState({});
-
-  const handleChange = (name, value) => {
-    setValues((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Support both single patient (from SpeechandlanguagePatients) and multiple selectedPatients (from GenericDepartmentDashboard)
-  const displayPatient = patient || selectedPatients?.[0] || null;
-  const patientName = displayPatient?.name || displayPatient?.patient_name || "";
-  const handleAction = (type) => {
-    if (type === "back") {
-      onBack?.();
-    }
-  };
-  
-  return (
-  <div>
-    {selectedPatients.length > 0 && (
-      <div
-        style={{
-          marginBottom: 20,
-          padding: "14px 18px",
-          borderRadius: 12,
-          background: "#fef2f2",
-          border: "1px solid #fecaca",
-        }}
-      >
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#991b1b", marginBottom: 8 }}>
-          Selected participants ({selectedPatients.length})
+  if (!primaryPatient) {
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "#6b7280" }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: "#374151" }}>
+          No patients selected
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {selectedPatients.map((p) => (
-            <span
-              key={p.id ?? p.patient_id ?? p.mrn}
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                padding: "4px 10px",
-                borderRadius: 999,
-                background: "#fff",
-                color: "#7f1d1d",
-                border: "1px solid #fecaca",
-              }}
-            >
-              {p.name || p.patient_name || p.mrn || "Patient"}
-            </span>
-          ))}
+        <div style={{ fontSize: 13, marginTop: 6 }}>
+          Go back and select at least one participant for the group session.
         </div>
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              marginTop: 20,
+              padding: "9px 20px",
+              borderRadius: 8,
+              border: "1px solid #2563eb",
+              background: "#fff",
+              color: "#2563eb",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            ← Back
+          </button>
+        )}
       </div>
-    )}
-    <CommonFormBuilder
-      schema={SPEECHANDLANGUAGEGROUP_SCHEMA}
-      values={values}
-      onChange={handleChange}
-      onAction={handleAction}
-      layout="nested"
-    />
-  </div>
+    );
+  }
+
+  return (
+    <div>
+      {participants.length > 0 && (
+        <div
+          style={{
+            margin: "12px 16px 0",
+            padding: "12px 14px",
+            borderRadius: 10,
+            border: "1px solid #fecaca",
+            background: "#fef2f2",
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#991b1b" }}>
+            Group session — {participants.length} participant
+            {participants.length !== 1 ? "s" : ""}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              marginTop: 8,
+            }}
+          >
+            {participants.map((p) => (
+              <span
+                key={p.id ?? p.patient_id ?? p.mrn}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#7f1d1d",
+                  background: "#fff",
+                  border: "1px solid #fecaca",
+                  borderRadius: 999,
+                  padding: "4px 10px",
+                }}
+              >
+                {p.name || p.patient_name || p.mrn || "Patient"}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <AssessmentLoader
+        department="Speech & Language Therapy"
+        patient={primaryPatient}
+        visitType="GROUP_INTERVENTIONS"
+      />
+    </div>
   );
 }
