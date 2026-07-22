@@ -242,7 +242,7 @@ const SUBJECTIVE = {
         {
           "name": "subjectiveLauncher",
           "type": "assessment-launcher",
-          "label": "History",
+          "label": "",
           "options": [
             {
               "label": "Swallowing",
@@ -810,7 +810,7 @@ const OBJECTIVE = {
         {
           "name": "objectiveLauncher",
           "type": "assessment-launcher",
-          "label": "History",
+          "label": "",
           "options": [
             {
               "label": "Swallowing",
@@ -884,7 +884,7 @@ const ASSESSMENT = {
         {
           "name": "assessmentLauncher",
           "type": "assessment-launcher",
-          "label": "History",
+          "label": "",
           "options": [
             {
               "label": "Swallowing",
@@ -970,7 +970,7 @@ const PLAN = {
         {
           "name": "planLauncher",
           "type": "assessment-launcher",
-          "label": "History",
+          "label": "",
           "options": [
             {
               "label": "Swallowing",

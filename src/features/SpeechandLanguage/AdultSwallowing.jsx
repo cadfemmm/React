@@ -292,7 +292,7 @@ const SUBJECTIVE_SCHEMA = {
 {
   name: "subjectiveLauncher",
   type: "assessment-launcher",
-  label: "History",
+  label: "",
   options: [
     { label: "Swallowing", value: "swallow_subjective", visibleIf: { field: "swallowingProblems", equals: "YES" } },
     // { label: "Speech & Language", value: "comm_subjective", visibleIf: { field: "communicationProblems", equals: "YES" } },
@@ -504,7 +504,7 @@ const OBJECTIVE_SCHEMA = {
         {
   name: "objectiveLauncher",
   type: "assessment-launcher",
-  label: "History",
+  label: "",
   options: [
     { label: "Swallowing", value: "swallow_objective", visibleIf: { field: "swallowingProblems", equals: "YES" } },
     { label: "Speech & Language", value: "comm_objective", visibleIf: { field: "communicationProblems", equals: "YES" } },
@@ -538,7 +538,7 @@ const OBJECTIVE_SCHEMA = {
         {
   name: "assessmentLauncher",
   type: "assessment-launcher",
-  label: "History",
+  label: "",
   options: [
     { label: "Swallowing", value: "swallow_assessment", visibleIf: { field: "swallowingProblems", equals: "YES" } },
     { label: "Speech & Language", value: "comm_assessment", visibleIf: { field: "communicationProblems", equals: "YES" } },
@@ -585,7 +585,7 @@ const OBJECTIVE_SCHEMA = {
 //           {
 //   name: "planLauncher",
 //   type: "assessment-launcher",
-//   label: "History",
+//   label: "",
 //   options: [
 //     { label: "Swallowing", value: "swallow_plan", visibleIf: { field: "swallowingProblems", equals: "YES" } },
 //     { label: "Speech & Language", value: "comm_plan", visibleIf: { field: "communicationProblems", equals: "YES" } },
