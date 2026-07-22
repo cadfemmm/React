@@ -37,8 +37,8 @@ const DEFAULT_OPTION_CARDS = [
   },
 ];
 
-/** Shown when the appointment queue returns no patients (demo / empty state). */
-const DUMMY_PATIENTS = [
+/** Speech & Language demo queue when appointments API returns no rows. */
+export const SPEECH_DUMMY_PATIENTS = [
   {
     id: "dummy-speech-001",
     patient_id: "dummy-speech-001",
@@ -100,6 +100,7 @@ export default function DepartmentAppointmentPatients({
   department,
   queueLabel = "Today's appointment queue",
   optionCards = DEFAULT_OPTION_CARDS,
+  fallbackPatients = null,
   renderAssessment,
 }) {
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -112,11 +113,17 @@ export default function DepartmentAppointmentPatients({
   const displayPatients = useMemo(() => {
     if (loading) return patients;
     if (patients.length > 0) return patients;
-    return DUMMY_PATIENTS;
-  }, [loading, patients]);
+    if (Array.isArray(fallbackPatients) && fallbackPatients.length > 0) {
+      return fallbackPatients;
+    }
+    return patients;
+  }, [loading, patients, fallbackPatients]);
 
   const usingDummyPatients =
-    !loading && patients.length === 0 && displayPatients === DUMMY_PATIENTS;
+    !loading &&
+    patients.length === 0 &&
+    Array.isArray(fallbackPatients) &&
+    fallbackPatients.length > 0;
 
   const totalPatients = usingDummyPatients
     ? displayPatients.length

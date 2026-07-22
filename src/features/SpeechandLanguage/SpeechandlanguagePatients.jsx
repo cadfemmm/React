@@ -1,5 +1,7 @@
 import React from "react";
-import DepartmentAppointmentPatients from "../common/DepartmentAppointmentPatients";
+import DepartmentAppointmentPatients, {
+  SPEECH_DUMMY_PATIENTS,
+} from "../common/DepartmentAppointmentPatients";
 import AssessmentLoader from "../../assessment";
 
 const SPEECH_DEPARTMENT = "Speech & Language Therapy";
@@ -21,6 +23,7 @@ export default function SpeechPatients(props) {
       {...props}
       department={SPEECH_DEPARTMENT}
       queueLabel="Today's speech & language appointment queue"
+      fallbackPatients={SPEECH_DUMMY_PATIENTS}
       renderAssessment={({ patient, assessmentView }) => (
         <AssessmentLoader
           department={SPEECH_DEPARTMENT}
