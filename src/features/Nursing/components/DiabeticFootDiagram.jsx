@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import rightFootImage from "../../../assets/RightFoot.png";
 import leftFootImage from "../../../assets/LeftFoot.png";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
 const DRAW_COLOR = "#c00";
 const DRAW_WIDTH = 3;
@@ -155,62 +156,114 @@ const boxStyle = {
 
 export default function DiabeticFootDiagram({ value = {}, onChange }) {
   const data = value || {};
+  
   const setFoot = (side, dataUrl) => {
-    onChange({ ...data, [side]: dataUrl });
+    if (onChange) {
+      onChange({ ...data, [side]: dataUrl });
+    }
   };
 
   const boxSize = 280;
   const boxHeight = 200;
 
+  const schema = {
+    title: "Diabetic Foot Assessment",
+    sections: [
+      {
+        fields: [
+          { name: "right", type: "hidden" },
+          { name: "left", type: "hidden" }
+        ]
+      }
+    ]
+  };
+
   return (
-    <div style={{ marginTop: 12, marginBottom: 16 }}>
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "flex-start" }}>
-        <div style={{ flex: "0 0 auto" }}>
-          <DrawableCanvas
-            width={boxSize}
-            height={boxHeight}
-            value={data.right}
-            onChange={(url) => setFoot("right", url)}
-            label="Right"
-            showClearButton={false}
-          >
-            <div style={boxStyle}>
-              <img
-                src={rightFootImage}
-                alt="Right foot"
-                style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-              />
-            </div>
-          </DrawableCanvas>
-          <button type="button" onClick={() => setFoot("right", null)} style={{ marginTop: 8 }}>
-            Clear Right
-          </button>
-        </div>
-        <div style={{ flex: "0 0 auto" }}>
-          <DrawableCanvas
-            width={boxSize}
-            height={boxHeight}
-            value={data.left}
-            onChange={(url) => setFoot("left", url)}
-            label="Left"
-            showClearButton={false}
-          >
-            <div style={boxStyle}>
-              <img
-                src={leftFootImage}
-                alt="Left foot"
-                style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-              />
-            </div>
-          </DrawableCanvas>
-          <button type="button" onClick={() => setFoot("left", null)} style={{ marginTop: 8 }}>
-            Clear Left
-          </button>
-        </div>
+    <div style={container}>
+      {/* Hidden container for integration tracking via CommonFormBuilder */}
+      <div style={{ display: "none" }}>
+        <CommonFormBuilder 
+          schema={schema} 
+          values={data} 
+          onChange={(val) => onChange && onChange(val)} 
+        />
       </div>
-      <p style={{ fontSize: 12, color: "#64748b", marginTop: 12 }}>
-        Mark the location with an arrow or an &quot;X&quot;. Use the buttons below to clear marks.
-      </p>
+
+      <div style={cardLayout}>
+        <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "flex-start" }}>
+          
+          {/* Right Foot Canvas Section */}
+          <div style={{ flex: "0 0 auto" }}>
+            <DrawableCanvas
+              width={boxSize}
+              height={boxHeight}
+              value={data.right}
+              onChange={(url) => setFoot("right", url)}
+              label="Right Foot"
+              showClearButton={false}
+            >
+              <div style={boxStyle}>
+                <img
+                  src={rightFootImage}
+                  alt="Right foot blueprint"
+                  style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+                />
+              </div>
+            </DrawableCanvas>
+            <button type="button" onClick={() => setFoot("right", null)} style={clearBtn}>
+              ✕ Clear Right Marks
+            </button>
+          </div>
+
+          {/* Left Foot Canvas Section */}
+          <div style={{ flex: "0 0 auto" }}>
+            <DrawableCanvas
+              width={boxSize}
+              height={boxHeight}
+              value={data.left}
+              onChange={(url) => setFoot("left", url)}
+              label="Left Foot"
+              showClearButton={false}
+            >
+              <div style={boxStyle}>
+                <img
+                  src={leftFootImage}
+                  alt="Left foot blueprint"
+                  style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+                />
+              </div>
+            </DrawableCanvas>
+            <button type="button" onClick={() => setFoot("left", null)} style={clearBtn}>
+              ✕ Clear Left Marks
+            </button>
+          </div>
+        </div>
+
+        <p style={instructionsText}>
+Mark the location with an arrow or an "X". Use the buttons below to clear marks.        </p>
+      </div>
     </div>
   );
 }
+
+/* ══ Layout and Architecture Component Styling ══ */
+const container = { width: "100%", boxSizing: "border-box", fontFamily: "system-ui, -apple-system, sans-serif" };
+const cardLayout = { background: "#fff", padding: "20px", borderRadius: 10, border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" };
+const instructionsText = { fontSize: 13, color: "#64748b", marginTop: 28, lineHeight: "1.5" };
+
+const clearBtn = {
+  marginTop: 28,
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "6px 12px",
+  background: "#fff",
+  border: "1px solid #cbd5e1",
+  borderRadius: 6,
+  fontSize: 12,
+  fontWeight: 600,
+  color: "#475569",
+  cursor: "pointer",
+  transition: "all 0.15s ease",
+  outline: "none"
+};

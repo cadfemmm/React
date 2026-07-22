@@ -1,87 +1,3 @@
-
-
-import React, { useState } from "react";
-import CommonFormBuilder from "../../CommonComponenets/FormBuilder"; // Adjust path as necessary
-
-const C = {
-  primary: "#1a6b8a",
-  primaryDark: "#0d3d52",
-  primaryLight: "#e8f4f8",
-  subHeader: "#d0e9f7",
-  border: "#b2c8d8",
-  danger: "#dc2626",
-  dangerBg: "#fef2f2",
-  dangerBorder: "#fca5a5",
-  success: "#16a34a",
-  successBg: "#f0fdf4",
-  successBorder: "#86efac",
-  warning: "#d97706",
-  warningBg: "#fffbeb",
-  text: "#0f172a",
-  muted: "#475569",
-  white: "#fff",
-};
-
-const SIGNS = [
-  "No or delayed swallow?",
-  "Immediate or delayed coughing?",
-  "Choking?",
-  'Change in voice quality? (Check by asking patient to say "aaah")',
-  "Change in breathing pattern, or increased breathlessness whilst sipping?",
-];
-
-// Reusable standard Yes/No options for radio buttons
-const YN_OPTIONS = [
-  { label: "YES", value: "YES" },
-  { label: "NO", value: "NO" }
-];
-
-export default function WaterSwallowTest({ patient, onBack }) {
-  const [values, setValues] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleFieldChange = (name, value) => {
-    setValues((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Derive logical dependencies for workflow validation
-  const partAPass = values.a1 === "YES" && values.a2 === "YES";
-  const partAFail = values.a1 === "NO" || values.a2 === "NO";
-  
-  const partBPass = values.b1 === "NO" && values.b2 === "NO";
-  const partBFail = values.b1 === "YES" || values.b2 === "YES";
-
-  const canProceedPart2 = partAPass && partBPass;
-
-  const tspAnyYes = SIGNS.some((_, i) => values[`tsp_sign_${i}`] === "YES");
-  const tspAllAnswered = SIGNS.every((_, i) => values[`tsp_sign_${i}`] !== undefined);
-
-  const canProceedSips = canProceedPart2 && tspAllAnswered && !tspAnyYes;
-
-  const sipAnyYes = SIGNS.some((_, i) => values[`sip_sign_${i}`] === "YES");
-  const sipAllAnswered = SIGNS.every((_, i) => values[`sip_sign_${i}`] !== undefined);
-
-  const testComplete = tspAnyYes || (tspAllAnswered && sipAllAnswered);
-  const outcome = tspAnyYes || sipAnyYes ? "refer" : testComplete ? "pass" : null;
-
-  const handleSubmit = () => {
-    if (!testComplete) return alert("Please complete all sections before submitting.");
-    setSubmitted(true);
-  };
-
-  // Build out standard clinical sign rows for Part 2 tests
-  const generateSignFields = (prefix) => {
-    return SIGNS.map((sign, i) => ({
-      name: `${prefix}_sign_${i}`,
-      label: sign,
-      type: "radio",
-      options: YN_OPTIONS,
-      labelAbove: false,
-      readOnly: submitted
-    }));
-  };
-
-  // Form Builder Schema configuration
 const schema = {
   "title": "Water Swallow Test",
   "subtitle": "To be carried out with patients admitted with acute Stroke or Transient Ischemic Attack symptoms within 4 hours of admission to ED / CAU by a nurse trained in the procedure.",
@@ -94,8 +10,14 @@ const schema = {
           "label": "A1) Is the patient consistently alert for 10 minutes?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -103,8 +25,14 @@ const schema = {
           "label": "A2) Is the patient able to be supported in an upright position?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -113,8 +41,14 @@ const schema = {
           "message": "STOP. If NO to either — Record the patient NIL BY MOUTH. Repeat daily until the patient's clinical condition improves.",
           "showIf": {
             "or": [
-              { "field": "a1", "equals": "NO" },
-              { "field": "a2", "equals": "NO" }
+              {
+                "field": "a1",
+                "equals": "NO"
+              },
+              {
+                "field": "a2",
+                "equals": "NO"
+              }
             ]
           }
         },
@@ -149,8 +83,14 @@ const schema = {
           "label": "B1) A hoarse, wet, weak or absent voice?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -158,8 +98,14 @@ const schema = {
           "label": "B2) Being unable to deal with own oral secretions?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -168,8 +114,14 @@ const schema = {
           "message": "STOP. If YES to either — Record the patient NIL BY MOUTH and refer to Speech and Language Therapy.",
           "showIf": {
             "or": [
-              { "field": "b1", "equals": "YES" },
-              { "field": "b2", "equals": "YES" }
+              {
+                "field": "b1",
+                "equals": "YES"
+              },
+              {
+                "field": "b2",
+                "equals": "YES"
+              }
             ]
           }
         },
@@ -204,8 +156,14 @@ const schema = {
           "label": "No or delayed swallow?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -213,8 +171,14 @@ const schema = {
           "label": "Immediate or delayed coughing?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -222,8 +186,14 @@ const schema = {
           "label": "Choking?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -231,8 +201,14 @@ const schema = {
           "label": "Change in voice quality? (Check by asking patient to say aaah)",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -240,8 +216,14 @@ const schema = {
           "label": "Change in breathing pattern, or increased breathlessness whilst sipping?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -250,11 +232,26 @@ const schema = {
           "message": "STOP. If YES to any of the above — Record the patient NIL BY MOUTH and refer to Speech and Language Therapy (SLT).",
           "showIf": {
             "or": [
-              { "field": "tsp_sign_0", "equals": "YES" },
-              { "field": "tsp_sign_1", "equals": "YES" },
-              { "field": "tsp_sign_2", "equals": "YES" },
-              { "field": "tsp_sign_3", "equals": "YES" },
-              { "field": "tsp_sign_4", "equals": "YES" }
+              {
+                "field": "tsp_sign_0",
+                "equals": "YES"
+              },
+              {
+                "field": "tsp_sign_1",
+                "equals": "YES"
+              },
+              {
+                "field": "tsp_sign_2",
+                "equals": "YES"
+              },
+              {
+                "field": "tsp_sign_3",
+                "equals": "YES"
+              },
+              {
+                "field": "tsp_sign_4",
+                "equals": "YES"
+              }
             ]
           }
         },
@@ -313,8 +310,14 @@ const schema = {
           "label": "No or delayed swallow?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -322,8 +325,14 @@ const schema = {
           "label": "Immediate or delayed coughing?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -331,8 +340,14 @@ const schema = {
           "label": "Choking?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -340,8 +355,14 @@ const schema = {
           "label": "Change in voice quality? (Check by asking patient to say aaah)",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -349,8 +370,14 @@ const schema = {
           "label": "Change in breathing pattern, or increased breathlessness whilst sipping?",
           "type": "radio",
           "options": [
-            { "label": "YES", "value": "YES" },
-            { "label": "NO", "value": "NO" }
+            {
+              "label": "YES",
+              "value": "YES"
+            },
+            {
+              "label": "NO",
+              "value": "NO"
+            }
           ]
         },
         {
@@ -359,11 +386,26 @@ const schema = {
           "message": "STOP. If YES to any of the above — Record the patient NIL BY MOUTH and refer to Speech and Language Therapy (SLT).",
           "showIf": {
             "or": [
-              { "field": "sip_sign_0", "equals": "YES" },
-              { "field": "sip_sign_1", "equals": "YES" },
-              { "field": "sip_sign_2", "equals": "YES" },
-              { "field": "sip_sign_3", "equals": "YES" },
-              { "field": "sip_sign_4", "equals": "YES" }
+              {
+                "field": "sip_sign_0",
+                "equals": "YES"
+              },
+              {
+                "field": "sip_sign_1",
+                "equals": "YES"
+              },
+              {
+                "field": "sip_sign_2",
+                "equals": "YES"
+              },
+              {
+                "field": "sip_sign_3",
+                "equals": "YES"
+              },
+              {
+                "field": "sip_sign_4",
+                "equals": "YES"
+              }
             ]
           }
         },
@@ -518,18 +560,30 @@ const schema = {
         }
       ]
     },
-   {
+    {
       "title": "Sign Off Verification",
       "showIf": {
         "or": [
-          { "field": "tsp_sign_0", "equals": "YES" },
-          { "field": "tsp_sign_1", "equals": "YES" },
-          { "field": "tsp_sign_2", "equals": "YES" },
-          { "field": "tsp_sign_3", "equals": "YES" },
-          { "field": "tsp_sign_4", "equals": "YES" },
-          
-          
-
+          {
+            "field": "tsp_sign_0",
+            "equals": "YES"
+          },
+          {
+            "field": "tsp_sign_1",
+            "equals": "YES"
+          },
+          {
+            "field": "tsp_sign_2",
+            "equals": "YES"
+          },
+          {
+            "field": "tsp_sign_3",
+            "equals": "YES"
+          },
+          {
+            "field": "tsp_sign_4",
+            "equals": "YES"
+          }
         ]
       },
       "fields": [
@@ -555,56 +609,5 @@ const schema = {
         }
       ]
     }
-  ],
-  
+  ]
 }
-console.log(schema)
-  return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "20px 40px", fontFamily: "Segoe UI, sans-serif", color: C.text }}>
-      {/* Patient demographics card header */}
-      {patient?.name && (
-        <div style={{ display: "flex", justifyContent: "flex-end", fontSize: 13, color: C.muted, marginBottom: 12 }}>
-          <strong>Patient:</strong> {patient.name} {patient.id && <>| <strong>MRN:</strong> {patient.id}</>}
-        </div>
-      )}
-
-      {/* Render core form layout directly via common form builder engine */}
-      <CommonFormBuilder
-        schema={schema}
-        values={values}
-        onChange={handleFieldChange}
-        submitted={submitted}
-      />
-
-      {/* Clinical Notes Footer */}
-      <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 8, padding: "14px 18px", background: "#f8fafc", margin: "18px 0" }}>
-        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>N.B.</div>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 6px" }}>The water swallow test is used to identify new Stroke patients who are at risk of aspiration and require a full clinical assessment by an SLT before commencing oral intake.</p>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 4px", fontWeight: 600 }}>Therefore it must NOT be:</p>
-        <div style={{ fontSize: 12, color: C.muted }}>• Repeated <u>after</u> assessment by an SLT.</div>
-        <div style={{ fontSize: 12, color: C.muted }}>• Carried out on patients who show symptoms of dysphagia but are not being investigated for Stroke i.e. are not under Stroke protocol.</div>
-      </div>
-
-      {/* Action Navigation Bar */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        {onBack && <button onClick={onBack} style={btnSecondary}>Back</button>}
-        {!submitted && testComplete && (
-          <button onClick={handleSubmit} style={btnPrimary}>Submit Test</button>
-        )}
-        {submitted && (
-          <button onClick={() => { setValues({}); setSubmitted(false); }} style={btnSecondary}>New Test</button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-const btnPrimary = {
-  background: C.primary, color: "#fff", border: "none",
-  borderRadius: 7, padding: "9px 24px", fontWeight: 700, fontSize: 13, cursor: "pointer",
-};
-
-const btnSecondary = {
-  background: C.white, color: C.primary, border: `2px solid ${C.primary}`,
-  borderRadius: 7, padding: "9px 24px", fontWeight: 700, fontSize: 13, cursor: "pointer",
-};

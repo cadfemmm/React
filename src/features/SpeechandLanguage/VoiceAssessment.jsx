@@ -184,7 +184,7 @@ useEffect(() => {
   const SCHEMA_SUBJECTIVE = {
     sections: [
       {
-        title: "Voice History",
+       
         fields: [
 
           /* ===== MEDICAL HISTORY ===== */
@@ -1220,7 +1220,7 @@ const SCHEMA_OBJECTIVE = {
   const SCHEMA_ASSESSMENT = {
   sections: [
     {
-      title: "Clinical Impression",
+    
       fields: [
         {
           name: "voice_status",
@@ -1301,7 +1301,7 @@ const SCHEMA_OBJECTIVE = {
 const SCHEMA_PLAN = {
   sections: [
     {
-      title: "Plan",
+      
       fields: [
 
         // Therapy

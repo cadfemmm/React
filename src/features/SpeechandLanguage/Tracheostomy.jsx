@@ -53,7 +53,7 @@ export default function ThacheostomyAssessment({ mode = "objective" }) {
   const SCHEMA_TRACHEOSTOMY = {
     sections: [
       {
-  title: "Thacheostomy",
+ 
   fields: [
 
     {
@@ -379,7 +379,7 @@ const SCHEMA_PLAN_TRACHEOSTOMY = {
 const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
   sections: [
     {
-      title: "Tracheostomy Weaning Evaluation",
+      
       fields: [
         { type: "subheading", label: "Pre-evaluation Vitals" },
         {
@@ -412,8 +412,8 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
           { label: "Large", value: "large" }
         ], showIf: { field: "pre_suction_performed", equals: "yes" }},
 
-        // ===== TRIALS SELECTOR =====
-        { type: "subheading", label: "Trials / Clinical Observations" },
+        
+        { type: "subheading", label: "Tracheostomy Weaning Evaluation" },
         {
           name: "tracheostomy_trials",
           label: "Select trials performed",
@@ -424,11 +424,11 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
             { label: "Speaking valve trial", value: "speaking_valve" },
             { label: "Capping trial", value: "capping" },
             { label: "Clinical Observations", value: "clinical_observations" },
-            { label: "Modified Evan's Blue Dye Test", value: "blue_dye_test" }
+            
           ]
         },
 
-        // ===== CUFF DEFLATION =====
+      
         { type: "subheading", label: "Cuff deflation trial  – Respiration functions", showIf: { field: "tracheostomy_trials", includes: "cuff_deflation" } },
         { name: "cuff_deflation", label: "Deflation", type: "radio", options: [{ label: "Partial", value: "partial" }, { label: "Complete", value: "complete" }], showIf: { field: "tracheostomy_trials", includes: "cuff_deflation" } },
         { name: "cuff_tolerated", label: "Tolerated", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], showIf: { field: "tracheostomy_trials", includes: "cuff_deflation" } },
@@ -442,7 +442,7 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
           ]
         },
 
-        // ===== DIGITAL OCCLUSION =====
+     
         { type: "subheading", label: "Digital Occlusion trial  –  Speaking", showIf: { field: "tracheostomy_trials", includes: "digital_occlusion" } },
         { name: "dig_duration", label: "Duration tolerated (minutes)", type: "input", showIf: { field: "tracheostomy_trials", includes: "digital_occlusion" } },
         { name: "dig_voice", label: "Voice quality", type: "radio", options: [{ label: "Clear", value: "clear" }, { label: "Wet", value: "wet" }, { label: "Breathy", value: "breathy" }, { label: "Strained", value: "strained" }, { label: "Absent", value: "absent" }], showIf: { field: "tracheostomy_trials", includes: "digital_occlusion" } },
@@ -457,7 +457,7 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
           ]
         },
 
-        // ===== SPEAKING VALVE =====
+        
         { type: "subheading", label: "Speaking valve trial  –  Speaking", showIf: { field: "tracheostomy_trials", includes: "speaking_valve" } },
         { name: "sv_duration", label: "Duration tolerated (minutes)", type: "input", showIf: { field: "tracheostomy_trials", includes: "speaking_valve" } },
         { name: "sv_voice", label: "Voice quality", type: "radio", options: [{ label: "Clear", value: "clear" }, { label: "Wet", value: "wet" }, { label: "Breathy", value: "breathy" }, { label: "Strained", value: "strained" }, { label: "Absent", value: "absent" }], showIf: { field: "tracheostomy_trials", includes: "speaking_valve" } },
@@ -472,7 +472,7 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
           ]
         },
 
-        // ===== CAPPING =====
+        
         { type: "subheading", label: "Capping trial  –  Respiration functions", showIf: { field: "tracheostomy_trials", includes: "capping" } },
         { name: "cap_duration", label: "Duration tolerated (minutes)", type: "input", showIf: { field: "tracheostomy_trials", includes: "capping" } },
         { name: "cap_voice", label: "Voice quality", type: "radio", options: [{ label: "Clear", value: "clear" }, { label: "Wet", value: "wet" }, { label: "Breathy", value: "breathy" }, { label: "Strained", value: "strained" }, { label: "Absent", value: "absent" }], showIf: { field: "tracheostomy_trials", includes: "capping" } },
@@ -487,7 +487,7 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
           ]
         },
 
-        // ===== CLINICAL OBSERVATIONS =====
+        
         { type: "subheading", label: "Clinical Observations", showIf: { field: "tracheostomy_trials", includes: "clinical_observations" } },
         {
           name: "clinical_obs",
@@ -502,23 +502,72 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
             { label: "No significant desaturation (>3% drop) or respiratory distress", value: "no_desaturation" }
           ]
         },
+        {label:"Modified Evan's Blue Dye Test", value: "blue_dye_test",type:'subheading'},
 
-        // ===== MODIFIED EVAN'S BLUE DYE TEST =====
+     
         { type: "subheading", label: "Modified Evan's Blue Dye Test  –  Ingestion functions", showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" } },
-        { name: "blue_cough", label: "Cough", type: "radio", options: [{ label: "Immediate", value: "immediate" }, { label: "Delayed", value: "delayed" },{ label: "None", value: "none" }], showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" } },
-        // { name: "blue_cough_none_remarks", label: "Cough – None (specify)", type: "input", showIf: { field: "blue_cough", equals: "none", and: { field: "tracheostomy_trials", includes: "blue_dye_test" } } },
-        { name: "blue_wet_voice", label: "Wet voice", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" } },
-        { name: "blue_wob", label: "Increased work of breathing", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" } },
-        {
-          type: "row",
-          showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" },
-          fields: [
-            { name: "blue_spo2_baseline", label: "SPO2 Baseline (%)", type: "input" },
-            { name: "blue_spo2_post", label: "SPO2 Post test (%)", type: "input" }
-          ]
-        },
-        { name: "blue_spo2_drop", label: "Drop in SPO2 (≥ 3%)", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" } },
-        { name: "blue_dye_suction", label: "Presence of blue dye upon suction", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], showIf: { field: "tracheostomy_trials", includes: "blue_dye_test" } }
+       {
+  name: "blue_cough",
+  label: "Cough",
+  type: "radio",
+  options: [
+    { label: "Immediate", value: "immediate" },
+    { label: "Delayed", value: "delayed" },
+    { label: "None", value: "none" }
+  ]
+},
+
+{
+  name: "blue_wet_voice",
+  label: "Wet voice",
+  type: "radio",
+  options: [
+    { label: "Yes", value: "yes" },
+    { label: "No", value: "no" }
+  ]
+},
+{
+  name: "blue_wob",
+  label: "Increased work of breathing",
+  type: "radio",
+  options: [
+    { label: "Yes", value: "yes" },
+    { label: "No", value: "no" }
+  ]
+},
+{
+  type: "row",
+  fields: [
+    {
+      name: "blue_spo2_baseline",
+      label: "SPO2 Baseline (%)",
+      type: "input"
+    },
+    {
+      name: "blue_spo2_post",
+      label: "SPO2 Post test (%)",
+      type: "input"
+    }
+  ]
+},
+{
+  name: "blue_spo2_drop",
+  label: "Drop in SPO2 (≥ 3%)",
+  type: "radio",
+  options: [
+    { label: "Yes", value: "yes" },
+    { label: "No", value: "no" }
+  ]
+},
+{
+  name: "blue_dye_suction",
+  label: "Presence of blue dye upon suction",
+  type: "radio",
+  options: [
+    { label: "Yes", value: "yes" },
+    { label: "No", value: "no" }
+  ]
+}
       ]
     }
   ]
@@ -526,7 +575,7 @@ const SCHEMA_OBJECTIVE_TRACHEOSTOMY = {
 
 
 const SCHEMA_ASSESSMENT_TRACHEOSTOMY = {
-  form_name: "Tracheostomy Management",
+ 
   sections: [
     {
       section_name: "Tracheostomy",

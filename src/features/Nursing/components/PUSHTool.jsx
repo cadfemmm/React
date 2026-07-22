@@ -1,23 +1,7 @@
 import React, { useState } from "react";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
-const DEFAULT_ROWS = 3;
-
-function emptyRow() {
-  return {
-    date: "",
-    time: "",
-    length: "",
-    width: "",
-    area: 0,
-    lengthScore: 0,
-    exudate: "",
-    exudateScore: 0,
-    tissue: "",
-    tissueScore: 0,
-    totalScore: 0,
-  };
-}
-
+// Helper for Area-to-Length Score conversion
 function calcLengthScore(area) {
   if (!Number.isFinite(area) || area <= 0) return 0;
   if (area < 0.3) return 1;
@@ -47,177 +31,125 @@ const TISSUE_OPTIONS = [
   { label: "Necrotic Tissue (4)", value: "necrotic", score: 4 },
 ];
 
-export default function PUSHTool({ patient }) {
-  const [rows, setRows] = useState(Array.from({ length: DEFAULT_ROWS }, emptyRow));
+// 1. FORM BUILDER SCHEMA DEFINITION
+const PUSH_TOOL_SCHEMA = {
+  title: "PUSH Tool – Pressure Ulcer Scale for Healing",
+  fields: [
+    {
+      name: "push_records",
+      type: "dynamic-table",
+      minRows: 3,
+      columns: [
+        { key: "date", label: "Date", type: "date" },
+        { key: "time", label: "Time", type: "time" },
+        { key: "length", label: "Length (cm)", type: "number", min: 0, step: 0.1 },
+        { key: "width", label: "Width (cm)", type: "number", min: 0, step: 0.1 },
+        {
+          key: "area",
+          label: "Length × Width (cm²)",
+          type: "computed",
+          compute: (row) => {
+            const l = parseFloat(row.length) || 0;
+            const w = parseFloat(row.width) || 0;
+            const area = l * w;
+            return area > 0 ? area.toFixed(1) : "—";
+          },
+        },
+        {
+          key: "exudate",
+          label: "Exudate Amount",
+          type: "single-select",
+          options: EXUDATE_OPTIONS,
+        },
+        {
+          key: "tissue",
+          label: "Tissue Type",
+          type: "single-select",
+          options: TISSUE_OPTIONS,
+        },
+        {
+          key: "totalScore",
+          label: "PUSH Total Score",
+          type: "computed",
+          compute: (row) => {
+            const l = parseFloat(row.length) || 0;
+            const w = parseFloat(row.width) || 0;
+            const area = l * w;
+            const lengthScore = calcLengthScore(area);
 
-  const updateRow = (idx, patch) => {
-    setRows((prev) =>
-      prev.map((r, i) => {
-        if (i !== idx) return r;
-        const next = { ...r, ...patch };
-        const lengthNum = parseFloat(next.length) || 0;
-        const widthNum = parseFloat(next.width) || 0;
-        const area = lengthNum * widthNum;
-        const lengthScore = calcLengthScore(area);
-        const exOpt = EXUDATE_OPTIONS.find((o) => o.value === next.exudate);
-        const tissueOpt = TISSUE_OPTIONS.find((o) => o.value === next.tissue);
-        const exudateScore = exOpt ? exOpt.score : 0;
-        const tissueScore = tissueOpt ? tissueOpt.score : 0;
-        const totalScore = lengthScore + exudateScore + tissueScore;
-        return {
-          ...next,
-          area,
-          lengthScore,
-          exudateScore,
-          tissueScore,
-          totalScore,
-        };
-      })
-    );
+            const exOpt = EXUDATE_OPTIONS.find((o) => o.value === row.exudate);
+            const tissueOpt = TISSUE_OPTIONS.find((o) => o.value === row.tissue);
+
+            const exudateScore = exOpt ? exOpt.score : 0;
+            const tissueScore = tissueOpt ? tissueOpt.score : 0;
+
+            const total = lengthScore + exudateScore + tissueScore;
+            return total > 0 ? total : l || w || row.exudate || row.tissue ? 0 : "—";
+          },
+        },
+      ],
+    },
+  ],
+};
+
+// 2. SCHEMA-DRIVEN COMPONENT
+export default function PUSHTool({ patient, onBack }) {
+  const [formData, setFormData] = useState({
+    push_records: Array.from({ length: 3 }, () => ({
+      date: "",
+      time: "",
+      length: "",
+      width: "",
+      exudate: "",
+      tissue: "",
+    })),
+  });
+
+  const handleFieldChange = (fieldName, newValue) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: newValue,
+    }));
   };
 
-  const addRow = () => setRows((prev) => [...prev, emptyRow()]);
-  const removeRow = (idx) => setRows((prev) => prev.filter((_, i) => i !== idx));
-
-  const overallTotal = rows.reduce((sum, r) => sum + (Number.isFinite(r.totalScore) ? r.totalScore : 0), 0);
+  const handleAction = (actionType) => {
+    if (actionType === "back" && onBack) {
+      onBack();
+    } else if (actionType === "save") {
+      console.log("Saving PUSH Tool state output: ", formData);
+      alert("PUSH Tool scores saved successfully.");
+    }
+  };
 
   return (
-    <div style={page}>
-      <style>{`
-        .push-tool-table thead th {
-          background-color: #eff6ff !important;
-          color: #1e40af !important;
-          border: 1px solid #bfdbfe !important;
-        }
-      `}</style>
-      <div style={header}>
+    <div style={pageStyle}>
+      {/* Header with Patient context */}
+      <div style={headerStyle}>
         <div>
-          <div style={title}>PUSH Tool – Pressure Ulcer Scale for Healing</div>
-          {patient && <div style={subtitle}>{patient.name ? `Patient: ${patient.name}` : ""}</div>}
+          <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>
+            {PUSH_TOOL_SCHEMA.title}
+          </div>
+          {patient?.name && (
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+              Patient: {patient.name} {patient.id ? `| MRN: ${patient.id}` : ""}
+            </div>
+          )}
         </div>
       </div>
 
-      <div style={tableCard}>
-        <div style={tableWrap}>
-          <table className="push-tool-table" style={table}>
-            <thead>
-              <tr>
-                <th style={thBlue}>Date</th>
-                <th style={thBlue}>Time</th>
-                <th style={thBlue}>Length (cm)</th>
-                <th style={thBlue}>Width (cm)</th>
-                <th style={thBlue}>Length × Width (cm²)</th>
-                <th style={thBlue}>Exudate Amount</th>
-                <th style={thBlue}>Tissue Type</th>
-                <th style={thBlue}>PUSH Total Score</th>
-                <th style={thBlue}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, idx) => (
-                <tr key={idx}>
-                  <td style={td}>
-                    <input
-                      type="date"
-                      style={input}
-                      value={row.date}
-                      onChange={(e) => updateRow(idx, { date: e.target.value })}
-                    />
-                  </td>
-                  <td style={td}>
-                    <input
-                      type="time"
-                      style={input}
-                      value={row.time}
-                      onChange={(e) => updateRow(idx, { time: e.target.value })}
-                    />
-                  </td>
-                  <td style={td}>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      style={input}
-                      value={row.length}
-                      onChange={(e) => updateRow(idx, { length: e.target.value })}
-                    />
-                  </td>
-                  <td style={td}>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      style={input}
-                      value={row.width}
-                      onChange={(e) => updateRow(idx, { width: e.target.value })}
-                    />
-                  </td>
-                  <td style={{ ...td, background: "#f9fafb", fontWeight: 600 }}>
-                    {row.area > 0 ? row.area.toFixed(1) : "—"}
-                  </td>
-                  <td style={td}>
-                    <select
-                      style={select}
-                      value={row.exudate}
-                      onChange={(e) => updateRow(idx, { exudate: e.target.value })}
-                    >
-                      <option value="">Select…</option>
-                      {EXUDATE_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={td}>
-                    <select
-                      style={select}
-                      value={row.tissue}
-                      onChange={(e) => updateRow(idx, { tissue: e.target.value })}
-                    >
-                      <option value="">Select…</option>
-                      {TISSUE_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={{ ...td, fontWeight: 700 }}>
-                    {row.totalScore > 0 ? row.totalScore : row.length || row.width || row.exudate || row.tissue ? 0 : "—"}
-                  </td>
-                  <td style={td}>
-                    {rows.length > 1 && (
-                      <button type="button" style={removeBtn} onClick={() => removeRow(idx)}>
-                        ✕
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td style={tfoot} colSpan={7}>
-                  Total PUSH Score (all entries)
-                </td>
-                <td style={{ ...tfoot, fontWeight: 800 }}>{overallTotal}</td>
-                <td style={tfoot}></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        <div style={footerRow}>
-          <button type="button" style={addBtn} onClick={addRow}>
-            ＋ Add Row
-          </button>
-        </div>
-      </div>
+      {/* Schema Engine Form Instance */}
+      <CommonFormBuilder
+        schema={PUSH_TOOL_SCHEMA}
+        values={formData}
+        onChange={handleFieldChange}
+        onAction={handleAction}
+        layout="root"
+      />
     </div>
   );
 }
 
-const page = {
+const pageStyle = {
   width: "100%",
   boxSizing: "border-box",
   padding: "20px 24px",
@@ -225,96 +157,9 @@ const page = {
   background: "#f8fafc",
 };
 
-const header = {
+const headerStyle = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
   marginBottom: 16,
 };
-
-const title = { fontSize: 20, fontWeight: 700, color: "#0f172a" };
-const subtitle = { fontSize: 12, color: "#64748b", marginTop: 4 };
-
-const tableCard = {
-  background: "#fff",
-  borderRadius: 12,
-  border: "1px solid #e2e8f0",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-};
-
-const tableWrap = { overflowX: "auto" };
-const table = { borderCollapse: "collapse", width: "100%", fontSize: 11 };
-
-const thBlue = {
-  border: "1px solid #bfdbfe",
-  padding: "7px 8px",
-  fontWeight: 700,
-  fontSize: 11,
-  textAlign: "center",
-  backgroundColor: "#eff6ff",
-  color: "#1e40af",
-  whiteSpace: "nowrap",
-};
-
-const td = {
-  border: "1px solid #e2e8f0",
-  padding: "4px 6px",
-  verticalAlign: "middle",
-};
-
-const input = {
-  width: "100%",
-  border: "none",
-  outline: "none",
-  fontSize: 11,
-  background: "transparent",
-  padding: "2px 3px",
-  boxSizing: "border-box",
-};
-
-const select = {
-  width: "100%",
-  border: "none",
-  outline: "none",
-  fontSize: 11,
-  background: "transparent",
-  padding: "2px 3px",
-  boxSizing: "border-box",
-};
-
-const tfoot = {
-  border: "1px solid #e2e8f0",
-  padding: "6px 8px",
-  background: "#f1f5f9",
-  fontSize: 11,
-  textAlign: "center",
-  color: "#475569",
-};
-
-const footerRow = {
-  display: "flex",
-  justifyContent: "flex-start",
-  padding: "10px 12px",
-  borderTop: "1px solid #e2e8f0",
-};
-
-const addBtn = {
-  padding: "8px 18px",
-  background: "#2563eb",
-  color: "#fff",
-  border: "none",
-  borderRadius: 7,
-  fontSize: 12,
-  fontWeight: 700,
-  cursor: "pointer",
-};
-
-const removeBtn = {
-  background: "none",
-  border: "none",
-  cursor: "pointer",
-  color: "#ef4444",
-  fontSize: 13,
-  fontWeight: 700,
-};
-

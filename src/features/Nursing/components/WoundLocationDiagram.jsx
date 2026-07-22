@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import woundTemplate from "../../../assets/wound_location.png";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
 const DRAW_COLOR = "#c00";
 const DRAW_WIDTH = 3;

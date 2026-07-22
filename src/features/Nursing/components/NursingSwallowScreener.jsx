@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
 const C = {
   headerBg: "#1e6fa5",
   headerText: "#fff",
   subHeaderBg: "#d0e9f7",
   subHeaderText: "#0c3d5e",
-  sectionBg: "#f0f7fc",
   border: "#b2c8d8",
   danger: "#dc2626",
   dangerBg: "#fef2f2",
@@ -20,8 +20,6 @@ const C = {
   white: "#fff",
   stepBg: "#e8f4f8",
   stepBorder: "#2589c7",
-  yesBg: "#fef2f2",
-  noBg: "#f0fdf4",
 };
 
 const PRE_CRITERIA = [
@@ -78,6 +76,7 @@ function YNToggle({ value, onChange, disabled }) {
       {["Y", "N"].map((opt) => (
         <button
           key={opt}
+          type="button"
           disabled={disabled}
           onClick={() => !disabled && onChange(opt)}
           style={{
@@ -116,271 +115,6 @@ function YNToggle({ value, onChange, disabled }) {
   );
 }
 
-export default function NursingSwallowScreener({ patient, onBack }) {
-  const [pre, setPre] = useState({});
-  const [steps, setSteps] = useState({});
-  const [problems, setProblems] = useState({});
-  const [otherProblem, setOtherProblem] = useState("");
-  const [outcome, setOutcome] = useState(null); // "pass" | "refer"
-  const [submitted, setSubmitted] = useState(false);
-
-  const preAnswered = PRE_CRITERIA.every((_, i) => pre[i] !== undefined);
-  const anyPreYes = PRE_CRITERIA.some((_, i) => pre[i] === "Y");
-
-  // Determine if screening can proceed
-  const canScreen = preAnswered && !anyPreYes;
-
-  // Determine if any step has problems
-  const anyStepYes = STEPS.some((s) => steps[s.id] === "Y");
-
-  // Auto-determine outcome when all steps answered or a YES hit
-  const allStepsAnswered = STEPS.every((s) => steps[s.id] !== undefined);
-  const screeningComplete = anyStepYes || allStepsAnswered;
-  const autoOutcome = anyStepYes ? "refer" : allStepsAnswered ? "pass" : null;
-
-  const handleSubmit = () => {
-    if (!preAnswered) return alert("Please complete all pre-assessment criteria.");
-    if (anyPreYes) return alert("Patient does not meet criteria. Keep NBM and refer to SLT.");
-    if (!screeningComplete) return alert("Please complete all water swallow steps.");
-    setOutcome(autoOutcome);
-    setSubmitted(true);
-  };
-
-  const handleReset = () => {
-    setPre({});
-    setSteps({});
-    setProblems({});
-    setOtherProblem("");
-    setOutcome(null);
-    setSubmitted(false);
-  };
-
-  return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "20px 40px", fontFamily: "Segoe UI, sans-serif", color: C.text }}>
-
-      {/* Title */}
-      <div style={{ marginBottom: 22, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: C.primary }}>Nursing Swallow Screener</div>
-        {patient?.name && (
-          <div style={{ fontSize: 13, color: C.muted }}>
-            {patient.name}
-            {patient.id && <span style={{ marginLeft: 10, color: C.border }}>|</span>}
-            {patient.id && <span style={{ marginLeft: 10 }}>MRN: {patient.id}</span>}
-          </div>
-        )}
-      </div>
-
-      {/* ── PRE-ASSESSMENT CRITERIA ── */}
-      <Section title="PRE-ASSESSMENT CRITERIA">
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={th("left", "70%")}>Criteria</th>
-              <th style={th("center", "30%")}>Response</th>
-            </tr>
-          </thead>
-          <tbody>
-            {PRE_CRITERIA.map((crit, i) => (
-              <tr key={i} style={{ background: pre[i] === "Y" ? C.dangerBg : pre[i] === "N" ? C.noBg : C.white }}>
-                <td style={td("left")}>{crit}</td>
-                <td style={{ ...td("center") }}>
-                  <YNToggle value={pre[i]} onChange={(v) => setPre((p) => ({ ...p, [i]: v }))} disabled={submitted} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {preAnswered && anyPreYes && (
-          <AlertBox type="danger">
-            <strong>NOT SAFE to proceed.</strong> If you answer YES to any statement, keep the patient NBM, refer to SLT, and continue with regular oral care.
-          </AlertBox>
-        )}
-        {preAnswered && !anyPreYes && (
-          <AlertBox type="success">
-            All criteria answered NO — you may proceed with the water swallow screening.
-          </AlertBox>
-        )}
-      </Section>
-
-      {/* ── WATER SWALLOW SCREENING ── */}
-      {canScreen && (
-        <Section title="WATER SWALLOW SCREENING" subtitle="Please tick [✓] the boxes accordingly.">
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-
-            {/* Left: Steps */}
-            <div style={{ flex: "1 1 580px" }}>
-              {STEPS.map((step, idx) => {
-                const prevBlocked = idx > 0 && steps[STEPS[idx - 1].id] === "Y";
-                const isBlocked = prevBlocked || (idx > 0 && steps[STEPS[idx - 1].id] === undefined);
-                const isActive = !isBlocked;
-                const answered = steps[step.id] !== undefined;
-
-                return (
-                  <div key={step.id} style={{ marginBottom: 10 }}>
-                    <div style={{
-                      display: "flex", alignItems: "center", gap: 10,
-                      padding: "10px 14px", borderRadius: 8,
-                      border: `2px solid ${answered ? (steps[step.id] === "Y" ? C.danger : C.stepBorder) : C.border}`,
-                      background: answered ? (steps[step.id] === "Y" ? C.dangerBg : C.stepBg) : isActive ? C.white : "#f8fafc",
-                      opacity: isActive ? 1 : 0.45,
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={answered}
-                        readOnly
-                        style={{ width: 16, height: 16, accentColor: C.headerBg }}
-                      />
-                      <div style={{ flex: 1, fontSize: 13 }}>
-                        {step.label} <strong>{step.bold}</strong>
-                      </div>
-                      <YNToggle
-                        value={steps[step.id]}
-                        onChange={(v) => !submitted && isActive && setSteps((s) => ({ ...s, [step.id]: v }))}
-                        disabled={submitted || !isActive}
-                      />
-                    </div>
-                    {idx < STEPS.length - 1 && steps[step.id] === "N" && (
-                      <div style={{ textAlign: "center", fontSize: 11, color: C.muted, margin: "2px 0", fontStyle: "italic" }}>↓ NO</div>
-                    )}
-                    {steps[step.id] === "Y" && (
-                      <div style={{ textAlign: "right", fontSize: 11, color: C.danger, margin: "2px 0", fontStyle: "italic" }}>YES →</div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Right: Observed Problems + Actions */}
-            <div style={{ flex: "1 1 380px", display: "flex", flexDirection: "column", gap: 10 }}>
-              {/* Observed problems box */}
-              <div style={{
-                border: `1.5px solid ${C.border}`, borderRadius: 8, padding: "10px 14px",
-                background: C.white, minHeight: 180,
-              }}>
-                <div style={{ fontWeight: 700, fontSize: 12, color: C.headerBg, marginBottom: 8 }}>
-                  Observed Problem(s):
-                </div>
-                {OBSERVED_PROBLEMS.map((p) => (
-                  <label key={p} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, fontSize: 12, cursor: submitted ? "default" : "pointer" }}>
-                    <input
-                      type="checkbox"
-                      checked={!!problems[p]}
-                      disabled={submitted || !anyStepYes}
-                      onChange={(e) => setProblems((prev) => ({ ...prev, [p]: e.target.checked }))}
-                      style={{ width: 13, height: 13, accentColor: C.danger }}
-                    />
-                    {p}
-                  </label>
-                ))}
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-                  <input
-                    type="checkbox"
-                    checked={!!problems["other"]}
-                    disabled={submitted || !anyStepYes}
-                    onChange={(e) => setProblems((prev) => ({ ...prev, other: e.target.checked }))}
-                    style={{ width: 13, height: 13, accentColor: C.danger }}
-                  />
-                  <span style={{ fontSize: 12 }}>Other:</span>
-                  <input
-                    type="text"
-                    value={otherProblem}
-                    disabled={submitted || !anyStepYes}
-                    onChange={(e) => setOtherProblem(e.target.value)}
-                    placeholder="Please indicate"
-                    style={{ flex: 1, fontSize: 11, border: `1px solid ${C.border}`, borderRadius: 4, padding: "2px 6px" }}
-                  />
-                </div>
-              </div>
-
-              {/* Fail actions */}
-              <div style={{
-                border: `1.5px solid ${C.dangerBorder}`, borderRadius: 8, padding: "10px 14px",
-                background: C.dangerBg,
-              }}>
-                <div style={{ fontWeight: 700, fontSize: 12, color: C.danger, marginBottom: 6 }}>If YES to any step:</div>
-                {FAIL_ACTIONS.map((a, i) => (
-                  <div key={i} style={{ fontSize: 12, color: C.text, marginBottom: 3 }}>• {a}</div>
-                ))}
-              </div>
-
-              {/* Legend */}
-              <div style={{
-                border: `1.5px dashed ${C.border}`, borderRadius: 8, padding: "8px 12px",
-                background: "#fafcfe",
-              }}>
-                <div style={{ fontWeight: 700, fontSize: 11, color: C.muted, marginBottom: 4 }}>LEGEND:</div>
-                {LEGEND.map((l, i) => (
-                  <div key={i} style={{ fontSize: 11, color: C.muted }}>{i + 1}. <strong>{l.abbr}</strong>: {l.full}</div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Pass actions */}
-          {allStepsAnswered && !anyStepYes && (
-            <div style={{
-              marginTop: 12, border: `1.5px solid ${C.successBorder}`, borderRadius: 8,
-              padding: "12px 16px", background: C.successBg,
-            }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: C.success, marginBottom: 8 }}>
-                ✓ All steps passed — NO problems observed:
-              </div>
-              {PASS_ACTIONS.map((a, i) => (
-                <div key={i} style={{ fontSize: 13, color: C.text, marginBottom: 4 }}>• {a}</div>
-              ))}
-            </div>
-          )}
-        </Section>
-      )}
-
-      {/* ── OUTCOME ── */}
-      {canScreen && screeningComplete && !submitted && (
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
-          <button onClick={handleReset} style={btnSecondary}>Reset</button>
-          <button onClick={handleSubmit} style={btnPrimary}>Submit Screening</button>
-        </div>
-      )}
-
-      {submitted && outcome && (
-        <Section title="Screening Outcome">
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-            <OutcomeBox label="PASS screening" active={outcome === "pass"} color={C.success} activeBg={C.successBg} />
-            <OutcomeBox label="REFER to SLT" active={outcome === "refer"} color={C.danger} activeBg={C.dangerBg} />
-          </div>
-          {outcome === "pass" && (
-            <AlertBox type="success" style={{ marginTop: 12 }}>
-              Patient <strong>PASSED</strong> the swallow screening. Commence oral diet and supervise first mealtime.
-            </AlertBox>
-          )}
-          {outcome === "refer" && (
-            <AlertBox type="danger" style={{ marginTop: 12 }}>
-              Patient <strong>FAILED</strong> swallow screening. Keep NBM, notify MO, and refer to SLT immediately.
-            </AlertBox>
-          )}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
-            <button onClick={handleReset} style={btnSecondary}>New Screening</button>
-            {onBack && <button onClick={onBack} style={btnPrimary}>Back</button>}
-          </div>
-        </Section>
-      )}
-    </div>
-  );
-}
-
-/* ── Helpers ── */
-function Section({ title, subtitle, children }) {
-  return (
-    <div style={{ marginBottom: 20, border: `1.5px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
-      <div style={{ background: C.headerBg, color: C.headerText, padding: "10px 16px" }}>
-        <div style={{ fontWeight: 700, fontSize: 13, letterSpacing: 0.3 }}>{title}</div>
-        {subtitle && <div style={{ fontSize: 11, fontStyle: "italic", marginTop: 2, color: "#cce4f5" }}>{subtitle}</div>}
-      </div>
-      <div style={{ padding: "14px 16px", background: C.white }}>{children}</div>
-    </div>
-  );
-}
-
 function AlertBox({ type, children }) {
   const styles = {
     danger: { bg: C.dangerBg, border: C.dangerBorder, color: C.danger },
@@ -389,10 +123,17 @@ function AlertBox({ type, children }) {
   };
   const s = styles[type] || styles.warning;
   return (
-    <div style={{
-      marginTop: 10, padding: "10px 14px", borderRadius: 8,
-      border: `1.5px solid ${s.border}`, background: s.bg, color: s.color, fontSize: 13,
-    }}>
+    <div
+      style={{
+        marginTop: 10,
+        padding: "10px 14px",
+        borderRadius: 8,
+        border: `1.5px solid ${s.border}`,
+        background: s.bg,
+        color: s.color,
+        fontSize: 13,
+      }}
+    >
       {children}
     </div>
   );
@@ -400,16 +141,30 @@ function AlertBox({ type, children }) {
 
 function OutcomeBox({ label, active, color, activeBg }) {
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 12, padding: "12px 20px",
-      border: `2px solid ${active ? color : C.border}`, borderRadius: 10,
-      background: active ? activeBg : C.white, minWidth: 200,
-    }}>
-      <div style={{
-        width: 22, height: 22, border: `2px solid ${active ? color : C.border}`,
-        borderRadius: 4, background: active ? color : C.white,
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 20px",
+        border: `2px solid ${active ? color : C.border}`,
+        borderRadius: 10,
+        background: active ? activeBg : C.white,
+        minWidth: 200,
+      }}
+    >
+      <div
+        style={{
+          width: 22,
+          height: 22,
+          border: `2px solid ${active ? color : C.border}`,
+          borderRadius: 4,
+          background: active ? color : C.white,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {active && <span style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>✓</span>}
       </div>
       <span style={{ fontWeight: 700, fontSize: 14, color: active ? color : C.muted }}>{label}</span>
@@ -417,29 +172,364 @@ function OutcomeBox({ label, active, color, activeBg }) {
   );
 }
 
-function th(align, width) {
-  return {
-    background: C.subHeaderBg, color: C.subHeaderText, fontWeight: 700,
-    fontSize: 12, padding: "8px 12px", border: `1px solid ${C.border}`,
-    textAlign: align, width,
+/* Custom Field Renderer 1: Pre-Assessment Criteria */
+function PreAssessmentCriteriaField({ values, onChange, readOnly }) {
+  const pre = values.pre || {};
+
+  const handlePreChange = (index, val) => {
+    const updated = { ...pre, [index]: val };
+    const preAnswered = PRE_CRITERIA.every((_, i) => updated[i] !== undefined);
+    const anyPreYes = PRE_CRITERIA.some((_, i) => updated[i] === "Y");
+    const canScreen = preAnswered && !anyPreYes;
+
+    onChange("pre", updated);
+    onChange("pre_criteria_passed", canScreen);
   };
+
+  const preAnswered = PRE_CRITERIA.every((_, i) => pre[i] !== undefined);
+  const anyPreYes = PRE_CRITERIA.some((_, i) => pre[i] === "Y");
+
+  return (
+    <div>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={{ background: C.subHeaderBg, color: C.subHeaderText, fontWeight: 700, fontSize: 12, padding: "8px 12px", border: `1px solid ${C.border}`, textAlign: "left", width: "70%" }}>
+              Criteria
+            </th>
+            <th style={{ background: C.subHeaderBg, color: C.subHeaderText, fontWeight: 700, fontSize: 12, padding: "8px 12px", border: `1px solid ${C.border}`, textAlign: "center", width: "30%" }}>
+              Response
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {PRE_CRITERIA.map((crit, i) => (
+            <tr key={i} style={{ background: pre[i] === "Y" ? C.dangerBg : pre[i] === "N" ? C.white : C.white }}>
+              <td style={{ padding: "8px 12px", border: `1px solid ${C.border}`, fontSize: 13, textAlign: "left" }}>{crit}</td>
+              <td style={{ padding: "8px 12px", border: `1px solid ${C.border}`, fontSize: 13, textAlign: "center" }}>
+                <YNToggle value={pre[i]} onChange={(v) => handlePreChange(i, v)} disabled={readOnly} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {preAnswered && anyPreYes && (
+        <AlertBox type="danger">
+          <strong>NOT SAFE to proceed.</strong> If you answer YES to any statement, keep the patient NBM, refer to SLT, and continue with regular oral care.
+        </AlertBox>
+      )}
+      {preAnswered && !anyPreYes && (
+        <AlertBox type="success">
+          All criteria answered NO — you may proceed with the water swallow screening.
+        </AlertBox>
+      )}
+    </div>
+  );
 }
 
-function td(align) {
-  return {
-    padding: "8px 12px", border: `1px solid ${C.border}`,
-    fontSize: 13, textAlign: align, verticalAlign: "middle",
+/* Custom Field Renderer 2: Water Swallow Steps & Problems */
+function WaterSwallowScreeningField({ values, onChange, readOnly }) {
+  const steps = values.steps || {};
+  const problems = values.problems || {};
+  const anyStepYes = STEPS.some((s) => steps[s.id] === "Y");
+  const allStepsAnswered = STEPS.every((s) => steps[s.id] !== undefined);
+
+  const handleStepChange = (stepId, val) => {
+    const updatedSteps = { ...steps, [stepId]: val };
+    const stepYes = STEPS.some((s) => updatedSteps[s.id] === "Y");
+    const allAnswered = STEPS.every((s) => updatedSteps[s.id] !== undefined);
+
+    onChange("steps", updatedSteps);
+
+    if (stepYes) {
+      onChange("outcome", "refer");
+      onChange("screening_complete", true);
+    } else if (allAnswered) {
+      onChange("outcome", "pass");
+      onChange("screening_complete", true);
+    } else {
+      onChange("outcome", null);
+      onChange("screening_complete", false);
+    }
   };
+
+  return (
+    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      {/* Steps List */}
+      <div style={{ flex: "1 1 580px" }}>
+        {STEPS.map((step, idx) => {
+          const prevBlocked = idx > 0 && steps[STEPS[idx - 1].id] === "Y";
+          const isBlocked = prevBlocked || (idx > 0 && steps[STEPS[idx - 1].id] === undefined);
+          const isActive = !isBlocked;
+          const answered = steps[step.id] !== undefined;
+
+          return (
+            <div key={step.id} style={{ marginBottom: 10 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  border: `2px solid ${answered ? (steps[step.id] === "Y" ? C.danger : C.stepBorder) : C.border}`,
+                  background: answered ? (steps[step.id] === "Y" ? C.dangerBg : C.stepBg) : isActive ? C.white : "#f8fafc",
+                  opacity: isActive ? 1 : 0.45,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={answered}
+                  readOnly
+                  style={{ width: 16, height: 16, accentColor: C.headerBg }}
+                />
+                <div style={{ flex: 1, fontSize: 13 }}>
+                  {step.label} <strong>{step.bold}</strong>
+                </div>
+                <YNToggle
+                  value={steps[step.id]}
+                  onChange={(v) => isActive && handleStepChange(step.id, v)}
+                  disabled={readOnly || !isActive}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Observed Problems & Failure Actions Side Panel */}
+      <div style={{ flex: "1 1 380px", display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", background: C.white }}>
+          <div style={{ fontWeight: 700, fontSize: 12, color: C.headerBg, marginBottom: 8 }}>
+            Observed Problem(s):
+          </div>
+          {OBSERVED_PROBLEMS.map((p) => (
+            <label key={p} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, fontSize: 12, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={!!problems[p]}
+                disabled={readOnly || !anyStepYes}
+                onChange={(e) => onChange("problems", { ...problems, [p]: e.target.checked })}
+                style={{ width: 13, height: 13, accentColor: C.danger }}
+              />
+              {p}
+            </label>
+          ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+            <input
+              type="checkbox"
+              checked={!!problems["other"]}
+              disabled={readOnly || !anyStepYes}
+              onChange={(e) => onChange("problems", { ...problems, other: e.target.checked })}
+              style={{ width: 13, height: 13, accentColor: C.danger }}
+            />
+            <span style={{ fontSize: 12 }}>Other:</span>
+            <input
+              type="text"
+              value={values.otherProblem || ""}
+              disabled={readOnly || !anyStepYes}
+              onChange={(e) => onChange("otherProblem", e.target.value)}
+              placeholder="Please indicate"
+              style={{ flex: 1, fontSize: 11, border: `1px solid ${C.border}`, borderRadius: 4, padding: "2px 6px" }}
+            />
+          </div>
+        </div>
+
+        <div style={{ border: `1.5px solid ${C.dangerBorder}`, borderRadius: 8, padding: "10px 14px", background: C.dangerBg }}>
+          <div style={{ fontWeight: 700, fontSize: 12, color: C.danger, marginBottom: 6 }}>If YES to any step:</div>
+          {FAIL_ACTIONS.map((a, i) => (
+            <div key={i} style={{ fontSize: 12, color: C.text, marginBottom: 3 }}>• {a}</div>
+          ))}
+        </div>
+
+        <div style={{ border: `1.5px dashed ${C.border}`, borderRadius: 8, padding: "8px 12px", background: "#fafcfe" }}>
+          <div style={{ fontWeight: 700, fontSize: 11, color: C.muted, marginBottom: 4 }}>LEGEND:</div>
+          {LEGEND.map((l, i) => (
+            <div key={i} style={{ fontSize: 11, color: C.muted }}>{i + 1}. <strong>{l.abbr}</strong>: {l.full}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Success/Pass Block */}
+      {allStepsAnswered && !anyStepYes && (
+        <div style={{ width: "100%", marginTop: 12, border: `1.5px solid ${C.successBorder}`, borderRadius: 8, padding: "12px 16px", background: C.successBg }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: C.success, marginBottom: 8 }}>
+            ✓ All steps passed — NO problems observed:
+          </div>
+          {PASS_ACTIONS.map((a, i) => (
+            <div key={i} style={{ fontSize: 13, color: C.text, marginBottom: 4 }}>• {a}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-const btnPrimary = {
-  background: C.headerBg, color: "#fff", border: "none",
-  borderRadius: 7, padding: "9px 22px", fontWeight: 700,
-  fontSize: 13, cursor: "pointer",
-};
+/* Custom Field Renderer 3: Outcome Display */
+function ScreeningOutcomeField({ values }) {
+  const outcome = values.outcome;
+  if (!values.submitted || !outcome) return null;
 
-const btnSecondary = {
-  background: C.white, color: C.headerBg, border: `2px solid ${C.headerBg}`,
-  borderRadius: 7, padding: "9px 22px", fontWeight: 700,
-  fontSize: 13, cursor: "pointer",
-};
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+        <OutcomeBox label="PASS screening" active={outcome === "pass"} color={C.success} activeBg={C.successBg} />
+        <OutcomeBox label="REFER to SLT" active={outcome === "refer"} color={C.danger} activeBg={C.dangerBg} />
+      </div>
+      {outcome === "pass" && (
+        <AlertBox type="success">
+          Patient <strong>PASSED</strong> the swallow screening. Commence oral diet and supervise first mealtime.
+        </AlertBox>
+      )}
+      {outcome === "refer" && (
+        <AlertBox type="danger">
+          Patient <strong>FAILED</strong> swallow screening. Keep NBM, notify MO, and refer to SLT immediately.
+        </AlertBox>
+      )}
+    </div>
+  );
+}
+
+export default function NursingSwallowScreenerContainer({ patient, onBack }) {
+  const [values, setValues] = useState({
+    pre: {},
+    steps: {},
+    problems: {},
+    otherProblem: "",
+    outcome: null,
+    submitted: false,
+    pre_criteria_passed: false,
+    screening_complete: false,
+  });
+
+  const schema = {
+    title: "Nursing Swallow Screener",
+    titleInfo: patient?.name ? `Patient: ${patient.name} | MRN: ${patient.id}` : null,
+    actions: [{ type: "reset", label: "Reset" }],
+    sections: [
+      {
+        key: "pre_assessment",
+        title: "PRE-ASSESSMENT CRITERIA",
+        fields: [
+          {
+            name: "pre_criteria",
+            type: "custom",
+            render: (props) => <PreAssessmentCriteriaField {...props} />,
+          },
+        ],
+      },
+      {
+        key: "water_swallow",
+        title: "WATER SWALLOW SCREENING",
+        subtitle: "Please tick [✓] the boxes accordingly.",
+        showIf: { field: "pre_criteria_passed", equals: true },
+        fields: [
+          {
+            name: "swallow_screening",
+            type: "custom",
+            render: (props) => <WaterSwallowScreeningField {...props} />,
+          },
+        ],
+      },
+      {
+        key: "outcome_section",
+        title: "Screening Outcome",
+        showIf: { field: "submitted", equals: true },
+        fields: [
+          {
+            name: "outcome_view",
+            type: "custom",
+            render: (props) => <ScreeningOutcomeField {...props} />,
+          },
+        ],
+      },
+    ],
+  };
+
+  const handleChange = (name, val) => {
+    setValues((prev) => ({ ...prev, [name]: val }));
+  };
+
+  const handleAction = (actionType) => {
+    if (actionType === "reset") {
+      setValues({
+        pre: {},
+        steps: {},
+        problems: {},
+        otherProblem: "",
+        outcome: null,
+        submitted: false,
+        pre_criteria_passed: false,
+        screening_complete: false,
+      });
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!values.pre_criteria_passed && !PRE_CRITERIA.every((_, i) => values.pre[i] !== undefined)) {
+      alert("Please complete all pre-assessment criteria.");
+      return;
+    }
+    if (!values.pre_criteria_passed) {
+      alert("Patient does not meet criteria. Keep NBM and refer to SLT.");
+      return;
+    }
+    if (!values.screening_complete) {
+      alert("Please complete all water swallow steps.");
+      return;
+    }
+    handleChange("submitted", true);
+  };
+
+  return (
+    <div>
+      <CommonFormBuilder
+        schema={schema}
+        values={values}
+        onChange={handleChange}
+        onAction={handleAction}
+        patient={patient}
+      >
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
+          {!values.submitted && values.pre_criteria_passed && (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              style={{
+                background: C.headerBg,
+                color: "#fff",
+                border: "none",
+                borderRadius: 7,
+                padding: "9px 22px",
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: "pointer",
+              }}
+            >
+              Submit Screening
+            </button>
+          )}
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                background: C.white,
+                color: C.headerBg,
+                border: `2px solid ${C.headerBg}`,
+                borderRadius: 7,
+                padding: "9px 22px",
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: "pointer",
+              }}
+            >
+              Back
+            </button>
+          )}
+        </div>
+      </CommonFormBuilder>
+    </div>
+  );
+}
