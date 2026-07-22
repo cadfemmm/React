@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 import WoundLocationDiagram from "./WoundLocationDiagram";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
 const PRESSURE_STAGES = [
   { name: "stage_1", label: "Stage 1" },

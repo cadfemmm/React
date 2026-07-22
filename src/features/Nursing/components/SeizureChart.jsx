@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder"; // Adjust path as necessary
 
 const SEIZURE_TYPES = [
   "Generalised Tonic-Clonic",
@@ -13,7 +14,7 @@ const SEIZURE_TYPES = [
 const YES_NO = ["Yes", "No"];
 
 const COLUMNS = [
-  { key: "timestamp",       label: "Timestamp\n(Entry)",          width: 90,  type: "datetime-local" },
+  { key: "timestamp",        label: "Timestamp\n(Entry)",           width: 90,  type: "datetime-local" },
   { key: "event_no",        label: "Event #",                     width: 56,  type: "text" },
   { key: "date",            label: "Date",                        width: 100, type: "date" },
   { key: "start_time",      label: "Start Time\n(hh:mm:ss)",      width: 90,  type: "time" },
@@ -42,7 +43,7 @@ const COLUMNS = [
   { key: "nurse_initials",  label: "Nurse\nInitials",             width: 70,  type: "text" },
 ];
 
-const STICKY_COLS = 3; // Timestamp, Event#, Date stay frozen
+const STICKY_COLS = 3; 
 
 function emptyRow() {
   return COLUMNS.reduce((o, c) => ({ ...o, [c.key]: "" }), {});
@@ -51,147 +52,464 @@ function emptyRow() {
 const DEFAULT_ROWS = 5;
 
 export default function SeizureChart({ patient }) {
-  const [rows, setRows] = useState(Array.from({ length: DEFAULT_ROWS }, emptyRow));
-  const [patientName, setPatientName] = useState(patient?.name || "");
-  const [patientId,   setPatientId]   = useState(patient?.id   || "");
-  const [ward,        setWard]        = useState("");
-  const [consultant,  setConsultant]  = useState("");
-  const [diagnosis,   setDiagnosis]   = useState("");
+  const [values, setValues] = useState({
+    patientName: patient?.name || "",
+    patientId: patient?.id || "",
+    ward: "",
+    consultant: "",
+    diagnosis: "",
+    clinicalNotes: "",
+    rows: Array.from({ length: DEFAULT_ROWS }, emptyRow),
+  });
+  const [submitted, setSubmitted] = useState(false);
 
-  const updateCell = (ri, key, val) =>
-    setRows((p) => p.map((r, i) => (i === ri ? { ...r, [key]: val } : r)));
+  const handleFieldChange = (name, value) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const addRow    = () => setRows((p) => [...p, emptyRow()]);
-  const removeRow = (ri) => setRows((p) => p.filter((_, i) => i !== ri));
+  const updateCell = (ri, key, val) => {
+    setValues((prev) => ({
+      ...prev,
+      rows: prev.rows.map((r, i) => (i === ri ? { ...r, [key]: val } : r)),
+    }));
+  };
 
-  // compute sticky left offsets
+  const addRow = () => {
+    setValues((prev) => ({ ...prev, rows: [...prev.rows, emptyRow()] }));
+  };
+
+  const removeRow = (ri) => {
+    setValues((prev) => ({
+      ...prev,
+      rows: prev.rows.filter((_, i) => i !== ri),
+    }));
+  };
+
+  // Compute sticky left offsets dynamically
   const stickyLeft = COLUMNS.reduce((acc, col, i) => {
     acc[i] = i === 0 ? 0 : acc[i - 1] + COLUMNS[i - 1].width;
     return acc;
   }, {});
+const schema = {
+  "title": "Seizure Monitoring Chart",
+  "subtitle": "Nursing · Neurological Observation Record",
+  "styles": {
+    "primary": "#3b5fa0",
+    "primaryDark": "#1e3a8a",
+    "primaryLight": "#eff6ff",
+    "border": "#e2e8f0",
+    "text": "#1e293b",
+    "muted": "#64748b",
+    "background": "#f8fafc"
+  },
+  "sections": [
+    {
+      "title": "Observation Log",
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Key: LOC = Loss of Consciousness | GI = Gastrointestinal Symptoms | BG = Blood Glucose | Post-ictal = Post-seizure State"
+        },
+        {
+          "name": "observation_log",
+          "type": "dynamic-table",
+          "minRows": 5,
+          "stickyColumns": 3,
+          "columns": [
+            {
+              "key": "timestamp",
+              "label": "Timestamp\n(Entry)",
+              "width": 90,
+              "type": "datetime-local"
+            },
+            {
+              "key": "event_no",
+              "label": "Event #",
+              "width": 56,
+              "type": "text"
+            },
+            {
+              "key": "date",
+              "label": "Date",
+              "width": 100,
+              "type": "date"
+            },
+            {
+              "key": "start_time",
+              "label": "Start Time\n(hh:mm:ss)",
+              "width": 90,
+              "type": "time"
+            },
+            {
+              "key": "stop_time",
+              "label": "Stop Time\n(hh:mm:ss)",
+              "width": 90,
+              "type": "time"
+            },
+            {
+              "key": "duration",
+              "label": "Duration\n(hh:mm:ss)",
+              "width": 80,
+              "type": "text"
+            },
+            {
+              "key": "seizure_type",
+              "label": "Seizure Type",
+              "width": 140,
+              "type": "single-select",
+              "options": [
+                "Generalised Tonic-Clonic",
+                "Focal with Impaired Awareness",
+                "Focal Aware",
+                "Absence",
+                "Myoclonic",
+                "Status Epilepticus",
+                "Other"
+              ]
+            },
+            {
+              "key": "aura",
+              "label": "Aura\n(Y/N)",
+              "width": 60,
+              "type": "single-select",
+              "options": [
+                "Yes",
+                "No"
+              ]
+            },
+            {
+              "key": "loc",
+              "label": "LOC\n(Y/N)",
+              "width": 60,
+              "type": "single-select",
+              "options": [
+                "Yes",
+                "No"
+              ]
+            },
+            {
+              "key": "motor_features",
+              "label": "Motor Features",
+              "width": 130,
+              "type": "text"
+            },
+            {
+              "key": "eyes",
+              "label": "Eyes",
+              "width": 80,
+              "type": "text"
+            },
+            {
+              "key": "respiratory",
+              "label": "Respiratory",
+              "width": 90,
+              "type": "text"
+            },
+            {
+              "key": "spo2",
+              "label": "SpO2 (%)",
+              "width": 70,
+              "type": "text"
+            },
+            {
+              "key": "hr",
+              "label": "HR (bpm)",
+              "width": 70,
+              "type": "text"
+            },
+            {
+              "key": "bp",
+              "label": "BP (mmHg)",
+              "width": 80,
+              "type": "text"
+            },
+            {
+              "key": "bg",
+              "label": "BG (mg/dL\nor mmol/L)",
+              "width": 80,
+              "type": "text"
+            },
+            {
+              "key": "gi_or_meds",
+              "label": "GI/Stool or\nMeds(Y/N)",
+              "width": 80,
+              "type": "single-select",
+              "options": [
+                "Yes",
+                "No"
+              ]
+            },
+            {
+              "key": "injuries",
+              "label": "Injuries\n(Y/N)",
+              "width": 70,
+              "type": "single-select",
+              "options": [
+                "Yes",
+                "No"
+              ]
+            },
+            {
+              "key": "injury_details",
+              "label": "Injury Details",
+              "width": 120,
+              "type": "text"
+            },
+            {
+              "key": "tongue_bite",
+              "label": "Tongue Bite/\nIncontinence (Y/N)",
+              "width": 100,
+              "type": "single-select",
+              "options": [
+                "Yes",
+                "No"
+              ]
+            },
+            {
+              "key": "interventions",
+              "label": "Interventions\n(Time – Action – Details)",
+              "width": 160,
+              "type": "text"
+            },
+            {
+              "key": "medications",
+              "label": "Medications Given\n(Time – Drug – Dose – Route)",
+              "width": 170,
+              "type": "text"
+            },
+            {
+              "key": "response",
+              "label": "Response to\nIntervention",
+              "width": 110,
+              "type": "text"
+            },
+            {
+              "key": "postictal",
+              "label": "Post-ictal\nGCS/Alertness",
+              "width": 100,
+              "type": "text"
+            },
+            {
+              "key": "returned_baseline",
+              "label": "Returned to\nBaseline (Time)",
+              "width": 100,
+              "type": "time"
+            },
+            {
+              "key": "witness",
+              "label": "Witness\n(Name/Role)",
+              "width": 110,
+              "type": "text"
+            },
+            {
+              "key": "nurse_initials",
+              "label": "Nurse\nInitials",
+              "width": 70,
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Clinical Notes & Summary",
+      "fields": [
+        {
+          "name": "clinicalNotes",
+          "label": "Clinical Notes / Additional Observations",
+          "type": "input",
+          "placeholder": "Record any additional clinical observations, escalation actions, or physician notifications..."
+        }
+      ]
+    }
+  ]
+}
+//  const schema = {
+//   title: "Seizure Monitoring Chart",
+//   subtitle: "Nursing · Neurological Observation Record",
+//   sections: [
+//     {
+//       title: "Form Legend",
+//       fields: [
+//         {
+//           type: "custom",
+//           render: () => (
+//             <div style={legendBar}>
+//               <span style={legendTitle}>Key</span>
+//               <span style={legendItem}><b>LOC</b> = Loss of Consciousness</span>
+//               <span style={legendItem}><b>GI</b> = Gastrointestinal symptoms</span>
+//               <span style={legendItem}><b>BG</b> = Blood Glucose</span>
+//               <span style={legendItem}><b>Post-ictal</b> = Post-seizure state</span>
+//             </div>
+//           ),
+//         },
+//       ],
+//     },
+//     {
+//       title: "Observation Log",
+//       fields: [
+//         {
+//           type: "custom",
+//           render: () => (
+//             <div style={tableCard}>
+//               <div style={tableWrap}>
+//                 <table style={table}>
+//                   <colgroup>
+//                     {COLUMNS.map((col) => (
+//                       <col key={col.key} style={{ width: col.width, minWidth: col.width }} />
+//                     ))}
+//                     <col style={{ width: 40, minWidth: 40 }} />
+//                   </colgroup>
+//                   <thead>
+//                     <tr>
+//                       {COLUMNS.map((col, ci) => (
+//                         <th
+//                           key={col.key}
+//                           style={{
+//                             ...th,
+//                             ...(ci < STICKY_COLS ? { position: "sticky", left: stickyLeft[ci], zIndex: 4, background: "#3b5fa0", color: "#fff" } : {}),
+//                             whiteSpace: "pre-line",
+//                           }}
+//                         >
+//                           {col.label}
+//                         </th>
+//                       ))}
+//                       <th style={{ ...th, background: "#dbeafe", color: "#1e3a8a", width: 40 }}></th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {values.rows.map((row, ri) => (
+//                       <tr key={ri} style={ri % 2 === 0 ? trEven : trOdd}>
+//                         {COLUMNS.map((col, ci) => {
+//                           const isSticky = ci < STICKY_COLS;
+//                           const bgColor = ri % 2 === 0 ? "#f8fafc" : "#fff";
+//                           return (
+//                             <td
+//                               key={col.key}
+//                               style={{
+//                                 ...td,
+//                                 ...(isSticky ? { position: "sticky", left: stickyLeft[ci], zIndex: 2, background: bgColor, boxShadow: ci === STICKY_COLS - 1 ? "2px 0 4px rgba(0,0,0,0.06)" : "none" } : {}),
+//                               }}
+//                             >
+//                               {col.type === "select" ? (
+//                                 <select
+//                                   style={cellSelect}
+//                                   value={row[col.key]}
+//                                   disabled={submitted}
+//                                   onChange={(e) => updateCell(ri, col.key, e.target.value)}
+//                                 >
+//                                   <option value="">—</option>
+//                                   {col.options.map((o) => (
+//                                     <option key={o} value={o}>{o}</option>
+//                                   ))}
+//                                 </select>
+//                               ) : (
+//                                 <input
+//                                   type={col.type === "text" ? "text" : col.type}
+//                                   style={cellInput}
+//                                   value={row[col.key]}
+//                                   disabled={submitted}
+//                                   onChange={(e) => updateCell(ri, col.key, e.target.value)}
+//                                 />
+//                               )}
+//                             </td>
+//                           );
+//                         })}
+//                         <td style={{ ...td, textAlign: "center" }}>
+//                           {values.rows.length > 1 && !submitted && (
+//                             <button style={removeBtn} onClick={() => removeRow(ri)} title="Delete">🗑</button>
+//                           )}
+//                         </td>
+//                       </tr>
+//                     ))}
+//                   </tbody>
+//                 </table>
+//               </div>
+
+//               {!submitted && (
+//                 <div style={tableFooter}>
+//                   <button style={addBtn} onClick={addRow}>＋ Add Row</button>
+//                   <span style={rowCount}>{values.rows.length} event{values.rows.length !== 1 ? "s" : ""} recorded</span>
+//                 </div>
+//               )}
+//             </div>
+//           ),
+//         },
+//       ],
+//     },
+//     {
+//       title: "Clinical Notes & Summary",
+//       fields: [
+//         {
+//           type: "custom",
+//           render: () => (
+//             <div style={notesBox}>
+//               <label style={notesLabel}>Clinical Notes / Additional Observations</label>
+//               <textarea
+//                 style={notesArea}
+//                 rows={3}
+//                 value={values.clinicalNotes}
+//                 disabled={submitted}
+//                 onChange={(e) => handleFieldChange("clinicalNotes", e.target.value)}
+//                 placeholder="Record any additional clinical observations, escalation actions, or physician notifications…"
+//               />
+//             </div>
+//           ),
+//         },
+//       ],
+//     },
+//   ],
+// };
 
   return (
     <div style={page}>
-      {/* ── Header ── */}
-      <div style={pageHeader}>
-        <div>
-          <div style={pageTitle}>Seizure Monitoring Chart</div>
-          {/* <div style={pageSubtitle}>Nursing · Neurological Observation Record</div> */}
-        </div>
-        {patient && (
+      {/* ── Patient badge utility anchor ── */}
+      {patient?.name && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
           <div style={patientBadge}>
             <div style={badgeName}>{patient.name}</div>
             {patient.id && <div style={badgeId}>MRN: {patient.id}</div>}
           </div>
-        )}
-      </div>
-
-      {/* ── Patient info bar ── */}
-      {/* <div style={infoBar}>
-        {[
-          ["Patient Name", patientName, setPatientName, "text"],
-          ["MRN / ID",     patientId,   setPatientId,   "text"],
-          ["Ward / Unit",  ward,        setWard,        "text"],
-          ["Consultant",   consultant,  setConsultant,  "text"],
-          ["Diagnosis",    diagnosis,   setDiagnosis,   "text"],
-        ].map(([label, val, setter, type]) => (
-          <div key={label} style={infoField}>
-            <label style={infoLabel}>{label}</label>
-            <input type={type} style={infoInput} value={val}
-              onChange={(e) => setter(e.target.value)} placeholder={label} />
-          </div>
-        ))}
-      </div> */}
+        </div>
+      )}
 
       {/* ── Legend ── */}
-      <div style={legendBar}>
-        <span style={legendTitle}>Key</span>
-        <span style={legendItem}><b>LOC</b> = Loss of Consciousness</span>
-        <span style={legendItem}><b>GI</b> = Gastrointestinal symptoms</span>
-        <span style={legendItem}><b>BG</b> = Blood Glucose</span>
-        <span style={legendItem}><b>Post-ictal</b> = Post-seizure state</span>
-      </div>
+      
+      <CommonFormBuilder
+        schema={schema}
+        values={values}
+        onChange={handleFieldChange}
+        submitted={submitted}
+      />
 
-      {/* ── Table ── */}
-      <div style={tableCard}>
-        <div style={tableWrap}>
-          <table style={table}>
-            <colgroup>
-              {COLUMNS.map((col) => (
-                <col key={col.key} style={{ width: col.width, minWidth: col.width }} />
-              ))}
-              <col style={{ width: 40, minWidth: 40 }} />
-            </colgroup>
-            <thead>
-              <tr>
-                {COLUMNS.map((col, ci) => (
-                  <th
-                    key={col.key}
-                    style={{
-                      ...th,
-                      ...(ci < STICKY_COLS ? { position: "sticky", left: stickyLeft[ci], zIndex: 4, background: "#3b5fa0", color: "#fff" } : {}),
-                      whiteSpace: "pre-line",
-                    }}
-                  >
-                    {col.label}
-                  </th>
-                ))}
-                <th style={{ ...th, background: "#dbeafe", color: "#1e3a8a", width: 40 }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, ri) => (
-                <tr key={ri} style={ri % 2 === 0 ? trEven : trOdd}>
-                  {COLUMNS.map((col, ci) => {
-                    const isSticky = ci < STICKY_COLS;
-                    const bgColor  = ri % 2 === 0 ? "#f8fafc" : "#fff";
-                    return (
-                      <td
-                        key={col.key}
-                        style={{
-                          ...td,
-                          ...(isSticky ? { position: "sticky", left: stickyLeft[ci], zIndex: 2, background: bgColor, boxShadow: ci === STICKY_COLS - 1 ? "2px 0 4px rgba(0,0,0,0.06)" : "none" } : {}),
-                        }}
-                      >
-                        {col.type === "select" ? (
-                          <select style={cellSelect} value={row[col.key]}
-                            onChange={(e) => updateCell(ri, col.key, e.target.value)}>
-                            <option value="">—</option>
-                            {col.options.map((o) => <option key={o} value={o}>{o}</option>)}
-                          </select>
-                        ) : (
-                          <input
-                            type={col.type === "text" ? "text" : col.type}
-                            style={cellInput}
-                            value={row[col.key]}
-                            onChange={(e) => updateCell(ri, col.key, e.target.value)}
-                          />
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td style={{ ...td, textAlign: "center" }}>
-                    {rows.length > 1 && (
-                      <button style={removeBtn} onClick={() => removeRow(ri)} title="Delete">🗑</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div style={tableFooter}>
-          <button style={addBtn} onClick={addRow}>＋ Add Row</button>
-          <span style={rowCount}>{rows.length} event{rows.length !== 1 ? "s" : ""} recorded</span>
-        </div>
-      </div>
-
-      {/* ── Notes ── */}
-      <div style={notesBox}>
-        <label style={notesLabel}>Clinical Notes / Additional Observations</label>
-        <textarea style={notesArea} rows={3}
-          placeholder="Record any additional clinical observations, escalation actions, or physician notifications…" />
+      {/* ── Actions ── */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20 }}>
+        {!submitted ? (
+          <button 
+            onClick={() => setSubmitted(true)} 
+            style={{ ...addBtn, background: "#1e3a8a" }}
+          >
+            Submit Chart
+          </button>
+        ) : (
+          <button 
+            onClick={() => {
+              setValues({
+                patientName: patient?.name || "",
+                patientId: patient?.id || "",
+                ward: "",
+                consultant: "",
+                diagnosis: "",
+                clinicalNotes: "",
+                rows: Array.from({ length: DEFAULT_ROWS }, emptyRow),
+              });
+              setSubmitted(false);
+            }} 
+            style={{ ...addBtn, background: "#64748b" }}
+          >
+            New Record
+          </button>
+        )}
       </div>
     </div>
   );
@@ -199,9 +517,6 @@ export default function SeizureChart({ patient }) {
 
 /* ══ Styles ══ */
 const page         = { width: "100%", boxSizing: "border-box", padding: "24px 28px", fontFamily: "'Inter', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" };
-const pageHeader   = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 };
-const pageTitle    = { fontSize: 20, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.3px" };
-const pageSubtitle = { fontSize: 12, color: "#64748b", marginTop: 2 };
 const patientBadge = { background: "#dbeafe", color: "#1e3a8a", borderRadius: 10, padding: "8px 16px", textAlign: "right", border: "1px solid #c7d9fb" };
 const badgeName    = { fontWeight: 700, fontSize: 14 };
 const badgeId      = { fontSize: 11, opacity: 0.7, marginTop: 2 };

@@ -23,23 +23,22 @@ actions: [
       // { name: "complaint", label: "Cheif Complaint", type: "input", placeholder: "Therapist assessment..." },
       
 
-      {type:'subheading',label:'Chief Complaint Mouse Over'},
-      {
-      name: "chief_complaint",
-      // label: "Chief Complaint Mouse Over",
-      type: "checkbox-group",
-      tooltip:
-        "What is the primary functional goal the patient wants to achieve?",
-      options: [
-        { label: "Pain Reduction / Support", value: "pain_reduction_support" },
-        { label: "Joint Immobilization (Splinting)", value: "joint_immobilization" },
-        { label: "Mobility Assistance", value: "mobility_assistance" },
-        { label: "Grip / Fine Motor Assistance", value: "grip_fine_motor_assistance" },
-        { label: "Cosmetic / Anatomical Restoration", value: "cosmetic_restoration" },
-        { label: "Protection of Sensitive Area", value: "protection_sensitive_area" },
-        { label: "Other", value: "other" }
-      ]
-    },
+      // {type:'subheading',label:'Chief Complaint Mouse Over', tooltip: "What is the primary functional goal the patient wants to achieve?"},
+    {
+  name: "chief_complaint",
+  label: "Chief Complaint",
+  type: "checkbox-group",
+  tooltip: "What is the primary functional goal the patient wants to achieve?",
+  options: [
+    { label: "Pain Reduction / Support", value: "pain_reduction_support" },
+    { label: "Joint Immobilization (Splinting)", value: "joint_immobilization" },
+    { label: "Mobility Assistance", value: "mobility_assistance" },
+    { label: "Grip / Fine Motor Assistance", value: "grip_fine_motor_assistance" },
+    { label: "Cosmetic / Anatomical Restoration", value: "cosmetic_restoration" },
+    { label: "Protection of Sensitive Area", value: "protection_sensitive_area" },
+    { label: "Other", value: "other" }
+  ]
+},
     {
       name: "chief_complaint_other",
       label: "Other Chief Complaint",
@@ -49,15 +48,18 @@ actions: [
         includes: "other"
       }
     },
-    { name: "History of Present", label: "History of Present Illnes", type: "input" },
+    // { name: "History of Present", label: "History of Present Illnes", type: "input", }
+    // ,
 
-    {
-      type: "subheading",
-      label: "Current Challenges & Symptoms Mouse Over"
-    },
+    // {
+    //   type: "subheading",
+    //   label: "Current Challenges & Symptoms Mouse Over",
+    //   tooltip:
+    //     "What are the patient's main complaints regarding the affected area?",
+    // },
     {
       name: "current_challenges_symptoms",
-      // label: "Current Challenges & Symptoms",
+      label: "Current Challenges & Symptoms",
       type: "checkbox-group",
       tooltip:
         "What are the patient's main complaints regarding the affected area?",
@@ -82,13 +84,15 @@ actions: [
       }
     },
 
-    {
-      type: "subheading",
-      label: "Occupational Environment Mouse Over"
-    },
+    // {
+    //   type: "subheading",
+    //   label: "Occupational Environment Mouse Over",
+    //   tooltip:
+    //     "What is the primary environment where the device will be used?",
+    // },
     {
       name: "occupational_environment",
-      // label: "Occupational Environment",
+      label: "Occupational Environment",
       type: "checkbox-group",
       tooltip:
         "What is the primary environment where the device will be used?",
@@ -112,13 +116,15 @@ actions: [
       }
     },
 
-    {
-      type: "subheading",
-      label: "Experience with Previous Devices Mouse Over"
-    },
+    // {
+    //   type: "subheading",
+    //   label: "Experience with Previous Devices Mouse Over",
+    //   tooltip:
+    //     "If the patient has used a similar device before, what were the issues?",
+    // },
      {
       name: "previous_device_experience",
-      // label: "Experience with Previous Devices",
+      label: "Experience with Previous Devices",
       type: "checkbox-group",
       tooltip:
         "If the patient has used a similar device before, what were the issues?",
@@ -143,13 +149,15 @@ actions: [
       }
     },
 
-    {
-      type: "subheading",
-      label: "Patient Preferences"
-    },
+    // {
+    //   type: "subheading",
+    //   label: "Patient Preferences",
+    //    tooltip:
+    //     "Does the patient have specific preferences for the 3D-printed design?",
+    // },
     {
       name: "patient_preferences",
-      // label: "Patient Preferences",
+      label: "Patient Preferences",
       type: "checkbox-group",
       tooltip:
         "Does the patient have specific preferences for the 3D-printed design?",
@@ -200,36 +208,35 @@ actions: [
     //     { label: "7-10 (Severe)", value: "severe" }
     //   ]
     // }
+{
+  name: "pain_score",
+  label: "Pain Scale",
+  type: "scale-slider",
+  info: "How does the patient rate their discomfort during functional tasks (0-10)?",
+  min: 0,
+  max: 10,
+  ranges: [
     {
-        name: "pain_score",
-        label: "Pain Scale",
-        type: "scale-slider",
-
-        min: 0,
-        max: 10,
-        ranges: [
-          {
-            min: 0,
-            max: 3,
-            label: "Mild",
-            color: "#22c55e"   // green
-          },
-          {
-            min: 4,
-            max: 7,
-            label: "Moderate",
-            color: "#facc15"   // yellow
-          },
-          {
-            min: 7,
-            max: 10,
-            label: "Severe",
-            color: "#ef4444"   // red
-          }
-        ],
-        showValue: true
-      },
-
+      min: 0,
+      max: 3,
+      label: "Mild",
+      color: "#22c55e"
+    },
+    {
+      min: 4,
+      max: 6,
+      label: "Moderate",
+      color: "#facc15"
+    },
+    {
+      min: 7,
+      max: 10,
+      label: "Severe",
+      color: "#ef4444"
+    }
+  ],
+  showValue: true
+}
  
 
 
@@ -250,15 +257,13 @@ const OBJECTIVE_SCHEMA = {
 
      {
       type: "subheading",
-      label: "Visual Documentation (Photos) Make Over"
+      label: "Visual Documentation (Photos) Make Over",
+       tooltip:
+        "Capture skin condition, posture, and current device wear for visual reference during the CAD process"
+    
     },
 
-    // {
-    //   type: "note",
-    //   label:
-    //     "Capture skin condition, posture, and current device wear for visual reference during the CAD process"
-    // },
-
+  
     {
       name: "visual_documentation_photos",
       label: "Upload Picture",
@@ -269,7 +274,9 @@ const OBJECTIVE_SCHEMA = {
 
     {
       type: "subheading",
-      label: "Physical Measurements Mouse Over"
+      label: "Physical Measurements Mouse Over",
+      tooltip:
+        "Reference dimensions for scaling and CAD verification"
     },
 
     // {
@@ -373,10 +380,7 @@ actions: [
       { name: "assessment_notes", label: "Clinical Impression / Notes", type: "input", placeholder: "Therapist assessment..." },
 
 
-   {
-      type: "subheading",
-      label: "Clinical & Engineering Impression Mouse Over"
-    },
+   
 
     // {
     //   type: "note",
@@ -387,6 +391,7 @@ actions: [
     {
       name: "clinical_engineering_impression",
       label: "Clinical & Engineering Impression",
+      tooltip:'What is the core problem the device must solve?',
       type: "checkbox-group",
       options: [
         {
@@ -414,7 +419,8 @@ actions: [
 
     {
       type: "subheading",
-      label: "Design Strategy Mouse Over"
+      label: "Design Strategy Mouse Over",
+      tooltip:"What is the logic behind the proposed 3D model?"
     },
 
     // {
@@ -507,7 +513,8 @@ actions: [
         },
   {
   type: "subheading",
-  label: "Material Selection Mouse Over"
+  label: "Material Selection Mouse Over",
+  tooltip:"Why choose this specific filament?"
 },
 
 // {
@@ -623,7 +630,8 @@ actions: [
   },
 {
   type: "subheading",
-  label: "Risk Assessment Mouse Over"
+  label: "Risk Assessment Mouse Over",
+  tooltip:"What could go wrong with this design?"
 },
 
 // {
@@ -633,7 +641,7 @@ actions: [
 
 {
   name: "risk_assessment",
-  label: "Risk Assessment",
+  // label: "Risk Assessment",
   type: "checkbox-group",
   options: [
     {
@@ -682,7 +690,8 @@ actions: [
 {type:'input',label:"Plan",name:'plan'},
  {
       type: "subheading",
-      label: "Design & Modeling (CAD) Mouse Over"
+      label: "Design & Modeling (CAD) Mouse Over",
+      tooltip:"What steps will be taken to create the digital model?"
     },
 
     // {
@@ -693,8 +702,9 @@ actions: [
 
     {
       name: "design_modeling_cad",
-      label: "Design & Modeling",
+     
       type: "checkbox-group",
+     
       options: [
         {
           label: "Sculpting / Smoothing (Clean scan data)",
@@ -720,7 +730,8 @@ actions: [
     },
   {
       type: "subheading",
-      label: "Manufacturing Specs (3D Printing) Mouse Over"
+      label: "Manufacturing Specs (3D Printing) Mouse Over",
+      tooltip:"What are the technical requirements for the build?"
     },
 
     // {
@@ -809,10 +820,11 @@ actions: [
             }
           ]
         },
-        {
-      type: "subheading",
-      label: "Post-Processing & Assembly Mouse Over"
-    },
+    //     {
+    //   type: "subheading",
+    //   label: "Post-Processing & Assembly Mouse Over",
+    //   tooltip:"What happens after the print is finished?"
+    // },
 
     // {
     //   type: "note",
@@ -822,7 +834,8 @@ actions: [
 
     {
       name: "post_processing_assembly",
-      // label: "Post-Processing & Assembly",
+      label: "Post-Processing & Assembly",
+      tooltip:"What happens after the print is finished?",
       type: "checkbox-group",
       options: [
         {

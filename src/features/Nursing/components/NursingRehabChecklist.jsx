@@ -133,17 +133,99 @@ const SCHEMA = {
 
     /* ── D. ADL ── */
     {
-      title: "D. Activities of Daily Living (ADL)",
-      fields: [
-        { type: "subheading", label: "Mark the level of dependency for each ADL:" },
-        ...ADL_ITEMS.map((item) => ({
-          name: `adl_${item.toLowerCase()}`,
-          label: item,
-          type: "radio",
-          options: ADL_OPTIONS,
-        })),
-      ],
-    },
+      "title": "D. Activities of Daily Living (ADL)",
+      "fields": [
+        { "type": "subheading", "label": "Mark the level of dependency for each ADL:" },
+        {
+          "name": "adl_feeding",
+          "label": "Feeding",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_bathing",
+          "label": "Bathing",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_dressing",
+          "label": "Dressing",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_toileting",
+          "label": "Toileting",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_grooming",
+          "label": "Grooming",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_mobility",
+          "label": "Mobility",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_transferring",
+          "label": "Transferring",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        },
+        {
+          "name": "adl_continence",
+          "label": "Continence",
+          "type": "radio",
+          "options": [
+            { "label": "Independent", "value": "independent" },
+            { "label": "Minimum Dependent", "value": "min_dependent" },
+            { "label": "Moderate Dependent", "value": "mod_dependent" },
+            { "label": "Maximum Dependent", "value": "max_dependent" }
+          ]
+        }
+      ]
+    }
   ],
 };
 

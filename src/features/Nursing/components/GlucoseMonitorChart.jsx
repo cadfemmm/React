@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
 
 const DEFAULT_ROWS = 7;
 
@@ -9,7 +10,6 @@ const MEAL_COLS = [
 ];
 const EXTRA_COLS = ["Pre Bed", "Late Night (3am–4am)"];
 
-// flat column keys for state
 const ALL_KEYS = [
   "breakfast_pre", "breakfast_post",
   "lunch_pre",     "lunch_post",
@@ -21,34 +21,83 @@ function emptyRow() {
   return ALL_KEYS.reduce((o, k) => ({ ...o, [k]: "" }), { date: "" });
 }
 
-function getRangeStyle(val) {
+function getRangeStyle(val, min, max) {
   const n = parseFloat(val);
   if (!val || isNaN(n)) return {};
-  if (n < 4.0)  return { background: "#fee2e2", color: "#991b1b", fontWeight: 700 }; // hypo
-  if (n > 10.0) return { background: "#ffedd5", color: "#c2410c", fontWeight: 700 }; // hyper
-  return { background: "#dcfce7", color: "#166534" }; // normal
+  const lowTarget = parseFloat(min) || 4.0;
+  const highTarget = parseFloat(max) || 10.0;
+
+  if (n < lowTarget)  return { background: "#fee2e2", color: "#991b1b", fontWeight: 700 }; 
+  if (n > highTarget) return { background: "#ffedd5", color: "#c2410c", fontWeight: 700 }; 
+  return { background: "#dcfce7", color: "#166534" }; 
 }
 
-export default function GlucoseMonitorChart({ patient }) {
-  const [rows, setRows]           = useState(Array.from({ length: DEFAULT_ROWS }, emptyRow));
+export default function GlucoseMonitorChart({ patient, values, onChange }) {
+  const [localRows, setLocalRows] = useState(Array.from({ length: DEFAULT_ROWS }, emptyRow));
   const [targetMin, setTargetMin] = useState("4.0");
   const [targetMax, setTargetMax] = useState("10.0");
   const [unit, setUnit]           = useState("mmol/L");
+  const [localNotes, setLocalNotes] = useState("");
 
-  const updateCell = (ri, key, val) =>
-    setRows((p) => p.map((r, i) => (i === ri ? { ...r, [key]: val } : r)));
+  const rows = values?.glucose_rows || localRows;
+  const notes = values?.glucose_notes !== undefined ? values.glucose_notes : localNotes;
 
-  const addRow    = () => setRows((p) => [...p, emptyRow()]);
-  const removeRow = (ri) => setRows((p) => p.filter((_, i) => i !== ri));
+  const updateState = (newRows, newNotes = notes) => {
+    if (onChange) {
+      onChange({
+        ...values,
+        glucose_rows: newRows,
+        glucose_notes: newNotes
+      });
+    } else {
+      setLocalRows(newRows);
+      setLocalNotes(newNotes);
+    }
+  };
+
+  const updateCell = (ri, key, val) => {
+    const nextRows = rows.map((r, i) => (i === ri ? { ...r, [key]: val } : r));
+    updateState(nextRows);
+  };
+
+  const addRow = () => updateState([...rows, emptyRow()]);
+  
+  const removeRow = (ri) => {
+    if (rows.length > 1) {
+      updateState(rows.filter((_, i) => i !== ri));
+    }
+  };
+
+  const schema = {
+    title: "Glucose Monitoring Data",
+    sections: [
+      {
+        fields: [
+          { name: "glucose_rows", type: "hidden" },
+          { name: "glucose_notes", type: "hidden" }
+        ]
+      }
+    ]
+  };
 
   return (
     <div style={page}>
+      <div style={{ display: "none" }}>
+        <CommonFormBuilder 
+          schema={schema} 
+          values={{ glucose_rows: rows, glucose_notes: notes }} 
+          onChange={(val) => {
+            if (val?.glucose_rows) {
+              updateState(val.glucose_rows, val.glucose_notes);
+            }
+          }} 
+        />
+      </div>
 
       {/* ── Header ── */}
       <div style={pageHeader}>
         <div>
           <div style={pageTitle}>Glucose Monitoring Chart</div>
-          {/* <div style={pageSubtitle}>Nursing · Blood Glucose Record</div> */}
         </div>
         {patient && (
           <div style={patientBadge}>
@@ -58,8 +107,8 @@ export default function GlucoseMonitorChart({ patient }) {
         )}
       </div>
 
-      {/* ── Settings bar ── */}
-      {/* <div style={settingsBar}>
+      {/* ── Settings Bar ── */}
+      <div style={settingsBar}>
         <div style={settingField}>
           <label style={settingLabel}>Unit</label>
           <select style={settingSelect} value={unit} onChange={(e) => setUnit(e.target.value)}>
@@ -80,7 +129,7 @@ export default function GlucoseMonitorChart({ patient }) {
           <span style={{ ...legendChip, background: "#dcfce7", color: "#166534" }}>Normal</span>
           <span style={{ ...legendChip, background: "#ffedd5", color: "#c2410c" }}>High (&gt;{targetMax})</span>
         </div>
-      </div> */}
+      </div>
 
       {/* ── Table ── */}
       <div style={tableCard}>
@@ -110,16 +159,20 @@ export default function GlucoseMonitorChart({ patient }) {
               {rows.map((row, ri) => (
                 <tr key={ri} style={ri % 2 === 0 ? trEven : trOdd}>
                   <td style={{ ...td, ...tdDate }}>
-                    <input type="date" style={cellInput} value={row.date}
-                      onChange={(e) => updateCell(ri, "date", e.target.value)} />
+                    <input 
+                      type="date" 
+                      style={cellInput} 
+                      value={row.date || ""}
+                      onChange={(e) => updateCell(ri, "date", e.target.value)} 
+                    />
                   </td>
                   {ALL_KEYS.map((key) => {
-                    const rangeStyle = getRangeStyle(row[key]);
+                    const rangeStyle = getRangeStyle(row[key], targetMin, targetMax);
                     return (
                       <td key={key} style={{ ...td, ...rangeStyle }}>
                         <input
                           style={{ ...cellInput, textAlign: "center", ...rangeStyle, background: "transparent" }}
-                          value={row[key]}
+                          value={row[key] || ""}
                           onChange={(e) => updateCell(ri, key, e.target.value)}
                           placeholder="—"
                           inputMode="decimal"
@@ -148,7 +201,13 @@ export default function GlucoseMonitorChart({ patient }) {
       {/* ── Notes ── */}
       <div style={notesBox}>
         <span style={notesLabel}>Notes / Insulin Actions</span>
-        <textarea style={notesArea} rows={3} placeholder="Record any insulin doses, hypoglycaemic episodes, or clinical actions taken…" />
+        <input 
+          style={notesArea} 
+          rows={3} 
+          value={notes}
+          onChange={(e) => updateState(rows, e.target.value)}
+          placeholder="Record any insulin doses, hypoglycaemic episodes, or clinical actions taken…" 
+        />
       </div>
     </div>
   );
@@ -158,7 +217,6 @@ export default function GlucoseMonitorChart({ patient }) {
 const page         = { width: "100%", boxSizing: "border-box", padding: "24px 28px", fontFamily: "'Inter', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" };
 const pageHeader   = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 };
 const pageTitle    = { fontSize: 20, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.3px" };
-const pageSubtitle = { fontSize: 12, color: "#64748b", marginTop: 2 };
 const patientBadge = { background: "#dbeafe", color: "#1e3a8a", borderRadius: 10, padding: "8px 16px", textAlign: "right", border: "1px solid #c7d9fb" };
 const badgeName    = { fontWeight: 700, fontSize: 14 };
 const badgeId      = { fontSize: 11, opacity: 0.7, marginTop: 2 };
@@ -166,8 +224,8 @@ const badgeId      = { fontSize: 11, opacity: 0.7, marginTop: 2 };
 const settingsBar  = { display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: "12px 16px", marginBottom: 16 };
 const settingField = { display: "flex", flexDirection: "column", gap: 3 };
 const settingLabel = { fontSize: 10, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em" };
-const settingSelect= { border: "1px solid #e2e8f0", borderRadius: 6, padding: "4px 8px", fontSize: 12, outline: "none", background: "#f8fafc", color: "#1e293b" };
-const settingInput = { border: "1px solid #e2e8f0", borderRadius: 6, padding: "4px 8px", fontSize: 12, outline: "none", width: 70, background: "#f8fafc", color: "#1e293b" };
+const settingSelect= { border: "1px solid #e2e8f0", borderRadius: 6, padding: "6px 10px", fontSize: 12, outline: "none", background: "#f8fafc", color: "#1e293b", cursor: "pointer" };
+const settingInput = { border: "1px solid #e2e8f0", borderRadius: 6, padding: "6px 10px", fontSize: 12, outline: "none", width: 90, background: "#f8fafc", color: "#1e293b" };
 const rangeLegend  = { display: "flex", gap: 8, alignItems: "center", marginLeft: "auto" };
 const legendChip   = { fontSize: 11, fontWeight: 700, borderRadius: 20, padding: "3px 10px" };
 
