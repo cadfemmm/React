@@ -44,27 +44,27 @@ const SPEECHANDLANGUAGEGROUP_SCHEMA = {
           options: [
             {
               label:
-                "Education about ingestion functions [KTB.PM.ZZ]",
+                "Education about ingestion functions",
               value: "ktb_pm",
             },
             {
               label:
-                "Interview in relation to swallowing [KTC.AN.ZZ]",
+                "Interview in relation to swallowing",
               value: "ktc_an",
             },
             {
               label:
-                "Assisting and leading exercise in relation to swallowing [KTC.PG.ZZ]",
+                "Assisting and leading exercise in relation to swallowing",
               value: "ktc_pg",
             },
             {
               label:
-                "Education about swallowing [KTC.PM.ZZ]",
+                "Education about swallowing",
               value: "ktc_pm",
             },
             {
               label:
-                "Advising about swallowing [KTC.PN.ZZ]",
+                "Advising about swallowing",
               value: "ktc_pn",
             },
           ],
@@ -86,12 +86,12 @@ const SPEECHANDLANGUAGEGROUP_SCHEMA = {
           options: [
             {
               label:
-                "Assisting and leading exercise for respiration function [JTB.PG.ZZ]",
+                "Assisting and leading exercise for respiration function",
               value: "jtb_pg",
             },
             {
               label:
-                "Education about respiration function [JTB.PM.ZZ]",
+                "Education about respiration function",
               value: "jtb_pm",
             },
           ],
@@ -113,12 +113,12 @@ const SPEECHANDLANGUAGEGROUP_SCHEMA = {
           options: [
             {
               label:
-                "Assisting and leading exercise for voice functions [JUB.PG.ZZ]",
+                "Assisting and leading exercise for voice functions",
               value: "jub_pg",
             },
             {
               label:
-                "Education about voice functions [JUB.PM.ZZ]",
+                "Education about voice functions",
               value: "jub_pm",
             },
           ],
@@ -140,17 +140,17 @@ const SPEECHANDLANGUAGEGROUP_SCHEMA = {
           options: [
             {
               label:
-                "Training in receiving spoken messages [SEA.PH.ZZ]",
+                "Training in receiving spoken messages",
               value: "sea_ph",
             },
             {
               label:
-                "Education about receiving spoken messages [SEA.PM.ZZ]",
+                "Education about receiving spoken messages",
               value: "sea_pm",
             },
             {
               label:
-                "Advising about receiving spoken messages [SEA.PN.ZZ]",
+                "Advising about receiving spoken messages",
               value: "sea_pn",
             },
           ],
@@ -171,35 +171,35 @@ const SPEECHANDLANGUAGEGROUP_SCHEMA = {
           label: "Interventions",
           options: [
             {
-              label: "Observation of speaking [SFA.AM.ZZ]",
+              label: "Observation of speaking",
               value: "sfa_am",
             },
             {
-              label: "Training in speaking [SFA.PH.ZZ]",
+              label: "Training in speaking",
               value: "sfa_ph",
             },
             {
-              label: "Education about speaking [SFA.PM.ZZ]",
+              label: "Education about speaking",
               value: "sfa_pm",
             },
             {
-              label: "Advising about speaking [SFA.PN.ZZ]",
+              label: "Advising about speaking",
               value: "sfa_pn",
             },
             {
-              label: "Observation of having a conversation [SGA.AM.ZZ]",
+              label: "Observation of having a conversation",
               value: "sga_am",
             },
             {
-              label: "Training in having a conversation [SGA.PH.ZZ]",
+              label: "Training in having a conversation",
               value: "sga_ph",
             },
             {
-              label: "Advising about having a conversation [SGA.PN.ZZ]",
+              label: "Advising about having a conversation",
               value: "sga_pn",
             },
             {
-              label: "Counselling about having a conversation [SGA.PP.ZZ]",
+              label: "Counselling about having a conversation",
               value: "sga_pp",
             },
           ],
@@ -221,42 +221,42 @@ const SPEECHANDLANGUAGEGROUP_SCHEMA = {
           options: [
             {
               label:
-                "Observation of articulation functions [JUD.AM.ZZ]",
+                "Observation of articulation functions",
               value: "jud_am",
             },
             {
               label:
-                "Assisting and leading exercise for articulation functions [JUD.PG.ZZ]",
+                "Assisting and leading exercise for articulation functions",
               value: "jud_pg",
             },
             {
               label:
-                "Training of articulation functions [JUD.PH.ZZ]",
+                "Training of articulation functions",
               value: "jud_ph",
             },
             {
               label:
-                "Education about articulation functions [JUD.PM.ZZ]",
+                "Education about articulation functions",
               value: "jud_pm",
             },
             {
               label:
-                "Observation of fluency and rhythm of speech functions [JUF.AM.ZZ]",
+                "Observation of fluency and rhythm of speech functions",
               value: "juf_am",
             },
             {
               label:
-                "Assisting and leading exercise for fluency and rhythm of speech functions [JUF.PG.ZZ]",
+                "Assisting and leading exercise for fluency and rhythm of speech functions",
               value: "juf_pg",
             },
             {
               label:
-                "Training of fluency and rhythm of speech functions [JUF.PH.ZZ]",
+                "Training of fluency and rhythm of speech functions",
               value: "juf_ph",
             },
             {
               label:
-                "Education about fluency and rhythm of speech functions [JUF.PM.ZZ]",
+                "Education about fluency and rhythm of speech functions",
               value: "juf_pm",
             },
           ],

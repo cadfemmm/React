@@ -31,7 +31,7 @@ import OptometryGroupIntervention from "../Optometry/components/OptometryGroup";
 import DietGroupIntervention from "../Dietetics/components/DietGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
 import SpeechGroupIntervention from "../SpeechandLanguage/Speechandlanguagegroup";
-import SpeechTherapyPaedSOAP from "../SpeechandLanguage/Speechandlanguageprogress";
+import SpeechTherapyPaedSOAP from "../SpeechandLanguage/SpeechandlanguagePaedprogress";
 
 const ASSESSMENT_MAP = {
   "Nursing":                  NursingPatientDetails,
