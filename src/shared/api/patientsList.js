@@ -195,6 +195,7 @@ export function formatAppointmentDateTime(patient) {
 const DEPARTMENT_APPOINTMENT_PATH_SLUGS = {
   Optometry: "optometry",
   Audiology: "audiology",
+  "Speech & Language Therapy": "speech",
 };
 
 const DEPARTMENT_APPOINTMENT_IDS = {

@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { fetchPatientsList } from "../../shared/api/patientsList";
 import { filterPatientsForDepartment } from "../../shared/utils/patientFilters";
+import AssessmentLoader from "../../assessment";
 import OrthoticsAssessment from "./ProstheticsAndOrthoticsAssessments";
 import OrthoticsFollowUp   from "./ProstheticsAndOrthoticsFollowUp";
 import ProgressIntervention from "./ProgressIntervention";
@@ -20,9 +20,20 @@ const ASSESSMENT_CARDS = [
 const AVATAR_COLORS = ["#DBEAFE", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#EDE9FE", "#FFEDD5"];
 
 const CARD_META = {
-  "Wheelchair":      { icon: "🦽", label: "Wheelchair Assessment", color: "#0EA5E9" },
+  Orthotics:         { icon: "🦿", label: "Orthotics Assessment",   color: "#059669" },
+  Prosthetics:       { icon: "🦴", label: "Prosthetics Assessment", color: "#D97706" },
+  "Check Out":       { icon: "✅", label: "Check Out",              color: "#EA580C" },
+  Wheelchair:        { icon: "🦽", label: "Wheelchair Assessment",  color: "#0EA5E9" },
   "3D":              { icon: "🧊", label: "3D Assessment",          color: "#8B5CF6" },
   "My Appointments": { icon: "📅", label: "Appointments",           color: "#2563EB" },
+};
+
+const PO_SOAP_STREAMS = new Set(["Orthotics", "Prosthetics"]);
+
+const VISIT_TYPE_BY_MODE = {
+  initial: "INITIAL",
+  followup: "FOLLOWUP",
+  progress: "PROGRESS",
 };
 
 const DEPARTMENT = "Prosthetics & Orthotics";
@@ -124,53 +135,72 @@ export default function ProstheticsAndOrthoticsPatients({ selectedCard, onBack }
 
   const meta = CARD_META[selectedCard] || { icon: "📋", label: "Assessment", color: "#2563EB" };
 
+  const assessmentTypeCards = useMemo(() => {
+    if (PO_SOAP_STREAMS.has(selectedCard)) {
+      return ASSESSMENT_CARDS.filter((card) => card.id !== "checkout");
+    }
+    return ASSESSMENT_CARDS;
+  }, [selectedCard]);
+
+  /* ── Check Out: dashboard card → patient → checkout form ── */
+  if (selectedPatient && selectedCard === "Check Out") {
+    return (
+      <CheckoutAssessment
+        patient={selectedPatient}
+        onBack={() => setSelectedPatient(null)}
+        onSubmit={() => setSelectedPatient(null)}
+      />
+    );
+  }
+
   /* ── Step 3: Assessment form ── */
   if (selectedPatient && assessmentMode) {
-    // if (selectedCard === "Wheelchair") {
-    //   return <WheelchairAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
-    // }
-    // if (selectedCard === "3D") {
-    //   return <ThreeDAssessment patient={selectedPatient} onBack={() => setAssessmentMode(null)} />;
-    // }
+    // Orthotics / Prosthetics → backend SOAP via AssessmentLoader
+    if (PO_SOAP_STREAMS.has(selectedCard)) {
+      const visitType = VISIT_TYPE_BY_MODE[assessmentMode] || "INITIAL";
+      return (
+        <AssessmentLoader
+          department={DEPARTMENT}
+          patient={selectedPatient}
+          visitType={visitType}
+          stream={String(selectedCard).toLowerCase()}
+        />
+      );
+    }
+
     if (selectedCard === "Wheelchair") {
+      if (["initial", "followup", "progress"].includes(assessmentMode)) {
+        return (
+          <WheelchairAssessment
+            patient={selectedPatient}
+            mode={assessmentMode}
+            onBack={() => setAssessmentMode(null)}
+          />
+        );
+      }
+    }
 
-  // initial, followup, progress → WheelchairAssessment
-  if (["initial", "followup", "progress"].includes(assessmentMode)) {
-    return (
-      <WheelchairAssessment
-        patient={selectedPatient}
-        mode={assessmentMode}
-        onBack={() => setAssessmentMode(null)}
-      />
-    );
-  }
-}
+    if (selectedCard === "3D") {
+      if (["initial", "followup"].includes(assessmentMode)) {
+        return (
+          <ThreeDAssessment
+            patient={selectedPatient}
+            mode={assessmentMode}
+            onBack={() => setAssessmentMode(null)}
+          />
+        );
+      }
+      if (assessmentMode === "progress") {
+        return (
+          <ThreeDProgress
+            patient={selectedPatient}
+            onBack={() => setAssessmentMode(null)}
+          />
+        );
+      }
+    }
 
-if (selectedCard === "3D") {
-
-  // initial, followup → ThreeDAssessment
-  if (["initial", "followup"].includes(assessmentMode)) {
-    return (
-      <ThreeDAssessment
-        patient={selectedPatient}
-        mode={assessmentMode}
-        onBack={() => setAssessmentMode(null)}
-      />
-    );
-  }
-
-  // progress → ThreeDProgressAssessment
-  if (assessmentMode === "progress") {
-    return (
-      <ThreeDProgress
-        patient={selectedPatient}
-        onBack={() => setAssessmentMode(null)}
-      />
-    );
-  }
-}
-
-    // Follow-up → dedicated follow-up form
+    // Follow-up → dedicated follow-up form (My Appointments legacy)
     if (assessmentMode === "followup") {
       return (
         <OrthoticsFollowUp
@@ -199,7 +229,7 @@ if (selectedCard === "3D") {
           onSubmit={() => setAssessmentMode(null)}
         />
       );
-    }       
+    }
     // Initial / Progress / Group → main assessment form with mode passed
     return (
       <OrthoticsAssessment
@@ -210,9 +240,8 @@ if (selectedCard === "3D") {
     );
   }
 
-  /* ── Step 2: Assessment type selection (My Appointments only) ── */
-  // if (selectedPatient && selectedCard === "My Appointments") {
-  if (selectedPatient && selectedCard) {
+  /* ── Step 2: Assessment type selection ── */
+  if (selectedPatient && selectedCard && selectedCard !== "Check Out") {
 
     const initials = (selectedPatient.name || selectedPatient.email || "P")
       .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
@@ -257,7 +286,7 @@ if (selectedCard === "3D") {
             fontSize: 12, fontWeight: 600, color: "#64748B",
             background: "#F1F5F9", padding: "4px 12px", borderRadius: 999
           }}>
-            Prosthetics &amp; Orthotics
+            {meta.label || "Prosthetics & Orthotics"}
           </div>
         </div>
 
@@ -268,7 +297,7 @@ if (selectedCard === "3D") {
             display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
             gap: 20, width: "100%", maxWidth: 860
           }}>
-            {ASSESSMENT_CARDS.map(card => (
+            {assessmentTypeCards.map(card => (
               <AssessmentTypeCard
                 key={card.id}
                 card={card}

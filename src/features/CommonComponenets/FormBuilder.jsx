@@ -150,6 +150,78 @@ function DrawCanvasField({ field, value, onChange }) {
   );
 }
 
+/** Expand backend groups like { title, fields } (no type) into subheading + flat fields. */
+function combineShowIf(parentShowIf, childShowIf) {
+  if (!parentShowIf) return childShowIf;
+  if (!childShowIf) return parentShowIf;
+  return { ...parentShowIf, and: childShowIf };
+}
+
+function applyGroupShowIf(fields, groupShowIf) {
+  if (!groupShowIf || !Array.isArray(fields)) return fields;
+  return fields.map((field) => {
+    if (!field || typeof field !== "object") return field;
+    const next = { ...field };
+    const existing = next.showIf || next.showif;
+    delete next.showif;
+    const combined = combineShowIf(groupShowIf, existing);
+    if (combined) next.showIf = combined;
+    if (Array.isArray(next.fields)) {
+      next.fields = applyGroupShowIf(next.fields, groupShowIf);
+    }
+    if (Array.isArray(next.children)) {
+      next.children = applyGroupShowIf(next.children, groupShowIf);
+    }
+    return next;
+  });
+}
+
+function flattenTitledFieldGroups(fields = []) {
+  if (!Array.isArray(fields)) return [];
+
+  const result = [];
+  fields.forEach((field) => {
+    if (!field || typeof field !== "object") return;
+
+    const next = { ...field };
+    if (next.showif && !next.showIf) next.showIf = next.showif;
+    delete next.showif;
+
+    const nested = Array.isArray(next.fields) ? next.fields : null;
+    const isTitledGroup =
+      nested &&
+      nested.length > 0 &&
+      !next.type &&
+      (next.title || next.label);
+
+    if (isTitledGroup) {
+      const groupShowIf = next.showIf;
+      result.push({
+        type: "subheading",
+        label: next.title || next.label,
+        ...(groupShowIf ? { showIf: groupShowIf } : {}),
+      });
+      const flattenedNested = flattenTitledFieldGroups(nested);
+      result.push(
+        ...(groupShowIf
+          ? applyGroupShowIf(flattenedNested, groupShowIf)
+          : flattenedNested),
+      );
+      return;
+    }
+
+    if (nested && nested.length > 0) {
+      next.fields = flattenTitledFieldGroups(nested);
+    }
+    if (Array.isArray(next.children) && next.children.length > 0) {
+      next.children = flattenTitledFieldGroups(next.children);
+    }
+
+    result.push(next);
+  });
+  return result;
+}
+
 function evaluateShowIf(showIf, values) {
   if (!showIf) return true;
   if ("and" in showIf) {
@@ -161,7 +233,28 @@ function evaluateShowIf(showIf, values) {
     const conditions = Array.isArray(showIf.or) ? showIf.or : [showIf.or];
     return conditions.some(cond => {
       const depVal = values[cond.field];
-      if ("equals" in cond && depVal !== cond.equals) return false;
+      if ("equals" in cond) {
+        if (Array.isArray(depVal)) {
+          if (
+            !depVal.some(
+              (v) =>
+                v === cond.equals ||
+                String(v).toLowerCase() === String(cond.equals).toLowerCase(),
+            )
+          ) {
+            return false;
+          }
+        } else if (
+          depVal !== cond.equals &&
+          !(
+            depVal != null &&
+            cond.equals != null &&
+            String(depVal).toLowerCase() === String(cond.equals).toLowerCase()
+          )
+        ) {
+          return false;
+        }
+      }
       if ("oneOf" in cond) {
         const allowed = Array.isArray(cond.oneOf) ? cond.oneOf : [cond.oneOf];
         if (!allowed.includes(depVal)) return false;
@@ -175,8 +268,22 @@ function evaluateShowIf(showIf, values) {
   }
   const depVal = values[showIf.field];
   if ("equals" in showIf) {
-    if (Array.isArray(depVal)) return depVal.includes(showIf.equals);
-    return depVal === showIf.equals;
+    if (Array.isArray(depVal)) {
+      return depVal.some(
+        (v) =>
+          v === showIf.equals ||
+          String(v).toLowerCase() === String(showIf.equals).toLowerCase(),
+      );
+    }
+    if (depVal === showIf.equals) return true;
+    if (
+      depVal != null &&
+      showIf.equals != null &&
+      String(depVal).toLowerCase() === String(showIf.equals).toLowerCase()
+    ) {
+      return true;
+    }
+    return false;
   }
   if ("oneOf" in showIf) {
     const allowed = Array.isArray(showIf.oneOf) ? showIf.oneOf : [showIf.oneOf];
@@ -381,7 +488,7 @@ export default function CommonFormBuilder({
             {sections.map((section, sIdx) => {
 
               /* ===== SECTION-LEVEL VISIBILITY ===== */
-              if (section.showIf && !evaluateShowIf(section.showIf, values)) return null;
+              if ((section.showIf || section.showif) && !evaluateShowIf(section.showIf || section.showif, values)) return null;
 
               const sectionKey = getSectionKey(section, sIdx);
               const sectionShowScores = resolveSectionShowScores(
@@ -465,7 +572,12 @@ export default function CommonFormBuilder({
                   )}
 
                   {(() => {
-                    const sectionFields = Array.isArray(section?.fields) ? section.fields : [];
+                    const rawFields = Array.isArray(section?.fields)
+                      ? section.fields
+                      : [];
+                    const sectionFields = schema?.fieldsFlattened
+                      ? rawFields
+                      : flattenTitledFieldGroups(rawFields);
                     const firstMatrixField = sectionFields.find(f => f.type === "radio-matrix");
                     // Check if there's a grid-header before the first radio-matrix
                     const hasGridHeader = sectionFields.some((f, idx) => {
@@ -479,6 +591,7 @@ export default function CommonFormBuilder({
                       for (let i = idx - 1; i >= 0; i--) {
                         const f = sectionFields[i];
                         if (f.showIf && !evaluateShowIf(f.showIf, values)) continue;
+                        if (f.showif && !evaluateShowIf(f.showif, values)) continue;
                         return { field: f, idx: i };
                       }
                       return null;
@@ -529,7 +642,8 @@ export default function CommonFormBuilder({
                       <>
                         {sectionFields.map((field, idx) => {
 
-                          if (field.showIf && !evaluateShowIf(field.showIf, values)) return null;
+                          const fieldShowIf = field.showIf || field.showif;
+                          if (fieldShowIf && !evaluateShowIf(fieldShowIf, values)) return null;
 
                           const fieldForRender = mapFieldForDoctorView(field, sectionShowScores);
                           if (!fieldForRender) return null;
@@ -539,7 +653,7 @@ export default function CommonFormBuilder({
                             ? validateField(value, field.validation)
                             : null;
 
-                          const fieldKey = field.name ?? (typeof field.label === "string" ? field.label : null) ?? `field-${idx}`;
+                          const fieldKey = `field-${idx}-${field.name ?? (typeof field.label === "string" ? field.label : "item")}`;
                           return (
                             <React.Fragment key={fieldKey}>
                               {renderScaleBeforeSubheading(field, idx)}
@@ -643,7 +757,7 @@ export default function CommonFormBuilder({
                                   <div style={{ marginBottom: 16 }}>
 
                                     <>
-                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion", "dynamic-table", "custom"].includes(fieldForRender.type)
+                                      {!["button", "subheading", "optional-section-toggle", "radio-matrix", "score-box", "inline-input", "grid-row", "grid-header", "accordion", "dynamic-table", "custom", "assessment-launcher"].includes(fieldForRender.type)
                                         && fieldForRender.type !== "checkbox-group"
                                         && (
                                           <label
@@ -1678,6 +1792,8 @@ function AssessmentLauncher({
               id: registryItem.id,
               value: registryItem.id,
               label: opt?.label ?? registryItem.name ?? registryItem.id,
+              visibleIf: opt?.visibleIf || opt?.showIf || registryItem.visibleIf,
+              showIf: opt?.showIf || opt?.visibleIf || registryItem.showIf,
               session_id:
                 registryItem.session_id ||
                 resolveSubAssessmentSessionId(registryItem),
@@ -1711,6 +1827,8 @@ function AssessmentLauncher({
             name: opt?.label ?? registryItem?.name ?? id,
             label:
               opt?.label ?? registryItem?.label ?? registryItem?.name ?? id,
+            visibleIf: opt?.visibleIf || opt?.showIf,
+            showIf: opt?.showIf || opt?.visibleIf,
             session_id:
               registryItem?.session_id ||
               resolveSubAssessmentSessionId({
@@ -1775,6 +1893,11 @@ function AssessmentLauncher({
 
           {registryOptions
             .filter(Boolean)
+            .filter((opt) => {
+              const condition = opt.visibleIf || opt.showIf;
+              if (!condition) return true;
+              return evaluateShowIf(condition, values);
+            })
             .map(opt => (
 
               <button

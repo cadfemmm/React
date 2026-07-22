@@ -24,7 +24,7 @@ ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip,
    recordingsCount: number
    appointmentsCount: number
    departmentName: string
-   onViewAllPatients: fn
+   onViewAllPatients: fn  // used by "View All" on Today's Appointments table
 ───────────────────────────────────────────────────────────── */
 
 /* ── KPI Card ── */
@@ -437,12 +437,19 @@ export default function DepartmentDashboard({
           <div className="text-[12px] text-muted mt-0.5">{today}</div>
         </div>
         <div className="flex gap-2.5">
-          {onViewAllPatients && (
-            <button onClick={onViewAllPatients}
-              className="dash-btn-outline flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold cursor-pointer">
-              View All Patients
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              window.open(
+                "https://dev.rehab-software.com/cams/booking-queue",
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }}
+            className="dash-btn-outline flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold cursor-pointer"
+          >
+            Book Appointment
+          </button>
           {onNewAppointment && (
             <button onClick={onNewAppointment}
               onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.color = "#fff"; }}
@@ -459,14 +466,17 @@ export default function DepartmentDashboard({
         {kpiCards.map((c, i) => <KpiCard key={i} {...c} />)}
       </div>
 
-      {/* ── P&O exclusive: Wheelchair & 3D quick-access cards ── */}
+      {/* ── P&O exclusive service cards ── */}
       {onPOCardClick && (
         <div>
           <div className="text-[12px] font-bold uppercase tracking-wider text-gray-500 mb-3">
             Exclusive Services
           </div>
-          <div className="grid grid-cols-2 gap-4" style={{ maxWidth: 560 }}>
+          <div className="grid grid-cols-2 gap-4" style={{ maxWidth: 920 }}>
             {[
+              { title: "Orthotics",   icon: "🦿", color: "#059669", desc: "Orthotics SOAP — initial, follow-up & progress" },
+              { title: "Prosthetics", icon: "🦴", color: "#D97706", desc: "Prosthetics SOAP — initial, follow-up & progress" },
+              { title: "Check Out",   icon: "✅", color: "#EA580C", desc: "Finalize visit and discharge workflow" },
               { title: "Wheelchair",  icon: "🦽", color: "#0EA5E9", desc: "Wheelchair service, repair & training" },
               { title: "3D",          icon: "🧊", color: "#8B5CF6", desc: "3D scanning, printing & customisation" },
             ].map(card => (
@@ -495,7 +505,9 @@ export default function DepartmentDashboard({
                   {card.icon}
                 </div>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{card.title} Assessment</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>
+                    {card.title === "Check Out" ? card.title : `${card.title} Assessment`}
+                  </div>
                   <div style={{ fontSize: 12, color: "#6b7280", marginTop: 3 }}>{card.desc}</div>
                 </div>
                 <div style={{

@@ -37,6 +37,52 @@ const DEFAULT_OPTION_CARDS = [
   },
 ];
 
+/** Shown when the appointment queue returns no patients (demo / empty state). */
+const DUMMY_PATIENTS = [
+  {
+    id: "dummy-speech-001",
+    patient_id: "dummy-speech-001",
+    name: "Aisha Rahman",
+    patient_name: "Aisha Rahman",
+    mrn: "MRN-SL-1001",
+    age: 34,
+    gender: "Female",
+    status: "Scheduled",
+    appointment_type: "Initial Assessment",
+    appointment_date: "2026-07-21",
+    start_time_myt: "09:00",
+    end_time_myt: "09:45",
+  },
+  {
+    id: "dummy-speech-002",
+    patient_id: "dummy-speech-002",
+    name: "Daniel Lim",
+    patient_name: "Daniel Lim",
+    mrn: "MRN-SL-1002",
+    age: 8,
+    gender: "Male",
+    status: "Waiting",
+    appointment_type: "Follow-up Visit",
+    appointment_date: "2026-07-21",
+    start_time_myt: "10:30",
+    end_time_myt: "11:15",
+  },
+  {
+    id: "dummy-speech-003",
+    patient_id: "dummy-speech-003",
+    name: "Nurul Hassan",
+    patient_name: "Nurul Hassan",
+    mrn: "MRN-SL-1003",
+    age: 62,
+    gender: "Female",
+    status: "Scheduled",
+    appointment_type: "Progress Intervention",
+    appointment_date: "2026-07-21",
+    start_time_myt: "14:00",
+    end_time_myt: "14:45",
+  },
+];
+
 /**
  * Shared patients list UI (same as Optometry / Audiology):
  * Patient | Date & Time | Reports | Begin Assessment
@@ -61,8 +107,20 @@ export default function DepartmentAppointmentPatients({
   const [assessmentView, setAssessmentView] = useState(null);
   const [search, setSearch] = useState("");
   const patients = patientsProp;
-  const totalPatients = totalPatientsProp ?? patients.length;
   const loading = loadingProp;
+
+  const displayPatients = useMemo(() => {
+    if (loading) return patients;
+    if (patients.length > 0) return patients;
+    return DUMMY_PATIENTS;
+  }, [loading, patients]);
+
+  const usingDummyPatients =
+    !loading && patients.length === 0 && displayPatients === DUMMY_PATIENTS;
+
+  const totalPatients = usingDummyPatients
+    ? displayPatients.length
+    : (totalPatientsProp ?? patients.length);
 
   const handleBackToPatients = useCallback(() => {
     setSelectedPatient(null);
@@ -84,7 +142,7 @@ export default function DepartmentAppointmentPatients({
   }, []);
 
   React.useEffect(() => {
-    if (!patients.length) return;
+    if (!displayPatients.length) return;
     if (selectedPatient) return;
 
     const params = new URLSearchParams(window.location.search);
@@ -92,26 +150,26 @@ export default function DepartmentAppointmentPatients({
     const assessment = params.get("assessment") || "initial";
     if (!patientId) return;
 
-    const found = patients.find(
+    const found = displayPatients.find(
       (p) => String(p.id ?? p.patient_id) === String(patientId),
     );
     if (found) {
       setSelectedPatient(found);
       setAssessmentView(assessment);
     }
-  }, [patients]);
+  }, [displayPatients]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    if (!q) return patients;
-    return patients.filter(
+    if (!q) return displayPatients;
+    return displayPatients.filter(
       (p) =>
         (p.name || p.patient_name || "").toLowerCase().includes(q) ||
         (p.email || "").toLowerCase().includes(q) ||
         (p.mrn || p.ic || "").toLowerCase().includes(q) ||
         (p.icd || "").toLowerCase().includes(q),
     );
-  }, [patients, search]);
+  }, [displayPatients, search]);
 
   if (reportsPatient) {
     return (
@@ -223,7 +281,11 @@ export default function DepartmentAppointmentPatients({
           </button>
           <div>
             <h1 style={S.pageTitle}>Patients</h1>
-            <p style={S.pageSub}>{queueLabel}</p>
+            <p style={S.pageSub}>
+              {usingDummyPatients
+                ? `${queueLabel} · demo patients (no appointments today)`
+                : queueLabel}
+            </p>
           </div>
         </div>
 
@@ -297,8 +359,9 @@ export default function DepartmentAppointmentPatients({
       {!loading && filtered.length > 0 && (
         <div style={S.footerCount}>
           Showing <strong>{filtered.length}</strong> of{" "}
-          <strong>{totalPatients || patients.length}</strong> patient
-          {(totalPatients || patients.length) !== 1 ? "s" : ""}
+          <strong>{totalPatients || displayPatients.length}</strong> patient
+          {(totalPatients || displayPatients.length) !== 1 ? "s" : ""}
+          {usingDummyPatients ? " (demo)" : ""}
         </div>
       )}
     </div>

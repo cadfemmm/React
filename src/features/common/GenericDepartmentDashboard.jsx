@@ -69,6 +69,7 @@ const DEPARTMENT_APPOINTMENT_DEPTS = new Set([
   "Audiology",
   "Dietetics",
   "Psychology",
+  "Speech & Language Therapy",
 ]);
 
 function formatAppointmentTime(value) {
