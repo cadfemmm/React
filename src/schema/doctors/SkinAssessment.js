@@ -1,0 +1,2806 @@
+const SCHEMA = {
+  "title": "",
+  "sections": [
+    {
+      "fields": [
+        {
+          "name": "skin_lesion_or_rash_present",
+          "label": "Skin Lesion/Rash Present",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "open_wound_present_initial",
+          "label": "Open Wound Present",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "GENERAL SKIN ASSESSMENT"
+        },
+        {
+          "name": "skin_integrity",
+          "label": "Skin Integrity",
+          "type": "radio",
+          "labelAbove": true,
+          "options": [
+            {
+              "label": "Intact",
+              "value": "intact"
+            },
+            {
+              "label": "Dry",
+              "value": "dry"
+            },
+            {
+              "label": "Fragile",
+              "value": "fragile"
+            },
+            {
+              "label": "Macerated",
+              "value": "macerated"
+            },
+            {
+              "label": "Rash",
+              "value": "rash"
+            },
+            {
+              "label": "Erythema",
+              "value": "erythema"
+            },
+            {
+              "label": "Non-blanchable erythema",
+              "value": "non_blanchable_erythema"
+            },
+            {
+              "label": "Erythema migrans",
+              "value": "erythema_migrans"
+            },
+            {
+              "label": "Skin tears",
+              "value": "skin_tears"
+            },
+            {
+              "label": "Other",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "skin_integrity_other_specify",
+          "label": "Specify",
+          "type": "input",
+          "showIf": {
+            "field": "skin_integrity",
+            "equals": "other"
+          }
+        },
+        {
+          "name": "skin_colour",
+          "label": "Skin Colour",
+          "type": "radio",
+          "labelAbove": true,
+          "options": [
+            {
+              "label": "Normal",
+              "value": "normal"
+            },
+            {
+              "label": "Pallor",
+              "value": "pallor"
+            },
+            {
+              "label": "Cyanosis",
+              "value": "cyanosis"
+            },
+            {
+              "label": "Jaundice",
+              "value": "jaundice"
+            },
+            {
+              "label": "Hyperpigmentation",
+              "value": "hyperpigmentation"
+            },
+            {
+              "label": "Hypopigmentation",
+              "value": "hypopigmentation"
+            },
+            {
+              "label": "Erythema",
+              "value": "erythema"
+            },
+            {
+              "label": "Petechiae",
+              "value": "petechiae"
+            },
+            {
+              "label": "Purpura",
+              "value": "purpura"
+            },
+            {
+              "label": "Ecchymosis",
+              "value": "ecchymosis"
+            },
+            {
+              "label": "Other",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "skin_colour_other_specify",
+          "label": "Specify",
+          "type": "input",
+          "showIf": {
+            "field": "skin_colour",
+            "equals": "other"
+          }
+        },
+        {
+          "name": "skin_temperature",
+          "label": "Skin Temperature",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Warm",
+              "value": "warm"
+            },
+            {
+              "label": "Hot",
+              "value": "hot"
+            },
+            {
+              "label": "Cool",
+              "value": "cool"
+            }
+          ]
+        },
+        {
+          "name": "skin_turgor",
+          "label": "Skin Turgor",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Normal",
+              "value": "normal"
+            },
+            {
+              "label": "Reduced",
+              "value": "reduced"
+            }
+          ]
+        },
+        {
+          "name": "edema",
+          "label": "Edema",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Pitting",
+              "value": "pitting"
+            },
+            {
+              "label": "Non-pitting",
+              "value": "non_pitting"
+            }
+          ]
+        },
+        {
+          "name": "skin_surface",
+          "label": "Skin Surface",
+          "type": "radio",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Smooth",
+              "value": "smooth"
+            },
+            {
+              "label": "Scaling",
+              "value": "scaling"
+            },
+            {
+              "label": "Crusting",
+              "value": "crusting"
+            },
+            {
+              "label": "Blistering",
+              "value": "blistering"
+            },
+            {
+              "label": "Non-scaling",
+              "value": "non_scaling"
+            },
+            {
+              "label": "Migratory Rash",
+              "value": "migratory_rash"
+            }
+          ]
+        },
+        {
+          "name": "skin_sensation",
+          "label": "Skin Sensation",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Reduced Sensation",
+              "value": "reduced_sensation"
+            },
+            {
+              "label": "Numbness",
+              "value": "numbness"
+            },
+            {
+              "label": "10g Monofilament fail",
+              "value": "monofilament_10g_fail"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "skin_moisture",
+          "label": "Skin Moisture",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Excess Moisture",
+              "value": "excess_moisture"
+            },
+            {
+              "label": "IAD",
+              "value": "iad",
+              "tooltip": "Incontinence-Associated Dermatitis"
+            },
+            {
+              "label": "ITD",
+              "value": "itd",
+              "tooltip": "Intertriginous Dermatitis"
+            },
+            {
+              "label": "Periwound MASD",
+              "value": "periwound_masd",
+              "tooltip": "Periwound Moisture-Associated Skin Damage"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Lesion Assessment",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "lesion_morphology",
+          "label": "Lesion Morphology (Standard Dermatology)",
+          "type": "radio",
+          "labelAbove": true,
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Macule",
+              "value": "macule",
+              "tooltip": "Flat discoloration of the skin without elevation or depression (e.g., freckle)."
+            },
+            {
+              "label": "Papule",
+              "value": "papule",
+              "tooltip": "Small, raised solid lesion less than 1 cm in diameter."
+            },
+            {
+              "label": "Plaque",
+              "value": "plaque",
+              "tooltip": "Raised, flat-topped lesion greater than 1 cm in diameter."
+            },
+            {
+              "label": "Vesicle",
+              "value": "vesicle",
+              "tooltip": "Small fluid-filled blister less than 1 cm in diameter."
+            },
+            {
+              "label": "Bulla",
+              "value": "bulla",
+              "tooltip": "Large fluid-filled blister greater than 1 cm in diameter."
+            },
+            {
+              "label": "Pustule",
+              "value": "pustule",
+              "tooltip": "Pus-filled lesion, often inflamed (e.g., acne pustule)."
+            },
+            {
+              "label": "Wheal",
+              "value": "wheal",
+              "tooltip": "Transient, edematous, raised lesion with central pallor and surrounding erythema (e.g., urticaria)."
+            },
+            {
+              "label": "Nodule",
+              "value": "nodule",
+              "tooltip": "Deep, solid lesion usually greater than 1 cm, extending into the dermis or subcutis."
+            },
+            {
+              "label": "Scale",
+              "value": "scale",
+              "tooltip": "Flaking or shedding of the stratum corneum (outer layer of epidermis)."
+            },
+            {
+              "label": "Crust",
+              "value": "crust",
+              "tooltip": "Dried exudate (serum, blood, or pus) on the skin surface (e.g., impetigo)."
+            },
+            {
+              "label": "Ulcer",
+              "value": "ulcer",
+              "tooltip": "Loss of epidermis and at least part of the dermis, resulting in a deeper tissue defect."
+            },
+            {
+              "label": "Others",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "lesion_morphology_other_specify",
+          "label": "Specify",
+          "type": "input",
+          "showIf": {
+            "field": "lesion_morphology",
+            "equals": "other"
+          }
+        },
+        {
+          "type": "info-text",
+          "name": "lesion_selected_label",
+          "label": "",
+          "text": "",
+          "showIf": {
+            "or": [
+              {
+                "field": "lesion_morphology",
+                "exists": true
+              },
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "row",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "fields": [
+            {
+              "type": "button",
+              "label": "Reference image",
+              "action": "lesion_reference_popup",
+              "showIf": {
+                "field": "lesion_morphology",
+                "oneOf": [
+                  "macule",
+                  "papule",
+                  "plaque",
+                  "vesicle",
+                  "bulla",
+                  "pustule",
+                  "wheal",
+                  "nodule",
+                  "scale",
+                  "crust",
+                  "ulcer"
+                ]
+              }
+            },
+            {
+              "type": "attach-file",
+              "name": "lesion_morphology_image",
+              "label": "Upload image",
+              "accept": "image/*",
+              "multiple": false,
+              "previewSize": {
+                "width": 320,
+                "height": 320
+              },
+              "hideInputAfterSelect": false,
+              "showIf": {
+                "field": "lesion_morphology",
+                "oneOf": [
+                  "macule",
+                  "papule",
+                  "plaque",
+                  "vesicle",
+                  "bulla",
+                  "pustule",
+                  "wheal",
+                  "nodule",
+                  "scale",
+                  "crust",
+                  "ulcer"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "lesion_distribution",
+          "label": "Lesion Distribution",
+          "type": "radio",
+          "labelAbove": true,
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Localized",
+              "value": "localized"
+            },
+            {
+              "label": "Generalized",
+              "value": "generalized"
+            },
+            {
+              "label": "Dermatomal",
+              "value": "dermatomal"
+            },
+            {
+              "label": "Symmetrical",
+              "value": "symmetrical"
+            },
+            {
+              "label": "Flexural",
+              "value": "flexural"
+            },
+            {
+              "label": "Extensor surfaces",
+              "value": "extensor_surfaces"
+            }
+          ]
+        },
+        {
+          "name": "lesion_duration",
+          "label": "Lesion Duration",
+          "type": "radio",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Acute (<6 weeks)",
+              "value": "acute_lt_6w"
+            },
+            {
+              "label": "Chronic (>6 weeks)",
+              "value": "chronic_gt_6w"
+            }
+          ]
+        },
+        {
+          "name": "lesion_associated_symptoms",
+          "label": "Associated Symptoms",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Itching (Pruritus)",
+              "value": "itching"
+            },
+            {
+              "label": "Pain",
+              "value": "pain"
+            },
+            {
+              "label": "Burning",
+              "value": "burning"
+            },
+            {
+              "label": "Tenderness",
+              "value": "tenderness"
+            },
+            {
+              "label": "Fever",
+              "value": "fever"
+            },
+            {
+              "label": "Exudate / discharge",
+              "value": "exudate_discharge"
+            },
+            {
+              "label": "Sleep disturbance",
+              "value": "sleep_disturbance"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Skin Disease Condition",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "skin_disease_inflammatory_allergic",
+          "label": "Inflammatory / Allergic",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Eczema (Dermatitis)",
+              "value": "eczema"
+            },
+            {
+              "label": "Urticaria (Wheals)",
+              "value": "urticaria"
+            },
+            {
+              "label": "Urticaria factitia (Dermatographism)",
+              "value": "urticaria_factitia"
+            },
+            {
+              "label": "Angioedema",
+              "value": "angioedema"
+            }
+          ]
+        },
+        {
+          "type": "button",
+          "label": "Reference image",
+          "action": "angioedema_reference",
+          "showIf": {
+            "field": "skin_disease_inflammatory_allergic",
+            "includes": "angioedema"
+          }
+        },
+        {
+          "name": "angioedema_involvement",
+          "label": "Involvement",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Lips",
+              "value": "lips"
+            },
+            {
+              "label": "Tongue",
+              "value": "tongue"
+            },
+            {
+              "label": "Mouth",
+              "value": "mouth"
+            },
+            {
+              "label": "Eyelids",
+              "value": "eyelids"
+            }
+          ],
+          "showIf": {
+            "field": "skin_disease_inflammatory_allergic",
+            "includes": "angioedema"
+          }
+        },
+        {
+          "name": "angioedema_ace_inhibitor_use",
+          "label": "Medication history ACE inhibitor use",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ],
+          "showIf": {
+            "field": "skin_disease_inflammatory_allergic",
+            "includes": "angioedema"
+          }
+        },
+        {
+          "name": "angioedema_possible_cause",
+          "label": "Possible cause",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "ACE inhibitor induced",
+              "value": "ace_inhibitor_induced"
+            },
+            {
+              "label": "Hereditary angioedema (HAE)",
+              "value": "hae"
+            },
+            {
+              "label": "Acquired angioedema (AAE)",
+              "value": "aae"
+            }
+          ],
+          "showIf": {
+            "field": "skin_disease_inflammatory_allergic",
+            "includes": "angioedema"
+          }
+        },
+        {
+          "name": "infectious_skin_conditions",
+          "label": "Infectious Skin Conditions",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Fungal infection",
+              "value": "fungal_infection"
+            },
+            {
+              "label": "Tinea (Ringworm)",
+              "value": "tinea"
+            },
+            {
+              "label": "Impetigo",
+              "value": "impetigo"
+            },
+            {
+              "label": "Herpes simplex",
+              "value": "herpes_simplex"
+            },
+            {
+              "label": "Chickenpox",
+              "value": "chickenpox"
+            },
+            {
+              "label": "Scarlet fever",
+              "value": "scarlet_fever"
+            },
+            {
+              "label": "Infectious mononucleosis",
+              "value": "infectious_mononucleosis"
+            },
+            {
+              "label": "Viral pharyngitis",
+              "value": "viral_pharyngitis"
+            }
+          ]
+        },
+        {
+          "name": "chickenpox_indicators",
+          "label": "Chickenpox indicators",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Acute fever",
+              "value": "acute_fever"
+            },
+            {
+              "label": "Vesicular rash",
+              "value": "vesicular_rash"
+            },
+            {
+              "label": "Itchy rash",
+              "value": "itchy_rash"
+            }
+          ],
+          "showIf": {
+            "field": "infectious_skin_conditions",
+            "includes": "chickenpox"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Other Skin Conditions",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "other_skin_conditions_autoimmune",
+          "label": "Autoimmune / Chronic",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Psoriasis",
+              "value": "psoriasis"
+            },
+            {
+              "label": "Lupus (SLE)",
+              "value": "lupus_sle"
+            },
+            {
+              "label": "Bullous pemphigoid",
+              "value": "bullous_pemphigoid"
+            },
+            {
+              "label": "Pemphigus",
+              "value": "pemphigus"
+            },
+            {
+              "label": "Other",
+              "value": "other"
+            }
+          ]
+        },
+        {
+          "name": "other_skin_conditions_autoimmune_other_specify",
+          "label": "Specify",
+          "type": "input",
+          "showIf": {
+            "field": "other_skin_conditions_autoimmune",
+            "includes": "other"
+          }
+        },
+        {
+          "name": "other_skin_conditions_neoplastic",
+          "label": "Neoplastic",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Melanoma",
+              "value": "melanoma"
+            },
+            {
+              "label": "Basal cell carcinoma",
+              "value": "basal_cell_carcinoma"
+            },
+            {
+              "label": "Squamous cell carcinoma (NICE NG12)",
+              "value": "squamous_cell_carcinoma_nice_ng12"
+            }
+          ]
+        },
+        {
+          "name": "other_skin_conditions_structural",
+          "label": "Structural",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Epidermal cyst",
+              "value": "epidermal_cyst"
+            },
+            {
+              "label": "Follicular accentuation",
+              "value": "follicular_accentuation"
+            }
+          ]
+        },
+        {
+          "name": "other_skin_conditions_tick_borne",
+          "label": "Tick-borne",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Lyme disease (Erythema migrans)",
+              "value": "lyme_disease"
+            }
+          ]
+        },
+        {
+          "name": "other_skin_conditions_drug_reaction",
+          "label": "Drug Reaction",
+          "type": "checkbox-group",
+          "showIf": {
+            "or": [
+              {
+                "field": "skin_lesion_or_rash_present",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_integrity",
+                "oneOf": [
+                  "rash",
+                  "erythema"
+                ]
+              },
+              {
+                "field": "skin_surface",
+                "oneOf": [
+                  "scaling",
+                  "crusting",
+                  "blistering",
+                  "non_scaling",
+                  "migratory_rash"
+                ]
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Fixed drug eruption",
+              "value": "fixed_drug_eruption"
+            },
+            {
+              "label": "SJS",
+              "value": "sjs",
+              "tooltip": "Stevens-Johnson Syndrome"
+            },
+            {
+              "label": "TEN",
+              "value": "ten",
+              "tooltip": "Toxic Epidermal Necrolysis"
+            },
+            {
+              "label": "DRESS syndrome",
+              "value": "dress_syndrome",
+              "tooltip": "Drug Reaction with Eosinophilia & Systemic Symptoms"
+            },
+            {
+              "label": "AGEP",
+              "value": "agep",
+              "tooltip": "Acute Generalised Exanthematous Pustulosis"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Wound Assessment Module",
+          "showIf": {
+            "or": [
+              {
+                "field": "open_wound_present_initial",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_moisture",
+                "equals": "excess_moisture"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wound_onset",
+          "label": "Onset",
+          "type": "radio",
+          "showIf": {
+            "or": [
+              {
+                "field": "open_wound_present_initial",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_moisture",
+                "equals": "excess_moisture"
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Acute",
+              "value": "acute"
+            },
+            {
+              "label": "Chronic",
+              "value": "chronic"
+            }
+          ]
+        },
+        {
+          "name": "wound_number",
+          "label": "Number of wounds",
+          "type": "radio",
+          "showIf": {
+            "or": [
+              {
+                "field": "open_wound_present_initial",
+                "equals": "yes"
+              },
+              {
+                "field": "skin_moisture",
+                "equals": "excess_moisture"
+              }
+            ]
+          },
+          "options": [
+            {
+              "label": "Single",
+              "value": "single"
+            },
+            {
+              "label": "Multiple",
+              "value": "multiple"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Wound Location",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_wound_anatomical_site",
+          "label": "Anatomical site",
+          "type": "input",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "row",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          },
+          "fields": [
+            {
+              "name": "single_wound_body_map_human",
+              "label": "Body Map Selection",
+              "type": "draw-canvas",
+              "backgroundImage": "/static/media/Human Body.935f25e275c28993fe51.jpg",
+              "width": 320,
+              "height": 260
+            },
+            {
+              "name": "single_wound_body_map_feet",
+              "label": "Foot map (draw)",
+              "type": "draw-canvas",
+              "backgroundImage": "/static/media/feet_image.952ef2d45dc1c443f022.gif",
+              "width": 320,
+              "height": 260
+            }
+          ]
+        },
+        {
+          "name": "single_wound_anatomical_location",
+          "label": "Anatomical location",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Sacrum",
+              "value": "sacrum"
+            },
+            {
+              "label": "Heel",
+              "value": "heel"
+            },
+            {
+              "label": "Ischial tuberosity",
+              "value": "ischial_tuberosity"
+            },
+            {
+              "label": "Trochanter",
+              "value": "trochanter"
+            },
+            {
+              "label": "Foot",
+              "value": "foot"
+            },
+            {
+              "label": "Leg",
+              "value": "leg"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Wound Measurements",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "row",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          },
+          "fields": [
+            {
+              "name": "single_wound_length_cm",
+              "label": "Length (cm)",
+              "type": "input"
+            },
+            {
+              "name": "single_wound_width_cm",
+              "label": "Width (cm)",
+              "type": "input"
+            },
+            {
+              "name": "single_wound_depth_cm",
+              "label": "Depth (cm)",
+              "type": "input"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          },
+          "fields": [
+            {
+              "name": "single_wound_undermining_cm",
+              "label": "Undermining (cm)",
+              "type": "input"
+            },
+            {
+              "name": "single_wound_tunnelling_cm",
+              "label": "Tunnelling (cm)",
+              "type": "input"
+            },
+            {
+              "name": "single_wound_surface_area_cm2",
+              "label": "Surface area (cm²)",
+              "type": "input",
+              "readOnly": true
+            }
+          ]
+        },
+        {
+          "name": "single_wound_type",
+          "label": "Wound Type",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Pressure Injury",
+              "value": "pressure_injury"
+            },
+            {
+              "label": "Diabetic Foot Ulcer",
+              "value": "diabetic_foot_ulcer"
+            },
+            {
+              "label": "Venous Ulcer",
+              "value": "venous_ulcer"
+            },
+            {
+              "label": "Arterial Ulcer",
+              "value": "arterial_ulcer"
+            },
+            {
+              "label": "Surgical Wound",
+              "value": "surgical_wound"
+            },
+            {
+              "label": "Traumatic Wound",
+              "value": "traumatic_wound"
+            },
+            {
+              "label": "Burn",
+              "value": "burn"
+            },
+            {
+              "label": "Other",
+              "value": "other"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_wound_type_other",
+          "label": "Other – specify",
+          "type": "input",
+          "showIf": {
+            "field": "single_wound_type",
+            "includes": "other"
+          }
+        },
+        {
+          "type": "button",
+          "label": "Reference image",
+          "action": "pressure_injury_reference",
+          "showIf": {
+            "field": "single_wound_type",
+            "includes": "pressure_injury"
+          }
+        },
+        {
+          "name": "single_pressure_injury_classification",
+          "label": "Pressure Injury Classification",
+          "type": "radio",
+          "labelAbove": true,
+          "options": [
+            {
+              "label": "Stage 1 – Non-blanchable erythema",
+              "value": "stage_1"
+            },
+            {
+              "label": "Stage 2 – Partial thickness loss",
+              "value": "stage_2"
+            },
+            {
+              "label": "Stage 3 – Full thickness skin loss",
+              "value": "stage_3"
+            },
+            {
+              "label": "Stage 4 – Full thickness tissue loss",
+              "value": "stage_4"
+            },
+            {
+              "label": "Unstageable",
+              "value": "unstageable"
+            },
+            {
+              "label": "Deep Tissue Pressure Injury",
+              "value": "deep_tissue"
+            }
+          ],
+          "showIf": {
+            "field": "single_wound_type",
+            "includes": "pressure_injury"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Wound Bed Assessment",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Percentage (%)",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "row",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          },
+          "fields": [
+            {
+              "name": "single_granulation_percent",
+              "label": "Granulation (%)",
+              "type": "input"
+            },
+            {
+              "name": "single_slough_percent",
+              "label": "Slough (%)",
+              "type": "input"
+            },
+            {
+              "name": "single_necrosis_percent",
+              "label": "Necrosis (%)",
+              "type": "input"
+            }
+          ]
+        },
+        {
+          "type": "subheading",
+          "label": "Characterisation — TIME Framework",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Tissue type:",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_tissue_type",
+          "label": "Tissue type",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Granulation",
+              "value": "granulation"
+            },
+            {
+              "label": "Epithelialising",
+              "value": "epithelialising"
+            },
+            {
+              "label": "Slough",
+              "value": "slough"
+            },
+            {
+              "label": "Eschar / necrotic",
+              "value": "eschar_necrotic"
+            },
+            {
+              "label": "Mixed",
+              "value": "mixed"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Infection / Inflammation:",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_infection",
+          "label": "Infection / Inflammation",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Clean",
+              "value": "clean"
+            },
+            {
+              "label": "Contaminated",
+              "value": "contaminated"
+            },
+            {
+              "label": "Critically colonised",
+              "value": "critically_colonised"
+            },
+            {
+              "label": "Locally infected",
+              "value": "locally_infected"
+            },
+            {
+              "label": "Spreading infection",
+              "value": "spreading_infection"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_infection_signs",
+          "label": "Signs",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Increased exudate",
+              "value": "increased_exudate"
+            },
+            {
+              "label": "Malodour",
+              "value": "malodour"
+            },
+            {
+              "label": "Erythema",
+              "value": "erythema"
+            },
+            {
+              "label": "Warmth",
+              "value": "warmth"
+            },
+            {
+              "label": "Pain",
+              "value": "pain"
+            },
+            {
+              "label": "Oedema",
+              "value": "oedema"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Moisture / Exudate:",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_moisture_amount",
+          "label": "Amount",
+          "type": "radio",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Light",
+              "value": "light"
+            },
+            {
+              "label": "Moderate",
+              "value": "moderate"
+            },
+            {
+              "label": "Heavy",
+              "value": "heavy"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_moisture_type",
+          "label": "Type",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Serous",
+              "value": "serous"
+            },
+            {
+              "label": "Haemoserous",
+              "value": "haemoserous"
+            },
+            {
+              "label": "Haemorrhagic",
+              "value": "haemorrhagic"
+            },
+            {
+              "label": "Purulent",
+              "value": "purulent"
+            },
+            {
+              "label": "Mixed",
+              "value": "mixed"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Edge / Periwound:",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_edge",
+          "label": "Edge",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Well-defined",
+              "value": "well_defined"
+            },
+            {
+              "label": "Irregular",
+              "value": "irregular"
+            },
+            {
+              "label": "Rolled/epibole",
+              "value": "rolled_epibole"
+            },
+            {
+              "label": "Undermined",
+              "value": "undermined"
+            },
+            {
+              "label": "Attached",
+              "value": "attached"
+            },
+            {
+              "label": "Non-attached",
+              "value": "non_attached"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_time_periwound",
+          "label": "Periwound",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Intact",
+              "value": "intact"
+            },
+            {
+              "label": "Macerated",
+              "value": "macerated"
+            },
+            {
+              "label": "Erythema",
+              "value": "erythema"
+            },
+            {
+              "label": "Oedema",
+              "value": "oedema"
+            },
+            {
+              "label": "Callous",
+              "value": "callous"
+            },
+            {
+              "label": "Eczema",
+              "value": "eczema"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_wound_pain_score",
+          "label": "Wound Pain (0–10)",
+          "type": "scale-slider",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "showValue": true,
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "single_factors_delaying_healing",
+          "label": "Factors Delaying Healing",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Immobility",
+              "value": "immobility"
+            },
+            {
+              "label": "Poor Nutrition",
+              "value": "poor_nutrition"
+            },
+            {
+              "label": "Diabetes",
+              "value": "diabetes"
+            },
+            {
+              "label": "Incontinence",
+              "value": "incontinence"
+            },
+            {
+              "label": "Vascular disease",
+              "value": "vascular_disease"
+            },
+            {
+              "label": "Respiratory disease",
+              "value": "respiratory_disease"
+            },
+            {
+              "label": "Anemia",
+              "value": "anemia"
+            },
+            {
+              "label": "Infection",
+              "value": "infection"
+            },
+            {
+              "label": "Edema",
+              "value": "edema"
+            },
+            {
+              "label": "Medication (steroids, chemotherapy, inotropes)",
+              "value": "medication"
+            }
+          ],
+          "showIf": {
+            "field": "wound_number",
+            "equals": "single",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "dynamic-section",
+          "name": "wound_blocks",
+          "showIf": {
+            "field": "wound_number",
+            "equals": "multiple",
+            "and": {
+              "or": [
+                {
+                  "field": "open_wound_present_initial",
+                  "equals": "yes"
+                },
+                {
+                  "field": "skin_moisture",
+                  "equals": "excess_moisture"
+                }
+              ]
+            }
+          },
+          "fields": [
+            {
+              "type": "subheading",
+              "label": "Wound Location"
+            },
+            {
+              "name": "anatomical_site",
+              "label": "Anatomical site",
+              "type": "input"
+            },
+            {
+              "type": "row",
+              "fields": [
+                {
+                  "name": "body_map_human",
+                  "label": "Body Map Selection",
+                  "type": "draw-canvas",
+                  "backgroundImage": "/static/media/Human Body.935f25e275c28993fe51.jpg",
+                  "width": 320,
+                  "height": 260
+                },
+                {
+                  "name": "body_map_feet",
+                  "label": "Foot map (draw)",
+                  "type": "draw-canvas",
+                  "backgroundImage": "/static/media/feet_image.952ef2d45dc1c443f022.gif",
+                  "width": 320,
+                  "height": 260
+                }
+              ]
+            },
+            {
+              "name": "anatomical_location",
+              "label": "Anatomical location",
+              "type": "checkbox-group",
+              "options": [
+                {
+                  "label": "Sacrum",
+                  "value": "sacrum"
+                },
+                {
+                  "label": "Heel",
+                  "value": "heel"
+                },
+                {
+                  "label": "Ischial tuberosity",
+                  "value": "ischial_tuberosity"
+                },
+                {
+                  "label": "Trochanter",
+                  "value": "trochanter"
+                },
+                {
+                  "label": "Foot",
+                  "value": "foot"
+                },
+                {
+                  "label": "Leg",
+                  "value": "leg"
+                }
+              ]
+            },
+            {
+              "type": "subheading",
+              "label": "Wound Measurements"
+            },
+            {
+              "type": "row",
+              "fields": [
+                {
+                  "name": "length_cm",
+                  "label": "Length (cm)",
+                  "type": "input"
+                },
+                {
+                  "name": "width_cm",
+                  "label": "Width (cm)",
+                  "type": "input"
+                },
+                {
+                  "name": "depth_cm",
+                  "label": "Depth (cm)",
+                  "type": "input"
+                }
+              ]
+            },
+            {
+              "type": "row",
+              "fields": [
+                {
+                  "name": "undermining_cm",
+                  "label": "Undermining (cm)",
+                  "type": "input"
+                },
+                {
+                  "name": "tunnelling_cm",
+                  "label": "Tunnelling (cm)",
+                  "type": "input"
+                },
+                {
+                  "name": "surface_area_cm2",
+                  "label": "Surface area (cm²)",
+                  "type": "input",
+                  "readOnly": true
+                }
+              ]
+            },
+            {
+              "name": "wound_type",
+              "label": "Wound Type",
+              "type": "checkbox-group",
+              "options": [
+                {
+                  "label": "Pressure Injury",
+                  "value": "pressure_injury"
+                },
+                {
+                  "label": "Diabetic Foot Ulcer",
+                  "value": "diabetic_foot_ulcer"
+                },
+                {
+                  "label": "Venous Ulcer",
+                  "value": "venous_ulcer"
+                },
+                {
+                  "label": "Arterial Ulcer",
+                  "value": "arterial_ulcer"
+                },
+                {
+                  "label": "Surgical Wound",
+                  "value": "surgical_wound"
+                },
+                {
+                  "label": "Traumatic Wound",
+                  "value": "traumatic_wound"
+                },
+                {
+                  "label": "Burn",
+                  "value": "burn"
+                },
+                {
+                  "label": "Other",
+                  "value": "other"
+                }
+              ]
+            },
+            {
+              "name": "wound_type_other",
+              "label": "Other – specify",
+              "type": "input",
+              "showIf": {
+                "field": "wound_type",
+                "includes": "other"
+              }
+            },
+            {
+              "type": "button",
+              "label": "Reference image",
+              "action": "pressure_injury_reference",
+              "showIf": {
+                "field": "wound_type",
+                "includes": "pressure_injury"
+              }
+            },
+            {
+              "name": "pressure_injury_classification",
+              "label": "Pressure Injury Classification",
+              "type": "radio",
+              "labelAbove": true,
+              "options": [
+                {
+                  "label": "Stage 1 – Non-blanchable erythema",
+                  "value": "stage_1"
+                },
+                {
+                  "label": "Stage 2 – Partial thickness loss",
+                  "value": "stage_2"
+                },
+                {
+                  "label": "Stage 3 – Full thickness skin loss",
+                  "value": "stage_3"
+                },
+                {
+                  "label": "Stage 4 – Full thickness tissue loss",
+                  "value": "stage_4"
+                },
+                {
+                  "label": "Unstageable",
+                  "value": "unstageable"
+                },
+                {
+                  "label": "Deep Tissue Pressure Injury",
+                  "value": "deep_tissue"
+                }
+              ],
+              "showIf": {
+                "field": "wound_type",
+                "includes": "pressure_injury"
+              }
+            },
+            {
+              "type": "subheading",
+              "label": "Wound Bed Assessment"
+            },
+            {
+              "type": "subheading",
+              "label": "Percentage (%)"
+            },
+            {
+              "type": "row",
+              "fields": [
+                {
+                  "name": "granulation_percent",
+                  "label": "Granulation (%)",
+                  "type": "input"
+                },
+                {
+                  "name": "slough_percent",
+                  "label": "Slough (%)",
+                  "type": "input"
+                },
+                {
+                  "name": "necrosis_percent",
+                  "label": "Necrosis (%)",
+                  "type": "input"
+                }
+              ]
+            },
+            {
+              "type": "subheading",
+              "label": "Characterisation — TIME Framework"
+            },
+            {
+              "type": "subheading",
+              "label": "Tissue type:"
+            },
+            {
+              "name": "time_tissue_type",
+              "label": "Tissue type",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Granulation",
+                  "value": "granulation"
+                },
+                {
+                  "label": "Epithelialising",
+                  "value": "epithelialising"
+                },
+                {
+                  "label": "Slough",
+                  "value": "slough"
+                },
+                {
+                  "label": "Eschar / necrotic",
+                  "value": "eschar_necrotic"
+                },
+                {
+                  "label": "Mixed",
+                  "value": "mixed"
+                }
+              ]
+            },
+            {
+              "type": "subheading",
+              "label": "Infection / Inflammation:"
+            },
+            {
+              "name": "time_infection",
+              "label": "Infection / Inflammation",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Clean",
+                  "value": "clean"
+                },
+                {
+                  "label": "Contaminated",
+                  "value": "contaminated"
+                },
+                {
+                  "label": "Critically colonised",
+                  "value": "critically_colonised"
+                },
+                {
+                  "label": "Locally infected",
+                  "value": "locally_infected"
+                },
+                {
+                  "label": "Spreading infection",
+                  "value": "spreading_infection"
+                }
+              ]
+            },
+            {
+              "name": "time_infection_signs",
+              "label": "Signs",
+              "type": "checkbox-group",
+              "options": [
+                {
+                  "label": "Increased exudate",
+                  "value": "increased_exudate"
+                },
+                {
+                  "label": "Malodour",
+                  "value": "malodour"
+                },
+                {
+                  "label": "Erythema",
+                  "value": "erythema"
+                },
+                {
+                  "label": "Warmth",
+                  "value": "warmth"
+                },
+                {
+                  "label": "Pain",
+                  "value": "pain"
+                },
+                {
+                  "label": "Oedema",
+                  "value": "oedema"
+                }
+              ]
+            },
+            {
+              "type": "subheading",
+              "label": "Moisture / Exudate:"
+            },
+            {
+              "name": "time_moisture_amount",
+              "label": "Amount",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "None",
+                  "value": "none"
+                },
+                {
+                  "label": "Light",
+                  "value": "light"
+                },
+                {
+                  "label": "Moderate",
+                  "value": "moderate"
+                },
+                {
+                  "label": "Heavy",
+                  "value": "heavy"
+                }
+              ]
+            },
+            {
+              "name": "time_moisture_type",
+              "label": "Type",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Serous",
+                  "value": "serous"
+                },
+                {
+                  "label": "Haemoserous",
+                  "value": "haemoserous"
+                },
+                {
+                  "label": "Haemorrhagic",
+                  "value": "haemorrhagic"
+                },
+                {
+                  "label": "Purulent",
+                  "value": "purulent"
+                },
+                {
+                  "label": "Mixed",
+                  "value": "mixed"
+                }
+              ]
+            },
+            {
+              "type": "subheading",
+              "label": "Edge / Periwound:"
+            },
+            {
+              "name": "time_edge",
+              "label": "Edge",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Well-defined",
+                  "value": "well_defined"
+                },
+                {
+                  "label": "Irregular",
+                  "value": "irregular"
+                },
+                {
+                  "label": "Rolled/epibole",
+                  "value": "rolled_epibole"
+                },
+                {
+                  "label": "Undermined",
+                  "value": "undermined"
+                },
+                {
+                  "label": "Attached",
+                  "value": "attached"
+                },
+                {
+                  "label": "Non-attached",
+                  "value": "non_attached"
+                }
+              ]
+            },
+            {
+              "name": "time_periwound",
+              "label": "Periwound",
+              "type": "radio",
+              "options": [
+                {
+                  "label": "Intact",
+                  "value": "intact"
+                },
+                {
+                  "label": "Macerated",
+                  "value": "macerated"
+                },
+                {
+                  "label": "Erythema",
+                  "value": "erythema"
+                },
+                {
+                  "label": "Oedema",
+                  "value": "oedema"
+                },
+                {
+                  "label": "Callous",
+                  "value": "callous"
+                },
+                {
+                  "label": "Eczema",
+                  "value": "eczema"
+                }
+              ]
+            },
+            {
+              "name": "wound_pain_score",
+              "label": "Wound Pain (0–10)",
+              "type": "scale-slider",
+              "min": 0,
+              "max": 10,
+              "step": 1,
+              "showValue": true
+            },
+            {
+              "name": "factors_delaying_healing",
+              "label": "Factors Delaying Healing",
+              "type": "checkbox-group",
+              "options": [
+                {
+                  "label": "Immobility",
+                  "value": "immobility"
+                },
+                {
+                  "label": "Poor Nutrition",
+                  "value": "poor_nutrition"
+                },
+                {
+                  "label": "Diabetes",
+                  "value": "diabetes"
+                },
+                {
+                  "label": "Incontinence",
+                  "value": "incontinence"
+                },
+                {
+                  "label": "Vascular disease",
+                  "value": "vascular_disease"
+                },
+                {
+                  "label": "Respiratory disease",
+                  "value": "respiratory_disease"
+                },
+                {
+                  "label": "Anemia",
+                  "value": "anemia"
+                },
+                {
+                  "label": "Infection",
+                  "value": "infection"
+                },
+                {
+                  "label": "Edema",
+                  "value": "edema"
+                },
+                {
+                  "label": "Medication (steroids, chemotherapy, inotropes)",
+                  "value": "medication"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "provisional_diagnosis",
+          "label": "Provisional Diagnosis",
+          "type": "textarea"
+        },
+        {
+          "type": "subheading",
+          "label": "Intervention Plan"
+        },
+        {
+          "name": "intervention_infection_control",
+          "label": "Infection Control",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Wound debridement",
+              "value": "wound_debridement"
+            },
+            {
+              "label": "Antimicrobial dressing",
+              "value": "antimicrobial_dressing"
+            },
+            {
+              "label": "Infection management",
+              "value": "infection_management"
+            }
+          ]
+        },
+        {
+          "name": "intervention_pressure_relief",
+          "label": "Pressure Relief",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "2-hourly repositioning",
+              "value": "two_hourly_repositioning"
+            },
+            {
+              "label": "Offloading device",
+              "value": "offloading_device"
+            }
+          ]
+        },
+        {
+          "name": "intervention_rehabilitation",
+          "label": "Rehabilitation",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Bed mobility training",
+              "value": "bed_mobility_training"
+            },
+            {
+              "label": "Transfer training",
+              "value": "transfer_training"
+            }
+          ]
+        },
+        {
+          "name": "intervention_lifestyle",
+          "label": "Lifestyle",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Stop smoking",
+              "value": "stop_smoking"
+            },
+            {
+              "label": "Weight management",
+              "value": "weight_management"
+            }
+          ]
+        },
+        {
+          "name": "intervention_medical",
+          "label": "Medical",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Nutrition optimization",
+              "value": "nutrition_optimization"
+            },
+            {
+              "label": "Glycemic control",
+              "value": "glycemic_control"
+            }
+          ]
+        },
+        {
+          "name": "intervention_wound_care",
+          "label": "Wound Care",
+          "type": "checkbox-group",
+          "options": [
+            {
+              "label": "Dressing selection",
+              "value": "dressing_selection"
+            },
+            {
+              "label": "Negative pressure wound therapy",
+              "value": "npwt"
+            },
+            {
+              "label": "Monitor Wound using PUSH tool",
+              "value": "monitor_push_tool"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
