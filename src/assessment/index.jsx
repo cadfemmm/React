@@ -2661,9 +2661,20 @@ useEffect(() => {
             });
 
             if (Object.keys(matchedValues).length > 0) {
+              const scopedMatchedValues = Object.fromEntries(
+                Object.entries(matchedValues).map(([key, val]) => [
+                  `${value}_${key}`,
+                  val,
+                ]),
+              );
+
               setAssessmentsValues((prev) => {
                 const next = { ...prev };
-                next[activeTab] = { ...(next[activeTab] || {}), ...matchedValues };
+                next[activeTab] = {
+                  ...(next[activeTab] || {}),
+                  ...matchedValues,
+                  ...scopedMatchedValues,
+                };
                 return next;
               });
               // Clear pending values so they don't re-apply on next open
@@ -2765,7 +2776,7 @@ useEffect(() => {
           },
         }));
 
-        await extractTympanogramValues(value).catch((error) => {
+        await extractTympanogramValues(value, name).catch((error) => {
           console.error("Tympanogram extraction failed", error);
         });
 
@@ -3047,7 +3058,6 @@ useEffect(() => {
     });
 
     const uniqueNames = [...new Set(allFieldNames)];
-    console.log("[Tympanogram] ALL template field names:", uniqueNames);
 
     // Build aliases: match extracted values to template field names
     const guess = (keywords) =>
@@ -3087,12 +3097,10 @@ useEffect(() => {
         guess(["ear", "volume", "left"]) ||
         "ecv_l",
     };
-
-    console.log("[Tympanogram] Field map:", map);
     return map;
   };
 
-  const applyTympanogramResult = (payload) => {
+  const applyTympanogramResult = (payload, sourceFieldName = "") => {
     const right = getEarValues(payload, "right");
     const left = getEarValues(payload, "left");
 
@@ -3133,8 +3141,63 @@ useEffect(() => {
       ...leftVolume,
     };
 
+    const groupedExtractedFields = {
+      peak_pressure: {
+        ...(rightPressure[fieldMap.peak_pressure_r]
+          ? { [fieldMap.peak_pressure_r]: rightPressure[fieldMap.peak_pressure_r] }
+          : {}),
+        ...(leftPressure[fieldMap.peak_pressure_l]
+          ? { [fieldMap.peak_pressure_l]: leftPressure[fieldMap.peak_pressure_l] }
+          : {}),
+      },
+      static_compliance: {
+        ...(rightCompliance[fieldMap.static_compliance_r]
+          ? {
+              [fieldMap.static_compliance_r]:
+                rightCompliance[fieldMap.static_compliance_r],
+            }
+          : {}),
+        ...(leftCompliance[fieldMap.static_compliance_l]
+          ? {
+              [fieldMap.static_compliance_l]:
+                leftCompliance[fieldMap.static_compliance_l],
+            }
+          : {}),
+      },
+      ecv: {
+        ...(rightVolume[fieldMap.ecv_r]
+          ? { [fieldMap.ecv_r]: rightVolume[fieldMap.ecv_r] }
+          : {}),
+        ...(leftVolume[fieldMap.ecv_l]
+          ? { [fieldMap.ecv_l]: leftVolume[fieldMap.ecv_l] }
+          : {}),
+      },
+    };
+
+    Object.keys(groupedExtractedFields).forEach((groupKey) => {
+      if (!Object.keys(groupedExtractedFields[groupKey]).length) {
+        delete groupedExtractedFields[groupKey];
+      }
+    });
+
+    const scopePrefixMatch =
+      typeof sourceFieldName === "string"
+        ? sourceFieldName.match(/^(.*)_tympan(?:o|ometry)/i)
+        : null;
+    const scopePrefix = scopePrefixMatch?.[1] || "";
+    const scopedExtractedFields = scopePrefix
+      ? Object.fromEntries(
+          Object.entries({ ...extractedFields, ...groupedExtractedFields }).map(
+            ([key, val]) => [`${scopePrefix}_${key}`, val],
+          ),
+        )
+      : {};
+
     // Store in ref so values can be applied when sub-assessment opens
-    pendingTympanogramValuesRef.current = extractedFields;
+    pendingTympanogramValuesRef.current = {
+      ...extractedFields,
+      ...groupedExtractedFields,
+    };
 
     setAssessmentsValues((prev) => {
       const next = { ...prev };
@@ -3143,6 +3206,7 @@ useEffect(() => {
         next[tab] = {
           ...(next[tab] || {}),
           ...extractedFields,
+          ...groupedExtractedFields,
         };
       });
 
@@ -3151,6 +3215,8 @@ useEffect(() => {
         [activeTab]: {
           ...(next[activeTab] || {}),
           ...extractedFields,
+          ...groupedExtractedFields,
+          ...scopedExtractedFields,
         },
       };
     });
@@ -3313,7 +3379,7 @@ useEffect(() => {
     }
   };
 
-  const extractTympanogramValues = async (value) => {
+  const extractTympanogramValues = async (value, sourceFieldName = "") => {
     const file = buildTympanogramUploadFile(value);
     if (!file) return;
 
@@ -3335,6 +3401,20 @@ useEffect(() => {
         },
       };
 
+      const scopePrefixMatch =
+        typeof sourceFieldName === "string"
+          ? sourceFieldName.match(/^(.*)_tympan(?:o|ometry)/i)
+          : null;
+      const scopePrefix = scopePrefixMatch?.[1] || "";
+      const scopedFetchingFields = scopePrefix
+        ? Object.fromEntries(
+            Object.entries(fetchingFields).map(([key, val]) => [
+              `${scopePrefix}_${key}`,
+              val,
+            ]),
+          )
+        : {};
+
       setAssessmentsValues((prev) => {
         const next = { ...prev };
         ["subjective", "objective", "assessment", "plan"].forEach((tab) => {
@@ -3349,6 +3429,7 @@ useEffect(() => {
           [activeTab]: {
             ...(next[activeTab] || {}),
             ...fetchingFields,
+            ...scopedFetchingFields,
           },
         };
       });
@@ -3368,7 +3449,7 @@ useEffect(() => {
       }
 
       const result = await response.json();
-      applyTympanogramResult(result);
+      applyTympanogramResult(result, sourceFieldName);
     } finally {
       setProcessingOCR(false);
       setOcrStatusMessage("");
