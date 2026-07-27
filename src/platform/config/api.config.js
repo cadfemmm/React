@@ -28,20 +28,30 @@ const API_URL = {
     VERIFY: BASE_API + 'token/verify/',
     REFRESH: RMS_API + 'auth/refresh/',
 
-    // Assessment apis
-    ASSESSMENT: BASE_API + 'assessment/',
-    fetchTemplate: (department) => 
-        BASE_API + `assessment/department/${encodeURIComponent(department)}/`,
-    patientAssessments: (patientId) =>
-        BASE_API + `assessment/patient/${encodeURIComponent(patientId)}/`,
+    // Assessment data endpoints (aligned with tps-ui: /api/session/assessment-data/{id}/)
+    ASSESSMENT_DATA_BY_ID: (id) => BASE_API + `session/assessment-data/${encodeURIComponent(id)}/`,
     assessmentFormData: (formDataId) =>
-        BASE_API + `assessment/data/${encodeURIComponent(formDataId)}/`,
+        BASE_API + `session/assessment-data/${encodeURIComponent(formDataId)}/`,
+
+    // Master-data template endpoints (replaced old assessment/department/ & assessment/form/)
+    TEMPLATE: BASE_API + 'master-data/template/',
+    TEMPLATE_BY_ID: (id) => BASE_API + `master-data/template/${encodeURIComponent(id)}/`,
+
+    // Session endpoints (replaced old assessment/{dept}/start & assessment/session/{id}/end/)
+    SESSION: BASE_API + 'session/',
+    SESSION_BY_ID: (id) => BASE_API + `session/${encodeURIComponent(id)}/`,
 
     // Referrral apis
     REFERRAL: BASE_API + 'referrals/',
     
     // Department
     DEPTARMENT: BASE_API + 'department/',
+
+    // P&O Old API (keep for backwards compat since used elsewhere)
+    fetchTemplate: (department) =>
+        BASE_API + `master-data/template/?department_name=${encodeURIComponent(department)}`,
+    patientAssessments: (patientId) =>
+        BASE_API + `session/?patient_id=${encodeURIComponent(patientId)}`,
     
     // ICD codes with ICF and ICHI
     icdByDepartment: (department) =>

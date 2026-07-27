@@ -332,7 +332,7 @@ export default function SOAPSession({
                 fetchFormData: (assessmentId) =>
                     api.get(API_URL.assessmentFormData(assessmentId)),
                 fetchFormTemplate: (formId) =>
-                    api.get(`${API_URL.ASSESSMENT}form/${formId}/`),
+                    api.get(API_URL.TEMPLATE_BY_ID(formId)),
             });
             setSessionReportEntries(entries);
         } catch {

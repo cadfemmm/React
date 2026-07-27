@@ -1244,11 +1244,12 @@ useEffect(() => {
     try {
       const map = {};
       const subAssessment = {};
-      const data = await forms.fetch(department);
+      let data = await forms.fetch(department, visitType);
       if (!data || data.length === 0) {
         setError(true);
         return;
       }
+
 
       // Capture the assessment form ID separately — the icf data lives on the
       // assessment form, and we need to pass it to both assessment & plan tabs.
@@ -2030,6 +2031,76 @@ useEffect(() => {
           const fullTemplate = await resolveFullTemplate(template);
           map[key] = buildProcessedTemplate(fullTemplate, key);
           await registerSubAssessments(fullTemplate, key);
+        }
+      }
+
+      // ── Fallback: tps-ui format (single-result with tab-keyed body) ─────
+      // The master-data/template/ endpoint (aligned with tps-ui) may return
+      // a single result whose `body` holds ALL SOAP tabs as keys, e.g.:
+      //   body: { subjective: { sections: [...] }, objective: { ... }, ... }
+      // If the per-department logic produced no templates, extract tabs here.
+      const hasAnyTemplate = TABS.some((tab) => !!map[tab]);
+      if (!hasAnyTemplate && data.length === 1 && data[0]?.body) {
+        const singleItem = data[0];
+        const body = singleItem.body;
+        for (const tab of TABS) {
+          const tabSchema = body[tab];
+          if (
+            tabSchema &&
+            typeof tabSchema === "object" &&
+            !Array.isArray(tabSchema)
+          ) {
+            // Normalise the tab schema the same way buildProcessedTemplate does
+            const normalized = withPrimarySection(
+              normalizeTemplateBody(tabSchema),
+            );
+            map[tab] = {
+              ...normalized,
+              id: singleItem.id,
+              name: singleItem.name,
+              actions: actions.ACTIONS_BUTTON,
+              fieldsFlattened: true,
+            };
+
+            // Register sub-assessments from the parent item
+            const subs =
+              singleItem.sub_assessment ||
+              singleItem.sub_templates ||
+              [];
+            const registry = {};
+            await Promise.all(
+              subs.map(async (sub) => {
+                if (!sub?.id) return;
+                let entry = buildSubAssessmentEntry(sub);
+                if (!subAssessmentHasSchema(entry)) {
+                  try {
+                    const res = await forms.fetchById(sub.id);
+                    entry = buildSubAssessmentEntry({
+                      ...sub,
+                      ...res?.data,
+                    });
+                  } catch {
+                    /* keep list payload */
+                  }
+                }
+                registry[sub.id] = entry;
+                if (sub.name) registry[sub.name] = entry;
+              }),
+            );
+            subAssessment[tab] = registry;
+
+            // Wire launcher options → sub-assessment UUIDs
+            // (same as buildProcessedTemplate does for per-department branches)
+            const linkedSubs = getUniqueSubAssessments(
+              subAssessment[tab] || {},
+            );
+            if (linkedSubs.length && map[tab]) {
+              map[tab] = injectLauncherSubAssessmentIds(
+                map[tab],
+                linkedSubs,
+              );
+            }
+          }
         }
       }
 
