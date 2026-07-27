@@ -1,0 +1,636 @@
+const SCHEMA = {
+  "title": "Vision Assessment",
+  "sections": [
+    {
+      "title": null,
+      "fields": [
+        {
+          "type": "radio",
+          "name": "vision_status",
+          "label": "Vision",
+          "options": [
+            {
+              "label": "Intact",
+              "value": "intact"
+            },
+            {
+              "label": "Impaired",
+              "value": "impaired"
+            }
+          ]
+        },
+        {
+          "type": "multi-select-dropdown",
+          "name": "vision_issues",
+          "label": "Vision Issue",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          },
+          "options": [
+            {
+              "label": "No issue",
+              "value": "no_issue"
+            },
+            {
+              "label": "Eye pain",
+              "value": "eye_pain"
+            },
+            {
+              "label": "Redness or swelling",
+              "value": "redness_swelling"
+            },
+            {
+              "label": "Blurring of vision",
+              "value": "blurred_vision"
+            },
+            {
+              "label": "Dry eye",
+              "value": "dry_eye"
+            },
+            {
+              "label": "Flashes and floaters",
+              "value": "flashes_floaters"
+            },
+            {
+              "label": "Near-sightedness (Myopia)",
+              "value": "myopia"
+            },
+            {
+              "label": "Far-sightedness (Hyperopia)",
+              "value": "hyperopia"
+            },
+            {
+              "label": "Vision loss",
+              "value": "vision_loss"
+            },
+            {
+              "label": "Colour blindness",
+              "value": "colour_blindness"
+            },
+            {
+              "label": "Ptosis",
+              "value": "ptosis"
+            },
+            {
+              "label": "Proptosis",
+              "value": "proptosis"
+            },
+            {
+              "label": "Foreign body",
+              "value": "foreign_body"
+            }
+          ]
+        },
+        {
+          "type": "input",
+          "name": "vision_issues_notes",
+          "label": "Specify",
+          "showIf": {
+            "field": "vision_issues",
+            "notEmpty": true
+          }
+        },
+        {
+          "type": "checkbox-group",
+          "name": "visual_aid_use",
+          "label": "Use of Visual Aid",
+          "options": [
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Spectacles",
+              "value": "spectacles"
+            },
+            {
+              "label": "Contact lens",
+              "value": "contact_lens"
+            },
+            {
+              "label": "Others",
+              "value": "other"
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "input",
+          "name": "visual_aid_other",
+          "label": "Other (Specify)",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired",
+            "and": {
+              "field": "visual_aid_use",
+              "includes": "other"
+            }
+          }
+        },
+        {
+          "type": "row",
+          "fields": [
+            {
+              "type": "single-select",
+              "name": "right_visual_acuity",
+              "label": "Visual Acuity – Right Eye",
+              "options": [
+                {
+                  "label": "Snellen Chart",
+                  "value": "snellen"
+                },
+                {
+                  "label": "Counting Finger",
+                  "value": "counting_finger"
+                },
+                {
+                  "label": "Hand Movement",
+                  "value": "hand_movement"
+                },
+                {
+                  "label": "Perception of Light",
+                  "value": "pol"
+                },
+                {
+                  "label": "Blind",
+                  "value": "blind"
+                }
+              ]
+            },
+            {
+              "type": "single-select",
+              "name": "left_visual_acuity",
+              "label": "Visual Acuity – Left Eye",
+              "options": [
+                {
+                  "label": "Snellen Chart",
+                  "value": "snellen"
+                },
+                {
+                  "label": "Counting Finger",
+                  "value": "counting_finger"
+                },
+                {
+                  "label": "Hand Movement",
+                  "value": "hand_movement"
+                },
+                {
+                  "label": "Perception of Light",
+                  "value": "pol"
+                },
+                {
+                  "label": "Blind",
+                  "value": "blind"
+                }
+              ]
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "row",
+          "fields": [
+            {
+              "type": "input",
+              "name": "right_visual_acuity_notes",
+              "label": "Elaboration – Right Eye",
+              "showIf": {
+                "field": "right_visual_acuity",
+                "exists": true
+              }
+            },
+            {
+              "type": "input",
+              "name": "left_visual_acuity_notes",
+              "label": "Elaboration – Left Eye",
+              "showIf": {
+                "field": "left_visual_acuity",
+                "exists": true
+              }
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "row",
+          "fields": [
+            {
+              "type": "radio",
+              "name": "right_visual_field",
+              "label": "Visual Field – Right Eye",
+              "options": [
+                {
+                  "label": "Intact",
+                  "value": "intact"
+                },
+                {
+                  "label": "Visual Field Defect",
+                  "value": "defect"
+                }
+              ]
+            },
+            {
+              "type": "radio",
+              "name": "left_visual_field",
+              "label": "Visual Field – Left Eye",
+              "options": [
+                {
+                  "label": "Intact",
+                  "value": "intact"
+                },
+                {
+                  "label": "Visual Field Defect",
+                  "value": "defect"
+                }
+              ]
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "row",
+          "fields": [
+            {
+              "type": "input",
+              "name": "right_visual_field_notes",
+              "label": "Elaboration – Right Eye (Visual Field)",
+              "showIf": {
+                "field": "right_visual_field",
+                "equals": "defect"
+              }
+            },
+            {
+              "type": "input",
+              "name": "left_visual_field_notes",
+              "label": "Elaboration – Left Eye (Visual Field)",
+              "showIf": {
+                "field": "left_visual_field",
+                "equals": "defect"
+              }
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "visual-field",
+          "name": "left_visual_field_map",
+          "label": "Eye image",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "refraction-12col",
+          "name": "ocular_exam_table",
+          "cornerLabel": "",
+          "showColumnHeaders": false,
+          "groups": [
+            {
+              "label": "Right Eye",
+              "columns": [
+                {
+                  "key": "Value"
+                }
+              ]
+            },
+            {
+              "label": "Left Eye",
+              "columns": [
+                {
+                  "key": "Value"
+                }
+              ]
+            }
+          ],
+          "rows": [
+            {
+              "label": "Pupil Size (mm)",
+              "value": "pupil_size",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Direct pupillary reflex",
+              "value": "direct_pupillary_reflex",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Indirect pupillary reflex",
+              "value": "indirect_pupillary_reflex",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Pupillary Defects",
+              "value": "pupillary_defects",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Positive",
+                    "Negative (Normal)"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Positive",
+                    "Negative (Normal)"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Eye movement (EOM)",
+              "value": "eye_movement_eom",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Full",
+                    "Limited"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Full",
+                    "Limited"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "EOM - Specify",
+              "value": "eye_movement_eom_notes",
+              "showIf": {
+                "or": [
+                  {
+                    "field": "ocular_exam_table_eye_movement_eom_0",
+                    "equals": "Limited"
+                  },
+                  {
+                    "field": "ocular_exam_table_eye_movement_eom_1",
+                    "equals": "Limited"
+                  }
+                ]
+              },
+              "columns": [
+                {
+                  "type": "input"
+                },
+                {
+                  "type": "input"
+                }
+              ]
+            },
+            {
+              "label": "Accomodation reflex",
+              "value": "accomodation_reflex",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Diplopia",
+              "value": "diplopia",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Nil",
+                    "Monocular",
+                    "Binocular"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Nil",
+                    "Monocular",
+                    "Binocular"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Nystagmus",
+              "value": "nystagmus",
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Yes",
+                    "No"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Nystagmus Type",
+              "value": "nystagmus_type",
+              "showIf": {
+                "or": [
+                  {
+                    "field": "ocular_exam_table_nystagmus_0",
+                    "equals": "Yes"
+                  },
+                  {
+                    "field": "ocular_exam_table_nystagmus_1",
+                    "equals": "Yes"
+                  }
+                ]
+              },
+              "columns": [
+                {
+                  "type": "select",
+                  "options": [
+                    "Horizontal",
+                    "Vertical",
+                    "Rotary (Torsional)",
+                    "Mixed"
+                  ]
+                },
+                {
+                  "type": "select",
+                  "options": [
+                    "Horizontal",
+                    "Vertical",
+                    "Rotary (Torsional)",
+                    "Mixed"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Fundoscopy examination finding (if applicable)",
+              "value": "fundoscopy",
+              "columns": [
+                {
+                  "type": "input"
+                },
+                {
+                  "type": "input"
+                }
+              ]
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Goals",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "textarea",
+          "name": "vision_goals",
+          "placeholder": "Enter goals",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "subheading",
+          "label": "Plan",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "checkbox-group",
+          "name": "vision_plan",
+          "options": [
+            {
+              "label": "For further evaluation by Optometrist - (notify Optometrist)",
+              "value": "optometrist_evaluation"
+            },
+            {
+              "label": "Others",
+              "value": "others"
+            }
+          ],
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired"
+          }
+        },
+        {
+          "type": "input",
+          "name": "vision_plan_others",
+          "label": "Others (free text)",
+          "showIf": {
+            "field": "vision_status",
+            "equals": "impaired",
+            "and": {
+              "field": "vision_plan",
+              "includes": "others"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
