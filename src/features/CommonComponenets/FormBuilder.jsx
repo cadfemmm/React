@@ -1842,20 +1842,30 @@ function AssessmentLauncher({
     }
 
     if (registryIsObject) {
-      return Object.entries(assessmentRegistry).map(([key, item]) => ({
-        ...(isRegistryComponent(item) ? { Component: item } : item || {}),
-        id: item?.id ?? item?.value ?? key,
-        value: item?.value ?? item?.id ?? key,
-        name: item?.name ?? item?.label ?? key,
-        label: item?.label ?? item?.name ?? key,
-        session_id:
-          item?.session_id ||
-          resolveSubAssessmentSessionId({
-            id: item?.id ?? item?.value ?? key,
-            name: item?.name ?? item?.label ?? key,
-            label: item?.label ?? item?.name ?? key,
-          }),
-      }));
+      // Deduplicate by item.id — the registry may contain both
+      // id-keyed and name-keyed entries pointing to the same
+      // sub-assessment, which would produce duplicate React keys.
+      const seen = new Map();
+      Object.entries(assessmentRegistry).forEach(([key, item]) => {
+        if (!item || isRegistryComponent(item)) return;
+        const itemId = item?.id ?? item?.value ?? key;
+        if (seen.has(String(itemId))) return;
+        seen.set(String(itemId), {
+          ...item,
+          id: itemId,
+          value: item?.value ?? item?.id ?? key,
+          name: item?.name ?? item?.label ?? key,
+          label: item?.label ?? item?.name ?? key,
+          session_id:
+            item?.session_id ||
+            resolveSubAssessmentSessionId({
+              id: item?.id ?? item?.value ?? key,
+              name: item?.name ?? item?.label ?? key,
+              label: item?.label ?? item?.name ?? key,
+            }),
+        });
+      });
+      return Array.from(seen.values());
     }
 
     return [];
@@ -1898,6 +1908,12 @@ function AssessmentLauncher({
               if (!condition) return true;
               return evaluateShowIf(condition, values);
             })
+            // Deduplicate by ID to prevent duplicate React keys when
+            // the registry maps multiple entries (id + name) to the same item.
+            .filter(
+              (opt, idx, arr) =>
+                arr.findIndex((o) => String(o?.id ?? "") === String(opt?.id ?? "")) === idx,
+            )
             .map(opt => (
 
               <button

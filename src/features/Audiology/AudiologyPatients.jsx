@@ -83,7 +83,15 @@ export default function AudiologyPatients({
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    const base = patients;
+    // Deduplicate by patient ID to prevent duplicate React keys
+    const seen = new Set();
+    const base = (patients || []).filter((p) => {
+      const key = String(p.id ?? p.patient_id ?? p.mrn ?? "");
+      if (!key) return true;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     return !q
       ? base
       : base.filter(
