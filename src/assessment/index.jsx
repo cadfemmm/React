@@ -1133,6 +1133,9 @@ export default function AssessmentLoader({
   // Ref to store pending ICF data from form fetch — populated on save, not on select
   const pendingFormIcfRef = useRef({});
 
+  // Ref to store tympanogram extracted values — applied when sub-assessment opens
+  const pendingTympanogramValuesRef = useRef(null);
+
   // OCR & Otoscopic processing state
   const [processingOCR, setProcessingOCR] = useState(false);
   const [ocrStatusMessage, setOcrStatusMessage] = useState("");
@@ -2090,15 +2093,85 @@ useEffect(() => {
             subAssessment[tab] = registry;
 
             // Wire launcher options → sub-assessment UUIDs
-            // (same as buildProcessedTemplate does for per-department branches)
+            // Use direct ID mapping instead of name-based matching
+            // (injectLauncherSubAssessmentIds uses broad legacy patterns
+            //  that can map multiple options to the same sub-assessment).
             const linkedSubs = getUniqueSubAssessments(
               subAssessment[tab] || {},
             );
             if (linkedSubs.length && map[tab]) {
-              map[tab] = injectLauncherSubAssessmentIds(
-                map[tab],
-                linkedSubs,
-              );
+              // Build lookup: option value/label → sub-assessment ID
+              const subById = {};
+              const subByName = {};
+              linkedSubs.forEach((sub) => {
+                if (sub?.id) subById[String(sub.id)] = sub;
+                if (sub?.name) {
+                  const key = String(sub.name).trim().toLowerCase();
+                  subByName[key] = sub;
+                }
+              });
+
+              const walkAndMap = (fields) => {
+                if (!Array.isArray(fields)) return fields;
+                return fields.map((field) => {
+                  if (!field || typeof field !== "object") return field;
+                  const next = { ...field };
+                  if (
+                    next.type === "assessment-launcher" &&
+                    Array.isArray(next.options)
+                  ) {
+                    next.options = next.options
+                      .map((opt) => {
+                        const optVal = String(
+                          opt?.value ?? opt?.id ?? "",
+                        ).trim();
+                        const optLabel = String(opt?.label ?? "")
+                          .trim()
+                          .toLowerCase();
+
+                        // 1) Direct UUID match
+                        let sub =
+                          subById[optVal] || subById[opt.label || ""];
+                        // 2) Exact name match
+                        if (!sub && optLabel) sub = subByName[optLabel];
+                        // 3) Fall back to legacy matching
+                        if (!sub) {
+                          const fallback = resolveSubForLauncherOption(
+                            linkedSubs,
+                            opt,
+                          );
+                          if (fallback?.id) sub = fallback;
+                        }
+
+                        if (!sub?.id) return opt;
+                        return {
+                          ...opt,
+                          value: sub.id,
+                          id: sub.id,
+                          label: opt.label ?? sub.name,
+                        };
+                      })
+                      .filter(Boolean);
+                  }
+                  if (Array.isArray(next.children))
+                    next.children = walkAndMap(next.children);
+                  if (Array.isArray(next.fields))
+                    next.fields = walkAndMap(next.fields);
+                  return next;
+                });
+              };
+
+              const patched = { ...map[tab] };
+              if (Array.isArray(patched.sections)) {
+                patched.sections = patched.sections.map((section) => ({
+                  ...section,
+                  fields: walkAndMap(section.fields),
+                }));
+              }
+              if (Array.isArray(patched.fields)) {
+                patched.fields = walkAndMap(patched.fields);
+              }
+              map[tab] = patched;
             }
           }
         }
@@ -2561,6 +2634,42 @@ useEffect(() => {
               [formName]: tm.data.icf,
             };
           }
+
+          // ── Auto-fill tympanogram extracted values ─────────────────────
+          // When a sub-assessment opens, apply any pending tympanogram OCR
+          // values that were stored by applyTympanogramResult.
+          const tympVals = pendingTympanogramValuesRef.current;
+          if (tympVals && Object.keys(tympVals).length > 0) {
+            // Check if this sub-assessment has fields matching the
+            // extracted value names — if so, pre-fill them.
+            const subBody = tm?.data?.body;
+            const subFields = [];
+            const collectFieldNames = (obj) => {
+              if (!obj || typeof obj !== "object") return;
+              if (obj.name && typeof obj.name === "string") subFields.push(obj.name);
+              Object.values(obj).forEach((v) => {
+                if (Array.isArray(v)) v.forEach(collectFieldNames);
+              });
+            };
+            collectFieldNames(subBody);
+
+            const matchedValues = {};
+            Object.entries(tympVals).forEach(([key, val]) => {
+              if (subFields.some((f) => f === key || f.endsWith(`_${key}`) || key.endsWith(`_${f}`))) {
+                matchedValues[key] = val;
+              }
+            });
+
+            if (Object.keys(matchedValues).length > 0) {
+              setAssessmentsValues((prev) => {
+                const next = { ...prev };
+                next[activeTab] = { ...(next[activeTab] || {}), ...matchedValues };
+                return next;
+              });
+              // Clear pending values so they don't re-apply on next open
+              pendingTympanogramValuesRef.current = null;
+            }
+          }
         } catch (e) {
           setToast({
             message: "Sub Assessment form loading failed",
@@ -2599,7 +2708,11 @@ useEffect(() => {
       // =========================
       // OTOSCOPIC EXTRACT INTERCEPT
       // =========================
-      if (name === "otoscopic_report" && value?.data) {
+      const isOtoscopicField =
+        /otoscopic/i.test(name) &&
+        /report|upload|file/i.test(name) &&
+        value?.data;
+      if (isOtoscopicField || (name === "otoscopic_report" && value?.data)) {
         await handleOtoscopicUpload(value);
         return;
       }
@@ -2632,11 +2745,17 @@ useEffect(() => {
       // =========================
       // TYMPANOGRAM EXTRACT INTERCEPT
       // =========================
+      // Match any field whose name suggests a tympanometry report upload,
+      // regardless of the exact field name used by the backend template.
+      const isTympanogramField =
+        /tympano/i.test(name) &&
+        /report|upload|file/i.test(name) &&
+        (value?.data || value instanceof File || value instanceof Blob);
       if (
-        (name === "tympanometry_report" ||
-          name === "tympanometry_report_right" ||
-          name === "tympanometry_report_left") &&
-        value
+        isTympanogramField ||
+        name === "tympanometry_report" ||
+        name === "tympanometry_report_right" ||
+        name === "tympanometry_report_left"
       ) {
         setAssessmentsValues((v) => ({
           ...v,
@@ -2649,6 +2768,74 @@ useEffect(() => {
         await extractTympanogramValues(value).catch((error) => {
           console.error("Tympanogram extraction failed", error);
         });
+
+        // ── Auto-open the tympanogram sub-assessment ────────────────────
+        // Scan the current tab's template for an assessment-launcher whose
+        // option label contains "tympano" / "hearing", and auto-open it so
+        // the extracted values appear immediately.
+        try {
+          const scanFields = (fields) => {
+            if (!Array.isArray(fields)) return null;
+            for (const f of fields) {
+              if (!f || typeof f !== "object") continue;
+              if (
+                f.type === "assessment-launcher" &&
+                Array.isArray(f.options)
+              ) {
+                const opt = f.options.find(
+                  (o) =>
+                    o &&
+                    (String(o.label || "").toLowerCase().includes("tympano") ||
+                      String(o.name || "").toLowerCase().includes("tympano")),
+                );
+                if (opt?.id || opt?.value) {
+                  return {
+                    fieldName: `${f.name}_active`,
+                    optionId: opt.id || opt.value,
+                  };
+                }
+              }
+              if (Array.isArray(f.fields)) {
+                const result = scanFields(f.fields);
+                if (result) return result;
+              }
+              if (Array.isArray(f.children)) {
+                const result = scanFields(f.children);
+                if (result) return result;
+              }
+            }
+            return null;
+          };
+
+          const tabSchema = templates?.[activeTab];
+          let launcherInfo = null;
+          if (tabSchema) {
+            if (Array.isArray(tabSchema.sections)) {
+              for (const s of tabSchema.sections) {
+                launcherInfo = scanFields(s.fields);
+                if (launcherInfo) break;
+              }
+            }
+            if (!launcherInfo && Array.isArray(tabSchema.fields)) {
+              launcherInfo = scanFields(tabSchema.fields);
+            }
+          }
+
+          if (launcherInfo) {
+            // Set the _active field to auto-open the sub-assessment.
+            // This triggers the _active handler which fetches & renders the form.
+            setAssessmentsValues((prev) => ({
+              ...prev,
+              [activeTab]: {
+                ...(prev[activeTab] || {}),
+                [launcherInfo.fieldName]: launcherInfo.optionId,
+              },
+            }));
+          }
+        } catch (e) {
+          console.warn("[Tympanogram] Auto-open failed:", e);
+        }
+
         return;
       }
 
@@ -2834,54 +3021,120 @@ useEffect(() => {
     };
   };
 
+  /** Build a map from generic OCR value names → template field names. */
+  const buildTympanogramFieldMap = () => {
+    // Deeply collect ALL field names traversing every possible nesting property
+    const collectNamesDeep = (obj, depth = 0) => {
+      if (!obj || typeof obj !== "object" || depth > 20) return [];
+      const names = [];
+      if (obj.name && typeof obj.name === "string") names.push(obj.name);
+      // Check every array-valued property for nested objects
+      Object.values(obj).forEach((val) => {
+        if (Array.isArray(val)) {
+          val.forEach((item) => names.push(...collectNamesDeep(item, depth + 1)));
+        }
+      });
+      return names;
+    };
+
+    // Collect from ALL tabs' templates (tympanogram fields may be in a
+    // specific tab like "objective", not necessarily the active one)
+    const allFieldNames = [];
+    TABS.forEach((tab) => {
+      const schema = templates?.[tab];
+      if (!schema) return;
+      allFieldNames.push(...collectNamesDeep(schema));
+    });
+
+    const uniqueNames = [...new Set(allFieldNames)];
+    console.log("[Tympanogram] ALL template field names:", uniqueNames);
+
+    // Build aliases: match extracted values to template field names
+    const guess = (keywords) =>
+      uniqueNames.find((n) => keywords.every((k) => n.toLowerCase().includes(k))) || null;
+
+    const map = {
+      peak_pressure_r:
+        guess(["peak", "pressure", "right"]) ||
+        guess(["pressure", "right"]) ||
+        guess(["tymp", "pressure", "right"]) ||
+        "peak_pressure_r",
+      peak_pressure_l:
+        guess(["peak", "pressure", "left"]) ||
+        guess(["pressure", "left"]) ||
+        guess(["tymp", "pressure", "left"]) ||
+        "peak_pressure_l",
+      static_compliance_r:
+        guess(["compliance", "right"]) ||
+        guess(["static", "compliance", "right"]) ||
+        guess(["tymp", "compliance", "right"]) ||
+        "static_compliance_r",
+      static_compliance_l:
+        guess(["compliance", "left"]) ||
+        guess(["static", "compliance", "left"]) ||
+        guess(["tymp", "compliance", "left"]) ||
+        "static_compliance_l",
+      ecv_r:
+        guess(["canal", "volume", "right"]) ||
+        guess(["ecv", "right"]) ||
+        guess(["volume", "right"]) ||
+        guess(["ear", "volume", "right"]) ||
+        "ecv_r",
+      ecv_l:
+        guess(["canal", "volume", "left"]) ||
+        guess(["ecv", "left"]) ||
+        guess(["volume", "left"]) ||
+        guess(["ear", "volume", "left"]) ||
+        "ecv_l",
+    };
+
+    console.log("[Tympanogram] Field map:", map);
+    return map;
+  };
+
   const applyTympanogramResult = (payload) => {
     const right = getEarValues(payload, "right");
     const left = getEarValues(payload, "left");
 
+    // Build dynamic field name mapping from the active template schema
+    const fieldMap = buildTympanogramFieldMap();
+
+    const rightPressure =
+      right.pressure !== undefined && right.pressure !== null && right.pressure !== ""
+        ? { [fieldMap.peak_pressure_r]: valueToText(right.pressure) }
+        : {};
+    const leftPressure =
+      left.pressure !== undefined && left.pressure !== null && left.pressure !== ""
+        ? { [fieldMap.peak_pressure_l]: valueToText(left.pressure) }
+        : {};
+    const rightCompliance =
+      right.compliance !== undefined && right.compliance !== null && right.compliance !== ""
+        ? { [fieldMap.static_compliance_r]: valueToText(right.compliance) }
+        : {};
+    const leftCompliance =
+      left.compliance !== undefined && left.compliance !== null && left.compliance !== ""
+        ? { [fieldMap.static_compliance_l]: valueToText(left.compliance) }
+        : {};
+    const rightVolume =
+      right.volume !== undefined && right.volume !== null && right.volume !== ""
+        ? { [fieldMap.ecv_r]: valueToText(right.volume) }
+        : {};
+    const leftVolume =
+      left.volume !== undefined && left.volume !== null && left.volume !== ""
+        ? { [fieldMap.ecv_l]: valueToText(left.volume) }
+        : {};
+
     const extractedFields = {
-      peak_pressure: {
-        ...(right.pressure !== undefined && right.pressure !== null && right.pressure !== ""
-          ? { peak_pressure_r: valueToText(right.pressure) }
-          : {}),
-        ...(left.pressure !== undefined && left.pressure !== null && left.pressure !== ""
-          ? { peak_pressure_l: valueToText(left.pressure) }
-          : {}),
-      },
-      static_compliance: {
-        ...(right.compliance !== undefined && right.compliance !== null && right.compliance !== ""
-          ? { static_compliance_r: valueToText(right.compliance) }
-          : {}),
-        ...(left.compliance !== undefined && left.compliance !== null && left.compliance !== ""
-          ? { static_compliance_l: valueToText(left.compliance) }
-          : {}),
-      },
-      ecv: {
-        ...(right.volume !== undefined && right.volume !== null && right.volume !== ""
-          ? { ecv_r: valueToText(right.volume) }
-          : {}),
-        ...(left.volume !== undefined && left.volume !== null && left.volume !== ""
-          ? { ecv_l: valueToText(left.volume) }
-          : {}),
-      },
-      ...(right.pressure !== undefined && right.pressure !== null && right.pressure !== ""
-        ? { peak_pressure_r: valueToText(right.pressure) }
-        : {}),
-      ...(left.pressure !== undefined && left.pressure !== null && left.pressure !== ""
-        ? { peak_pressure_l: valueToText(left.pressure) }
-        : {}),
-      ...(right.compliance !== undefined && right.compliance !== null && right.compliance !== ""
-        ? { static_compliance_r: valueToText(right.compliance) }
-        : {}),
-      ...(left.compliance !== undefined && left.compliance !== null && left.compliance !== ""
-        ? { static_compliance_l: valueToText(left.compliance) }
-        : {}),
-      ...(right.volume !== undefined && right.volume !== null && right.volume !== ""
-        ? { ecv_r: valueToText(right.volume) }
-        : {}),
-      ...(left.volume !== undefined && left.volume !== null && left.volume !== ""
-        ? { ecv_l: valueToText(left.volume) }
-        : {}),
+      ...rightPressure,
+      ...leftPressure,
+      ...rightCompliance,
+      ...leftCompliance,
+      ...rightVolume,
+      ...leftVolume,
     };
+
+    // Store in ref so values can be applied when sub-assessment opens
+    pendingTympanogramValuesRef.current = extractedFields;
 
     setAssessmentsValues((prev) => {
       const next = { ...prev };
