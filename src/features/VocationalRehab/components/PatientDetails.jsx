@@ -1,49 +1,24 @@
 import React, { useState, useEffect } from "react";
 
-/* Components */
+/* Parent Assessments & Programs */
 import WorkRehab from "./workrehab";
 import VocationalRehab from "./vocationalrehab";
-import WorkhardeningProgress from "./WorkhardeningProgress";
 import OccupationalRehab from "./Occupational_performance.jsx";
+import PreVocational from "./PreVocational";
+import VocationalProgress from "./VocationalProgress";
+import VocationalTraining from "./vocational.jsx";
 import IntegratedTraining from "./Integrated.jsx";
 
-import PreVocational from "./PreVocational";
-import VocationalTraining from "./vocational.jsx";
-import VocationalProgress from "./VocationalProgress";
-
-import CulinaryIntegrated from "./CulinaryIntegrated";
-import BakeryIntegrated from "./BakeryIntegrated.jsx";
-import BaristaIntegrated from "./BaristaIntegrated.jsx";
-import SewingIntegrated from "./SewingIntegrated.jsx";
-import HairstylingIntegrated from "./HairstylingIntegrated.jsx";
-import DesignIntegrated from "./DesignIntegrated.jsx";
-import OfficeIntegrated from "./OfficeIntegrated.jsx";
-import ElectronicIntegrated from "./ElectronicIntegrated.jsx";
-import ElectricIntegrated from "./ElectricIntegrated.jsx";
-import EntrepreneurshipIntegrated from "./EnterpreneurshipIntegrated.jsx";
-import CreativeMultimediaIntegrated from "./CreativeMultimediaIntegrated.jsx";
-import FloristryIntegrated from "./FloristIntegrated.jsx";
-import ThreeDInnovationIntegrated from "./ThreeDInnovationIntegrated.jsx";
-import UrbanFarmingIntegrated from "./UrbanfarmingIntegrated.jsx";
-
-import ElectricFunctional from "./ElectricFunctional";
-import ElectronicFunctional from "./ElectronicFunctional";
-import OfficeadminAssessment from "./OfficeadminAssessment";
-import SewingFunctional from "./SewingFunctional";
-import CulinaryFunctional from "./CulinaryFunctional";
-import DesignFunctional from "./DesignFunctional";
+/* Functional Assessment Components */
 import BakeryFunctional from "./BakeryFunctional";
-import BaristaFunctional from "./BaristaFunctional";
-import FloristFunctional from "./FloristFunctional";
-import HairstylingFunctional from "./HairstylingFunctional";
-import EnterpreneurshipFunctional from "./EnterpreneurshipFunctional";
-import InnovartFunctional from "./InnovartFunctional";
+
+/* Integrated Training Components */
+import BakeryIntegrated from "./BakeryIntegrated.jsx";
 
 export default function PatientDetails({ patient, mode }) {
   const [assessmentType] = useState(mode || "initial");
   const [activeTab, setActiveTab] = useState("vocationalrehab");
   const [activeSubTab, setActiveSubTab] = useState(null);
-  const [activeChildTab, setActiveChildTab] = useState(null);
 
   const [vocationalValues, setVocationalValues] = useState({});
   const [functionalVocationalValues, setFunctionalVocationalValues] = useState({});
@@ -157,16 +132,14 @@ export default function PatientDetails({ patient, mode }) {
     },
   ];
 
+  // Sync active sub-tab when parent tab changes
   useEffect(() => {
     const currentTab = TABS.find((t) => t.key === activeTab);
 
     if (currentTab?.subTabs?.length > 0) {
-      const firstSubTab = currentTab.subTabs[0];
-      setActiveSubTab(firstSubTab.key);
-      setActiveChildTab(null);
+      setActiveSubTab(currentTab.subTabs[0].key);
     } else {
       setActiveSubTab(null);
-      setActiveChildTab(null);
     }
   }, [activeTab, vocationalValues, functionalVocationalValues]);
 
@@ -186,8 +159,9 @@ export default function PatientDetails({ patient, mode }) {
       );
     }
 
-    if (activeTab === "prevocationalscreening")
+    if (activeTab === "prevocationalscreening") {
       return <PreVocational patient={patient} />;
+    }
 
     if (activeTab === "functionalvocational") {
       return (
@@ -200,10 +174,17 @@ export default function PatientDetails({ patient, mode }) {
       );
     }
 
+    /* Vocational Training Tab */
     if (activeTab === "vocationaltraining") {
       if (!activeSubTab) {
         return <div style={emptyState}>No modules selected yet.</div>;
       }
+
+      // Redirect Bakery to BakeryFunctional
+      if (activeSubTab === "bakery") {
+        return <BakeryFunctional patient={patient} />;
+      }
+
       return (
         <VocationalTraining
           patient={patient}
@@ -213,10 +194,17 @@ export default function PatientDetails({ patient, mode }) {
       );
     }
 
+    /* Integrated Functional Training Tab */
     if (activeTab === "integratedfunctionaltraining") {
       if (!activeSubTab) {
         return <div style={emptyState}>No modules selected yet.</div>;
       }
+
+      // Redirect Bakery to BakeryIntegrated
+      if (activeSubTab === "bakery") {
+        return <BakeryIntegrated patient={patient} />;
+      }
+
       return (
         <IntegratedTraining
           patient={patient}
@@ -241,6 +229,7 @@ export default function PatientDetails({ patient, mode }) {
 
   return (
     <div style={{ fontFamily: "Inter, system-ui" }}>
+      {/* Primary Navigation Bar */}
       <div style={tabRow}>
         {TABS.map((tab) => (
           <div
@@ -256,6 +245,7 @@ export default function PatientDetails({ patient, mode }) {
         ))}
       </div>
 
+      {/* Secondary Dynamic Sub-Tabs */}
       {(() => {
         const currentTab = TABS.find((t) => t.key === activeTab);
         const hasSubTabs = currentTab?.subTabs?.length > 0;
@@ -267,10 +257,7 @@ export default function PatientDetails({ patient, mode }) {
             {currentTab.subTabs.map((sub) => (
               <div
                 key={sub.key}
-                onClick={() => {
-                  setActiveSubTab(sub.key);
-                  setActiveChildTab(null);
-                }}
+                onClick={() => setActiveSubTab(sub.key)}
                 style={{
                   ...subTabItem,
                   ...(activeSubTab === sub.key ? subTabActive : {}),
@@ -283,6 +270,7 @@ export default function PatientDetails({ patient, mode }) {
         );
       })()}
 
+      {/* Viewport Content */}
       <div style={content}>{renderContent()}</div>
     </div>
   );

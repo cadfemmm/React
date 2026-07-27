@@ -475,35 +475,35 @@ const CONSENT_AND_REFERRAL_SCHEMA = {
   sections: [
     {
       fields: [
-        { type: "subheading", label: "Environmental & Physical Functional Limitations" },
- {
-          name: "functional_limitations",
-          // label: "Functional Limitations",
-          type: "checkbox-group",
-          options: [
-            { label: "Standing", value: "standing" },
-            { label: "Walking", value: "walking" },
-            { label: "Sitting", value: "sitting" },
-            { label: "Stretching", value: "stretching" },
-            { label: "Squatting or Crouching", value: "squatting_or_crouching" },
-            { label: "Twisting Body or Neck", value: "twisting_body_or_neck" },
-            { label: "Lifting and Carrying Weight", value: "lifting_and_carrying_weight" },
-            { label: "Repetitive Movement", value: "repetitive_movement" },
-            { label: "Driving", value: "driving" },
-            { label: "Using Hand Equipment", value: "using_hand_equipment" },
-            { label: "Stooping", value: "stooping" },
-            { label: "Memory / Concentration Activity", value: "memory_concentration_activity" },
-            { label: "Visual Impairment", value: "visual_impairment" },
-            { label: "Hearing Impairment", value: "hearing_impairment" },
-            { label: "Speech Impairment", value: "speech_impairment" }
-          ]
-        },
-        {
-          name: "therapist_objective_observations",
-          label: "Therapist's Objective Observations on Occupational Performance",
-          type: "input",
-          placeholder: "Enter therapist's objective observations on occupational performance"
-        },
+//         { type: "subheading", label: "Environmental & Physical Functional Limitations" },
+//  {
+//           name: "functional_limitations",
+//           // label: "Functional Limitations",
+//           type: "checkbox-group",
+//           options: [
+//             { label: "Standing", value: "standing" },
+//             { label: "Walking", value: "walking" },
+//             { label: "Sitting", value: "sitting" },
+//             { label: "Stretching", value: "stretching" },
+//             { label: "Squatting or Crouching", value: "squatting_or_crouching" },
+//             { label: "Twisting Body or Neck", value: "twisting_body_or_neck" },
+//             { label: "Lifting and Carrying Weight", value: "lifting_and_carrying_weight" },
+//             { label: "Repetitive Movement", value: "repetitive_movement" },
+//             { label: "Driving", value: "driving" },
+//             { label: "Using Hand Equipment", value: "using_hand_equipment" },
+//             { label: "Stooping", value: "stooping" },
+//             { label: "Memory / Concentration Activity", value: "memory_concentration_activity" },
+//             { label: "Visual Impairment", value: "visual_impairment" },
+//             { label: "Hearing Impairment", value: "hearing_impairment" },
+//             { label: "Speech Impairment", value: "speech_impairment" }
+//           ]
+//         },
+//         {
+//           name: "therapist_objective_observations",
+//           label: "Therapist's Objective Observations on Occupational Performance",
+//           type: "input",
+//           placeholder: "Enter therapist's objective observations on occupational performance"
+//         },
         // {
         //   name: "vocational_scales",
         //   type: "assessment-launcher",
