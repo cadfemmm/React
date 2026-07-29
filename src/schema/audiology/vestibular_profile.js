@@ -2407,398 +2407,398 @@ export const mainSchema = {
         }
       ]
     },
-    {
-      "title": "Malay Version Vertigo Symptom Scale (MVVSS)",
-      "showIf": {
-        "field": "enable_mvvss",
-        "equals": "yes"
-      },
-      "fields": [
-        {
-          "name": "mvvss_1",
-          "label": "1. Perasaan seolah-olah benda atau keadaan sekeliling berpusing atau bergerak, selama kurang dari dua minit",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_2",
-          "label": "2. Berasa telinga tersumbat",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_3",
-          "label": "3. Menggigil, menggeletar",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_4",
-          "label": "4. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama lebih dari 12 jam",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_5",
-          "label": "5. Kesukaran untuk bernafas, bernafas dengan tercungap-cungap",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_6",
-          "label": "6. Berpeluh berlebihan",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_7",
-          "label": "7. Perasaan seolah-olah benda atau sekeliling berpusing atau bergerak, selama 20 minit hingga satu jam",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_8",
-          "label": "8. Muntah",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_9",
-          "label": "9. Sakit kepala atau berasa berat dalam kepala",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_10",
-          "label": "10. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjangan lebih dari 12 jam",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_11",
-          "label": "11. Berdenyut-denyut, mencucuk-cucuk atau kebas di bahagian badan tertentu",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_12",
-          "label": "12. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjanjangan kurang dari dua minit",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_13",
-          "label": "13. Sakit di bahagian jantung atau dada",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_14",
-          "label": "14. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama kurang 20 minit hingga satu jam",
-          "type": "radio-matrix",
-          "options": [
-            {
-              "label": "Tidak pernah (0)",
-              "value": 0
-            },
-            {
-              "label": "Beberapa kali (1–3 kali setahun) (1)",
-              "value": 1
-            },
-            {
-              "label": "Banyak kali (4–12 kali setahun) (2)",
-              "value": 2
-            },
-            {
-              "label": "Agak kerap (lebih dari sekali sebulan) (3)",
-              "value": 3
-            },
-            {
-              "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "mvvss_total",
-          "label": "MVVSS Total Score",
-          "type": "score-box"
-        }
-      ]
-    },
+    // {
+    //   "title": "Malay Version Vertigo Symptom Scale (MVVSS)",
+    //   "showIf": {
+    //     "field": "enable_mvvss",
+    //     "equals": "yes"
+    //   },
+    //   "fields": [
+    //     {
+    //       "name": "mvvss_1",
+    //       "label": "1. Perasaan seolah-olah benda atau keadaan sekeliling berpusing atau bergerak, selama kurang dari dua minit",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_2",
+    //       "label": "2. Berasa telinga tersumbat",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_3",
+    //       "label": "3. Menggigil, menggeletar",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_4",
+    //       "label": "4. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama lebih dari 12 jam",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_5",
+    //       "label": "5. Kesukaran untuk bernafas, bernafas dengan tercungap-cungap",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_6",
+    //       "label": "6. Berpeluh berlebihan",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_7",
+    //       "label": "7. Perasaan seolah-olah benda atau sekeliling berpusing atau bergerak, selama 20 minit hingga satu jam",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_8",
+    //       "label": "8. Muntah",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_9",
+    //       "label": "9. Sakit kepala atau berasa berat dalam kepala",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_10",
+    //       "label": "10. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjangan lebih dari 12 jam",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_11",
+    //       "label": "11. Berdenyut-denyut, mencucuk-cucuk atau kebas di bahagian badan tertentu",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_12",
+    //       "label": "12. Berasa hilang keseimbangan badan sehingga ingin terjatuh, berpanjanjangan kurang dari dua minit",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_13",
+    //       "label": "13. Sakit di bahagian jantung atau dada",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_14",
+    //       "label": "14. Perasaan berasa pening-pening lalat, terapung-apung atau 'giddy', selama kurang 20 minit hingga satu jam",
+    //       "type": "radio-matrix",
+    //       "options": [
+    //         {
+    //           "label": "Tidak pernah (0)",
+    //           "value": 0
+    //         },
+    //         {
+    //           "label": "Beberapa kali (1–3 kali setahun) (1)",
+    //           "value": 1
+    //         },
+    //         {
+    //           "label": "Banyak kali (4–12 kali setahun) (2)",
+    //           "value": 2
+    //         },
+    //         {
+    //           "label": "Agak kerap (lebih dari sekali sebulan) (3)",
+    //           "value": 3
+    //         },
+    //         {
+    //           "label": "Sangat kerap (lebih dari sekali seminggu) (4)",
+    //           "value": 4
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "mvvss_total",
+    //       "label": "MVVSS Total Score",
+    //       "type": "score-box"
+    //     }
+    //   ]
+    // },
     {
       "title": "Counseling Summary",
       "showIf": {
@@ -5488,6 +5488,270 @@ export const mainSchema = {
           ]
         }
       ]
+    }
+  ]
+}
+
+
+export const MVVSS = {
+  "title": "Malay Version Vertigo Symptom Scale (MVVSS)",
+  "enableScoreToggle": true,
+  "showIf": {
+    "field": "enable_mvvss",
+    "equals": "yes"
+  },
+  "fields": [
+    {
+      "type": "info-text",
+      "text": "0 = Never, 1 = A few times (1-3 times a year), 2 = Several times (4-12 times a year), 3 = Quite often (>1 time a month), 4 = Very often (>1 time a week)"
+    },
+    {
+      "name": "mvvss_1",
+      "label": "1. A feeling that things are spinning or moving around, lasting less than two minutes",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_2",
+      "label": "2. A feeling that things are spinning or moving around, lasting up to 20 minutes",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_3",
+      "label": "3. A feeling that things are spinning or moving around, lasting 20 minutes to 1 hour",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_4",
+      "label": "4. A feeling that things are spinning or moving around, lasting several hours",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_5",
+      "label": "5. A feeling that things are spinning or moving around, lasting more than 12 hours",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_6",
+      "label": "6. Pains in the heart or chest region",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_7",
+      "label": "7. Hot or cold spells",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_8",
+      "label": "8. Unsteadiness so severe that you actually fall",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_9",
+      "label": "9. Nausea (feeling sick), stomach churning",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_10",
+      "label": "10. Tension/soreness in your muscles",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_11",
+      "label": "11. A feeling of being light-headed, 'swimmy' or giddy, lasting less than two minutes",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_12",
+      "label": "12. A feeling of being light-headed, 'swimmy' or giddy, lasting up to 20 minutes",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_13",
+      "label": "13. A feeling of being light-headed, 'swimmy' or giddy, lasting 20 minutes to 1 hour",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_14",
+      "label": "14. A feeling of being light-headed, 'swimmy' or giddy, lasting several hours",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_15",
+      "label": "15. A feeling of being light-headed, 'swimmy' or giddy, lasting more than 12 hours",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_16",
+      "label": "16. Trembling, shivering",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_17",
+      "label": "17. Feeling of pressure in the ear(s)",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_18",
+      "label": "18. Heart pounding or fluttering",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_19",
+      "label": "19. Vomiting",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_20",
+      "label": "20. Heavy feeling in arms or legs",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_21",
+      "label": "21. Visual disturbances (e.g., blurring, spots before the eyes)",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_22",
+      "label": "22. Headache or feeling of pressure in the head",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_23",
+      "label": "23. Unable to walk or stand properly without support",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_24",
+      "label": "24. Difficulty breathing, short of breath",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_25",
+      "label": "25. Loss of concentration or memory",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_26",
+      "label": "26. Feeling unsteady, about to lose balance, lasting less than two minutes",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_27",
+      "label": "27. Feeling unsteady, about to lose balance, lasting up to 20 minutes",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_28",
+      "label": "28. Feeling unsteady, about to lose balance, lasting 20 minutes to 1 hour",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_29",
+      "label": "29. Feeling unsteady, about to lose balance, lasting several hours",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_30",
+      "label": "30. Feeling unsteady, about to lose balance, lasting more than 12 hours",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_31",
+      "label": "31. Tingling, prickling or numbness in parts of the body",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_32",
+      "label": "32. Pains in the lower part of your back",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_33",
+      "label": "33. Excessive sweating",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_34",
+      "label": "34. Feeling faint, about to black out",
+      "type": "scale-slider",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "mvvss_score",
+      "label": "MVVSS Score",
+      "type": "score-box"
+    },
+    {
+      "name": "mvvss_interpretation",
+      "label": "Interpretation",
+      "type": "score-box"
     }
   ]
 }
