@@ -286,3 +286,30 @@ const SCHEMA = {
     }
   ]
 }
+
+const REFERENCE_IMAGES = [
+  {
+    "title": "Naming",
+    "src": "/naming.png"
+  },
+  {
+    "title": "Reproducing a Copy of a Cube",
+    "src": "/cube.png"
+  },
+  {
+    "title": "Graphic Series",
+    "src": "/graphic.png"
+  },
+  {
+    "title": "Image Recall",
+    "src": "/imagerecall.png"
+  },
+  {
+    "title": "Praxis",
+    "src": "/praxis.png"
+  },
+  {
+    "title": "Calendar",
+    "src": "/calendar.png"
+  }
+]
