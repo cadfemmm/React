@@ -16,6 +16,15 @@ import NeurodynamicTestsForm from "./NDT";
 import PaivmForm from "./Paivm";
 import ULFSForm from "./ULFS";
 import BalanceTestForm from "./Balancetest";
+import LowerLimbSpecialTestsForm from "./Lowerlimbspecialtests";
+import DeepTendonReflexesForm from "./Deeptendonreflexes";
+import MyotomeDermatomeForm from "./Myotomedermatome";
+import UpperLimbSpecialTestsForm from "./Upperlimbspecialtests";
+import LumbarSpineSpecialTestsForm from "./Lumbarspinespecialtests";
+import CervicalSpecialTestsForm from "./Cervicalspecialtests";
+import SingleLegStanceTestForm from "./Singlelegstancetest";
+import FourStageBalanceTestForm from "./Fourstagebalancetest";
+import LimbLengthAlignmentForm from "./Limblengthalignment";
 
 
 const YES_NO_OPTIONS = [
@@ -83,7 +92,16 @@ const MUSCULOSKELETAL_ASSESSMENT_REGISTRY = {
   neurodynamic_test: NeurodynamicTestsForm,
   paivm: PaivmForm,
   ulfs: ULFSForm,
-  balance_test: BalanceTestForm
+  balance_test: BalanceTestForm,
+  lld_general: LowerLimbSpecialTestsForm,
+  deep_tendon_reflexes: DeepTendonReflexesForm,
+  myotome_dermatome: MyotomeDermatomeForm,
+  ull_general: UpperLimbSpecialTestsForm,
+  spine_special_tests: LumbarSpineSpecialTestsForm,
+  cervical_special_tests: CervicalSpecialTestsForm,
+  single_leg_stance_test: SingleLegStanceTestForm,
+  four_stage_balance_test: FourStageBalanceTestForm,
+  limb_length_alignment: LimbLengthAlignmentForm,
 }
 
 const MSK_CONTAINER_SCHEMA = {
@@ -631,11 +649,19 @@ const OBJECTIVE_SCHEMA = {
             { label: "Neurodynamic Test",                                         value: "neurodynamic_test",         regions: ["spine_general"] },
             { label: "PAIVM",                                                     value: "paivm",                regions: ["spine_general"] },
             { label: "Compression / Distraction Test",                            value: "compression",          regions: ["spine_general"] },
-            { label: "Lower Limb Discrepancy Test",                               value: "lld_general",          regions: ["spine_general"] },
+            { label: "Lower Limb – Special Tests (Hip, Knee, Ankle)",                               value: "lld_general",          regions: ["spine_general"] },
+            { label: "Deep Tendon Reflexes",                                        value: "deep_tendon_reflexes", regions: ["spine_general"] },
+            { label: "Myotome / Dermatome Test",                                value: "myotome_dermatome",   regions: ["spine_general"] },
+            { label: "Upper Limb – Special Tests (Shoulder, Elbow, Wrist)",                               value: "ull_general",          regions: ["spine_general"] },
+            { label: "Lumbar Spine – Special Tests",                               value: "spine_special_tests",  regions: ["spine_general"] },
+            { label: "Cervical Spine – Special Tests",                             value: "cervical_special_tests",  regions: ["spine_general"] },
+            { label: "Single Leg Stance Test",                                      value: "single_leg_stance_test",  regions: ["spine_general"] },
+            { label: "Four Stage Balance Test",                                      value: "four_stage_balance_test",  regions: ["spine_general"] },
+            { label: "Limb Length Alignment",                                value: "limb_length_alignment",  regions: ["lower_limb"] },
             { label: "Muscle Length Test",                                         value: "ml_lower",             regions: ["lower_limb"] },
             { label: "Functional Test",                                           value: "func_lower",           regions: ["lower_limb"] },
-            { label: "Lower Limb Discrepancy — True Leg Length",                  value: "true_leg_length",      regions: ["lower_limb"] },
-            { label: "Lower Limb Discrepancy — Apparent Leg Length",              value: "apparent_leg_length",  regions: ["lower_limb"] },
+            // { label: "Lower Limb Discrepancy — True Leg Length",                  value: "true_leg_length",      regions: ["lower_limb"] },
+            // { label: "Lower Limb Discrepancy — Apparent Leg Length",              value: "apparent_leg_length",  regions: ["lower_limb"] },
             { label: "Q-Angle Measurement",                                       value: "q_angle",              regions: ["lower_limb"] },
             { label: "Instability Test",                                          value: "instability",         regions: ["upper_limb"] },
             { label: "Special Test",                                              value: "special_upper",        regions: ["upper_limb"] },
