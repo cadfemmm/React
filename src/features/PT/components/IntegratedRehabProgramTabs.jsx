@@ -17,9 +17,10 @@ import NeuromodulationAssessment from "./NeuromodulationAssessment";
 import CybernicsAssessment from "./CybernicsAssessment";
 
 /* ── Progress pages ── */
-import NeuracTherapyProgress   from "./NeuracTherapyProgress";
-import NeuromodulationProgress from "./NeuromodulationProgress";
-import NeuroroticProgress      from "./NeuroroticProgress";
+import NeuracTherapyProgress        from "./NeuracTherapyProgress";
+import NeuromodulationProgress      from "./NeuromodulationProgress";
+import NeuroroticProgress           from "./NeuroroticProgress";
+import MetamotusGalileoProgressNote from "./Metamotusgalileoprogressnote";
 import PatientCard from "../../../shared/cards/PatientCard";
 /* ── Consent & Referral schema ── */
 const CONSENT_AND_REFERRAL_SCHEMA = {
@@ -212,7 +213,7 @@ export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
         case "cybernics":
           return <NeuroroticProgress patient={patient} onBack={handleBack} />;
         case "metamotus":
-          return <MetaMotusGalileoAssessment patient={patient} onBack={handleBack} />;
+          return <MetamotusGalileoProgressNote patient={patient} onBack={handleBack} />;
         default:
           return null;
       }

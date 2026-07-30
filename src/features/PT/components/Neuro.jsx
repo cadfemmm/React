@@ -14,11 +14,10 @@ import StrengthTestForm from "./StrengthTestForm";
 import FACForm from "./FunctionalAmbulationCategory"
 import ScarAssessmentForm from "../../OT/components/vas";
 import PatientCard from "../../../shared/cards/PatientCard";
-
-
 import MotorAssessmentScaleForm from "./MotorAssessmentScaleForm";
 import SensationTestForm from "./SensationTestForm";
 import ProprioceptionForm from "./ProprioceptionForm";
+import CoordinationTestsForm from "./Coordinationtests";
 
 export const NEURO_ASSESSMENT_REGISTRY = {
   rom: ROMForm,
@@ -35,7 +34,8 @@ export const NEURO_ASSESSMENT_REGISTRY = {
   fac:FACForm,
   sixmwt: SixMWTForm,
   tenmwt: TenMWTForm,
-  strength: StrengthTestForm
+  strength: StrengthTestForm,
+  coordination: CoordinationTestsForm
 };
 
 /* ===================== OPTIONS ===================== */
