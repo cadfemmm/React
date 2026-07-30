@@ -166,20 +166,9 @@ const CONSENT = {
 }
 
 const SUBJECTIVE = {
-  "title": "",
   "sections": [
     {
       "fields": [
-        {
-          "type": "input",
-          "name": "chief_complaints",
-          "label": "Chief Complaints"
-        },
-        {
-          "type": "input",
-          "name": "hpi",
-          "label": "History of Present Illness (HPI)"
-        },
         {
           "name": "History of Present",
           "label": "History of Present Illnes",
@@ -364,85 +353,30 @@ const SUBJECTIVE = {
 }
 
 const OBJECTIVE = {
-  "title": "",
   "sections": [
     {
       "fields": [
         {
-          "type": "subheading",
-          "label": "Environmental & Physical Functional Limitations"
-        },
-        {
-          "name": "functional_limitations",
-          "type": "checkbox-group",
+          "name": "vocational_scales",
+          "type": "assessment-launcher",
           "options": [
             {
-              "label": "Standing",
-              "value": "standing"
+              "label": "Berg Balance Scale (BBS)",
+              "value": "BergBalanceScale"
             },
             {
-              "label": "Walking",
-              "value": "walking"
+              "label": "Montreal Cognitive Assessment (MoCA)",
+              "value": "MoCAAssessment"
             },
             {
-              "label": "Sitting",
-              "value": "sitting"
+              "label": "BECKER WORK ADJUSTMENT PROFILE",
+              "value": "BeckerWorkAdjustmentProfile"
             },
             {
-              "label": "Stretching",
-              "value": "stretching"
-            },
-            {
-              "label": "Squatting or Crouching",
-              "value": "squatting_or_crouching"
-            },
-            {
-              "label": "Twisting Body or Neck",
-              "value": "twisting_body_or_neck"
-            },
-            {
-              "label": "Lifting and Carrying Weight",
-              "value": "lifting_and_carrying_weight"
-            },
-            {
-              "label": "Repetitive Movement",
-              "value": "repetitive_movement"
-            },
-            {
-              "label": "Driving",
-              "value": "driving"
-            },
-            {
-              "label": "Using Hand Equipment",
-              "value": "using_hand_equipment"
-            },
-            {
-              "label": "Stooping",
-              "value": "stooping"
-            },
-            {
-              "label": "Memory / Concentration Activity",
-              "value": "memory_concentration_activity"
-            },
-            {
-              "label": "Visual Impairment",
-              "value": "visual_impairment"
-            },
-            {
-              "label": "Hearing Impairment",
-              "value": "hearing_impairment"
-            },
-            {
-              "label": "Speech Impairment",
-              "value": "speech_impairment"
+              "label": "BTE PRIMUS RS",
+              "value": "BTEAssessment"
             }
           ]
-        },
-        {
-          "name": "therapist_objective_observations",
-          "label": "Therapist's Objective Observations on Occupational Performance",
-          "type": "input",
-          "placeholder": "Enter therapist's objective observations on occupational performance"
         }
       ]
     }
@@ -450,44 +384,260 @@ const OBJECTIVE = {
 }
 
 const ASSESSMENT = {
-  "fields": [
+  "sections": [
     {
-      "type": "subheading",
-      "label": "Clinical Interpretation"
-    },
-    {
-      "name": "clinical_impression",
-      "label": "Clinical Impression",
-      "type": "input",
-      "placeholder": "Enter clinical impression"
-    },
-    {
-      "name": "summary_of_findings_clinical_reasoning",
-      "label": "Summary of Findings & Clinical Reasoning",
-      "type": "input",
-      "placeholder": "Enter summary of findings and clinical reasoning"
-    },
-    {
-      "type": "subheading",
-      "label": "Vocational Potential & Barriers"
-    },
-    {
-      "name": "strengths_facilitators",
-      "label": "Strengths / Facilitators",
-      "type": "input",
-      "placeholder": "Enter strengths and facilitators"
-    },
-    {
-      "name": "barriers_challenges",
-      "label": "Barriers / Challenges",
-      "type": "input",
-      "placeholder": "Enter barriers and challenges"
+      "fields": [
+        {
+          "type": "subheading",
+          "label": "Physical, Cognitive and Sensory Demand"
+        },
+        {
+          "type": "accordion",
+          "name": "physical_demand_section",
+          "label": "Physical Demand",
+          "defaultOpen": false,
+          "children": [
+            {
+              "type": "grid-table-flat",
+              "name": "physical_demand",
+              "headers": [
+                "Observation/Remarks",
+                "Score"
+              ],
+              "headerOptions": {
+                "Score": [
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ]
+              },
+              "rows": [
+                {
+                  "key": "sitting_tolerance",
+                  "label": "Sitting Tolerance"
+                },
+                {
+                  "key": "standing_tolerance",
+                  "label": "Standing Tolerance"
+                },
+                {
+                  "key": "walking_mobility",
+                  "label": "Walking & Mobility"
+                },
+                {
+                  "key": "upper_limb_function",
+                  "label": "Upper Limb Function"
+                },
+                {
+                  "key": "hand_function",
+                  "label": "Hand Function"
+                },
+                {
+                  "key": "bilateral_coordination",
+                  "label": "Bilateral Coordination"
+                },
+                {
+                  "key": "strength_endurance",
+                  "label": "Strength & Endurance"
+                },
+                {
+                  "key": "fine_motor_skills",
+                  "label": "Fine Motor Skills"
+                },
+                {
+                  "key": "gross_motor_skills",
+                  "label": "Gross Motor Skills"
+                },
+                {
+                  "key": "safety_awareness",
+                  "label": "Safety Awareness"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "accordion",
+          "name": "cognitive_demand_section",
+          "label": "Cognitive Demand",
+          "defaultOpen": false,
+          "children": [
+            {
+              "type": "grid-table-flat",
+              "name": "cognitive_demand",
+              "headers": [
+                "Observation/Remarks",
+                "Score"
+              ],
+              "headerOptions": {
+                "Score": [
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ]
+              },
+              "rows": [
+                {
+                  "key": "attention",
+                  "label": "Attention & Concentration"
+                },
+                {
+                  "key": "understanding",
+                  "label": "Understanding Instructions"
+                },
+                {
+                  "key": "memory",
+                  "label": "Memory"
+                },
+                {
+                  "key": "problem_solving",
+                  "label": "Problem Solving"
+                },
+                {
+                  "key": "sequencing",
+                  "label": "Sequencing"
+                },
+                {
+                  "key": "learning_ability",
+                  "label": "Learning Ability"
+                },
+                {
+                  "key": "decision_making",
+                  "label": "Decision Making"
+                },
+                {
+                  "key": "time_awareness",
+                  "label": "Time Awareness"
+                },
+                {
+                  "key": "task_completion",
+                  "label": "Task Completion"
+                },
+                {
+                  "key": "adaptability",
+                  "label": "Adaptability"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "accordion",
+          "name": "sensory_demand_section",
+          "label": "Sensory & Perceptual Demand",
+          "defaultOpen": false,
+          "children": [
+            {
+              "type": "grid-table-flat",
+              "name": "sensory_demand",
+              "headers": [
+                "Observation/Remarks",
+                "Score"
+              ],
+              "headerOptions": {
+                "Score": [
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ]
+              },
+              "rows": [
+                {
+                  "key": "vision",
+                  "label": "Vision"
+                },
+                {
+                  "key": "hearing",
+                  "label": "Hearing"
+                },
+                {
+                  "key": "communication",
+                  "label": "Communication"
+                },
+                {
+                  "key": "tactile_function",
+                  "label": "Tactile Function"
+                },
+                {
+                  "key": "visual_motor",
+                  "label": "Visual-Motor Coordination"
+                },
+                {
+                  "key": "spatial_awareness",
+                  "label": "Spatial Awareness"
+                },
+                {
+                  "key": "sensory_tolerance",
+                  "label": "Sensory Tolerance"
+                },
+                {
+                  "key": "environmental_awareness",
+                  "label": "Environmental Awareness"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "accordion",
+          "name": "rating_scale_section",
+          "label": "Rating Scale",
+          "defaultOpen": false,
+          "children": [
+            {
+              "name": "functional_rating_scale",
+              "label": "Rating Scale",
+              "type": "scale-slider",
+              "min": 0,
+              "max": 4,
+              "ranges": [
+                {
+                  "min": 0,
+                  "max": 0,
+                  "label": "Unable / Full Assistance",
+                  "color": "#ef4444"
+                },
+                {
+                  "min": 1,
+                  "max": 1,
+                  "label": "Significant Difficulty",
+                  "color": "#f97316"
+                },
+                {
+                  "min": 2,
+                  "max": 2,
+                  "label": "Moderate Difficulty",
+                  "color": "#facc15"
+                },
+                {
+                  "min": 3,
+                  "max": 3,
+                  "label": "Mild Difficulty",
+                  "color": "#84cc16"
+                },
+                {
+                  "min": 4,
+                  "max": 4,
+                  "label": "Independent / Functional",
+                  "color": "#22c55e"
+                }
+              ],
+              "showValue": true
+            }
+          ]
+        }
+      ]
     }
   ]
 }
 
 const PLAN = {
-  "title": "",
   "sections": [
     {
       "fields": [
@@ -520,14 +670,10 @@ const PLAN = {
           "placeholder": "Enter suggestions and recommendations"
         },
         {
-          "name": "functional_assessment_workshop",
-          "label": "Functional Assessment & Workshop Referral",
+          "name": "module_referral",
+          "label": "Module Referral",
           "type": "checkbox-group",
           "options": [
-            {
-              "label": "Book for Vocational Functional Assessment (auto-booking)",
-              "value": "book_vocational_functional_assessment"
-            },
             {
               "label": "Discharge from Vocational Programme (client not interested / not required)",
               "value": "discharge_from_vocational_programme"
@@ -602,71 +748,115 @@ const PLAN = {
             }
           ],
           "showIf": {
-            "field": "functional_assessment_workshop",
+            "field": "module_referral",
             "includes": "refer_to_trainer"
           }
         },
         {
           "name": "referred_module",
           "label": "Referred Module",
-          "type": "select",
+          "type": "multi-select-dropdown",
           "placeholder": "Select from Module List",
           "options": [
             {
-              "label": "Sewing",
-              "value": "sewing"
+              "label": "3D Innovation",
+              "value": "3d_innovation"
             },
             {
-              "label": "Entrepreneurship",
-              "value": "entrepreneurship"
+              "label": "Art & Crafts",
+              "value": "art_crafts"
             },
             {
-              "label": "Electric / Electronic",
-              "value": "electric_electronic"
-            },
-            {
-              "label": "Hairstyling",
-              "value": "hairstyling"
-            },
-            {
-              "label": "Design",
-              "value": "design"
-            },
-            {
-              "label": "Office Administration",
-              "value": "office_administration"
+              "label": "Automotive Technology",
+              "value": "automotive_technology"
             },
             {
               "label": "Bakery",
               "value": "bakery"
             },
             {
-              "label": "Culinary",
-              "value": "culinary"
-            },
-            {
               "label": "Barista",
               "value": "barista"
             },
             {
-              "label": "Florist",
-              "value": "florist"
+              "label": "Call Centre",
+              "value": "call_centre"
+            },
+            {
+              "label": "Carpentry",
+              "value": "carpentry"
+            },
+            {
+              "label": "Creative Multimedia",
+              "value": "creative_multimedia"
+            },
+            {
+              "label": "Culinary",
+              "value": "culinary"
+            },
+            {
+              "label": "Design & Printing",
+              "value": "design_printing"
+            },
+            {
+              "label": "Domestic Electrical",
+              "value": "domestic_electrical"
+            },
+            {
+              "label": "Electrical",
+              "value": "electrical"
+            },
+            {
+              "label": "Electric Vehicle (EV)",
+              "value": "electric_vehicle_ev"
+            },
+            {
+              "label": "Electronics",
+              "value": "electronics"
+            },
+            {
+              "label": "Entrepreneurship",
+              "value": "entrepreneurship"
+            },
+            {
+              "label": "Floristry",
+              "value": "floristry"
+            },
+            {
+              "label": "Graphic & Virtual Arts",
+              "value": "graphic_virtual_arts"
+            },
+            {
+              "label": "Hairstyling",
+              "value": "hairstyling"
+            },
+            {
+              "label": "Job Profiling & Readiness",
+              "value": "job_profiling_readiness"
+            },
+            {
+              "label": "Office Administration",
+              "value": "office_administration"
+            },
+            {
+              "label": "Sewing & Fashion",
+              "value": "sewing_fashion"
+            },
+            {
+              "label": "Spa & Cosmetology",
+              "value": "spa_cosmetology"
             },
             {
               "label": "Urban Farming",
               "value": "urban_farming"
             },
             {
-              "label": "Pre-Vocational",
-              "value": "pre_vocational"
-            },
-            {
-              "label": "Initial / Screening Assessment",
-              "value": "initial_screening_assessment"
+              "label": "Work Trial",
+              "value": "work_trial"
             }
           ],
           "showIf": {
-            "field": "functional_assessment_workshop",
+            "field": "module_referral",
             "includes": "refer_to_module"
           }
         }
@@ -674,5 +864,6 @@ const PLAN = {
     }
   ]
 }
+
 
 export { CONSENT, SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN }
