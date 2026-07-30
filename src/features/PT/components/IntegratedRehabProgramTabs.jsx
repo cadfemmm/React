@@ -21,7 +21,64 @@ import NeuracTherapyProgress   from "./NeuracTherapyProgress";
 import NeuromodulationProgress from "./NeuromodulationProgress";
 import NeuroroticProgress      from "./NeuroroticProgress";
 import PatientCard from "../../../shared/cards/PatientCard";
-/* ── Consent & Referral schema ── */
+
+/* ── Appendix A: Relation Gait Feature → Possible Impairments ── */
+export const GAIT_FEATURE_MAPPING = {
+  forward_lean: [
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.5, sd: 0.7 },
+  ],
+  hyper_lordose: [
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Anterior tilt increased", mean: 4.4, sd: 0.5 },
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.4, sd: 0.8 },
+  ],
+  ipsilateral_lean: [
+    { plane: "F", segment: "Trunk", gaitPhase: "EST-LST", impairment: "Gluteus medius weakness", mean: 4.1, sd: 0.6 },
+  ],
+  anterior_tilt: [
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.2, sd: 0.7 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Hamstrings weakness", mean: 3.4, sd: 0.9 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Iliopsoas spasticity / contracture", mean: 3.9, sd: 0.6 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 2.9, sd: 1.0 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Swing", impairment: "Iliopsoas spasticity / contracture", mean: 3.6, sd: 1.0 },
+  ],
+  posterior_tilt: [
+    { plane: "S", segment: "Pelvis", gaitPhase: "LSW", impairment: "Hamstrings spasticity / contracture", mean: 4.3, sd: 0.6 },
+  ],
+  obliquity_drop: [
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Anatomical leg length discrepancy - shortest leg", mean: 3.0, sd: 1.0 },
+  ],
+  obliquity_lift: [
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Adductor spasticity / contracture", mean: 2.6, sd: 0.6 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Anatomical leg length discrepancy - longest leg", mean: 2.9, sd: 1.0 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Stance", impairment: "Gluteus medius weakness", mean: 3.6, sd: 1.0 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Swing", impairment: "<< Clearance decreased", mean: 3.2, sd: 1.1 },
+  ],
+  protraction: [
+    { plane: "T", segment: "Pelvis", gaitPhase: "Stance", impairment: "<< Contralateral retraction increased", mean: 3.8, sd: 0.7 },
+  ],
+  retraction: [
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "Femoral anteversion increased", mean: 3.1, sd: 0.8 },
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "Iliopsoas spasticity / contracture", mean: 3.6, sd: 0.6 },
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "<< Hip extension decreased", mean: 3.9, sd: 0.7 },
+  ],
+  hip_extension_decreased: [
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Rectus femoris spasticity", mean: 2.6, sd: 1.0 },
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Iliopsoas spasticity / contracture", mean: 3.8, sd: 0.6 },
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Gluteus maximus weakness", mean: 2.7, sd: 1.3 },
+  ],
+  peak_extension_delayed: [
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gastrocnemius weakness", mean: 2.7, sd: 1.2 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Soleus weakness", mean: 2.8, sd: 1.3 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 2.6, sd: 0.9 },
+  ],
+  flexion_delayed: [
+    { plane: "S", segment: "Hip", gaitPhase: "ESW", impairment: "Limited selective control (flexion/extension synergy)", mean: 2.9, sd: 1.0 },
+  ],
+  flexion_increased: [
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.1, sd: 1.0 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "<< Knee flexion increased", mean: 2.8, sd: 0.9 },
+  ],
+}
 const CONSENT_AND_REFERRAL_SCHEMA = {
   sections: [
     {
@@ -433,10 +490,14 @@ const MC_SUBJECTIVE_SCHEMA = {
   ],
  sections: [{ fields: [
    
-    { name: "mc_gait_report",         label: "Upload Gait Report",  type: "attach-file" },
-    { name: "mc_chief_complaint_obj", label: "Chief Complaint",     type: "input" },
+          {
+          name: "mc_foot_report",
+          label: "Upload Foot Report",
+          type: "attach-file",
+        },
+    { name: "mc_foot_scan", label: "Chief Complaint",     type: "input" },
       {
-            name: "hpi",
+            name: "hpi_footscan",
             label: "History of Presenting Illness (HPI)",
             type: "input"
           }
@@ -451,36 +512,729 @@ const MC_OBJECTIVE_SCHEMA = {
     { type: "save",  label: "Save"  },
   ],
   sections: [{ fields: [
-   
+    {
+          name: "services",
+          label: "Services",
+          type: "checkbox-group",
+          options: [
+            { label: "Neurology", value: "neurology" },
+            { label: "Musculoskeletal", value: "musculoskeletal" },
+            { label: "Peadiatrics (CP)", value: "paediatrics" },
+            { label: "Geriatrics", value: "geriatrics" },
+            { label: "Amputation", value: "amputation" },
+            { label: "Spinal Cord Injury", value: "sci" },
+            { label: "Others", value: "others" },
+          ],
+        },
+
+        {
+          name: "other_service",
+          label: "Please Specify",
+          type: "input",
+          showIf: {
+            field: "services",
+            includes: "others",
+          },
+        },
+
+        // Impairment Mapping
+
+        {
+          name: "paediatrics_mapping",
+          label: "Impairment Mapping - Peadiatrics (CP)",
+          type: "radio",
+          options: ["Yes", "No"],
+          showIf: {
+            field: "services",
+            includes: "paediatrics",
+          },
+        },
+
+        {
+          name: "neurology_mapping",
+          label: "Impairment Mapping - Neurology",
+          type: "radio",
+          options: ["Yes", "No"],
+          showIf: {
+            field: "services",
+            includes: "neurology",
+          },
+        },
+
+        {
+          name: "musculoskeletal_mapping",
+          label: "Impairment Mapping - Musculoskeletal",
+          type: "radio",
+          options: ["Yes", "No"],
+          showIf: {
+            field: "services",
+            includes: "musculoskeletal",
+          },
+        },
+
+        {
+          name: "geriatrics_mapping",
+          label: "Impairment Mapping - Geriatrics",
+          type: "radio",
+          options: ["Yes", "No"],
+          showIf: {
+            field: "services",
+            includes: "geriatrics",
+          },
+        },
+
+        {
+          name: "amputation_mapping",
+          label: "Impairment Mapping - Amputation",
+          type: "radio",
+          options: ["Yes", "No"],
+          showIf: {
+            field: "services",
+            includes: "amputation",
+          },
+        },
+
+        {
+          name: "sci_mapping",
+          label: "Impairment Mapping - Spinal Cord Injury",
+          type: "radio",
+          options: ["Yes", "No"],
+          showIf: {
+            field: "services",
+            includes: "sci",
+          },
+        },
+   {
+  name: "motion_capture_category",
+  label: "Category",
+  type: "single-select",
+  placeholder: "Select Category",
+  options: [
+    { label: "Gait Analysis", value: "gait_analysis" },
+    { label: "Upper Limb Analysis", value: "upper_limb_analysis" },
+    { label: "Total Body Analysis", value: "total_body_analysis" },
+    { label: "Ergonomics Assessment", value: "ergonomics_assessment" },
+    { label: "Push Ergonomics Assessment", value: "ergonomics_push" },
+    { label: "Pull Ergonomics Assessment", value: "ergonomics_pull" },
+    { label: "Lifting Ergonomics Assessment", value: "ergonomics_lifting" },
+    { label: "Twisting Ergonomics Assessment", value: "ergonomics_twisting" },
+    { label: "Carrying Ergonomics Assessment", value: "ergonomics_carrying" },
+    { label: "Sport Biomechanics", value: "sport_biomechanics" },
+    { label: "Jumping Sport Biomechanics", value: "sport_jumping" },
+    { label: "Landing Sport Biomechanics", value: "sport_landing" },
+  ],
+},
     { name: "mc_gait_report",         label: "Upload Gait Report",  type: "attach-file" },
-    { name: "mc_chief_complaint_obj", label: "Chief Complaint",     type: "input" },
+    {
+  title: "OCR Summary",
+  fields: [
+    {
+      type: "accordion",
+      label: "1. Spatial-Temporal Parameter Summary",
+      defaultOpen: false,
+
+      children: [
+        {
+          name: "spatial_temporal",
+          type: "grid-table-flat",
+
+          headers: ["Left", "Right", "Norms"],
+
+          rows: [
+            {
+              key: "step_length",
+              label: "Step Length (m)",
+            },
+            {
+              key: "stride_length",
+              label: "Stride Length (m)",
+            },
+            {
+              key: "cadence",
+              label: "Cadence (step/min)",
+            },
+            {
+              key: "double_support",
+              label: "Double supp (s)",
+            },
+            {
+              key: "single_support",
+              label: "Single supp (s)",
+            },
+            {
+              key: "step_time",
+              label: "Step Time (s)",
+            },
+            {
+              key: "stride_time",
+              label: "Stride Time (s)",
+            },
+          ],
+
+          labelWidth: "250px",
+        },
+      ],
+    },
+  ],
+},
+{
+  type: "accordion",
+  label: "2. Walking Speed (with Interpretation)",
+  defaultOpen: false,
+  children: [
+    {
+      name: "walking_speed",
+      type: "grid-table-flat",
+      headers: ["Left", "Right", "Norms"],
+      rows: [
+        {
+          key: "speed",
+          label: "Speed (m/s)",
+        },
+      ],
+      labelWidth: "180px",
+    },
+    {
+      name: "walking_speed_interpretation",
+      label: "Walking Speed Interpretation",
+      type: "input",
+    },
+  ],
+},
+{
+  type: "accordion",
+  label: "3. Stance VS Swing Ratio (with Interpretation)",
+  defaultOpen: false,
+  children: [
+    {
+      name: "stance_swing_ratio",
+      type: "grid-table-flat",
+      headers: ["Left", "Right", "Norms"],
+      rows: [
+        {
+          key: "stance",
+          label: "Stance (%)",
+        },
+        {
+          key: "swing",
+          label: "Swing (%)",
+        },
+      ],
+      labelWidth: "180px",
+    },
+    {
+      name: "stance_swing_interpretation",
+      label: "Stance Swing Interpretation",
+      type: "input",
+    },
+  ],
+},
+{
+  type: "accordion",
+  label: "4. Step Width (with Interpretation)",
+  defaultOpen: false,
+  children: [
+    {
+      name: "step_width",
+      type: "grid-table-flat",
+      headers: ["Left", "Right", "Norms"],
+      rows: [
+        {
+          key: "width",
+          label: "Width (m)",
+        },
+      ],
+      labelWidth: "180px",
+    },
+    {
+      name: "step_width_interpretation",
+      label: "Step Width Interpretation",
+      type: "input",
+    },
+  ],
+},
+{
+  type: "accordion",
+  label: "5. Kinematic Graph",
+  defaultOpen: false,
+  children: [
+    {
+      name: "kinematic_interpretation",
+      label: "Kinematic Interpretation",
+      type: "input",
+    },
+  ],
+},
+    { name: "gait_chieft_complaint", label: "  Gait Chief Complaint",     type: "input" },
      {
-            name: "hpi",
+            name: "hpi_gait",
             label: "History of Presenting Illness (HPI)",
             type: "input"
-          }
+          },
+        
+// {
+//       name: "gait_feature",
+//       label: "Gait Feature",
+//       type: "single-select",
+
+//       options: [
+//         { label: "Forward lean increased", value: "forward_lean" },
+//         { label: "Hyper lordose", value: "hyper_lordose" },
+//         { label: "Ipsilateral lean", value: "ipsilateral_lean" },
+//         { label: "Anterior tilt increased", value: "anterior_tilt" },
+//         { label: "Posterior tilt movement increased", value: "posterior_tilt" },
+//         { label: "Obliquity drop", value: "obliquity_drop" },
+//         { label: "Obliquity lift", value: "obliquity_lift" },
+//         { label: "Protraction increased", value: "protraction" },
+//         { label: "Retraction increased", value: "retraction" },
+//         { label: "Extension decreased", value: "hip_extension_decreased" },
+//         { label: "Peak extension delayed", value: "peak_extension_delayed" },
+//         { label: "Flexion delayed", value: "flexion_delayed" },
+//         { label: "Flexion increased", value: "flexion_increased" },
+//       ],
+//     },
+{type:'subheading',label:'Appendix A: Relation gait feature - possible impairments'},
+{
+  name: "gait_feature",
+  label: "Gait Feature",
+  type: "multi-select-dropdown",
+
+  showIf: {
+    field: "paediatrics_mapping",
+    equals: "Yes",
+    and: {
+      field: "services",
+      includes: "paediatrics"
+    }
+  },
+
+ options: [
+    { label: "Forward lean increased", value: "forward_lean" },
+    { label: "Hyper lordose", value: "hyper_lordose" },
+    { label: "Ipsilateral lean", value: "ipsilateral_lean" },
+    { label: "Anterior tilt increased", value: "anterior_tilt" },
+    { label: "Posterior tilt movement increased", value: "posterior_tilt" },
+    { label: "Obliquity drop", value: "obliquity_drop" },
+    { label: "Obliquity lift", value: "obliquity_lift" },
+    { label: "Protraction increased", value: "protraction" },
+    { label: "Retraction increased", value: "retraction" },
+    { label: "Extension decreased", value: "hip_extension_decreased" },
+    { label: "Peak extension delayed", value: "peak_extension_delayed" },
+    { label: "Flexion delayed", value: "flexion_delayed" },
+    { label: "Flexion increased", value: "flexion_increased" },
+  ],
+},
+
+{
+  type: "custom",
+  name: "underlying_impairment_dropdown",
+  
+  render: ({ values, onChange }) => {
+
+    const selectedFeatures =
+      values?.gait_feature || [];
+
+    const impairments = [
+      ...new Map(
+        selectedFeatures
+          .flatMap(
+            feature => GAIT_FEATURE_MAPPING[feature] || []
+          )
+          .map(item => [item.impairment, item])
+      ).values()
+    ];
+
+    return (
+      <CommonFormBuilder
+        schema={{
+          sections: [
+            {
+              fields: [
+                {
+                  name: "selected_impairments",
+                  label: "Underlying Impairment",
+                  type: "multi-select-dropdown",
+                   showIf: {
+    field: "paediatrics_mapping",
+    equals: "Yes",
+    and: {
+      field: "services",
+      includes: "paediatrics"
+    }
+  },
+                  options: impairments.map(item => ({
+                    label: item.impairment,
+                    value: item.impairment,
+                  })),
+                },
+              ],
+            },
+          ],
+        }}
+        values={values}
+        onChange={onChange}
+      />
+    );
+  },
+},
+// {
+//   type: "custom",
+//   name: "impairment_details",
+//   render: ({ values, onChange }) => {
+//     const selectedFeatures = values?.gait_feature || [];
+//     const selectedImpairment =
+//       values?.selected_impairment;
+
+//     const item = selectedFeatures
+//       .flatMap(
+//         feature => GAIT_FEATURE_MAPPING[feature] || []
+//       )
+//       .find(
+//         x => x.impairment === selectedImpairment
+//       );
+
+//     if (!item) return null;
+
+//     return (
+//       <div
+//         style={{
+//           border: "1px solid #e5e7eb",
+//           borderRadius: 8,
+//           padding: 16,
+//           marginTop: 12,
+//         }}
+//       >
+//         <div>
+//           <strong>Plane:</strong> {item.plane}
+//         </div>
+
+//         <div>
+//           <strong>Segment:</strong> {item.segment}
+//         </div>
+
+//         <div>
+//           <strong>Gait Phase:</strong> {item.gaitPhase}
+//         </div>
+
+//         <div style={{ marginTop: 12 }}>
+//           <label className="form-label">
+//             Likelihood
+//           </label>
+
+//           <div className="fb-inline-group">
+//             <label>
+//               <input
+//                 type="radio"
+//                 checked={
+//                   values?.likelihood === "Yes"
+//                 }
+//                 onChange={() =>
+//                   onChange("likelihood", "Yes")
+//                 }
+//               />
+//               Yes
+//             </label>
+
+//             <label>
+//               <input
+//                 type="radio"
+//                 checked={
+//                   values?.likelihood === "No"
+//                 }
+//                 onChange={() =>
+//                   onChange("likelihood", "No")
+//                 }
+//               />
+//               No
+//             </label>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+// },
+
+{
+  type: "custom",
+  name: "impairment_details",
+  render: ({ values, onChange }) => {
+
+    const gaitLabels = {
+      forward_lean: "Forward lean increased",
+      hyper_lordose: "Hyper lordose",
+      ipsilateral_lean: "Ipsilateral lean",
+      anterior_tilt: "Anterior tilt increased",
+      posterior_tilt: "Posterior tilt movement increased",
+      obliquity_drop: "Obliquity drop",
+      obliquity_lift: "Obliquity lift",
+      protraction: "Protraction increased",
+      retraction: "Retraction increased",
+      hip_extension_decreased: "Extension decreased",
+      peak_extension_delayed: "Peak extension delayed",
+      flexion_delayed: "Flexion delayed",
+      flexion_increased: "Flexion increased",
+    };
+
+    const selectedFeatures =
+      values?.gait_feature || [];
+
+    const selectedImpairments =
+      values?.selected_impairments || [];
+
+    const rows = [];
+    const tableValues = {};
+
+    selectedFeatures.forEach(feature => {
+      (GAIT_FEATURE_MAPPING[feature] || [])
+        .filter(item =>
+          selectedImpairments.includes(item.impairment)
+        )
+        .forEach((item, index) => {
+
+          const rowKey = `${feature}_${index}`;
+
+          rows.push({
+            key: rowKey,
+            label: gaitLabels[feature]
+          });
+
+          tableValues[
+            `gait_impairment_table_${rowKey}_Gait Feature`
+          ] = gaitLabels[feature];
+
+          tableValues[
+            `gait_impairment_table_${rowKey}_Plane`
+          ] = item.plane;
+
+          tableValues[
+            `gait_impairment_table_${rowKey}_Segment`
+          ] = item.segment;
+
+          tableValues[
+            `gait_impairment_table_${rowKey}_Gait Phase`
+          ] = item.gaitPhase;
+
+          tableValues[
+            `gait_impairment_table_${rowKey}_Underlying Impairment`
+          ] = item.impairment;
+
+          tableValues[
+            `gait_impairment_table_${rowKey}_Likelihood`
+          ] = values[
+            `gait_impairment_table_${rowKey}_Likelihood`
+          ] || "";
+        });
+    });
+
+    if (!rows.length) return null;
+
+    return (
+      <CommonFormBuilder
+        schema={{
+          sections: [
+            {
+              fields: [
+                {
+  name: "gait_impairment_table",
+  type: "grid-table-flat",
+
+  headers: [
+   
+    "Plane",
+    "Segment",
+    "Gait Phase",
+    "Underlying Impairment",
+    "Likelihood"
+  ],
+
+  rows,
+
+  headerOptions: {
+    "Likelihood": ["Yes", "No"]
+  },
+
+  labelWidth: "200px"
+}
+              ]
+            }
+          ]
+        }}
+        values={{
+          ...values,
+          ...tableValues
+        }}
+        onChange={onChange}
+      />
+    );
+  }
+} // {
+    //   type: "custom",
+    //   name: "gait_impairment_table",
+    //   render: ({ values }) => {
+    //     const selectedGaitFeature = values?.gait_feature;
+    //     const impairments = selectedGaitFeature ? GAIT_FEATURE_MAPPING[selectedGaitFeature] : [];
+
+    //     const planeLabel = { S: "Sagittal", F: "Frontal", T: "Transverse" };
+
+    //     const containerStyle = {
+    //       border: "1px solid #e5e7eb",
+    //       borderRadius: 8,
+    //       overflow: "hidden",
+    //       marginTop: 8,
+    //     };
+
+    //     const headerStyle = {
+    //       display: "grid",
+    //       gridTemplateColumns: "100px 100px 120px 1fr 70px 70px",
+    //       background: "#f1f5f9",
+    //       fontWeight: 700,
+    //       fontSize: 12,
+    //       color: "#334155",
+    //       borderBottom: "2px solid #e2e8f0",
+    //     };
+
+    //     const headerCellStyle = {
+    //       padding: "10px 8px",
+    //       textAlign: "left",
+    //       borderRight: "1px solid #e2e8f0",
+    //     };
+
+    //     const rowStyle = {
+    //       display: "grid",
+    //       gridTemplateColumns: "100px 100px 120px 1fr 70px 70px",
+    //       borderBottom: "1px solid #e5e7eb",
+    //       fontSize: 12,
+    //       background: "#fff",
+    //     };
+
+    //     const cellStyle = {
+    //       padding: "8px",
+    //       borderRight: "1px solid #f1f5f9",
+    //       display: "flex",
+    //       alignItems: "center",
+    //     };
+
+    //     // if (!selectedGaitFeature) {
+    //     //   return (
+    //     //     <div style={{ fontSize: 13, color: "#9ca3af", fontStyle: "italic", marginTop: 8 }}>
+    //     //       Select a gait feature above to view related impairments.
+    //     //     </div>
+    //     //   );
+    //     // }
+
+    //     // if (impairments.length === 0) {
+    //     //   return (
+    //     //     <div style={{ fontSize: 13, color: "#9ca3af", fontStyle: "italic", marginTop: 8 }}>
+    //     //       No impairments mapped for this gait feature.
+    //     //     </div>
+    //     //   );
+    //     // }
+
+    //     return (
+    //       <div style={containerStyle}>
+    //         {/* Header */}
+    //         <div style={headerStyle}>
+    //           <div style={headerCellStyle}>Plane</div>
+    //           <div style={headerCellStyle}>Segment</div>
+    //           <div style={headerCellStyle}>Gait Phase</div>
+    //           <div style={headerCellStyle}>Underlying Impairment</div>
+    //           <div style={{ ...headerCellStyle, textAlign: "center" }}>Mean</div>
+    //           <div style={{ ...headerCellStyle, textAlign: "center", borderRight: "none" }}>SD</div>
+    //         </div>
+
+    //         {/* Rows */}
+    //         {impairments.map((item, idx) => (
+    //           <div key={idx} style={{ ...rowStyle, background: idx % 2 === 0 ? "#fff" : "#fafbfc" }}>
+    //             <div style={cellStyle}>
+    //               <span style={{
+    //                 padding: "2px 8px",
+    //                 borderRadius: 4,
+    //                 fontSize: 11,
+    //                 fontWeight: 600,
+    //                 color: "#1d4ed8",
+    //                 background: "#dbeafe",
+    //               }}>
+    //                 {planeLabel[item.plane] || item.plane}
+    //               </span>
+    //             </div>
+    //             <div style={cellStyle}>
+    //               <span style={{
+    //                 padding: "2px 8px",
+    //                 borderRadius: 4,
+    //                 fontSize: 11,
+    //                 fontWeight: 600,
+    //                 color: "#065f46",
+    //                 background: "#d1fae5",
+    //               }}>
+    //                 {item.segment}
+    //               </span>
+    //             </div>
+    //             <div style={cellStyle}>{item.gaitPhase}</div>
+    //             <div style={{ ...cellStyle, fontWeight: 600, color: "#0f172a" }}>{item.impairment}</div>
+    //             <div style={{ ...cellStyle, justifyContent: "center", fontWeight: 600 }}>{item.mean}</div>
+    //             <div style={{ ...cellStyle, justifyContent: "center", borderRight: "none" }}>{item.sd}</div>
+    //           </div>
+    //         ))}
+    //       </div>
+    //     );
+    //   },
+    // },
+
   ]}],
 };
 
 const MC_ASSESSMENT_SCHEMA = {
-
   actions: [
-    { type: "back",  label: "Back"  },
+    { type: "back", label: "Back" },
     { type: "clear", label: "Clear" },
-    { type: "save",  label: "Save"  },
+    { type: "save", label: "Save" },
   ],
- sections: [{ fields: [
-   
-    { name: "mc_gait_report",         label: "Upload Gait Report",  type: "attach-file" },
-    { name: "mc_chief_complaint_obj", label: "Chief Complaint",     type: "input" },
-     {
-            name: "hpi",
-            label: "History of Presenting Illness (HPI)",
-            type: "input"
-          }
-  ]}],
-};
 
+  sections: [
+    {
+      fields: [
+       {
+  type: "row",
+  cols: 4,
+  fields: [
+    {
+      name: "mc_gait_report",
+      label: "Upload EMG Report",
+      type: "attach-file",
+    },
+    {
+      name: "upper_limb_report",
+      label: "Upper Limb",
+      type: "attach-file",
+    },
+    {
+      name: "lower_limb_report",
+      label: "Lower Limb",
+      type: "attach-file",
+    },
+    {
+      name: "back_report",
+      label: "Back",
+      type: "attach-file",
+    },
+  ],
+},
+
+        {
+          name: "mc_chief_complaint_obj",
+          label: "Chief Complaint",
+          type: "input",
+        },
+
+        {
+          name: "hpi",
+          label: "History of Presenting Illness (HPI)",
+          type: "input",
+        },
+      ],
+    },
+  ],
+};
 
 const MC_SOAP_TABS = [
   { key: "subjective",  label: "Foot Scan"              },
@@ -560,9 +1314,14 @@ function EmptySoapPanel({ patient, onBack }) {
         onAction={handleAction}
       />
 
-      {/* Motion Capture sub-tabs (inside Objective) */}
+{/* Motion Capture sub-tabs (inside Objective) */}
       {activeSOAP === "objective" && (
         <MotionCaptureSubTabs patient={patient} values={values} onChange={onChange} />
+      )}
+
+      {/* Gait Feature Details (Appendix A cascading) - renders below the gait_feature select */}
+      {activeSOAP === "objective" && values?.gait_feature && (
+        <GaitFeatureDetails values={values} onChange={onChange} />
       )}
 
       {/* Next / Submit */}
@@ -583,6 +1342,149 @@ function EmptySoapPanel({ patient, onBack }) {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ── Gait Feature Details: Cascading selection for Appendix A ── */
+function GaitFeatureDetails({ values, onChange }) {
+  // const selectedGaitFeature = values?.gait_feature;
+  // const impairments = selectedGaitFeature ? GAIT_FEATURE_MAPPING[selectedGaitFeature] : [];
+  const selectedGaitFeatures = Array.isArray(values?.gait_feature)
+  ? values.gait_feature
+  : [];
+
+const impairments = selectedGaitFeatures.flatMap(
+  feature => GAIT_FEATURE_MAPPING[feature] || []
+);
+  const selectedImpairmentIdx = values?.selected_impairment_idx;
+
+  const handleImpairmentSelect = (idx) => {
+    onChange("selected_impairment_idx", String(idx));
+  };
+
+  // Gait feature label lookup
+  const gaitFeatureLabels = {
+    forward_lean: "Forward lean increased",
+    hyper_lordose: "Hyper lordose",
+    ipsilateral_lean: "Ipsilateral lean",
+    anterior_tilt: "Anterior tilt increased",
+    posterior_tilt: "Posterior tilt movement increased",
+    obliquity_drop: "Obliquity drop",
+    obliquity_lift: "Obliquity lift",
+    protraction: "Protraction increased",
+    retraction: "Retraction increased",
+    hip_extension_decreased: "Extension decreased",
+    peak_extension_delayed: "Peak extension delayed",
+    flexion_delayed: "Flexion delayed",
+    flexion_increased: "Flexion increased",
+  };
+
+  const planeLabel = {
+    S: "Sagittal",
+    F: "Frontal",
+    T: "Transverse",
+  };
+
+  const containerStyle = {
+    marginTop: 16,
+    padding: "16px 0",
+    borderTop: "1px solid #e5e7eb",
+  };
+
+  const sectionTitle = {
+    fontSize: 14,
+    fontWeight: 700,
+    color: "#0f172a",
+    marginBottom: 12,
+  };
+
+  const cardStyle = {
+    border: "1px solid #e5e7eb",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    cursor: "pointer",
+    transition: "all 0.15s",
+    background: "#fff",
+  };
+
+  const activeCardStyle = {
+    ...cardStyle,
+    border: "2px solid #2563eb",
+    background: "#eff6ff",
+    boxShadow: "0 0 0 3px rgba(37,99,235,0.1)",
+  };
+
+  const labelText = {
+    fontSize: 13,
+    fontWeight: 600,
+    color: "#1e293b",
+    marginBottom: 4,
+  };
+
+  const metaText = {
+    fontSize: 12,
+    color: "#6b7280",
+    lineHeight: 1.6,
+  };
+
+  const detailCardStyle = {
+    border: "1px solid #dbeafe",
+    borderRadius: 10,
+    padding: 16,
+    background: "#f8faff",
+    marginTop: 8,
+  };
+
+  const detailRow = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  };
+
+  const badgeStyle = (color, bg) => ({
+    padding: "3px 10px",
+    borderRadius: 6,
+    fontSize: 13,
+    fontWeight: 600,
+    color,
+    background: bg,
+  });
+
+  const meanSdBadge = {
+    padding: "4px 10px",
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    background: "#f1f5f9",
+    color: "#475569",
+  };
+
+  // If no gait feature selected, nothing to show
+  // if (!selectedGaitFeature) return null;
+
+  return (
+    <div style={containerStyle}>
+      {/* Impairments section */}
+     
+      {impairments.length === 0 && (
+        <div style={{ fontSize: 13, color: "#9ca3af", fontStyle: "italic" }}>
+          No impairments mapped for this gait feature.
+        </div>
+      )}
+
+      {impairments.map((item, idx) => {
+        const isActive = selectedImpairmentIdx === String(idx);
+        return (
+          <div key={idx}>
+            
+             
+                        
+          </div>
+        );
+      })}
     </div>
   );
 }
