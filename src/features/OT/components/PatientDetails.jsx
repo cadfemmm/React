@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 
 /* ── Standard assessment components ── */
-import Neuro            from "./Neuro";
-import SpinalCordInjury from "./SpinalcordInjury";
-import Musculoskeletal  from "./Musculoskeletal";
-import Conditioning     from "./Conditioning";
-import Amputee          from "./Amputee";
-import DrivingRehab     from "./DrivingRehab";
-import HomeAssessment   from "./HomeAssessment";
+import Neuro                           from "./Neuro";
+import SpinalCordInjury                from "./SpinalcordInjury";
+import Musculoskeletal                 from "./Musculoskeletal";
+import Conditioning                    from "./Conditioning";
+import Amputee                         from "./Amputee";
+import DrivingRehab                    from "./DrivingRehab";
+import HomeAssessment                  from "./HomeAssessment";
+import OtInitialAssessmentCardioResp   from "./Otinitialassessmentcardioresp";
+import Otprogressassessmentcardioresp from "./Otprogressassessmentcardioresp";
 
 /* ── Progress components ── */
 // import NeuroProgress           from "../../../features/PT/components/NeuroProgress";
@@ -49,13 +51,14 @@ function AssessmentCard({ item, onClick }) {
 }
 
 const TABS = [
-  { key: "conditioning",    label: "Cognitive"          },
-  { key: "neuro",           label: "Neurology"          },
-  { key: "msk",             label: "Musculoskeletal"    },
-  { key: "sci",             label: "Spinal Cord Injury" },
-  { key: "amputee",         label: "Amputee"            },
-  { key: "driving_rehab",   label: "Driving Rehab"      },
-  { key: "home_assessment", label: "Home Assessment"    },
+  { key: "conditioning",       label: "Cognitive"             },
+  { key: "neuro",              label: "Neurology"             },
+  { key: "msk",                label: "Musculoskeletal"       },
+  { key: "sci",                label: "Spinal Cord Injury"    },
+  { key: "amputee",            label: "Amputee"               },
+  { key: "cardiorespiratory",  label: "Cardiorespiratory"     },
+  { key: "driving_rehab",      label: "Driving Rehab"         },
+  { key: "home_assessment",    label: "Home Assessment"       },
 ];
 
 const TYPE_COLORS = { initial: { bg: "#dbeafe", color: "#1d4ed8" }, followup: { bg: "#d1fae5", color: "#065f46" }, progress: { bg: "#ede9fe", color: "#5b21b6" }, group: { bg: "#fee2e2", color: "#991b1b" } };
@@ -85,24 +88,26 @@ export default function ProgramTabsWithContent({ patient, mode, onBack }) {
   const renderContent = () => {
     if (assessmentType === "progress") {
       switch (activeTab) {
-        case "conditioning":    return <CognitiveProgress         patient={patient} onBack={() => setAssessmentType(null)} />;
-        case "neuro":           return <NeuroProgress             patient={patient} onBack={() => setAssessmentType(null)} />;
-        case "msk":             return <MSDProgress               patient={patient} onBack={() => setAssessmentType(null)} />;
-        case "sci":             return <SpinalcordinjuryProgress  patient={patient} onBack={() => setAssessmentType(null)} />;
-        case "amputee":         return <AmputeeProgress           patient={patient} onBack={() => setAssessmentType(null)} />;
-        case "driving_rehab":   return <DrivingRehab              patient={patient} />;
-        case "home_assessment": return <HomeAssessment            patient={patient} />;
+        case "conditioning":       return <CognitiveProgress         patient={patient} onBack={() => setAssessmentType(null)} />;
+        case "neuro":              return <NeuroProgress             patient={patient} onBack={() => setAssessmentType(null)} />;
+        case "msk":                return <MSDProgress               patient={patient} onBack={() => setAssessmentType(null)} />;
+        case "sci":                return <SpinalcordinjuryProgress  patient={patient} onBack={() => setAssessmentType(null)} />;
+        case "amputee":            return <AmputeeProgress           patient={patient} onBack={() => setAssessmentType(null)} />;
+        case "cardiorespiratory":  return <Otprogressassessmentcardioresp patient={patient} onBack={() => setAssessmentType(null)} />;
+        case "driving_rehab":      return <DrivingRehab              patient={patient} />;
+        case "home_assessment":    return <HomeAssessment            patient={patient} />;
         default: return null;
       }
     }
     switch (activeTab) {
-      case "conditioning":    return <Conditioning     patient={patient} />;
-      case "neuro":           return <Neuro            patient={patient} />;
-      case "msk":             return <Musculoskeletal  patient={patient} />;
-      case "sci":             return <SpinalCordInjury patient={patient} />;
-      case "amputee":         return <Amputee          patient={patient} />;
-      case "driving_rehab":   return <DrivingRehab     patient={patient} />;
-      case "home_assessment": return <HomeAssessment   patient={patient} />;
+      case "conditioning":       return <Conditioning     patient={patient} />;
+      case "neuro":              return <Neuro            patient={patient} />;
+      case "msk":                return <Musculoskeletal  patient={patient} />;
+      case "sci":                return <SpinalCordInjury patient={patient} />;
+      case "amputee":            return <Amputee          patient={patient} />;
+      case "cardiorespiratory":  return <OtInitialAssessmentCardioResp patient={patient} onBack={() => setAssessmentType(null)} />;
+      case "driving_rehab":      return <DrivingRehab     patient={patient} />;
+      case "home_assessment":    return <HomeAssessment   patient={patient} />;
       default: return null;
     }
   };

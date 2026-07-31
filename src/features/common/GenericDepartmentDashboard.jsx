@@ -32,6 +32,10 @@ import DietGroupIntervention from "../Dietetics/components/DietGroup";
 import GroupInterventionPatientPicker from "./GroupInterventionPatientPicker";
 import SpeechGroupIntervention from "../SpeechandLanguage/Speechandlanguagegroup";
 import SpeechTherapyPaedSOAP from "../SpeechandLanguage/SpeechandlanguagePaedprogress";
+import IntegratedRehabGroupIntervention from "../PT/components/IntegratedRehabGroup";
+import WorkRehabGroupIntervention from "../VocationalRehab/components/WorkrehabGroup";
+import PhysiotherapyGroupIntervention from "../PT/components/PhysiotherapyGroup";
+import OccupationalTherapyGroupIntervention from "../OT/components/OccupationalTherapyGroup";
 
 const ASSESSMENT_MAP = {
   "Nursing":                  NursingPatientDetails,
@@ -49,12 +53,16 @@ const ASSESSMENT_MAP = {
 };
 
 const GROUP_INTERVENTION_MAP = {
-  "Nursing": NursingGroupIntervention,
-  "Prosthetics & Orthotics": POGroupIntervention,
-  "Audiology": AudiologyGroupAssessmentForm,
-  "Optometry": OptometryGroupIntervention,
-  "Dietetics": DietGroupIntervention,
-  "Speech & Language Therapy": SpeechGroupIntervention,
+  "Nursing":                  NursingGroupIntervention,
+  "Prosthetics & Orthotics":  POGroupIntervention,
+  "Audiology":                AudiologyGroupAssessmentForm,
+  "Optometry":                OptometryGroupIntervention,
+  "Dietetics":                DietGroupIntervention,
+  "Speech & Language Therapy":SpeechGroupIntervention,
+  "Integrated Rehab":         IntegratedRehabGroupIntervention,
+  "Work & Vocational Rehab":  WorkRehabGroupIntervention,
+  "Physiotherapy":            PhysiotherapyGroupIntervention,
+  "Occupational Therapy":     OccupationalTherapyGroupIntervention,
 };
 
 /** Departments that override the default "Progress Intervention" card with a
