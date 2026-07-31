@@ -572,7 +572,7 @@ const ASSESSMENT_SCHEMA = {
     {
       type: "grid-table-flat",
       name: "physical_demand",
-      headers: ["Observation", "Score", "Remarks"],
+      headers: ["Observation/Remarks", "Score"],
       headerOptions: {
         Score: SCORE_OPTIONS
       },
@@ -603,7 +603,7 @@ const ASSESSMENT_SCHEMA = {
     {
       type: "grid-table-flat",
       name: "cognitive_demand",
-      headers: ["Observation", "Score", "Remarks"],
+      headers: ["Observation/Remarks", "Score"],
       headerOptions: {
         Score: SCORE_OPTIONS
       },
@@ -634,7 +634,7 @@ const ASSESSMENT_SCHEMA = {
     {
       type: "grid-table-flat",
       name: "sensory_demand",
-      headers: ["Observation", "Score", "Remarks"],
+      headers: ["Observation/Remarks", "Score"],
       headerOptions: {
         Score: SCORE_OPTIONS
       },
@@ -709,6 +709,7 @@ const ASSESSMENT_SCHEMA = {
     }
   ]
 };
+
 
 const PLAN_SCHEMA = {
   title: "",
