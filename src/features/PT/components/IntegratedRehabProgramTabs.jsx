@@ -24,7 +24,1962 @@ import MetamotusGalileoProgressNote from "./Metamotusgalileoprogressnote";
 import PatientCard from "../../../shared/cards/PatientCard";
 
 /* ── Appendix A: Relation Gait Feature → Possible Impairments ── */
-export const GAIT_FEATURE_MAPPING = {
+const IMPAIRMENT_MAPPING_SHOWIF = {
+  or: [
+    { field: "paediatrics_mapping", equals: "Yes" },
+    { field: "neurology_mapping", equals: "Yes" },
+    { field: "sci_mapping", equals: "Yes" },
+  ],
+};
+
+
+export const IMPAIRMENT_GAIT_MAPPING_Peadiatrics = {
+ "Adductor spasticity / contracture": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+"Anatomical leg length discrepancy - longest leg": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Anatomical leg length discrepancy - shortest leg": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity drop",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased (vaulting)",
+    gaitPhase: "Stance",
+  },
+],
+
+"Excessive ankle plantar flexor length": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Extension lag": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LR-EST",
+  },
+],
+
+"Femoral anteversion increased": [
+  {
+    plane: "T",
+    segment: "Pelvis",
+    gaitFeature: "Retraction increased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+],
+
+"Foot deformity": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/midfoot contact",
+    gaitPhase: "IC",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact",
+    gaitPhase: "IC",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Gait cycle",
+  },
+  
+],
+"Gastrocnemius spasticity / contracture":[
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW"
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST"
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle"
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heel rise",
+    gaitPhase: "EST"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking",
+    gaitPhase: "Stance"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/midfoot contact",
+    gaitPhase: "IC"
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact",
+    gaitPhase: "IC"
+  }
+],
+"Gluteus maximus weakness": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Peak extension delayed",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Gluteus medius weakness": [
+  {
+    plane: "F",
+    segment: "Trunk",
+    gaitFeature: "Ipsilateral lean",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Hamstrings spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Posterior tilt movement increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Narrow stride width",
+    gaitPhase: "Stance",
+  },
+],
+"Hamstrings weakness": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+],
+"Iliopsoas spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "T",
+    segment: "Pelvis",
+    gaitFeature: "Retraction increased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Iliopsoas weakness": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "PSW-ESW",
+  },
+],
+
+"Knee flexion contracture": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+"Limited selective control (flexion/extension synergy)": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Peroneus spasticity / contracture": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+"Peroneus weakness": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+"Quadriceps weakness": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+  },
+],
+
+"Rectus femoris spasticity": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "ESW",
+  },
+],
+
+"Soleus spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension movement",
+    gaitPhase: "LR",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise",
+    gaitPhase: "EST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+"Soleus weakness": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Peak extension delayed",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+  },
+],
+
+"Tibial torsion too external": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+  },
+],
+
+"Tibial torsion too internal": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Exorotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+],
+"Tibialis anterior weakness": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Tibialis posterior spasticity / contracture": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Tibialis posterior weakness": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+
+
+};
+export const IMPAIRMENT_GAIT_MAPPING_Nurology = {
+ "Adductor spasticity / contracture": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+"Anatomical leg length discrepancy - longest leg": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Anatomical leg length discrepancy - shortest leg": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity drop",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased (vaulting)",
+    gaitPhase: "Stance",
+  },
+],
+
+"Excessive ankle plantar flexor length": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Extension lag": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LR-EST",
+  },
+],
+
+"Femoral anteversion increased": [
+  {
+    plane: "T",
+    segment: "Pelvis",
+    gaitFeature: "Retraction increased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+],
+
+"Foot deformity": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/midfoot contact",
+    gaitPhase: "IC",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact",
+    gaitPhase: "IC",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Gait cycle",
+  },
+  
+],
+"Gastrocnemius spasticity / contracture":[
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW"
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST"
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle"
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heel rise",
+    gaitPhase: "EST"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking",
+    gaitPhase: "Stance"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/midfoot contact",
+    gaitPhase: "IC"
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact",
+    gaitPhase: "IC"
+  }
+],
+"Gluteus maximus weakness": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Peak extension delayed",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Gluteus medius weakness": [
+  {
+    plane: "F",
+    segment: "Trunk",
+    gaitFeature: "Ipsilateral lean",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Hamstrings spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Posterior tilt movement increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Narrow stride width",
+    gaitPhase: "Stance",
+  },
+],
+"Hamstrings weakness": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+],
+"Iliopsoas spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "T",
+    segment: "Pelvis",
+    gaitFeature: "Retraction increased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Iliopsoas weakness": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "PSW-ESW",
+  },
+],
+
+"Knee flexion contracture": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+"Limited selective control (flexion/extension synergy)": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Peroneus spasticity / contracture": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+"Peroneus weakness": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+"Quadriceps weakness": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+  },
+],
+
+"Rectus femoris spasticity": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "ESW",
+  },
+],
+
+"Soleus spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension movement",
+    gaitPhase: "LR",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise",
+    gaitPhase: "EST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+"Soleus weakness": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Peak extension delayed",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+  },
+],
+
+"Tibial torsion too external": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+  },
+],
+
+"Tibial torsion too internal": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Exorotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+],
+"Tibialis anterior weakness": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Tibialis posterior spasticity / contracture": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Tibialis posterior weakness": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+
+
+};
+export const IMPAIRMENT_GAIT_MAPPING_Spinal = {
+ "Adductor spasticity / contracture": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+"Anatomical leg length discrepancy - longest leg": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Anatomical leg length discrepancy - shortest leg": [
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity drop",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased (vaulting)",
+    gaitPhase: "Stance",
+  },
+],
+
+"Excessive ankle plantar flexor length": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Extension lag": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LR-EST",
+  },
+],
+
+"Femoral anteversion increased": [
+  {
+    plane: "T",
+    segment: "Pelvis",
+    gaitFeature: "Retraction increased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+],
+
+"Foot deformity": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/midfoot contact",
+    gaitPhase: "IC",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact",
+    gaitPhase: "IC",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Gait cycle",
+  },
+  
+],
+"Gastrocnemius spasticity / contracture":[
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW"
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST"
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST"
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle"
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heel rise",
+    gaitPhase: "EST"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking",
+    gaitPhase: "Stance"
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/midfoot contact",
+    gaitPhase: "IC"
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact",
+    gaitPhase: "IC"
+  }
+],
+"Gluteus maximus weakness": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Peak extension delayed",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Gluteus medius weakness": [
+  {
+    plane: "F",
+    segment: "Trunk",
+    gaitFeature: "Ipsilateral lean",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "F",
+    segment: "Pelvis",
+    gaitFeature: "Obliquity lift",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Hamstrings spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Posterior tilt movement increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Narrow stride width",
+    gaitPhase: "Stance",
+  },
+],
+"Hamstrings weakness": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+],
+"Iliopsoas spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Pelvis",
+    gaitFeature: "Anterior tilt increased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "T",
+    segment: "Pelvis",
+    gaitFeature: "Retraction increased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+
+"Iliopsoas weakness": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "PSW-ESW",
+  },
+],
+
+"Knee flexion contracture": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+  },
+],
+"Limited selective control (flexion/extension synergy)": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Peroneus spasticity / contracture": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+"Peroneus weakness": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+"Quadriceps weakness": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+  },
+],
+
+"Rectus femoris spasticity": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LST",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "ESW",
+  },
+],
+
+"Soleus spasticity / contracture": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension movement",
+    gaitPhase: "LR",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise",
+    gaitPhase: "EST",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+"Soleus weakness": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Peak extension delayed",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+  },
+],
+
+"Tibial torsion too external": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+  },
+],
+
+"Tibial torsion too internal": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Exorotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+  },
+],
+"Tibialis anterior weakness": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "Swing",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Tibialis posterior spasticity / contracture": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+  },
+],
+
+"Tibialis posterior weakness": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+  },
+],
+
+
+
+};
+
+
+export const GAIT_FEATURE_MAPPING_Peadiatrics = {
   forward_lean: [
     { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.5, sd: 0.7 },
   ],
@@ -79,6 +2034,2350 @@ export const GAIT_FEATURE_MAPPING = {
     { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.1, sd: 1.0 },
     { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "<< Knee flexion increased", mean: 2.8, sd: 0.9 },
   ],
+  "Flexion increased (high steps)": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+
+"Flexion decreased": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Iliopsoas weakness",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Push-off decreased",
+  },
+],
+
+"Adduction increased": [
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Adductor spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus medius weakness",
+  },
+],
+
+"Abduction (circumduction)": [
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Abduction (circumduction)",
+    gaitPhase: "Swing",
+    impairment: "Clearance decreased",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Abduction (circumduction)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+
+"Exorotation increased": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Exorotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibial torsion too internal",
+  },
+],
+
+"Endorotation increased": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Adductor spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Femoral anteversion increased",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus maximus weakness",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too external",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+
+"Adduction increased (LSW)": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+"Extension decreased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Push-off decreased",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+],
+
+"Extension increased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "Stance",
+    impairment: "Quadriceps weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Extension movement": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension movement",
+    gaitPhase: "LR",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Flexion decreased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Reduced walking speed",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "PSW-ESW",
+    impairment: "Iliopsoas weakness",
+  },
+],
+
+"Flexion increased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased in LST-PSW",
+    gaitPhase: "ESW",
+    impairment: "Knee flexion increased in LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "ESW",
+    impairment: "Rectus femoris spasticity",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "ESW",
+    impairment: "Push-off decreased",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Knee flexion contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Excessive ankle plantar flexor length",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+],
+
+"Flexion delayed": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+],
+"Flexion increased (continued)": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus maximus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Iliopsoas spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Anatomical leg length discrepancy - longest leg",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST-LST",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LST",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LR-EST",
+    impairment: "Extension lag",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+    impairment: "Soleus weakness",
+  },
+],
+"Flexion increased (high steps)": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+"Backward inclination": [
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+    impairment: "Quadriceps weakness",
+  },
+],
+
+"Forward inclination increased (v)": [
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+    impairment: "Gastrocnemius weakness",
+  },
+],
+
+"Dorsal flexion increased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Excessive ankle plantar flexor length",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Knee flexion contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Soleus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LST",
+    impairment: "Gastrocnemius weakness",
+  },
+],
+
+"Plantar flexion decreased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+    impairment: "Soleus weakness",
+  },
+],
+
+"Plantar flexion increased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "MST",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "Swing",
+    impairment: "Tibialis anterior weakness",
+  },
+],
+
+"Plantar flexion increased (vaulting)": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased (vaulting)",
+    gaitPhase: "Stance",
+    impairment: "Anatomical leg length discrepancy - shortest leg",
+  },
+],
+"Plantar flexion peak too early": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Internal rotation increased": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus weakness",
+  },
+],
+
+"Inversion (varus) increased": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus weakness",
+  },
+],
+
+"Eversion (valgus) increased": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior weakness",
+  },
+],
+
+"Early heelrise (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise (v)",
+    gaitPhase: "EST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise (v)",
+    gaitPhase: "EST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Toe walking (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+"Forefoot/ midfoot contact (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Tibialis anterior weakness",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Foot deformity",
+  },
+],
+
+"Clearance decreased (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Clearance decreased (v)",
+    gaitPhase: "ESW",
+    impairment: "Ankle plantar flexion increased in ESW",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Clearance decreased (v)",
+    gaitPhase: "ESW",
+    impairment: "Knee flexion decreased in ESW",
+  },
+],
+
+"Lateral foot contact (v)": [
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Peroneus weakness",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+],
+
+"Narrow stride width": [
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Narrow stride width",
+    gaitPhase: "Stance",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+
+"Progression angle too external": [
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too external",
+  },
+],
+
+"Foot Progression angle too internal": [
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too internal",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Peroneus weakness",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Femoral anteversion increased",
+  },
+],
+
+}
+export const GAIT_FEATURE_MAPPING_Nurology = {
+  forward_lean: [
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.5, sd: 0.7 },
+  ],
+  hyper_lordose: [
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Anterior tilt increased", mean: 4.4, sd: 0.5 },
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.4, sd: 0.8 },
+  ],
+  ipsilateral_lean: [
+    { plane: "F", segment: "Trunk", gaitPhase: "EST-LST", impairment: "Gluteus medius weakness", mean: 4.1, sd: 0.6 },
+  ],
+  anterior_tilt: [
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.2, sd: 0.7 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Hamstrings weakness", mean: 3.4, sd: 0.9 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Iliopsoas spasticity / contracture", mean: 3.9, sd: 0.6 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 2.9, sd: 1.0 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Swing", impairment: "Iliopsoas spasticity / contracture", mean: 3.6, sd: 1.0 },
+  ],
+  posterior_tilt: [
+    { plane: "S", segment: "Pelvis", gaitPhase: "LSW", impairment: "Hamstrings spasticity / contracture", mean: 4.3, sd: 0.6 },
+  ],
+  obliquity_drop: [
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Anatomical leg length discrepancy - shortest leg", mean: 3.0, sd: 1.0 },
+  ],
+  obliquity_lift: [
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Adductor spasticity / contracture", mean: 2.6, sd: 0.6 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Anatomical leg length discrepancy - longest leg", mean: 2.9, sd: 1.0 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Stance", impairment: "Gluteus medius weakness", mean: 3.6, sd: 1.0 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Swing", impairment: "<< Clearance decreased", mean: 3.2, sd: 1.1 },
+  ],
+  protraction: [
+    { plane: "T", segment: "Pelvis", gaitPhase: "Stance", impairment: "<< Contralateral retraction increased", mean: 3.8, sd: 0.7 },
+  ],
+  retraction: [
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "Femoral anteversion increased", mean: 3.1, sd: 0.8 },
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "Iliopsoas spasticity / contracture", mean: 3.6, sd: 0.6 },
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "<< Hip extension decreased", mean: 3.9, sd: 0.7 },
+  ],
+  hip_extension_decreased: [
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Rectus femoris spasticity", mean: 2.6, sd: 1.0 },
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Iliopsoas spasticity / contracture", mean: 3.8, sd: 0.6 },
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Gluteus maximus weakness", mean: 2.7, sd: 1.3 },
+  ],
+  peak_extension_delayed: [
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gastrocnemius weakness", mean: 2.7, sd: 1.2 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Soleus weakness", mean: 2.8, sd: 1.3 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 2.6, sd: 0.9 },
+  ],
+  flexion_delayed: [
+    { plane: "S", segment: "Hip", gaitPhase: "ESW", impairment: "Limited selective control (flexion/extension synergy)", mean: 2.9, sd: 1.0 },
+  ],
+  flexion_increased: [
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.1, sd: 1.0 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "<< Knee flexion increased", mean: 2.8, sd: 0.9 },
+  ],
+  "Flexion increased (high steps)": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+
+"Flexion decreased": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Iliopsoas weakness",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Push-off decreased",
+  },
+],
+
+"Adduction increased": [
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Adductor spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus medius weakness",
+  },
+],
+
+"Abduction (circumduction)": [
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Abduction (circumduction)",
+    gaitPhase: "Swing",
+    impairment: "Clearance decreased",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Abduction (circumduction)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+
+"Exorotation increased": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Exorotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibial torsion too internal",
+  },
+],
+
+"Endorotation increased": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Adductor spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Femoral anteversion increased",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus maximus weakness",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too external",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+
+"Adduction increased (LSW)": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+"Extension decreased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Push-off decreased",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+],
+
+"Extension increased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "Stance",
+    impairment: "Quadriceps weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Extension movement": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension movement",
+    gaitPhase: "LR",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Flexion decreased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Reduced walking speed",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "PSW-ESW",
+    impairment: "Iliopsoas weakness",
+  },
+],
+
+"Flexion increased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased in LST-PSW",
+    gaitPhase: "ESW",
+    impairment: "Knee flexion increased in LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "ESW",
+    impairment: "Rectus femoris spasticity",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "ESW",
+    impairment: "Push-off decreased",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Knee flexion contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Excessive ankle plantar flexor length",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+],
+
+"Flexion delayed": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+],
+"Flexion increased (continued)": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus maximus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Iliopsoas spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Anatomical leg length discrepancy - longest leg",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST-LST",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LST",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LR-EST",
+    impairment: "Extension lag",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+    impairment: "Soleus weakness",
+  },
+],
+"Flexion increased (high steps)": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+"Backward inclination": [
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+    impairment: "Quadriceps weakness",
+  },
+],
+
+"Forward inclination increased (v)": [
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+    impairment: "Gastrocnemius weakness",
+  },
+],
+
+"Dorsal flexion increased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Excessive ankle plantar flexor length",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Knee flexion contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Soleus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LST",
+    impairment: "Gastrocnemius weakness",
+  },
+],
+
+"Plantar flexion decreased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+    impairment: "Soleus weakness",
+  },
+],
+
+"Plantar flexion increased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "MST",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "Swing",
+    impairment: "Tibialis anterior weakness",
+  },
+],
+
+"Plantar flexion increased (vaulting)": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased (vaulting)",
+    gaitPhase: "Stance",
+    impairment: "Anatomical leg length discrepancy - shortest leg",
+  },
+],
+"Plantar flexion peak too early": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Internal rotation increased": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus weakness",
+  },
+],
+
+"Inversion (varus) increased": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus weakness",
+  },
+],
+
+"Eversion (valgus) increased": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior weakness",
+  },
+],
+
+"Early heelrise (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise (v)",
+    gaitPhase: "EST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise (v)",
+    gaitPhase: "EST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Toe walking (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+"Forefoot/ midfoot contact (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Tibialis anterior weakness",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Foot deformity",
+  },
+],
+
+"Clearance decreased (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Clearance decreased (v)",
+    gaitPhase: "ESW",
+    impairment: "Ankle plantar flexion increased in ESW",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Clearance decreased (v)",
+    gaitPhase: "ESW",
+    impairment: "Knee flexion decreased in ESW",
+  },
+],
+
+"Lateral foot contact (v)": [
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Peroneus weakness",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+],
+
+"Narrow stride width": [
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Narrow stride width",
+    gaitPhase: "Stance",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+
+"Progression angle too external": [
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too external",
+  },
+],
+
+"Foot Progression angle too internal": [
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too internal",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Peroneus weakness",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Femoral anteversion increased",
+  },
+],
+
+}
+export const GAIT_FEATURE_MAPPING_Spinal = {
+  forward_lean: [
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.5, sd: 0.7 },
+  ],
+  hyper_lordose: [
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Anterior tilt increased", mean: 4.4, sd: 0.5 },
+    { plane: "S", segment: "Trunk", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 3.4, sd: 0.8 },
+  ],
+  ipsilateral_lean: [
+    { plane: "F", segment: "Trunk", gaitPhase: "EST-LST", impairment: "Gluteus medius weakness", mean: 4.1, sd: 0.6 },
+  ],
+  anterior_tilt: [
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.2, sd: 0.7 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Hamstrings weakness", mean: 3.4, sd: 0.9 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "Iliopsoas spasticity / contracture", mean: 3.9, sd: 0.6 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Stance", impairment: "<< Knee extension increased", mean: 2.9, sd: 1.0 },
+    { plane: "S", segment: "Pelvis", gaitPhase: "Swing", impairment: "Iliopsoas spasticity / contracture", mean: 3.6, sd: 1.0 },
+  ],
+  posterior_tilt: [
+    { plane: "S", segment: "Pelvis", gaitPhase: "LSW", impairment: "Hamstrings spasticity / contracture", mean: 4.3, sd: 0.6 },
+  ],
+  obliquity_drop: [
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Anatomical leg length discrepancy - shortest leg", mean: 3.0, sd: 1.0 },
+  ],
+  obliquity_lift: [
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Adductor spasticity / contracture", mean: 2.6, sd: 0.6 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Gait cycle", impairment: "Anatomical leg length discrepancy - longest leg", mean: 2.9, sd: 1.0 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Stance", impairment: "Gluteus medius weakness", mean: 3.6, sd: 1.0 },
+    { plane: "F", segment: "Pelvis", gaitPhase: "Swing", impairment: "<< Clearance decreased", mean: 3.2, sd: 1.1 },
+  ],
+  protraction: [
+    { plane: "T", segment: "Pelvis", gaitPhase: "Stance", impairment: "<< Contralateral retraction increased", mean: 3.8, sd: 0.7 },
+  ],
+  retraction: [
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "Femoral anteversion increased", mean: 3.1, sd: 0.8 },
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "Iliopsoas spasticity / contracture", mean: 3.6, sd: 0.6 },
+    { plane: "T", segment: "Pelvis", gaitPhase: "LST-PSW", impairment: "<< Hip extension decreased", mean: 3.9, sd: 0.7 },
+  ],
+  hip_extension_decreased: [
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Rectus femoris spasticity", mean: 2.6, sd: 1.0 },
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Iliopsoas spasticity / contracture", mean: 3.8, sd: 0.6 },
+    { plane: "S", segment: "Hip", gaitPhase: "LST-PSW", impairment: "Gluteus maximus weakness", mean: 2.7, sd: 1.3 },
+  ],
+  peak_extension_delayed: [
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gastrocnemius weakness", mean: 2.7, sd: 1.2 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Soleus weakness", mean: 2.8, sd: 1.3 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 2.6, sd: 0.9 },
+  ],
+  flexion_delayed: [
+    { plane: "S", segment: "Hip", gaitPhase: "ESW", impairment: "Limited selective control (flexion/extension synergy)", mean: 2.9, sd: 1.0 },
+  ],
+  flexion_increased: [
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "Gluteus maximus weakness", mean: 3.1, sd: 1.0 },
+    { plane: "S", segment: "Hip", gaitPhase: "Stance", impairment: "<< Knee flexion increased", mean: 2.8, sd: 0.9 },
+  ],
+  "Flexion increased (high steps)": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+
+"Flexion decreased": [
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Iliopsoas weakness",
+  },
+  {
+    plane: "S",
+    segment: "Hip",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Push-off decreased",
+  },
+],
+
+"Adduction increased": [
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Adductor spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus medius weakness",
+  },
+],
+
+"Abduction (circumduction)": [
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Abduction (circumduction)",
+    gaitPhase: "Swing",
+    impairment: "Clearance decreased",
+  },
+  {
+    plane: "F",
+    segment: "Hip",
+    gaitFeature: "Abduction (circumduction)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+
+"Exorotation increased": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Exorotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibial torsion too internal",
+  },
+],
+
+"Endorotation increased": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Adductor spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Femoral anteversion increased",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus maximus weakness",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too external",
+  },
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Endorotation increased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+
+"Adduction increased (LSW)": [
+  {
+    plane: "T",
+    segment: "Hip",
+    gaitFeature: "Adduction increased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+"Extension decreased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Push-off decreased",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension decreased",
+    gaitPhase: "LSW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+],
+
+"Extension increased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "Stance",
+    impairment: "Quadriceps weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension increased",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Extension movement": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Extension movement",
+    gaitPhase: "LR",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Flexion decreased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "Swing",
+    impairment: "Reduced walking speed",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion decreased",
+    gaitPhase: "PSW-ESW",
+    impairment: "Iliopsoas weakness",
+  },
+],
+
+"Flexion increased": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased in LST-PSW",
+    gaitPhase: "ESW",
+    impairment: "Knee flexion increased in LST-PSW",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "ESW",
+    impairment: "Rectus femoris spasticity",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "ESW",
+    impairment: "Push-off decreased",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Knee flexion contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Excessive ankle plantar flexor length",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+],
+
+"Flexion delayed": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion delayed",
+    gaitPhase: "ESW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+],
+"Flexion increased (continued)": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Gluteus maximus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Iliopsoas spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Anatomical leg length discrepancy - longest leg",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST-LST",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LST",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "LR-EST",
+    impairment: "Extension lag",
+  },
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased",
+    gaitPhase: "EST",
+    impairment: "Soleus weakness",
+  },
+],
+"Flexion increased (high steps)": [
+  {
+    plane: "S",
+    segment: "Knee",
+    gaitFeature: "Flexion increased (high steps)",
+    gaitPhase: "Swing",
+    impairment: "Contralateral stance leg (functionally) shorter",
+  },
+],
+"Backward inclination": [
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Backward inclination",
+    gaitPhase: "EST-LST",
+    impairment: "Quadriceps weakness",
+  },
+],
+
+"Forward inclination increased (v)": [
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Tibia",
+    gaitFeature: "Forward inclination increased (v)",
+    gaitPhase: "EST-LST",
+    impairment: "Gastrocnemius weakness",
+  },
+],
+
+"Dorsal flexion increased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Excessive ankle plantar flexor length",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "Stance",
+    impairment: "Knee flexion contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Soleus weakness",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Dorsal flexion increased",
+    gaitPhase: "LST",
+    impairment: "Gastrocnemius weakness",
+  },
+],
+
+"Plantar flexion decreased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+    impairment: "Gastrocnemius weakness",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion decreased",
+    gaitPhase: "PSW",
+    impairment: "Soleus weakness",
+  },
+],
+
+"Plantar flexion increased": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "MST",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LSW",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "LR-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased",
+    gaitPhase: "Swing",
+    impairment: "Tibialis anterior weakness",
+  },
+],
+
+"Plantar flexion increased (vaulting)": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion increased (vaulting)",
+    gaitPhase: "Stance",
+    impairment: "Anatomical leg length discrepancy - shortest leg",
+  },
+],
+"Plantar flexion peak too early": [
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Ankle",
+    gaitFeature: "Plantar flexion peak too early",
+    gaitPhase: "EST-LST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Internal rotation increased": [
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "T",
+    segment: "Ankle",
+    gaitFeature: "Internal rotation increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus weakness",
+  },
+],
+
+"Inversion (varus) increased": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Inversion (varus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus weakness",
+  },
+],
+
+"Eversion (valgus) increased": [
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Peroneus spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Ankle",
+    gaitFeature: "Eversion (valgus) increased",
+    gaitPhase: "Gait cycle",
+    impairment: "Tibialis posterior weakness",
+  },
+],
+
+"Early heelrise (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise (v)",
+    gaitPhase: "EST",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Early heelrise (v)",
+    gaitPhase: "EST",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+
+"Toe walking (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Toe walking (v)",
+    gaitPhase: "Stance",
+    impairment: "Soleus spasticity / contracture",
+  },
+],
+"Forefoot/ midfoot contact (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Tibialis anterior weakness",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Limited selective control (flexion/extension synergy)",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Soleus spasticity / contracture",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Forefoot/ midfoot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Foot deformity",
+  },
+],
+
+"Clearance decreased (v)": [
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Clearance decreased (v)",
+    gaitPhase: "ESW",
+    impairment: "Ankle plantar flexion increased in ESW",
+  },
+  {
+    plane: "S",
+    segment: "Foot",
+    gaitFeature: "Clearance decreased (v)",
+    gaitPhase: "ESW",
+    impairment: "Knee flexion decreased in ESW",
+  },
+],
+
+"Lateral foot contact (v)": [
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Gastrocnemius spasticity / contracture",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Peroneus weakness",
+  },
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Lateral foot contact (v)",
+    gaitPhase: "IC",
+    impairment: "Tibialis posterior spasticity / contracture",
+  },
+],
+
+"Narrow stride width": [
+  {
+    plane: "F",
+    segment: "Foot",
+    gaitFeature: "Narrow stride width",
+    gaitPhase: "Stance",
+    impairment: "Hamstrings spasticity / contracture",
+  },
+],
+
+"Progression angle too external": [
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too external",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too external",
+  },
+],
+
+"Foot Progression angle too internal": [
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Foot deformity",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Tibial torsion too internal",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Peroneus weakness",
+  },
+  {
+    plane: "T",
+    segment: "Foot",
+    gaitFeature: "Progression angle too internal",
+    gaitPhase: "Stance",
+    impairment: "Femoral anteversion increased",
+  },
+],
+
 }
 const CONSENT_AND_REFERRAL_SCHEMA = {
   sections: [
@@ -89,6 +4388,18 @@ const CONSENT_AND_REFERRAL_SCHEMA = {
       ],
     },
   ],
+};
+export const GAIT_FEATURE_MAPPING = {
+  ...GAIT_FEATURE_MAPPING_Peadiatrics,
+  ...GAIT_FEATURE_MAPPING_Nurology,
+  ...GAIT_FEATURE_MAPPING_Spinal,
+};
+
+
+export const IMPAIRMENT_GAIT_MAPPING = {
+  ...IMPAIRMENT_GAIT_MAPPING_Peadiatrics,
+  ...IMPAIRMENT_GAIT_MAPPING_Nurology,
+  ...IMPAIRMENT_GAIT_MAPPING_Spinal,
 };
 
 /* ── Progress sub-type data ── */
@@ -183,7 +4494,7 @@ function AssessmentTypeCard({ item, onClick }) {
 ══════════════════════════════════════════════════════════ */
 export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
   const tabs = [
-    { key: "motion_capture",  label: "Motion Capture"          },
+    { key: "motion_capture",  label: "Movement Analysis"          },
     { key: "advance_fitness", label: "Advance Fitness Program" },
     { key: "neurac_therapy",  label: "Neurac Therapy"          },
     { key: "neuromodulation", label: "Neuromodulation"         },
@@ -331,7 +4642,540 @@ export default function IntegratedRehabProgramTabs({ patient, mode, onBack }) {
     </div>
   );
 }
+function AppendixASection({
+  title,
+  prefix,
+  gaitMapping,
+  values,
+  onChange,
+}) {
+  const selectedFeatures =
+    values?.[`${prefix}_gait_feature`] || [];
 
+  const impairments = [
+    ...new Map(
+      selectedFeatures
+        .flatMap(
+          feature => gaitMapping[feature] || []
+        )
+        .map(item => [item.impairment, item])
+    ).values()
+  ];
+
+  return (
+    <div
+      style={{
+        marginTop: 20,
+        padding: 16,
+        border: "1px solid #e5e7eb",
+        borderRadius: 10,
+        background: "#fff",
+      }}
+    >
+      <h3>{title} - Appendix A</h3>
+
+      <CommonFormBuilder
+        schema={{
+          sections: [
+            {
+              fields: [
+                {
+                  name: `${prefix}_gait_feature`,
+                  label: "Gait Feature",
+                  type: "multi-select-dropdown",
+                  options: Object.keys(gaitMapping).map(
+                    key => ({
+                      label: key
+                        .replaceAll("_", " ")
+                        .replace(/\b\w/g, c =>
+                          c.toUpperCase()
+                        ),
+                      value: key,
+                    })
+                  ),
+                },
+              ],
+            },
+          ],
+        }}
+        values={values}
+        onChange={onChange}
+      />
+
+      {selectedFeatures.length > 0 && (
+        <CommonFormBuilder
+          schema={{
+            sections: [
+              {
+                fields: [
+                  {
+                    name: `${prefix}_impairments`,
+                    label:
+                      "Underlying Impairment",
+                    type:
+                      "multi-select-dropdown",
+                    options: impairments.map(
+                      item => ({
+                        label:
+                          item.impairment,
+                        value:
+                          item.impairment,
+                      })
+                    ),
+                  },
+                ],
+              },
+            ],
+          }}
+          values={values}
+          onChange={onChange}
+        />
+      )}
+    </div>
+  );
+}
+function AppendixATable({
+  prefix,
+  gaitMapping,
+  values,
+  onChange,
+}) {
+  const selectedFeatures = Array.isArray(
+    values?.[`${prefix}_gait_feature`]
+  )
+    ? values[`${prefix}_gait_feature`].map((x) =>
+        typeof x === "object" ? x.value : x
+      )
+    : [];
+
+  const selectedImpairments = Array.isArray(
+    values?.[`${prefix}_impairments`]
+  )
+    ? values[`${prefix}_impairments`].map((x) =>
+        typeof x === "object" ? x.value : x
+      )
+    : [];
+
+  const rows = [];
+  const tableValues = {};
+
+  selectedFeatures.forEach((feature) => {
+    (gaitMapping[feature] || [])
+      .filter((item) =>
+        selectedImpairments.includes(item.impairment)
+      )
+      .forEach((item, index) => {
+        const rowKey = `${feature}_${index}`;
+
+        rows.push({
+          key: rowKey,
+          label: feature,
+        });
+
+        tableValues[
+          `${prefix}_table_${rowKey}_Plane`
+        ] = item.plane;
+
+        tableValues[
+          `${prefix}_table_${rowKey}_Segment`
+        ] = item.segment;
+
+        tableValues[
+          `${prefix}_table_${rowKey}_Gait Phase`
+        ] = item.gaitPhase;
+
+        tableValues[
+          `${prefix}_table_${rowKey}_Underlying Impairment`
+        ] = item.impairment;
+
+        tableValues[
+          `${prefix}_table_${rowKey}_Likelihood`
+        ] =
+          values[
+            `${prefix}_table_${rowKey}_Likelihood`
+          ] || "";
+      });
+  });
+
+  if (rows.length === 0) return null;
+
+  return (
+    <CommonFormBuilder
+      schema={{
+        sections: [
+          {
+            fields: [
+              {
+                name: `${prefix}_table`,
+                type: "grid-table-flat",
+
+                headers: [
+                  "Plane",
+                  "Segment",
+                  "Gait Phase",
+                  "Underlying Impairment",
+                  "Likelihood",
+                ],
+
+                rows,
+
+                headerOptions: {
+                  Likelihood: ["Yes", "No"],
+                },
+
+                labelWidth: "250px",
+              },
+            ],
+          },
+        ],
+      }}
+      values={{
+        ...values,
+        ...tableValues,
+      }}
+      onChange={onChange}
+    />
+  );
+}
+function AppendixBTable({
+  prefix,
+  impairmentMapping,
+  values,
+  onChange,
+}) {
+  const selectedFeatures =
+    Array.isArray(values?.[`${prefix}_gait_feature_b`])
+      ? values[`${prefix}_gait_feature_b`].map((x) =>
+          typeof x === "object" ? x.value : x
+        )
+      : [];
+
+  const selectedImpairments =
+    Array.isArray(values?.[`${prefix}_impairments_b`])
+      ? values[`${prefix}_impairments_b`].map((x) =>
+          typeof x === "object" ? x.value : x
+        )
+      : [];
+
+  const rows = [];
+  const tableValues = {};
+
+  selectedImpairments.forEach((impairment) => {
+    (impairmentMapping[impairment] || [])
+      .filter((item) =>
+        selectedFeatures.includes(item.gaitFeature)
+      )
+      .forEach((item, index) => {
+        const rowKey = `${impairment}_${index}`;
+
+        rows.push({
+          key: rowKey,
+          label: item.gaitFeature,
+        });
+
+        tableValues[
+          `${prefix}_appendix_b_table_${rowKey}_Plane`
+        ] = item.plane;
+
+        tableValues[
+          `${prefix}_appendix_b_table_${rowKey}_Segment`
+        ] = item.segment;
+
+        tableValues[
+          `${prefix}_appendix_b_table_${rowKey}_Underlying Impairment`
+        ] = impairment;
+
+        tableValues[
+          `${prefix}_appendix_b_table_${rowKey}_Gait Phase`
+        ] = item.gaitPhase;
+
+        tableValues[
+          `${prefix}_appendix_b_table_${rowKey}_Likelihood`
+        ] =
+          values[
+            `${prefix}_appendix_b_table_${rowKey}_Likelihood`
+          ] || "";
+      });
+  });
+
+  if (!rows.length) return null;
+
+  return (
+    <CommonFormBuilder
+      schema={{
+        sections: [
+          {
+            fields: [
+              {
+                name: `${prefix}_appendix_b_table`,
+                type: "grid-table-flat",
+
+                headers: [
+                  "Plane",
+                  "Segment",
+                  "Underlying Impairment",
+                  "Gait Phase",
+                  "Likelihood",
+                ],
+
+                rows,
+
+                headerOptions: {
+                  Likelihood: ["Yes", "No"],
+                },
+
+                labelWidth: "250px",
+              },
+            ],
+          },
+        ],
+      }}
+      values={{
+        ...values,
+        ...tableValues,
+      }}
+      onChange={onChange}
+    />
+  );
+}
+function AppendixAUploads({
+  prefix,
+  gaitMapping,
+  values,
+  onChange,
+}) {
+  const selectedFeatures =
+    Array.isArray(values?.[`${prefix}_gait_feature`])
+      ? values[`${prefix}_gait_feature`].map(x =>
+          typeof x === "object" ? x.value : x
+        )
+      : [];
+
+  const selectedImpairments =
+    Array.isArray(values?.[`${prefix}_impairments`])
+      ? values[`${prefix}_impairments`].map(x =>
+          typeof x === "object" ? x.value : x
+        )
+      : [];
+
+  const uploadFields = [];
+
+  selectedFeatures.forEach(feature => {
+    (gaitMapping[feature] || [])
+      .filter(item =>
+        selectedImpairments.includes(item.impairment)
+      )
+      .forEach((item, index) => {
+        const rowKey = `${feature}_${index}`;
+
+        const likelihood =
+          values[
+            `${prefix}_table_${rowKey}_Likelihood`
+          ];
+
+        if (likelihood === "Yes") {
+          uploadFields.push({
+            name: `${prefix}_upload_${rowKey}`,
+            label: `Upload Report - ${item.impairment}`,
+            type: "attach-file",
+          });
+        }
+      });
+  });
+
+  if (!uploadFields.length) return null;
+
+  return (
+    <CommonFormBuilder
+      schema={{
+        sections: [
+          {
+            fields: uploadFields,
+          },
+        ],
+      }}
+      values={values}
+      onChange={onChange}
+    />
+  );
+}
+function AppendixBUploads({
+  prefix,
+  impairmentMapping,
+  values,
+  onChange,
+}) {
+  const selectedFeatures =
+    Array.isArray(values?.[`${prefix}_gait_feature_b`])
+      ? values[`${prefix}_gait_feature_b`].map(x =>
+          typeof x === "object" ? x.value : x
+        )
+      : [];
+
+  const selectedImpairments =
+    Array.isArray(values?.[`${prefix}_impairments_b`])
+      ? values[`${prefix}_impairments_b`].map(x =>
+          typeof x === "object" ? x.value : x
+        )
+      : [];
+
+  const uploadFields = [];
+
+  selectedImpairments.forEach(impairment => {
+    (impairmentMapping[impairment] || [])
+      .filter(item =>
+        selectedFeatures.includes(item.gaitFeature)
+      )
+      .forEach((item, index) => {
+        const rowKey = `${impairment}_${index}`;
+
+        const likelihood =
+          values[
+            `${prefix}_appendix_b_table_${rowKey}_Likelihood`
+          ];
+
+        if (likelihood === "Yes") {
+          uploadFields.push({
+            name: `${prefix}_appendix_b_upload_${rowKey}`,
+            label: `Upload Report - ${item.gaitFeature}`,
+            type: "attach-file",
+          });
+        }
+      });
+  });
+
+  if (!uploadFields.length) return null;
+
+  return (
+    <CommonFormBuilder
+      schema={{
+        sections: [
+          {
+            fields: uploadFields,
+          },
+        ],
+      }}
+      values={values}
+      onChange={onChange}
+    />
+  );
+}
+function AppendixBSection({
+  title,
+  prefix,
+  impairmentMapping,
+  values,
+  onChange,
+}) {
+  const gaitFeatures = [
+    ...new Set(
+      Object.values(impairmentMapping)
+        .flat()
+        .map(item => item.gaitFeature)
+    ),
+  ];
+
+  const selectedFeatures =
+    values?.[`${prefix}_gait_feature_b`] || [];
+
+  const impairments = [];
+
+  Object.entries(
+    impairmentMapping
+  ).forEach(([impairment, rows]) => {
+    rows.forEach(row => {
+      if (
+        selectedFeatures.includes(
+          row.gaitFeature
+        )
+      ) {
+        impairments.push({
+          impairment,
+          ...row,
+        });
+      }
+    });
+  });
+
+  const uniqueImpairments = [
+    ...new Map(
+      impairments.map(item => [
+        item.impairment,
+        item,
+      ])
+    ).values(),
+  ];
+
+  return (
+    <div
+      style={{
+        marginTop: 20,
+        padding: 16,
+        border: "1px solid #e5e7eb",
+        borderRadius: 10,
+        background: "#fff",
+      }}
+    >
+      <h3>{title} - Appendix B</h3>
+
+      <CommonFormBuilder
+        schema={{
+          sections: [
+            {
+              fields: [
+                {
+                  name: `${prefix}_gait_feature_b`,
+                  label: "Gait Feature",
+                  type:
+                    "multi-select-dropdown",
+                  options: gaitFeatures.map(
+                    item => ({
+                      label: item,
+                      value: item,
+                    })
+                  ),
+                },
+              ],
+            },
+          ],
+        }}
+        values={values}
+        onChange={onChange}
+      />
+
+      {selectedFeatures.length > 0 && (
+        <CommonFormBuilder
+          schema={{
+            sections: [
+              {
+                fields: [
+                  {
+                    name: `${prefix}_impairments_b`,
+                    label:
+                      "Underlying Impairment",
+                    type:
+                      "multi-select-dropdown",
+                    options:
+                      uniqueImpairments.map(
+                        item => ({
+                          label:
+                            item.impairment,
+                          value:
+                            item.impairment,
+                        })
+                      ),
+                  },
+                ],
+              },
+            ],
+          }}
+          values={values}
+          onChange={onChange}
+        />
+      )}
+    </div>
+  );
+}
 /* ── Advance Fitness: Wall Climbing + Dry Needling ── */
 function AdvanceFitnessWithSubTabs({ patient, onBack }) {
   const subTabs = [
@@ -408,7 +5252,7 @@ function NeuracTherapyTabs({ patient }) {
 
   return (
     <div>
-      {/* Tabs — same style as Motion Capture */}
+      {/* Tabs — same style as Movement Analysis */}
       <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid #e5e7eb", background: "#fff" }}>
         {subTabs.map((t) => (
           <div
@@ -442,12 +5286,13 @@ function NeuracTherapyTabs({ patient }) {
     </div>
   );
 }
-/* ── Motion Capture: Foot Scan / Gait Analysis / Electromyography ── */
+/* ── Movement Analysis: Foot Scan / Motion Capture / Electromyography ── */
 function MotionCaptureSubTabs({ patient, values, onChange }) {
   const subTabs = [
     { key: "foot_scan",        label: "Foot Scan"              },
-    { key: "gait_analysis",    label: "Gait Analysis"          },
+    { key: "gait_analysis",    label: "Motion Capture"          },
     { key: "electromyography", label: "Electromyography (EMG)" },
+    { key: "plan", label: "IMU" }
   ];
   const [activeSub, setActiveSub] = useState("foot_scan");
 
@@ -481,7 +5326,7 @@ function MotionCaptureSubTabs({ patient, values, onChange }) {
   );
 }
 
-/* ── Motion Capture SOAP schemas ── */
+/* ── Movement Analysis SOAP schemas ── */
 const MC_SUBJECTIVE_SCHEMA = {
   
   actions: [
@@ -773,413 +5618,372 @@ const MC_OBJECTIVE_SCHEMA = {
             type: "input"
           },
         
-// {
-//       name: "gait_feature",
-//       label: "Gait Feature",
-//       type: "single-select",
 
-//       options: [
-//         { label: "Forward lean increased", value: "forward_lean" },
-//         { label: "Hyper lordose", value: "hyper_lordose" },
-//         { label: "Ipsilateral lean", value: "ipsilateral_lean" },
-//         { label: "Anterior tilt increased", value: "anterior_tilt" },
-//         { label: "Posterior tilt movement increased", value: "posterior_tilt" },
-//         { label: "Obliquity drop", value: "obliquity_drop" },
-//         { label: "Obliquity lift", value: "obliquity_lift" },
-//         { label: "Protraction increased", value: "protraction" },
-//         { label: "Retraction increased", value: "retraction" },
-//         { label: "Extension decreased", value: "hip_extension_decreased" },
-//         { label: "Peak extension delayed", value: "peak_extension_delayed" },
-//         { label: "Flexion delayed", value: "flexion_delayed" },
-//         { label: "Flexion increased", value: "flexion_increased" },
-//       ],
-//     },
-{type:'subheading',label:'Appendix A: Relation gait feature - possible impairments'},
-{
-  name: "gait_feature",
-  label: "Gait Feature",
-  type: "multi-select-dropdown",
 
-  showIf: {
-    field: "paediatrics_mapping",
-    equals: "Yes",
-    and: {
-      field: "services",
-      includes: "paediatrics"
-    }
-  },
-
- options: [
-    { label: "Forward lean increased", value: "forward_lean" },
-    { label: "Hyper lordose", value: "hyper_lordose" },
-    { label: "Ipsilateral lean", value: "ipsilateral_lean" },
-    { label: "Anterior tilt increased", value: "anterior_tilt" },
-    { label: "Posterior tilt movement increased", value: "posterior_tilt" },
-    { label: "Obliquity drop", value: "obliquity_drop" },
-    { label: "Obliquity lift", value: "obliquity_lift" },
-    { label: "Protraction increased", value: "protraction" },
-    { label: "Retraction increased", value: "retraction" },
-    { label: "Extension decreased", value: "hip_extension_decreased" },
-    { label: "Peak extension delayed", value: "peak_extension_delayed" },
-    { label: "Flexion delayed", value: "flexion_delayed" },
-    { label: "Flexion increased", value: "flexion_increased" },
-  ],
-},
 
 {
   type: "custom",
-  name: "underlying_impairment_dropdown",
-  
-  render: ({ values, onChange }) => {
+  name: "dynamic_appendix_sections",
 
-    const selectedFeatures =
-      values?.gait_feature || [];
+  render: ({ values, onChange }) => (
+    <>
+      {/* ================= PAEDIATRICS ================= */}
 
-    const impairments = [
-      ...new Map(
-        selectedFeatures
-          .flatMap(
-            feature => GAIT_FEATURE_MAPPING[feature] || []
-          )
-          .map(item => [item.impairment, item])
-      ).values()
-    ];
+      {values?.paediatrics_mapping === "Yes" && (
+        <>
+          
 
-    return (
-      <CommonFormBuilder
-        schema={{
-          sections: [
-            {
-              fields: [
-                {
-                  name: "selected_impairments",
-                  label: "Underlying Impairment",
-                  type: "multi-select-dropdown",
-                   showIf: {
-    field: "paediatrics_mapping",
-    equals: "Yes",
-    and: {
-      field: "services",
-      includes: "paediatrics"
-    }
-  },
-                  options: impairments.map(item => ({
-                    label: item.impairment,
-                    value: item.impairment,
-                  })),
-                },
-              ],
-            },
-          ],
-        }}
-        values={values}
-        onChange={onChange}
-      />
-    );
-  },
-},
+          <AppendixASection
+            title="Paediatrics"
+            prefix="paediatrics"
+            gaitMapping={GAIT_FEATURE_MAPPING_Peadiatrics}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixATable
+            prefix="paediatrics"
+            gaitMapping={GAIT_FEATURE_MAPPING_Peadiatrics}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixAUploads
+            prefix="paediatrics"
+            gaitMapping={GAIT_FEATURE_MAPPING_Peadiatrics}
+            values={values}
+            onChange={onChange}
+          />
+
+          
+
+          <AppendixBSection
+            title="Paediatrics"
+            prefix="paediatrics"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Peadiatrics}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixBTable
+            prefix="paediatrics"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Peadiatrics}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixBUploads
+            prefix="paediatrics"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Peadiatrics}
+            values={values}
+            onChange={onChange}
+          />
+        </>
+      )}
+
+      {/* ================= NEUROLOGY ================= */}
+
+      {values?.neurology_mapping === "Yes" && (
+        <>
+          
+
+          <AppendixASection
+            title="Neurology"
+            prefix="neurology"
+            gaitMapping={GAIT_FEATURE_MAPPING_Nurology}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixATable
+            prefix="neurology"
+            gaitMapping={GAIT_FEATURE_MAPPING_Nurology}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixAUploads
+            prefix="neurology"
+            gaitMapping={GAIT_FEATURE_MAPPING_Nurology}
+            values={values}
+            onChange={onChange}
+          />
+
+          
+
+          <AppendixBSection
+            title="Neurology"
+            prefix="neurology"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Nurology}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixBTable
+            prefix="neurology"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Nurology}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixBUploads
+            prefix="neurology"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Nurology}
+            values={values}
+            onChange={onChange}
+          />
+        </>
+      )}
+
+      {/* ================= SPINAL CORD INJURY ================= */}
+
+      {values?.sci_mapping === "Yes" && (
+        <>
+         
+
+          <AppendixASection
+            title="Spinal Cord Injury"
+            prefix="sci"
+            gaitMapping={GAIT_FEATURE_MAPPING_Spinal}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixATable
+            prefix="sci"
+            gaitMapping={GAIT_FEATURE_MAPPING_Spinal}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixAUploads
+            prefix="sci"
+            gaitMapping={GAIT_FEATURE_MAPPING_Spinal}
+            values={values}
+            onChange={onChange}
+          />
+
+         
+
+          <AppendixBSection
+            title="Spinal Cord Injury"
+            prefix="sci"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Spinal}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixBTable
+            prefix="sci"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Spinal}
+            values={values}
+            onChange={onChange}
+          />
+
+          <AppendixBUploads
+            prefix="sci"
+            impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Spinal}
+            values={values}
+            onChange={onChange}
+          />
+        </>
+      )}
+    </>
+  )
+}
 // {
 //   type: "custom",
-//   name: "impairment_details",
+//   name: "dynamic_appendix_sections",
+
 //   render: ({ values, onChange }) => {
-//     const selectedFeatures = values?.gait_feature || [];
-//     const selectedImpairment =
-//       values?.selected_impairment;
-
-//     const item = selectedFeatures
-//       .flatMap(
-//         feature => GAIT_FEATURE_MAPPING[feature] || []
-//       )
-//       .find(
-//         x => x.impairment === selectedImpairment
-//       );
-
-//     if (!item) return null;
-
 //     return (
-//       <div
-//         style={{
-//           border: "1px solid #e5e7eb",
-//           borderRadius: 8,
-//           padding: 16,
-//           marginTop: 12,
-//         }}
-//       >
-//         <div>
-//           <strong>Plane:</strong> {item.plane}
-//         </div>
+//       <>
+//       {values?.paediatrics_mapping === "Yes" && (
+//   <>
+    
 
-//         <div>
-//           <strong>Segment:</strong> {item.segment}
-//         </div>
+//     <AppendixASection
+//       title="Paediatrics"
+//       prefix="paediatrics"
+//       gaitMapping={GAIT_FEATURE_MAPPING_Peadiatrics}
+//       values={values}
+//       onChange={onChange}
+//     />
 
-//         <div>
-//           <strong>Gait Phase:</strong> {item.gaitPhase}
-//         </div>
+//     <AppendixATable
+//       prefix="paediatrics"
+//       gaitMapping={GAIT_FEATURE_MAPPING_Peadiatrics}
+//       values={values}
+//       onChange={onChange}
+//     />
 
-//         <div style={{ marginTop: 12 }}>
-//           <label className="form-label">
-//             Likelihood
-//           </label>
+//     <h3>Appendix B - Paediatrics</h3>
 
-//           <div className="fb-inline-group">
-//             <label>
-//               <input
-//                 type="radio"
-//                 checked={
-//                   values?.likelihood === "Yes"
-//                 }
-//                 onChange={() =>
-//                   onChange("likelihood", "Yes")
-//                 }
-//               />
-//               Yes
-//             </label>
+//     <AppendixBSection
+//       title="Paediatrics"
+//       prefix="paediatrics"
+//       impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Peadiatrics}
+//       values={values}
+//       onChange={onChange}
+//     />
 
-//             <label>
-//               <input
-//                 type="radio"
-//                 checked={
-//                   values?.likelihood === "No"
-//                 }
-//                 onChange={() =>
-//                   onChange("likelihood", "No")
-//                 }
-//               />
-//               No
-//             </label>
-//           </div>
-//         </div>
-//       </div>
+//     <AppendixBTable
+//       prefix="paediatrics"
+//       impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Peadiatrics}
+//       values={values}
+//       onChange={onChange}
+//     />
+//   </>
+// )}
+// {values?.neurology_mapping === "Yes" && (
+//   <>
+//     <h3>Appendix A - Neurology</h3>
+
+//     <AppendixASection
+//       title="Neurology"
+//       prefix="neurology"
+//       gaitMapping={GAIT_FEATURE_MAPPING_Nurology}
+//       values={values}
+//       onChange={onChange}
+//     />
+
+//     <AppendixATable
+//       prefix="neurology"
+//       gaitMapping={GAIT_FEATURE_MAPPING_Nurology}
+//       values={values}
+//       onChange={onChange}
+//     />
+
+//     <h3>Appendix B - Neurology</h3>
+
+//     <AppendixBSection
+//       title="Neurology"
+//       prefix="neurology"
+//       impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Nurology}
+//       values={values}
+//       onChange={onChange}
+//     />
+
+//     <AppendixBTable
+//       prefix="neurology"
+//       impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Nurology}
+//       values={values}
+//       onChange={onChange}
+//     />
+//   </>
+// )}
+// {values?.sci_mapping === "Yes" && (
+//   <>
+//     <h3>Appendix A - Spinal Cord Injury</h3>
+
+//     <AppendixASection
+//       title="SCI"
+//       prefix="sci"
+//       gaitMapping={GAIT_FEATURE_MAPPING_Spinal}
+//       values={values}
+//       onChange={onChange}
+//     />
+
+//     <AppendixATable
+//       prefix="sci"
+//       gaitMapping={GAIT_FEATURE_MAPPING_Spinal}
+//       values={values}
+//       onChange={onChange}
+//     />
+
+//     <h3>Appendix B - Spinal Cord Injury</h3>
+
+//     <AppendixBSection
+//       title="SCI"
+//       prefix="sci"
+//       impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Spinal}
+//       values={values}
+//       onChange={onChange}
+//     />
+
+//     <AppendixBTable
+//       prefix="sci"
+//       impairmentMapping={IMPAIRMENT_GAIT_MAPPING_Spinal}
+//       values={values}
+//       onChange={onChange}
+//     />
+//   </>
+// )}
+//         {/* {values?.paediatrics_mapping === "Yes" && (
+//           <>
+//             <AppendixASection
+//               title="Paediatrics"
+//               prefix="paediatrics"
+//               gaitMapping={
+//                 GAIT_FEATURE_MAPPING_Peadiatrics
+//               }
+//               values={values}
+//               onChange={onChange}
+//             />
+
+//             <AppendixBSection
+//               title="Paediatrics"
+//               prefix="paediatrics"
+//               impairmentMapping={
+//                 IMPAIRMENT_GAIT_MAPPING_Peadiatrics
+//               }
+//               values={values}
+//               onChange={onChange}
+//             />
+//           </>
+//         )}
+
+//         {values?.neurology_mapping === "Yes" && (
+//           <>
+//             <AppendixASection
+//               title="Neurology"
+//               prefix="neurology"
+//               gaitMapping={
+//                 GAIT_FEATURE_MAPPING_Nurology
+//               }
+//               values={values}
+//               onChange={onChange}
+//             />
+
+//             <AppendixBSection
+//               title="Neurology"
+//               prefix="neurology"
+//               impairmentMapping={
+//                 IMPAIRMENT_GAIT_MAPPING_Nurology
+//               }
+//               values={values}
+//               onChange={onChange}
+//             />
+//           </>
+//         )}
+
+//         {values?.sci_mapping === "Yes" && (
+//           <>
+//             <AppendixASection
+//               title="Spinal Cord Injury"
+//               prefix="sci"
+//               gaitMapping={
+//                 GAIT_FEATURE_MAPPING_Spinal
+//               }
+//               values={values}
+//               onChange={onChange}
+//             />
+
+//             <AppendixBSection
+//               title="Spinal Cord Injury"
+//               prefix="sci"
+//               impairmentMapping={
+//                 IMPAIRMENT_GAIT_MAPPING_Spinal
+//               }
+//               values={values}
+//               onChange={onChange}
+//             />
+//           </>
+//         )} */}
+//       </>
 //     );
-//   }
-// },
-
-{
-  type: "custom",
-  name: "impairment_details",
-  render: ({ values, onChange }) => {
-
-    const gaitLabels = {
-      forward_lean: "Forward lean increased",
-      hyper_lordose: "Hyper lordose",
-      ipsilateral_lean: "Ipsilateral lean",
-      anterior_tilt: "Anterior tilt increased",
-      posterior_tilt: "Posterior tilt movement increased",
-      obliquity_drop: "Obliquity drop",
-      obliquity_lift: "Obliquity lift",
-      protraction: "Protraction increased",
-      retraction: "Retraction increased",
-      hip_extension_decreased: "Extension decreased",
-      peak_extension_delayed: "Peak extension delayed",
-      flexion_delayed: "Flexion delayed",
-      flexion_increased: "Flexion increased",
-    };
-
-    const selectedFeatures =
-      values?.gait_feature || [];
-
-    const selectedImpairments =
-      values?.selected_impairments || [];
-
-    const rows = [];
-    const tableValues = {};
-
-    selectedFeatures.forEach(feature => {
-      (GAIT_FEATURE_MAPPING[feature] || [])
-        .filter(item =>
-          selectedImpairments.includes(item.impairment)
-        )
-        .forEach((item, index) => {
-
-          const rowKey = `${feature}_${index}`;
-
-          rows.push({
-            key: rowKey,
-            label: gaitLabels[feature]
-          });
-
-          tableValues[
-            `gait_impairment_table_${rowKey}_Gait Feature`
-          ] = gaitLabels[feature];
-
-          tableValues[
-            `gait_impairment_table_${rowKey}_Plane`
-          ] = item.plane;
-
-          tableValues[
-            `gait_impairment_table_${rowKey}_Segment`
-          ] = item.segment;
-
-          tableValues[
-            `gait_impairment_table_${rowKey}_Gait Phase`
-          ] = item.gaitPhase;
-
-          tableValues[
-            `gait_impairment_table_${rowKey}_Underlying Impairment`
-          ] = item.impairment;
-
-          tableValues[
-            `gait_impairment_table_${rowKey}_Likelihood`
-          ] = values[
-            `gait_impairment_table_${rowKey}_Likelihood`
-          ] || "";
-        });
-    });
-
-    if (!rows.length) return null;
-
-    return (
-      <CommonFormBuilder
-        schema={{
-          sections: [
-            {
-              fields: [
-                {
-  name: "gait_impairment_table",
-  type: "grid-table-flat",
-
-  headers: [
-   
-    "Plane",
-    "Segment",
-    "Gait Phase",
-    "Underlying Impairment",
-    "Likelihood"
-  ],
-
-  rows,
-
-  headerOptions: {
-    "Likelihood": ["Yes", "No"]
-  },
-
-  labelWidth: "200px"
-}
-              ]
-            }
-          ]
-        }}
-        values={{
-          ...values,
-          ...tableValues
-        }}
-        onChange={onChange}
-      />
-    );
-  }
-} // {
-    //   type: "custom",
-    //   name: "gait_impairment_table",
-    //   render: ({ values }) => {
-    //     const selectedGaitFeature = values?.gait_feature;
-    //     const impairments = selectedGaitFeature ? GAIT_FEATURE_MAPPING[selectedGaitFeature] : [];
-
-    //     const planeLabel = { S: "Sagittal", F: "Frontal", T: "Transverse" };
-
-    //     const containerStyle = {
-    //       border: "1px solid #e5e7eb",
-    //       borderRadius: 8,
-    //       overflow: "hidden",
-    //       marginTop: 8,
-    //     };
-
-    //     const headerStyle = {
-    //       display: "grid",
-    //       gridTemplateColumns: "100px 100px 120px 1fr 70px 70px",
-    //       background: "#f1f5f9",
-    //       fontWeight: 700,
-    //       fontSize: 12,
-    //       color: "#334155",
-    //       borderBottom: "2px solid #e2e8f0",
-    //     };
-
-    //     const headerCellStyle = {
-    //       padding: "10px 8px",
-    //       textAlign: "left",
-    //       borderRight: "1px solid #e2e8f0",
-    //     };
-
-    //     const rowStyle = {
-    //       display: "grid",
-    //       gridTemplateColumns: "100px 100px 120px 1fr 70px 70px",
-    //       borderBottom: "1px solid #e5e7eb",
-    //       fontSize: 12,
-    //       background: "#fff",
-    //     };
-
-    //     const cellStyle = {
-    //       padding: "8px",
-    //       borderRight: "1px solid #f1f5f9",
-    //       display: "flex",
-    //       alignItems: "center",
-    //     };
-
-    //     // if (!selectedGaitFeature) {
-    //     //   return (
-    //     //     <div style={{ fontSize: 13, color: "#9ca3af", fontStyle: "italic", marginTop: 8 }}>
-    //     //       Select a gait feature above to view related impairments.
-    //     //     </div>
-    //     //   );
-    //     // }
-
-    //     // if (impairments.length === 0) {
-    //     //   return (
-    //     //     <div style={{ fontSize: 13, color: "#9ca3af", fontStyle: "italic", marginTop: 8 }}>
-    //     //       No impairments mapped for this gait feature.
-    //     //     </div>
-    //     //   );
-    //     // }
-
-    //     return (
-    //       <div style={containerStyle}>
-    //         {/* Header */}
-    //         <div style={headerStyle}>
-    //           <div style={headerCellStyle}>Plane</div>
-    //           <div style={headerCellStyle}>Segment</div>
-    //           <div style={headerCellStyle}>Gait Phase</div>
-    //           <div style={headerCellStyle}>Underlying Impairment</div>
-    //           <div style={{ ...headerCellStyle, textAlign: "center" }}>Mean</div>
-    //           <div style={{ ...headerCellStyle, textAlign: "center", borderRight: "none" }}>SD</div>
-    //         </div>
-
-    //         {/* Rows */}
-    //         {impairments.map((item, idx) => (
-    //           <div key={idx} style={{ ...rowStyle, background: idx % 2 === 0 ? "#fff" : "#fafbfc" }}>
-    //             <div style={cellStyle}>
-    //               <span style={{
-    //                 padding: "2px 8px",
-    //                 borderRadius: 4,
-    //                 fontSize: 11,
-    //                 fontWeight: 600,
-    //                 color: "#1d4ed8",
-    //                 background: "#dbeafe",
-    //               }}>
-    //                 {planeLabel[item.plane] || item.plane}
-    //               </span>
-    //             </div>
-    //             <div style={cellStyle}>
-    //               <span style={{
-    //                 padding: "2px 8px",
-    //                 borderRadius: 4,
-    //                 fontSize: 11,
-    //                 fontWeight: 600,
-    //                 color: "#065f46",
-    //                 background: "#d1fae5",
-    //               }}>
-    //                 {item.segment}
-    //               </span>
-    //             </div>
-    //             <div style={cellStyle}>{item.gaitPhase}</div>
-    //             <div style={{ ...cellStyle, fontWeight: 600, color: "#0f172a" }}>{item.impairment}</div>
-    //             <div style={{ ...cellStyle, justifyContent: "center", fontWeight: 600 }}>{item.mean}</div>
-    //             <div style={{ ...cellStyle, justifyContent: "center", borderRight: "none" }}>{item.sd}</div>
-    //           </div>
-    //         ))}
-    //       </div>
-    //     );
-    //   },
-    // },
+//   },
+// }
 
   ]}],
 };
@@ -1194,32 +5998,46 @@ const MC_ASSESSMENT_SCHEMA = {
   sections: [
     {
       fields: [
-       {
-  type: "row",
-  cols: 4,
-  fields: [
-    {
-      name: "mc_gait_report",
-      label: "Upload EMG Report",
-      type: "attach-file",
-    },
-    {
-      name: "upper_limb_report",
-      label: "Upper Limb",
-      type: "attach-file",
-    },
-    {
-      name: "lower_limb_report",
-      label: "Lower Limb",
-      type: "attach-file",
-    },
-    {
-      name: "back_report",
-      label: "Back",
-      type: "attach-file",
-    },
-  ],
-},
+        {
+          name: "emg_regions",
+          label: "Select EMG Region",
+          type: "checkbox-group",
+          options: [
+            { label: "Upper Limb", value: "upper_limb" },
+            { label: "Lower Limb", value: "lower_limb" },
+            { label: "Back", value: "back" },
+          ],
+        },
+
+        {
+          name: "upper_limb_report",
+          label: "Upload Upper Limb EMG Report",
+          type: "attach-file",
+          showIf: {
+            field: "emg_regions",
+            includes: "upper_limb",
+          },
+        },
+
+        {
+          name: "lower_limb_report",
+          label: "Upload Lower Limb EMG Report",
+          type: "attach-file",
+          showIf: {
+            field: "emg_regions",
+            includes: "lower_limb",
+          },
+        },
+
+        {
+          name: "back_report",
+          label: "Upload Back EMG Report",
+          type: "attach-file",
+          showIf: {
+            field: "emg_regions",
+            includes: "back",
+          },
+        },
 
         {
           name: "mc_chief_complaint_obj",
@@ -1236,19 +6054,52 @@ const MC_ASSESSMENT_SCHEMA = {
     },
   ],
 };
+const MC_PLAN_SCHEMA = {
+  actions: [
+    { type: "back", label: "Back" },
+    { type: "clear", label: "Clear" },
+    { type: "save", label: "Save" },
+  ],
+
+  sections: [
+    {
+      fields: [
+        {
+          name: "imu_report",
+          label: "Upload IMU Report",
+          type: "attach-file",
+        },
+        {
+          name: "imu_chief_complaint",
+          label: "Chief Complaint",
+          type: "input",
+        },
+        {
+          name: "imu_hpi",
+          label: "History of Presenting Illness (HPI)",
+          type: "input",
+        },
+      ],
+    },
+  ],
+};
 
 const MC_SOAP_TABS = [
-  { key: "subjective",  label: "Foot Scan"              },
-  { key: "objective",   label: "Gait Analysis"          },
+  { key: "objective",   label: "Motion Capture"          },
+  
+  // { key: "objective",   label: "Motion Capture"          },
   { key: "assessment",  label: "Electromyography (EMG)" },
+  { key: "subjective",  label: "Foot Scan"              },
+  { key: "plan", label: "IMU" },
 ];
 const MC_SCHEMA_MAP = {
   subjective:  MC_SUBJECTIVE_SCHEMA,
   objective:   MC_OBJECTIVE_SCHEMA,
   assessment:  MC_ASSESSMENT_SCHEMA,
+  plan: MC_PLAN_SCHEMA
 };
 
-/* ── EmptySoapPanel (Motion Capture main view) ── */
+/* ── EmptySoapPanel (Movement Analysis main view) ── */
 function EmptySoapPanel({ patient, onBack }) {
   const storageKey = patient ? `motion_capture_${patient.id}` : null;
   const [values, setValues]       = useState({});
@@ -1268,11 +6119,11 @@ function EmptySoapPanel({ patient, onBack }) {
     if (type === "clear") { setValues({}); localStorage.removeItem(storageKey); }
     if (type === "save")  {
       if (storageKey) localStorage.setItem(storageKey, JSON.stringify({ values, updatedAt: new Date() }));
-      alert("Motion Capture draft saved");
+      alert("Movement Analysis draft saved");
     }
   };
 
-  const soapOrder = ["subjective", "objective", "assessment"];
+  const soapOrder = ["subjective", "objective", "assessment","plan"];
   const soapIdx   = soapOrder.indexOf(activeSOAP);
 
   return (
@@ -1315,7 +6166,7 @@ function EmptySoapPanel({ patient, onBack }) {
         onAction={handleAction}
       />
 
-{/* Motion Capture sub-tabs (inside Objective) */}
+{/* Movement Analysis sub-tabs (inside Objective) */}
       {activeSOAP === "objective" && (
         <MotionCaptureSubTabs patient={patient} values={values} onChange={onChange} />
       )}
@@ -1337,7 +6188,7 @@ function EmptySoapPanel({ patient, onBack }) {
         ) : (
           <button
             style={submitBtnStyle}
-            onClick={() => { setSubmitted(true); alert("Motion Capture assessment submitted"); }}
+            onClick={() => { setSubmitted(true); alert("Movement Analysis assessment submitted"); }}
           >
             Submit Assessment
           </button>
