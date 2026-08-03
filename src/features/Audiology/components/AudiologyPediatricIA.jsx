@@ -1508,6 +1508,7 @@ const OBJECTIVE_SCHEMA = {
             },
             {
               type: "paired-text",
+              name: "otoscopy_other",
               pairs: [
                 { name: "otoscopy_other_r", title: "Other Findings – Right" },
                 { name: "otoscopy_other_l", title: "Other Findings – Left" }

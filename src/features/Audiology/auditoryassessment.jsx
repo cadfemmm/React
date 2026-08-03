@@ -932,7 +932,7 @@ const token = localStorage.getItem("access_token");
           {
             type: "accordion",
             name: "type_of_test_section",
-            label: "Type of Test",
+            label: "Speech Test",
             defaultOpen: false,
             children: [
               {
@@ -1219,6 +1219,15 @@ const token = localStorage.getItem("access_token");
             label: "Special Test",
             defaultOpen: false,
             children: [
+              {
+                name: "special_upload",
+                type: "attach-file",
+                accept: "application/pdf,image/*",
+                title: "Upload Special Test File",
+                multiple: false,
+                previewSize: { width: 400, height: 400 },
+                hideInputAfterSelect: true
+              },
               { name: "special_test", label: "Details", type: "input" }
             ]
           }

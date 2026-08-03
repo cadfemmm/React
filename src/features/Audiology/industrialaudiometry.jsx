@@ -24,6 +24,29 @@ export function IndustrialAudiometry({ onBack, mode }) {
       {
         title: "",
         fields: [
+          // REQUIRED INFORMATION
+          {
+            type: "subheading",
+            label: "Required Information"
+          },
+          {
+            type: "row",
+            cols: 3,
+            fields: [
+              { name: "years_of_service", label: "Years of Service", type: "input" },
+              { name: "work_location", label: "Work Location", type: "input" },
+              { name: "designation", label: "Designation", type: "input" }
+            ]
+          },
+          {
+            type: "row",
+            cols: 2,
+            fields: [
+              { name: "noise_exposure_level", label: "Noise Exposure Level", type: "input" },
+              { name: "max_noise_exposure_level", label: "Maximum Noise Exposure Level", type: "input" }
+            ]
+          },
+
           // CAUTION INFO TEXT
           {
             type: "info-text",
@@ -109,7 +132,7 @@ export function IndustrialAudiometry({ onBack, mode }) {
               { label: "No", value: "no" }
             ]
           },
-          
+
           {
             type: "row",
             cols: 2, // Split into 2 equal columns
@@ -234,7 +257,7 @@ export function IndustrialAudiometry({ onBack, mode }) {
               { label: "No", value: "no" }
             ]
           },
-          
+
           {
             type: "row",
             cols: 2, // Split into 2 equal columns
@@ -448,7 +471,7 @@ export function IndustrialAudiometry({ onBack, mode }) {
             fields: [
               { name: "result_normal", label: "1. Normal audiogram", type: "radio", options: ["Yes", "No"] },
               { name: "result_impairment", label: "2. Hearing Impairment", type: "radio", options: ["Yes", "No"] },
-              
+
             ]
           },
           {
@@ -457,12 +480,12 @@ export function IndustrialAudiometry({ onBack, mode }) {
             fields: [
               { name: "result_shift", label: "3. Standard threshold shift", type: "radio", options: ["Yes", "No"] },
               { name: "result_retest_3m", label: "4. Must retest within 3 months", type: "radio", options: ["Yes", "No"] },
-              
+
             ]
           },
           {
             type: "row",
-            
+
             fields: [
               { name: "result_annual", label: "5. Must retest annually & wear hearing protector", type: "radio", options: ["Yes", "No"] }
             ]
@@ -491,15 +514,15 @@ export function IndustrialAudiometry({ onBack, mode }) {
           if (action === "back") onBack();
         }}
       />
-      
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
+
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
         marginTop: "20px",
         gap: "12px"
       }}>
-     
-        
+
+
         {/* <button
           onClick={handleSubmit}
           style={{

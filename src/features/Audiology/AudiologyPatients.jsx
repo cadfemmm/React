@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo } from "react";
 import AudiologyAssessment from "./AudiologyAssessment";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
-import AssessmentLoader from "../../assessment";
 import { formatAppointmentDateTime } from "../../shared/api/patientsList";
 import SOAPSession from "../Rap/session";
 
@@ -137,10 +136,11 @@ export default function AudiologyPatients({
   /* ── Assessment views ── */
   if (selectedPatient && assessmentView === "initial") {
     return (
-      <AssessmentLoader
-        department="Audiology"
+      <AudiologyAssessment
         patient={selectedPatient}
-        visitType="INITIAL"
+        mode="initial"
+        onSubmit={() => setAssessmentView(null)}
+        onBack={handleBackToCards}
       />
     );
   }
@@ -156,10 +156,11 @@ export default function AudiologyPatients({
   }
   if (selectedPatient && assessmentView === "progress") {
     return (
-      <AssessmentLoader
-        department="Audiology"
+      <AudiologyAssessment
         patient={selectedPatient}
-        visitType="PROGRESS"
+        mode="progress"
+        onSubmit={() => setAssessmentView(null)}
+        onBack={handleBackToCards}
       />
     );
   }
