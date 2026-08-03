@@ -1139,6 +1139,32 @@ function stripScoreFromLabel(label = "") {
   return String(label).replace(/\s*\([^)]*\)\s*$/, "").trim();
 }
 
+// Numeric max for score-box fields whose displayValue is a number out of a known total.
+// Text-based score-boxes (severity labels, interpretations) resolve to null, since "/max" doesn't apply to them.
+const SCORE_BOX_MAX_BY_COMPUTE_TYPE = {
+  thi_score: "100%",
+  tfi_score: "100%",
+};
+const SCORE_BOX_MAX_BY_NAME = {
+  thi_score: "100%",
+  tfi_score: "100%",
+};
+
+function resolveScoreBoxMax(field) {
+  if (field == null) return null;
+  // Explicit field.max always wins, so any assessment can opt in/out per-field without touching this list.
+  if (field.max != null && Number.isFinite(Number(field.max))) return Number(field.max);
+  if (field.showMax === false) return null;
+
+  if (field.computeType && SCORE_BOX_MAX_BY_COMPUTE_TYPE[field.computeType] != null) {
+    return SCORE_BOX_MAX_BY_COMPUTE_TYPE[field.computeType];
+  }
+  if (field.name && SCORE_BOX_MAX_BY_NAME[field.name] != null) {
+    return SCORE_BOX_MAX_BY_NAME[field.name];
+  }
+  return null;
+}
+
 function mapFieldForDoctorView(field, showScores) {
   if (!field) return null;
 
@@ -3641,6 +3667,7 @@ case "grid-table-advanced": {
         ? t(field.info, languageConfig?.enabled ? languageConfig.lang : "en")
         : null;
       const displayValue = resolveScoreBoxDisplay(field, values, value);
+      const scoreMax = resolveScoreBoxMax(field);
 
       const renderedLabel = infoText ? (
         <InfoTooltip
@@ -3660,6 +3687,7 @@ case "grid-table-advanced": {
           </div>
           <div className="fb-score-value">
             {displayValue ?? 0}
+            {scoreMax != null && <span className="fb-score-value-max">/{scoreMax}</span>}
           </div>
         </div>
       );
@@ -6283,15 +6311,6 @@ function ScaleSlider({ field, value = field.min, onChange, readOnly }) {
 
         const pctOf = (n) => Math.max(0, Math.min(100, ((n - min) / span) * 100));
 
-        const majorTicks = Array.isArray(tickMajorValues) && tickMajorValues.length > 0
-          ? [...new Set(tickMajorValues)].filter(n => n >= min && n <= max).sort((a, b) => a - b)
-          : (normalised.length > 0
-              ? [...new Set([min, ...normalised.flatMap(r => [r.from, r.to]), max])]
-                  .sort((a, b) => a - b)
-              : null);
-
-        const majorTickSet = new Set(majorTicks || []);
-
         const minorStep = Number.isFinite(tickMinorStep) ? tickMinorStep : (step || 1);
         const minorTicks = showMinorTicks && minorStep > 0
           ? Array.from(
@@ -6299,6 +6318,19 @@ function ScaleSlider({ field, value = field.min, onChange, readOnly }) {
               (_, i) => min + i * minorStep
             ).filter(n => n >= min && n <= max)
           : [];
+
+        // For compact scales (e.g. a 0-10 VAS slider) with no explicit tickMajorValues/ranges,
+        // default to numbering every tick so the scale is always legible out of the box.
+        const isCompactScale = minorTicks.length > 0 && minorTicks.length <= 21;
+
+        const majorTicks = Array.isArray(tickMajorValues) && tickMajorValues.length > 0
+          ? [...new Set(tickMajorValues)].filter(n => n >= min && n <= max).sort((a, b) => a - b)
+          : (normalised.length > 0
+              ? [...new Set([min, ...normalised.flatMap(r => [r.from, r.to]), max])]
+                  .sort((a, b) => a - b)
+              : (showMinorLabels || isCompactScale ? minorTicks : null));
+
+        const majorTickSet = new Set(majorTicks || []);
 
         return (
           <div style={{ position: "relative", width: "100%", height: 22, marginBottom: 2 }}>
