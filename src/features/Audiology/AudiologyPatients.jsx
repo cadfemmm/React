@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import AudiologyAssessment from "./AudiologyAssessment";
+import AudiologyProgressAssessmentForm from "./components/AudiologyProgress";
 import { ShimmerRow } from "../../shared/ui/Shimmer";
 import EmptyState from "../../shared/ui/EmptyState";
 import { formatAppointmentDateTime } from "../../shared/api/patientsList";
@@ -133,7 +134,7 @@ export default function AudiologyPatients({
     );
   }
 
-  /* ── Assessment views ── */
+  /* ── Assessment views — local frontend schemas (not backend) ── */
   if (selectedPatient && assessmentView === "initial") {
     return (
       <AudiologyAssessment
@@ -156,9 +157,8 @@ export default function AudiologyPatients({
   }
   if (selectedPatient && assessmentView === "progress") {
     return (
-      <AudiologyAssessment
+      <AudiologyProgressAssessmentForm
         patient={selectedPatient}
-        mode="progress"
         onSubmit={() => setAssessmentView(null)}
         onBack={handleBackToCards}
       />

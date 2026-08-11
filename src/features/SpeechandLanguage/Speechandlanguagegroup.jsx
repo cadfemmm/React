@@ -1,5 +1,5 @@
 import React from "react";
-import AssessmentLoader from "../../assessment";
+import SpeechAssessment from "./SpeechAssessment";
 
 /**
  * Speech & Language Group Intervention — single unified form from backend
@@ -90,11 +90,9 @@ export default function SpeechGroupIntervention({
         </div>
       )}
 
-      <AssessmentLoader
-        department="Speech & Language Therapy"
-        patient={primaryPatient}
-        visitType="GROUP_INTERVENTIONS"
-      />
+      {/* Schema-only fallback: render Speech & Language assessment UI for
+          the primary patient (no backend AssessmentLoader). */}
+      <SpeechAssessment patient={primaryPatient} mode="initial" onBack={onBack} />
     </div>
   );
 }
