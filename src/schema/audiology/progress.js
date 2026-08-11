@@ -320,12 +320,6 @@ const PLAN = {
   ],
 };
 
-
-console.log (SUBJECTIVE);
-console.log (OBJECTIVE);
-console.log (ASSESSMENT);
-console.log (PLAN);
-
 export default {
   SUBJECTIVE,
   OBJECTIVE,
