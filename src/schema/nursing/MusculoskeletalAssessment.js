@@ -1086,7 +1086,16 @@
           "name": "msk_limb_length_discrepancy",
           "label": "Limb length discrepancy",
           "type": "radio",
-          "options": "YES_NO_OPTIONS"
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ]
         },
         {
           "name": "msk_limb_length_amount",

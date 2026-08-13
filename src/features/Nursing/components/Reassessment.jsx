@@ -3551,6 +3551,7 @@ function NursingPlanPanel({ values, onChange }) {
           {
             type: "custom",
             name: "nursing_diagnosis_panel",
+            globalValues: true,
             render: ({ values, onChange }) => <NursingDiagnosisPanel values={values} onChange={onChange} />
           },
           {
@@ -3639,6 +3640,7 @@ function NursingPlanPanel({ values, onChange }) {
           {
             type: "custom",
             name: "nursing_plan_panel",
+            globalValues: true,
             render: ({ values, onChange }) => <NursingPlanPanel values={values} onChange={onChange} />
           },
           {

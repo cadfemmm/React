@@ -127,20 +127,6 @@ const schema = {
 
 
 const subjective = {
-  "actions": [
-    {
-      "type": "back",
-      "label": "Back"
-    },
-    {
-      "type": "clear",
-      "label": "Clear"
-    },
-    {
-      "type": "save",
-      "label": "Save"
-    }
-  ],
   "sections": [
     {
       "fields": [
@@ -160,8 +146,8 @@ const subjective = {
           "type": "textarea"
         },
         {
-          "name": "past_family_medical_history ",
-          "label": "Past Family Medical History ",
+          "name": "past_family_medical_history",
+          "label": "Past Family Medical History",
           "type": "textarea"
         }
       ]
@@ -1983,20 +1969,6 @@ const subjective = {
 }
 
 const objective = {
-   "actions":[
-      {
-         "type":"back",
-         "label":"Back"
-      },
-      {
-         "type":"clear",
-         "label":"Clear"
-      },
-      {
-         "type":"save",
-         "label":"Save"
-      }
-   ],
    "sections":[
       {
          "fields":[
@@ -2203,7 +2175,16 @@ const objective = {
                "name":"urinary_catheter",
                "label":"Urinary catheter",
                "type":"radio",
-               "options":"YES_NO_OPTIONS"
+               "options":[
+                  {
+                     "label":"Yes",
+                     "value":"yes"
+                  },
+                  {
+                     "label":"No",
+                     "value":"no"
+                  }
+               ]
             },
             {
                "name":"feeding_tube",
@@ -2228,7 +2209,16 @@ const objective = {
                "name":"drains_wound_vac",
                "label":"Drains/wound VAC",
                "type":"radio",
-               "options":"YES_NO_OPTIONS"
+               "options":[
+                  {
+                     "label":"Yes",
+                     "value":"yes"
+                  },
+                  {
+                     "label":"No",
+                     "value":"no"
+                  }
+               ]
             }
          ]
       },
@@ -4662,5 +4652,143 @@ const objective = {
          ]
       }
    ]
-}
-
+   }
+   
+   const assessment = {
+      "sections":[
+         {
+            "fields":[
+               {
+                  "name":"assessment_problem_summary",
+                  "label":"Problem Summary",
+                  "type":"textarea"
+               },
+               {
+                  "type":"subheading",
+                  "label":"Problem List — Nursing Diagnosis"
+               },
+               {
+                  "type":"custom",
+                  "name":"nursing_diagnosis_panel",
+                  "component":"nursing-diagnosis-panel",
+                  "globalValues":true
+               },
+               {
+                  "name":"assessment_problem_other",
+                  "label":"Other problem (free text)",
+                  "type":"input"
+               },
+               {
+                  "type":"subheading",
+                  "label":"Severity / Status"
+               },
+               {
+                  "name":"assessment_severity",
+                  "label":"Severity",
+                  "type":"checkbox-group",
+                  "options":[
+                     { "label":"Mild", "value":"mild" },
+                     { "label":"Moderate", "value":"moderate" },
+                     { "label":"Severe", "value":"severe" },
+                     { "label":"Improving", "value":"improving" },
+                     { "label":"Stable", "value":"stable" },
+                     { "label":"Deteriorating", "value":"deteriorating" }
+                  ]
+               },
+               {
+                  "type":"subheading",
+                  "label":"Functional Impact"
+               },
+               {
+                  "name":"assessment_functional_impact",
+                  "label":"",
+                  "type":"checkbox-group",
+                  "options":[
+                     { "label":"Affects ambulation", "value":"affects_ambulation" },
+                     { "label":"Affects transfers", "value":"affects_transfers" },
+                     { "label":"Affects self-care", "value":"affects_self_care" },
+                     { "label":"Affects continence", "value":"affects_continence" },
+                     { "label":"Affects communication", "value":"affects_communication" },
+                     { "label":"Affects swallowing", "value":"affects_swallowing" }
+                  ]
+               },
+               {
+                  "name":"assessment_other_notes",
+                  "label":"Others",
+                  "type":"input"
+               },
+               {
+                  "name":"assessment_risk_level",
+                  "label":"Risk Level (related to falls, skin, aspiration, infection)",
+                  "type":"radio",
+                  "options":[
+                     { "label":"Low", "value":"low" },
+                     { "label":"Moderate", "value":"moderate" },
+                     { "label":"High", "value":"high" }
+                  ]
+               },
+               {
+                  "name":"assessment_clinical_impression",
+                  "label":"Nursing Diagnosis",
+                  "type":"textarea"
+               },
+               {
+                  "name":"assessment_rehab_interpretation",
+                  "label":"Rehab-Specific Interpretation (participation tolerance, endurance, therapy readiness)",
+                  "type":"textarea"
+               }
+            ]
+         }
+      ]
+   };
+   
+   const plan = {
+      "sections":[
+         {
+            "fields":[
+               { "type":"subheading", "label":"Short Term Goals (2–4 Weeks)" },
+               { "type":"dynamic-goals", "name":"short_term_goals" },
+               { "type":"subheading", "label":"Long Term Goals (6–12 Weeks)" },
+               { "type":"dynamic-goals", "name":"long_term_goals" },
+               {
+                  "type":"subheading",
+                  "label":"Nursing Diagnosis & Interventions Plan"
+               },
+               {
+                  "type":"custom",
+                  "name":"nursing_plan_panel",
+                  "component":"nursing-plan-panel",
+                  "globalValues":true
+               },
+               {
+                  "name":"plan_nursing_interventions",
+                  "label":"Additional Nursing Interventions",
+                  "type":"textarea"
+               },
+               {
+                  "name":"plan_monitoring",
+                  "label":"Monitoring Plan",
+                  "type":"textarea"
+               },
+               {
+                  "name":"plan_safety_measures",
+                  "label":"Safety Measures / Precautions implemented",
+                  "type":"textarea"
+               },
+               {
+                  "name":"plan_reassessment_timeline",
+                  "label":"Reassessment Timeline",
+                  "type":"date"
+               }
+            ]
+         }
+      ]
+   };
+   
+   export default {
+      schema,
+      subjective,
+      objective,
+      assessment,
+      plan
+   };

@@ -1516,7 +1516,29 @@ const patient_fleet = {
             "ms": "Minyak Power Steering"
           },
           "type": "radio",
-          "options": "CUKUP_TIDAK_CUKUP_OPTIONS",
+          "options": [
+            {
+              "value": "cukup",
+              "label": {
+                "en": "Sufficient",
+                "ms": "CUKUP"
+              }
+            },
+            {
+              "value": "tidak_cukup",
+              "label": {
+                "en": "Insufficient",
+                "ms": "TIDAK CUKUP"
+              }
+            },
+            {
+              "value": "others",
+              "label": {
+                "en": "Others",
+                "ms": "Lain-lain"
+              }
+            }
+          ],
           "showIf": {
             "field": "fleet_checklist",
             "includes": "kenderaan"
