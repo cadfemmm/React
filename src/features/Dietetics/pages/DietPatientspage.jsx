@@ -1,14 +1,17 @@
 import React from "react";
-import AssessmentLoader from "../../../assessment";
+import DietInitialAssessmentForm from "../components/DietInitialAssessmentForm";
+import DietFollowupAssessmentForm from "../components/DietFollowupAssessmentForm";
+import DietProgressAssessmentForm from "../components/DietProgressAssessmentForm";
 
 /**
- * Dietetics assessment entry — all SOAP visit types load form content from the backend.
+ * Dietetics assessment entry — SOAP from local frontend forms/schemas only
+ * (not backend AssessmentLoader).
  */
 export default function DietPatientspage({
   patient,
   selectedPatients = [],
   patients = [],
-  mode,
+  mode = "initial",
   onBack,
   onSubmit,
 }) {
@@ -23,20 +26,31 @@ export default function DietPatientspage({
     );
   }
 
-  const visitTypeByMode = {
-    followup: "FOLLOWUP",
-    progress: "PROGRESS",
-    group: "GROUP",
-    initial: "INITIAL",
-  };
+  if (mode === "followup") {
+    return (
+      <DietFollowupAssessmentForm
+        patient={primaryPatient}
+        onBack={onBack}
+        onSubmit={onSubmit}
+      />
+    );
+  }
 
-  const visitType = visitTypeByMode[mode] || "INITIAL";
+  if (mode === "progress") {
+    return (
+      <DietProgressAssessmentForm
+        patient={primaryPatient}
+        onBack={onBack}
+        onSubmit={onSubmit}
+      />
+    );
+  }
 
   return (
-    <AssessmentLoader
-      department="Dietetics"
+    <DietInitialAssessmentForm
       patient={primaryPatient}
-      visitType={visitType}
+      onBack={onBack}
+      onSubmit={onSubmit}
     />
   );
 }
