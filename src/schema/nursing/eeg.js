@@ -488,7 +488,29 @@ const EEG_SCHEMA = {
             "ms": "Laporan Akhir"
           },
           "type": "radio",
-          "options": "FINAL_REPORT_OPTIONS"
+          "options": [
+            {
+              "value": "normal",
+              "label": {
+                "en": "Normal EEG",
+                "ms": "EEG Normal"
+              }
+            },
+            {
+              "value": "abnormal",
+              "label": {
+                "en": "Abnormal EEG",
+                "ms": "EEG Tidak Normal"
+              }
+            },
+            {
+              "value": "borderline",
+              "label": {
+                "en": "Borderline EEG",
+                "ms": "EEG Sempadan"
+              }
+            }
+          ]
         },
         {
           "name": "final_report_abnormal",

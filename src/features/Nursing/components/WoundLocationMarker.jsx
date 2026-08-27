@@ -1,78 +1,208 @@
 import React, { useState } from "react";
-import CommonFormBuilder from "../../CommonComponenets/FormBuilder";
-export default function App() {
-  // 1. Define your form schema mapping field configurations
-  const schema = {
-    fields: [
-      {
-        key: "patientName",
-        type: "text",
-        label: "Patient Full Name",
-        readOnly: false
-      },
-      {
-        key: "woundAssessmentMap",
-        type: "woundLocationMarker",
-        label: "Anatomical Wound Mapping Diagram",
-        pinLabelPrefix: "W", // Sets initial prefix for pins (e.g., W1, W2)
-        markerLegendTitle: "Active Pressure Injuries / Lesions",
-        markerHelperText: "Click precise coordinates on the target region to drop a pin. Click a pin to edit label or remove.",
-        markerTotalLabel: "Total tracked pressure areas",
-        // Optional override: if omitted, it falls back to DEFAULT_BODY_VIEWS inside the component
-        views: [
-          { key: "body", label: "Full Body View", src: "/body_high.png" },
-          { key: "hands", label: "Palmar View", src: "/palm.png" },
-          { key: "feet", label: "Plantar View", src: "/feet_high.png" }
-        ]
-      }
-    ]
+import { resolveBodyDiagramViews } from "../../../shared/utils/bodyDiagramViews";
+
+/**
+ * WoundLocationMarker
+ *
+ * Renders a segmented body diagram (Body / Feet / Hands) and lets the user drop
+ * pins on the image to record wound / lesion locations. Value shape:
+ *
+ *   {
+ *     body:  [{ id, x, y, label }],
+ *     feet:  [...],
+ *     hands: [...]
+ *   }
+ *
+ * Coordinates (x, y) are stored as percentages (0–100) of the image so they
+ * remain stable when the image is responsively resized.
+ *
+ * Props:
+ *   value     - object keyed by view key -> array of pins
+ *   onChange  - (nextValue) => void
+ *   readOnly  - when true, pins cannot be added/edited/removed
+ *   views     - array of { key, label, src } view definitions
+ */
+export default function WoundLocationMarker({
+  value = {},
+  onChange,
+  readOnly = false,
+  views,
+}) {
+  const resolvedViews = resolveBodyDiagramViews(views);
+  const [activeView, setActiveView] = useState(resolvedViews[0]?.key || "body");
+  const [selectedPin, setSelectedPin] = useState(null);
+
+  const activeSrc = resolvedViews.find(v => v.key === activeView)?.src || "";
+  const pins = Array.isArray(value[activeView]) ? value[activeView] : [];
+
+  const updatePins = (nextPins) => {
+    onChange?.({ ...(value || {}), [activeView]: nextPins });
   };
 
-  // 2. Set up initial form data structure
-  const [formData, setFormData] = useState({
-    patientName: "John Doe",
-    woundAssessmentMap: {
-      body: [
-        { id: 1710920000000, x: 45.5, y: 32.2, label: "W1" } // Pre-populate Example pin if needed
-      ],
-      hands: [],
-      feet: []
-    }
-  });
-
-  // Mock patient metadata that resolveBodyDiagramViews can consume to switch view variants if necessary
-  const currentPatient = {
-    id: "pat_9921",
-    biologicalSex: "male"
+  const addPin = (e) => {
+    if (readOnly) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+    const newPin = { id: Date.now(), x, y, label: `W${pins.length + 1}` };
+    updatePins([...pins, newPin]);
+    setSelectedPin(newPin.id);
   };
 
-  const handleFormChange = (updatedFormData) => {
-    setFormData(updatedFormData);
-    console.log("Updated Form State: ", updatedFormData);
+  const removePin = (id) => {
+    if (readOnly) return;
+    updatePins(pins.filter(p => p.id !== id));
+    setSelectedPin(null);
   };
+
+  const renamePin = (id, label) => {
+    if (readOnly) return;
+    updatePins(pins.map(p => (p.id === id ? { ...p, label } : p)));
+  };
+
+  const selected = pins.find(p => p.id === selectedPin) || null;
 
   return (
-    <div style={{ padding: "24px", maxWidth: "900px", margin: "0 auto", fontFamily: "sans-serif" }}>
-      <h2 style={{ borderBottom: "2px solid #e5e7eb", paddingBottom: "8px" }}>
-        Clinical Assessment Engine
-      </h2>
-      
-      <form onSubmit={(e) => e.preventDefault()}>
-        <CommonFormBuilder
-          schema={schema}
-          formData={formData}
-          onChange={handleFormChange}
-          readOnly={false}
-          patient={currentPatient}
-        />
-        
-        <div style={{ marginTop: 24, padding: 12, background: "#f1f5f9", borderRadius: 6 }}>
-          <h4 style={{ margin: "0 0 8px 0" }}>Form Payload Output (JSON):</h4>
-          <pre style={{ fontSize: 11, overflowX: "auto" }}>
-            {JSON.stringify(formData, null, 2)}
-          </pre>
+    <div style={{ marginTop: 8, fontFamily: "inherit" }}>
+      {/* View tabs */}
+      {resolvedViews.length > 1 && (
+        <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+          {resolvedViews.map(v => (
+            <button
+              key={v.key}
+              type="button"
+              onClick={() => { setActiveView(v.key); setSelectedPin(null); }}
+              style={{
+                padding: "6px 16px",
+                borderRadius: 999,
+                border: activeView === v.key ? "2px solid #2563eb" : "1px solid #d1d5db",
+                background: activeView === v.key ? "#eff6ff" : "#fff",
+                color: activeView === v.key ? "#1d4ed8" : "#334155",
+                fontWeight: activeView === v.key ? 700 : 500,
+                fontSize: 13,
+                cursor: "pointer",
+              }}
+            >
+              {v.label}
+            </button>
+          ))}
         </div>
-      </form>
+      )}
+
+      {/* Body image + pins */}
+      {activeSrc ? (
+        <div
+          onClick={addPin}
+          style={{
+            position: "relative",
+            display: "inline-block",
+            maxWidth: "100%",
+            cursor: readOnly ? "default" : "crosshair",
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            overflow: "hidden",
+            background: "#fff",
+          }}
+        >
+          <img
+            src={activeSrc}
+            alt={resolvedViews.find(v => v.key === activeView)?.label || "Body diagram"}
+            style={{ display: "block", maxWidth: "100%", height: "auto" }}
+            draggable={false}
+          />
+
+          {pins.map(pin => (
+            <div
+              key={pin.id}
+              onClick={(e) => { e.stopPropagation(); setSelectedPin(pin.id); }}
+              style={{
+                position: "absolute",
+                left: `${pin.x}%`,
+                top: `${pin.y}%`,
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 26,
+                height: 26,
+                padding: "0 6px",
+                borderRadius: 999,
+                background: selectedPin === pin.id ? "#2563eb" : "#dc2626",
+                color: "#fff",
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: readOnly ? "default" : "pointer",
+                boxShadow: selectedPin === pin.id ? "0 0 0 3px rgba(37,99,235,0.35)" : "0 2px 6px rgba(0,0,0,0.3)",
+                zIndex: 2,
+                userSelect: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {pin.label}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ color: "#94a3b8", fontSize: 13, fontStyle: "italic", padding: 8 }}>
+          No diagram image available.
+        </div>
+      )}
+
+      {!readOnly && (
+        <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>
+          Click the diagram to drop a pin, then click a pin to edit or remove it.
+        </div>
+      )}
+
+      {/* Selected pin editor */}
+      {selected && !readOnly && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: "10px 12px",
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            background: "#f8fafc",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <label style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>
+            {selected.label}
+          </label>
+          <input
+            type="text"
+            value={selected.label}
+            onChange={(e) => renamePin(selected.id, e.target.value)}
+            style={{
+              flex: 1,
+              minWidth: 120,
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "1px solid #d1d5db",
+              fontSize: 13,
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => removePin(selected.id)}
+            style={{
+              padding: "6px 14px",
+              borderRadius: 6,
+              border: "none",
+              background: "#ef4444",
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2394,12 +2394,16 @@ function renderField(
   if (String(field.type) === "custom") {
     const RegisteredCustom = resolveCustomFieldComponent(field);
     if (RegisteredCustom) {
+      // `globalValues: true` → render with the TOP-LEVEL form values/onChange,
+      // not a value scoped under field.name. Required for cross-tab custom
+      // panels (e.g. nursing diagnosis ↔ plan) that share state via nd_* keys.
+      const useGlobalValues = field.globalValues === true;
       const objectValue =
         value && typeof value === "object" && !Array.isArray(value)
           ? value
           : {};
       const componentOnChange = (subNameOrData, subValue) => {
-        if (!field.name) {
+        if (!field.name || useGlobalValues) {
           onChange(subNameOrData, subValue);
           return;
         }
@@ -2420,8 +2424,8 @@ function renderField(
         <RegisteredCustom
           field={field}
           value={value}
-          values={field.name ? objectValue : values}
-          onChange={field.name ? componentOnChange : onChange}
+          values={useGlobalValues ? values : field.name ? objectValue : values}
+          onChange={useGlobalValues ? onChange : field.name ? componentOnChange : onChange}
           patient={languageConfig?.patient}
           readOnly={readOnly}
         />
