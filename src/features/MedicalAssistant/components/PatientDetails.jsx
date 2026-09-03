@@ -9,6 +9,7 @@ import NCSEMGForm from "./NCSEMGForm";
 import EvokePotentialForm from "./EvokePotentialForm";
 import ESTForm from "./ESTForm";
 import HolterForm from "./HolterForm";
+import NeuromodulationInterventions from "./NeuromodulationInterventions";
 
 const TABS = [
   { key: "urgent", label: "Urgent care" },
@@ -29,7 +30,10 @@ const NEURO_OPTIONS = [
   { key: "ncs_emg", label: "NCS, EMG" },
   { key: "evoke", label: "Evoke Potential Study" },
   { key: "est", label: "EST" },
-  { key: "holter", label: "Holter" }
+  { key: "holter", label: "Holter" },
+  { key: "rtms", label: "rTMS" },
+  { key: "tdcs", label: "tDCS" },
+  { key: "nesa", label: "NESA" }
 ];
 // const NEURO_OPTIONS = [
 //   { key: "eeg", label: "Electroencephalogram" },
@@ -121,7 +125,10 @@ export default function MedicalAssistantPatientDetails({ patient, onBack, mode }
           {selectedNeuro === "evoke" && <EvokePotentialForm patient={patient} onBack={onBack} />}
           {selectedNeuro === "est" && <ESTForm patient={patient} onBack={onBack} />}
           {selectedNeuro === "holter" && <HolterForm patient={patient} onBack={onBack} />}
-          {selectedNeuro && !["eeg", "psg", "ncs_emg", "evoke", "est", "holter"].includes(selectedNeuro) && (
+          {selectedNeuro === "rtms" && <NeuromodulationInterventions schemaKey="rTMS" onBack={onBack} />}
+          {selectedNeuro === "tdcs" && <NeuromodulationInterventions schemaKey="tDCS" onBack={onBack} />}
+          {selectedNeuro === "nesa" && <NeuromodulationInterventions schemaKey="NESA" onBack={onBack} />}
+          {selectedNeuro && !["eeg", "psg", "ncs_emg", "evoke", "est", "holter", "rtms", "tdcs", "nesa"].includes(selectedNeuro) && (
             <div style={{ color: "#6b7280", fontStyle: "italic" }}>
               {NEURO_OPTIONS.find(o => o.key === selectedNeuro)?.label} – content to be provided
             </div>

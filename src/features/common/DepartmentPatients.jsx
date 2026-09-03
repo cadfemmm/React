@@ -62,7 +62,7 @@ const NURSING_CARDS = [
   { id: "group",     title: "Group Intervention",     desc: "Record group session and multi-patient notes",     icon: "👥", accent: "#DC2626", tag: "6",              tagBg: "#fee2e2", tagColor: "#991b1b" },
   { id: "discharge", title: "Discharge",              desc: "Complete discharge summary and planning",          icon: "🏠", accent: "#6B7280", tag: "7",              tagBg: "#f3f4f6", tagColor: "#374151" },
   { id: "urgent",    title: "Urgent Care",           desc: "Clinical entry, fleet, lab, X-ray and day care",   icon: "🚨", accent: "#DC2626", tag: "Urgent",         tagBg: "#fee2e2", tagColor: "#991b1b" },
-  { id: "neuro",     title: "Neuro & Cardio",        desc: "EEG, PSG, NCS/EMG, evoke potential, EST and Holter", icon: "🧠", accent: "#6366F1", tag: "Neuro / Cardio", tagBg: "#e0e7ff", tagColor: "#4338ca" },
+  { id: "neuro",     title: "Neuro & Cardio",        desc: "EEG, PSG, NCS/EMG, evoke potential, EST, Holter, rTMS, tDCS and NESA", icon: "🧠", accent: "#6366F1", tag: "Neuro / Cardio", tagBg: "#e0e7ff", tagColor: "#4338ca" },
 ];
 
 // Returns the correct card set for a given department (group is on the dashboard)
