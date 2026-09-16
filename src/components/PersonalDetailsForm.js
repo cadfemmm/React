@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import EmploymentDetailsForm from "./EmploymentDetailsForm";
 import FinancialDetailsForm from "./FinancialDetailsForm";
 import AsyncPatientSearch from "./AsyncPatientSearch";
-import { DateTriple } from "../pages/Menu";
-import {Row} from "../pages/Menu";
+import { DateTriple, Row } from "./FormLayout";
 import axios from "axios";
 
 const API = "http://127.0.0.1:5000"; // backend base URL
