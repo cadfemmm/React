@@ -12,7 +12,7 @@ import PatientCard from "../../../shared/cards/PatientCard";
 import EquipmentBookingPopup from "./EquipmentBookingPopup";
 import AudiologyICDSection from "./AudiologyICDSection";
 import { OTOSCOPIC_EXTRACT_URL, API_URL } from "../../../platform/config/api.config";
-import api from "../../../shared/api/apiClient";
+import api, { getCookie } from "../../../shared/api/apiClient";
 import { BookAppointmentModal } from "../../book-appointment-modal/BookAppointmentModal";
 import { fetchBookingQueue } from "../../book-appointment-modal/bookingQueueService";
 /* ===================== OPTIONS ===================== */
@@ -892,8 +892,10 @@ const handleOtoscopicUpload = async (file) => {
     const formData = new FormData();
     formData.append("file", pdfFile);
 
+    const token = getCookie("access_token");
     const response = await fetch(OTOSCOPIC_EXTRACT_URL, {
       method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
       body: formData
     });
 

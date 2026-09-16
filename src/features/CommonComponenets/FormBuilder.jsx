@@ -1272,7 +1272,6 @@ function AssessmentLauncher({
     (registryIsArray
       ? "active_assessment_id"
       : `${field.name}_active`);
-  const active = values[activeKey];
   const isRegistryComponent = item =>
     typeof item === "function" ||
     Boolean(item && typeof item === "object" && item.$$typeof);
@@ -1326,6 +1325,16 @@ function AssessmentLauncher({
   })();
 
   assessmentRegistry = Array.isArray(assessmentRegistry) ? assessmentRegistry : [assessmentRegistry]
+
+  // autoOpen hides buttons, so default to the first option when nothing is stored yet
+  const defaultActive =
+    field.options?.[0]?.value ??
+    registryOptions[0]?.value ??
+    registryOptions[0]?.id ??
+    null;
+  const active =
+    values[activeKey] ||
+    (field.autoOpen ? defaultActive : null);
 
   // Active selected assessment
   const selectedAssessment = registryOptions.find(
